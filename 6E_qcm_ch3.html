@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Terre & Soleil : Le Défi</title>
+    <style>
+        :root { 
+            --primary: #2563eb; 
+            --bg: #f8fafc; 
+            --text: #1e293b; 
+            --easy: #16a34a; 
+            --medium: #d97706; 
+            --hard: #dc2626; 
+        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; }
+        
+        .card { max-width: 600px; margin: 10px auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        
+        h1 { text-align: center; color: var(--primary); font-size: 1.6rem; margin-bottom: 20px; border-bottom: 3px solid #e2e8f0; padding-bottom: 15px; }
+        
+        .schema-box { 
+            background-color: #ffffff; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            margin: 15px 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 10px; 
+            min-height: 160px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
+        }
+        
+        .progress-container { display: flex; gap: 5px; margin-bottom: 15px; }
+        .progress-step { height: 8px; flex: 1; background: #e2e8f0; border-radius: 4px; transition: 0.3s; }
+        .progress-step.active { background: var(--primary); }
+        
+        .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; color: white; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .lvl-easy { background-color: var(--easy); }
+        .lvl-medium { background-color: var(--medium); }
+        .lvl-hard { background-color: var(--hard); }
+
+        .question-txt { font-weight: 700; font-size: 1.15rem; line-height: 1.4; margin-bottom: 20px; color: #0f172a; }
+        
+        .options button { 
+            display: block; width: 100%; padding: 16px; margin: 10px 0; 
+            background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; 
+            text-align: left; cursor: pointer; font-size: 1rem; transition: 0.2s; color: #334155; font-weight: 500;
+        }
+        .options button:hover { background: #e0f2fe; border-color: var(--primary); transform: translateX(5px); }
+        .options button:disabled { cursor: default; opacity: 0.6; transform: none; }
+
+        .feedback { display: none; padding: 20px; border-radius: 12px; margin-top: 20px; font-weight: 600; font-size: 0.95rem; border-left: 6px solid; line-height: 1.5; }
+        .correct { background: #dcfce7; color: #14532d; border-color: #22c55e; }
+        .incorrect { background: #fee2e2; color: #7f1d1d; border-color: #ef4444; }
+        
+        .next-btn { 
+            display: none; width: 100%; padding: 16px; margin-top: 20px; 
+            background: var(--primary); color: white; border: none; border-radius: 12px; 
+            font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .next-btn:hover { background: #1d4ed8; }
+        
+        .btn-restart { width: 100%; padding: 16px; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1rem; margin-top: 20px; }
+        .btn-restart:hover { background: #059669; }
+
+        svg { max-width: 100%; height: auto; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>☀️ Terre & Soleil : Le Quiz</h1>
+    
+    <div id="quiz-area">
+        <div class="progress-container" id="progress-bar"></div>
+        <span id="lvl-badge" class="badge"></span>
+        <div id="schema" class="schema-box"></div>
+        <div id="q-text" class="question-txt">Chargement...</div>
+        <div id="options" class="options"></div>
+        <div id="fb" class="feedback"></div>
+        <button id="n-btn" class="next-btn" onclick="nextQuestion()">Question suivante ➔</button>
+    </div>
+
+    <div id="result-area" style="display:none; text-align:center;">
+        <h2 style="font-size: 3rem; margin: 10px 0;">🌟 <span id="score-display"></span>/10</h2>
+        <p id="comment" style="font-size: 1.3rem; color: #475569; margin-bottom: 30px; font-weight: 500;"></p>
+        <div style="text-align:left; background:#f1f5f9; padding:20px; border-radius:15px; font-size:0.95rem; margin-bottom:20px; border: 1px solid #e2e8f0;">
+            <strong>🎯 Composition du test :</strong><br><br>
+            🟢 3 questions Faciles (Bases)<br>
+            🟠 4 questions Moyennes (Compréhension)<br>
+            🔴 3 questions Difficiles (Analyse)
+        </div>
+        <button class="btn-restart" onclick="initGame()">🔄 Nouveau test</button>
+    </div>
+</div>
+
+<script>
+/* --- 1. BANQUE SVG (Avec correction du point A) --- */
+const s = {
+    rotation: `<svg viewBox="0 0 200 120" width="200" height="120"><circle cx="100" cy="60" r="40" fill="#3b82f6"/><path d="M 70,40 Q 100,20 130,40" stroke="#000" fill="none" stroke-width="3" marker-end="url(#arrow)"/><text x="60" y="115" font-size="12" font-weight="bold">24 heures</text></svg>`,
+    
+    revolution: `<svg viewBox="0 0 200 120" width="200" height="120"><ellipse cx="100" cy="60" rx="80" ry="40" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4"/><circle cx="100" cy="60" r="15" fill="#f59e0b"/><circle cx="30" cy="60" r="10" fill="#3b82f6"/><text x="80" y="115" font-size="12">365,25 jours</text></svg>`,
+    
+    ombre: `<svg viewBox="0 0 200 120" width="200" height="120"><rect x="20" y="100" width="160" height="2" fill="#000"/><line x1="100" y1="100" x2="100" y2="50" stroke="#000" stroke-width="4"/><path d="M 100,100 L 140,100" stroke="black" stroke-width="4" opacity="0.4"/><circle cx="60" cy="20" r="12" fill="#facc15"/><text x="110" y="115" font-size="10">Ombre portée</text></svg>`,
+    
+    saisons: `<svg viewBox="0 0 200 120" width="200" height="120"><path d="M10,60 L60,60 M10,70 L60,70 M10,50 L60,50" stroke="#f59e0b" stroke-width="3" /><text x="15" y="40" font-size="10" fill="#f59e0b">SOLEIL</text><g transform="translate(150,60) rotate(-23)"><circle r="35" fill="#3b82f6"/><line x1="0" y1="-45" x2="0" y2="45" stroke="#fff" stroke-width="2" stroke-dasharray="4"/><path d="M0,-35 A35,35 0 0,1 0,35" fill="#1e3a8a" opacity="0.4"/></g></svg>`,
+    
+    rayons: `<svg viewBox="0 0 200 100" width="200" height="100"><rect x="20" y="80" width="60" height="5" fill="#ef4444"/><path d="M30,20 L30,80 M50,20 L50,80 M70,20 L70,80" stroke="#f59e0b" stroke-width="2"/><text x="20" y="95" font-size="10" fill="#ef4444">ÉTÉ (Vertical)</text><rect x="120" y="80" width="60" height="5" fill="#3b82f6"/><path d="M140,20 L120,80 M160,20 L140,80 M180,20 L160,80" stroke="#f59e0b" stroke-width="2"/><text x="120" y="95" font-size="10" fill="#3b82f6">HIVER (Oblique)</text></svg>`,
+    
+    // IMAGE AVEC FLÈCHE ET MARQUEUR (CORRIGÉE)
+    jourNuitA: `<svg viewBox="0 0 200 120" width="200" height="120">
+        <defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="white"/></marker></defs>
+        <circle cx="20" cy="60" r="30" fill="#facc15"/>
+        <g transform="translate(150,60)">
+            <circle r="40" fill="#3b82f6"/>
+            <path d="M 0,-40 A 40,40 0 0,1 0,40 Z" fill="#1e3a8a"/>
+            <circle cx="0" cy="0" r="4" fill="red" stroke="white" stroke-width="1"/>
+            <text x="-5" y="-12" fill="red" font-weight="bold" font-size="12">A</text>
+            <path d="M -30,-50 Q 0,-60 30,-50" stroke="white" fill="none" stroke-width="2" marker-end="url(#arrowhead)"/>
+            <text x="-15" y="-65" fill="white" font-size="9">Rotation</text>
+        </g>
+    </svg>`,
+    
+    jourNuit: `<svg viewBox="0 0 200 120" width="200" height="120"><circle cx="20" cy="60" r="30" fill="#facc15"/><g transform="translate(150,60)"><circle r="40" fill="#3b82f6"/><path d="M 0,-40 A 40,40 0 0,1 0,40 Z" fill="#1e3a8a"/><text x="-15" y="5" fill="white" font-size="10">Jour</text><text x="5" y="5" fill="white" font-size="10">Nuit</text></g></svg>`,
+    
+    axe0: `<svg viewBox="0 0 200 120" width="200" height="120"><circle cx="20" cy="60" r="25" fill="#f59e0b" opacity="0.6"/><g transform="translate(150,60)"><circle r="35" fill="#9ca3af"/><line x1="0" y1="-45" x2="0" y2="45" stroke="#000" stroke-width="3"/><text x="-35" y="-50" font-size="10" fill="#000">Axe 0° (Droit)</text></g></svg>`,
+    
+    courseSoleil: `<svg viewBox="0 0 200 120" width="200" height="120"><line x1="20" y1="110" x2="220" y2="110" stroke="#94a3b8" stroke-width="2"/><path d="M 40,110 Q 120,0 200,110" stroke="#f59e0b" fill="none" stroke-width="3" stroke-dasharray="5"/><text x="80" y="100" font-size="10">Est</text><text x="180" y="100" font-size="10">Ouest</text></svg>`
+};
+
+/* --- 2. BANQUE DE QUESTIONS --- */
+const allQuestions = [
+    // --- NIVEAU 1 : FACILE ---
+    { l: 1, q: "En combien de temps la Terre fait-elle un tour sur elle-même ?", svg: s.rotation, o: ["24 heures", "365 jours", "12 heures"], c: 0, f: "C'est la durée d'une rotation complète (une journée)." },
+    { l: 1, q: "Combien de temps dure la révolution de la Terre autour du Soleil ?", svg: s.revolution, o: ["365,25 jours", "24 heures", "1 mois"], c: 0, f: "C'est la durée exacte d'une année terrestre." },
+    { l: 1, q: "Le Soleil se lève toujours vers...", svg: s.courseSoleil, o: ["L'Est", "L'Ouest", "Le Sud"], c: 0, f: "Le mouvement apparent du Soleil commence à l'Est." },
+    { l: 1, q: "Le Soleil se couche vers...", svg: s.courseSoleil, o: ["L'Ouest", "L'Est", "Le Nord"], c: 0, f: "Il finit sa course à l'Ouest." },
+    { l: 1, q: "L'alternance jour/nuit est provoquée par...", svg: s.jourNuit, o: ["La rotation de la Terre", "La révolution de la Terre", "Les nuages"], c: 0, f: "En tournant, la Terre expose successivement ses faces au Soleil." },
+    { l: 1, q: "La zone de la Terre non éclairée par le Soleil est...", svg: s.jourNuit, o: ["La nuit", "Le jour", "Le crépuscule"], c: 0, f: "Sans lumière du Soleil, c'est la nuit." },
+    { l: 1, q: "La trajectoire de la Terre autour du Soleil s'appelle...", svg: s.revolution, o: ["L'orbite", "Le diamètre", "L'axe"], c: 0, f: "C'est le chemin circulaire (ou elliptique) qu'elle parcourt." },
+    { l: 1, q: "À quel moment l'ombre d'un bâton est-elle la plus courte ?", svg: s.ombre, o: ["À midi (solaire)", "Le matin", "Le soir"], c: 0, f: "Le Soleil est au plus haut dans le ciel à ce moment-là." },
+    { l: 1, q: "L'ombre portée se forme...", svg: s.ombre, o: ["Sur le sol", "Sur l'objet", "Dans le ciel"], c: 0, f: "C'est l'ombre projetée par l'objet sur une surface." },
+    { l: 1, q: "L'ombre propre se trouve...", svg: s.jourNuit, o: ["Sur la partie non éclairée de l'objet", "Sur le sol", "Devant l'objet"], c: 0, f: "C'est la partie sombre de l'objet lui-même." },
+    { l: 1, q: "Le mouvement de la Terre autour du Soleil est...", svg: s.revolution, o: ["La révolution", "La rotation", "La gravitation"], c: 0, f: "Révolution = Tourner autour d'un astre." },
+    { l: 1, q: "Le mouvement de la Terre sur elle-même est...", svg: s.rotation, o: ["La rotation", "La révolution", "L'inclinaison"], c: 0, f: "Rotation = Tourner sur son axe." },
+    { l: 1, q: "La Terre est une...", svg: null, o: ["Planète", "Étoile", "Lune"], c: 0, f: "C'est une planète du système solaire." },
+    { l: 1, q: "Le Soleil est une...", svg: null, o: ["Étoile", "Planète", "Comète"], c: 0, f: "Il produit sa propre lumière, c'est une étoile." },
+    { l: 1, q: "Un cycle complet jour + nuit dure...", svg: null, o: ["24 heures", "12 heures", "365 jours"], c: 0, f: "C'est la durée d'un jour civil." },
+
+    // --- NIVEAU 2 : MOYEN ---
+    { l: 2, q: "Quelle est la cause principale des saisons ?", svg: s.saisons, o: ["L'inclinaison de l'axe de la Terre", "La distance Terre-Soleil", "La vitesse de rotation"], c: 0, f: "L'axe penché fait varier l'ensoleillement selon la position sur l'orbite." },
+    { l: 2, q: "En été, il fait plus chaud car les rayons du Soleil sont...", svg: s.rayons, o: ["Verticaux (concentrés)", "Obliques (étalés)", "Horizontaux"], c: 0, f: "L'énergie est concentrée sur une petite surface." },
+    { l: 2, q: "En hiver, il fait froid car les rayons du Soleil sont...", svg: s.rayons, o: ["Obliques (étalés)", "Verticaux", "Absents"], c: 0, f: "L'énergie est répartie sur une grande surface, donc ça chauffe moins." },
+    { l: 2, q: "Si l'axe de la Terre était droit (0°), les saisons...", svg: s.axe0, o: ["N'existeraient pas", "Seraient plus fortes", "Changeraient tout le temps"], c: 0, f: "Sans inclinaison, la lumière arriverait toujours de la même façon." },
+    { l: 2, q: "Le solstice d'été (21 juin) est le jour...", svg: null, o: ["Le plus long de l'année", "Le plus court", "Égal à la nuit"], c: 0, f: "C'est le moment où l'hémisphère est le plus penché vers le Soleil." },
+    { l: 2, q: "Le solstice d'hiver (21 décembre) est le jour...", svg: null, o: ["Le plus court de l'année", "Le plus long", "Égal à la nuit"], c: 0, f: "Le Soleil reste peu de temps dans le ciel." },
+    { l: 2, q: "À l'équinoxe, la durée du jour est...", svg: null, o: ["Égale à celle de la nuit", "Très longue", "Très courte"], c: 0, f: "12h de jour et 12h de nuit partout sur Terre." },
+    { l: 2, q: "Une année bissextile (366 jours) sert à...", svg: s.revolution, o: ["Compenser les 0,25 jours de la révolution", "Fêter le printemps", "Rien du tout"], c: 0, f: "365,25 jours x 4 = 1 jour entier à rattraper tous les 4 ans." },
+    { l: 2, q: "En hiver, la trajectoire du Soleil dans le ciel est...", svg: s.courseSoleil, o: ["Basse et courte", "Haute et longue", "Moyenne"], c: 0, f: "Le Soleil monte peu dans le ciel." },
+    { l: 2, q: "En été, la trajectoire du Soleil dans le ciel est...", svg: s.courseSoleil, o: ["Haute et longue", "Basse et courte", "Moyenne"], c: 0, f: "Le Soleil monte haut et reste longtemps visible." },
+    { l: 2, q: "Pourquoi l'ombre est-elle très longue le matin et le soir ?", svg: s.ombre, o: ["Le Soleil est bas", "Le Soleil est haut", "Il fait froid"], c: 0, f: "La lumière rasante allonge les ombres." },
+    { l: 2, q: "Quand c'est l'été en France (Nord), en Australie (Sud) c'est...", svg: null, o: ["L'hiver", "L'été", "Le printemps"], c: 0, f: "Les saisons sont inversées entre les hémisphères." },
+    { l: 2, q: "L'axe de rotation de la Terre relie...", svg: s.rotation, o: ["Le Pôle Nord au Pôle Sud", "L'Est à l'Ouest", "La France aux USA"], c: 0, f: "C'est l'axe vertical (incliné) de la planète." },
+    { l: 2, q: "La Terre tourne sur elle-même dans le sens...", svg: null, o: ["Ouest vers Est", "Est vers Ouest", "Nord vers Sud"], c: 0, f: "C'est pour cela que le Soleil semble aller vers l'Ouest." },
+    { l: 2, q: "L'inclinaison de l'axe de la Terre est d'environ...", svg: s.saisons, o: ["23 degrés", "0 degré", "90 degrés"], c: 0, f: "C'est l'angle indiqué dans le cours." },
+
+    // --- NIVEAU 3 : DIFFICILE ---
+    { l: 3, q: "Pourquoi le Soleil se lève-t-il plus tôt à Strasbourg qu'à Brest ?", svg: null, o: ["Car la Terre tourne vers l'Est", "Car il fait plus beau", "Car Brest est au Nord"], c: 0, f: "Strasbourg est à l'Est, donc face au Soleil avant Brest." },
+    { l: 3, q: "Si la Terre tournait plus vite (ex: en 12h), le jour durerait...", svg: s.rotation, o: ["12 heures", "24 heures", "48 heures"], c: 0, f: "La durée du jour dépend directement de la vitesse de rotation." },
+    { l: 3, q: "Si la Terre s'éloignait du Soleil, l'année durerait...", svg: s.revolution, o: ["Plus longtemps", "Moins longtemps", "Pareil"], c: 0, f: "L'orbite à parcourir serait plus grande." },
+    { l: 3, q: "Pourquoi l'ombre d'un bâton est-elle plus longue en Hiver à midi qu'en Été à midi ?", svg: s.rayons, o: ["Car le Soleil est plus bas en hiver", "Car le jour est court", "Car il y a des nuages"], c: 0, f: "Même au zénith, le Soleil est plus bas en hiver qu'en été." },
+    { l: 3, q: "Quel paramètre ne change jamais au cours de l'année ?", svg: null, o: ["La direction de l'axe de rotation", "La durée du jour", "La hauteur du Soleil"], c: 0, f: "L'axe pointe toujours vers la même direction dans l'espace." },
+    { l: 3, q: "Au Pôle Nord, en été, le Soleil...", svg: s.saisons, o: ["Ne se couche jamais (Jour polaire)", "Ne se lève jamais", "Est au zénith"], c: 0, f: "L'inclinaison maintient le pôle dans la lumière même quand la Terre tourne." },
+    { l: 3, q: "Au cours d'une même journée, l'ombre d'un bâton change de...", svg: s.ombre, o: ["Taille et Direction", "Taille uniquement", "Direction uniquement"], c: 0, f: "Le Soleil tourne, donc l'ombre tourne et change de longueur." },
+    { l: 3, q: "Sur le schéma (Point A rouge), ce point passe de la lumière à l'ombre. C'est...", svg: s.jourNuitA, o: ["Le coucher du Soleil", "Le lever du Soleil", "Midi"], c: 0, f: "Le point bascule dans la partie noire (nuit)." },
+    { l: 3, q: "La vitesse de rotation de la Terre détermine...", svg: null, o: ["La durée du jour", "La durée de l'année", "Les saisons"], c: 0, f: "Rotation = Jour." },
+    { l: 3, q: "La distance Terre-Soleil détermine...", svg: s.revolution, o: ["La durée de l'année", "La durée du jour", "L'inclinaison"], c: 0, f: "Distance = Longueur de l'orbite = Année." },
+    { l: 3, q: "L'axe de la Terre pointe vers une étoile appelée...", svg: null, o: ["Étoile Polaire", "Soleil", "Vénus"], c: 0, f: "C'est l'étoile qui indique le Nord." },
+    { l: 3, q: "Pourquoi fait-il nuit ?", svg: s.jourNuit, o: ["Car je suis dans l'ombre propre de la Terre", "Car le Soleil s'éteint", "Car la Lune cache le Soleil"], c: 0, f: "La Terre elle-même nous cache le Soleil." },
+    { l: 3, q: "Si l'ombre se déplace au cours de la journée, c'est parce que...", svg: s.ombre, o: ["La Terre tourne", "Le bâton bouge", "Le Soleil tourne autour de nous"], c: 0, f: "Notre rotation change notre point de vue sur le Soleil." },
+    { l: 3, q: "Sur ce schéma, si le Pôle Nord est penché vers le Soleil, la France est en...", svg: s.saisons, o: ["Été", "Hiver", "Automne"], c: 0, f: "C'est l'été quand l'hémisphère penche vers le Soleil." },
+    { l: 3, q: "Si la Terre arrêtait de tourner sur elle-même...", svg: null, o: ["Une face serait brûlée, l'autre gelée", "Il ferait nuit partout", "Les jours feraient 12h"], c: 0, f: "Le cycle jour/nuit s'arrêterait." },
+    { l: 3, q: "Pourquoi dit-on mouvement 'apparent' du Soleil ?", svg: s.courseSoleil, o: ["Car c'est la Terre qui bouge", "Car c'est une illusion", "Car il bouge vraiment"], c: 0, f: "C'est nous qui bougeons, pas lui." },
+    { l: 3, q: "Sur une carte de France, le Soleil se lève d'abord en...", svg: null, o: ["Alsace", "Bretagne", "Aquitaine"], c: 0, f: "L'Est (Alsace) voit le Soleil avant l'Ouest (Bretagne)." },
+    { l: 3, q: "Quelle affirmation est vraie ?", svg: s.revolution, o: ["La Terre tourne sur elle-même ET autour du Soleil", "La Terre est immobile", "Le Soleil tourne autour de la Terre"], c: 0, f: "Elle combine deux mouvements." }
+];
+
+/* --- LOGIQUE DE JEU --- */
+let currentSeries = [];
+let score = 0;
+let currentIndex = 0;
+
+function initGame() {
+    const easy = allQuestions.filter(q => q.l === 1);
+    const medium = allQuestions.filter(q => q.l === 2);
+    const hard = allQuestions.filter(q => q.l === 3);
+
+    const shuffle = (arr) => arr.sort(() => 0.5 - Math.random());
+    
+    // Tirage équilibré
+    currentSeries = [
+        ...shuffle(easy).slice(0, 3),
+        ...shuffle(medium).slice(0, 4),
+        ...shuffle(hard).slice(0, 3)
+    ];
+
+    currentSeries = shuffle(currentSeries);
+    score = 0;
+    currentIndex = 0;
+    document.getElementById('result-area').style.display = 'none';
+    document.getElementById('quiz-area').style.display = 'block';
+    
+    const progContainer = document.getElementById('progress-bar');
+    progContainer.innerHTML = '';
+    for(let i=0; i<10; i++) {
+        const div = document.createElement('div');
+        div.className = 'progress-step';
+        progContainer.appendChild(div);
+    }
+    
+    showQuestion();
+}
+
+function showQuestion() {
+    const q = currentSeries[currentIndex];
+    
+    document.querySelectorAll('.progress-step').forEach((el, idx) => {
+        el.className = idx <= currentIndex ? 'progress-step active' : 'progress-step';
+    });
+
+    const badge = document.getElementById('lvl-badge');
+    if(q.l === 1) { badge.innerText = "🟢 Niveau : Facile"; badge.className = "badge lvl-easy"; }
+    else if(q.l === 2) { badge.innerText = "🟠 Niveau : Moyen"; badge.className = "badge lvl-medium"; }
+    else { badge.innerText = "🔴 Niveau : Difficile"; badge.className = "badge lvl-hard"; }
+
+    const sBox = document.getElementById('schema');
+    if(q.svg) {
+        sBox.innerHTML = q.svg;
+        sBox.style.display = 'flex';
+    } else {
+        sBox.style.display = 'none';
+    }
+
+    document.getElementById('q-text').innerText = q.q;
+    const optBox = document.getElementById('options');
+    optBox.innerHTML = "";
+    q.o.forEach((optText, index) => {
+        const btn = document.createElement('button');
+        btn.innerText = optText;
+        btn.onclick = () => checkAnswer(index);
+        optBox.appendChild(btn);
+    });
+
+    document.getElementById('fb').style.display = 'none';
+    document.getElementById('n-btn').style.display = 'none';
+}
+
+function checkAnswer(selectedIndex) {
+    const q = currentSeries[currentIndex];
+    const fb = document.getElementById('fb');
+    const btns = document.querySelectorAll('#options button');
+    
+    btns.forEach(b => b.disabled = true);
+
+    if (selectedIndex === q.c) {
+        score++;
+        fb.innerHTML = "✅ <b>Exact !</b><br>" + q.f;
+        fb.className = "feedback correct";
+    } else {
+        fb.innerHTML = "❌ <b>Faux.</b> La bonne réponse était : <i>" + q.o[q.c] + "</i>.<br>" + q.f;
+        fb.className = "feedback incorrect";
+    }
+    fb.style.display = 'block';
+    document.getElementById('n-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < 10) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    document.getElementById('quiz-area').style.display = 'none';
+    const res = document.getElementById('result-area');
+    res.style.display = 'block';
+    document.getElementById('score-display').innerText = score;
+    
+    let msg = "";
+    if(score === 10) msg = "Incroyable ! Tu maîtrises parfaitement le sujet. 🌟";
+    else if(score >= 8) msg = "Très bon travail ! Tu es un expert. 🚀";
+    else if(score >= 5) msg = "Bien joué. Tu as compris l'essentiel. 🌍";
+    else msg = "Courage ! Relis tes leçons sur la rotation et les saisons. 🌑";
+    
+    document.getElementById('comment').innerText = msg;
+}
+
+initGame();
+</script>
+</body>
+</html>
