@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évaluation : L'Histoire de l'Univers</title>
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --success: #22c55e;
+            --error: #ef4444;
+            --selected: #3b82f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box;
+        }
+
+        #quiz-container {
+            background-color: var(--card-bg); border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 600px; width: 100%; padding: 30px; position: relative;
+        }
+
+        h1 { text-align: center; color: var(--primary); margin-top: 0; }
+        
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: #cbd5e1; font-weight: bold; font-size: 14px;}
+        .input-group input { 
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #475569; 
+            background: #0f172a; color: white; font-size: 15px; box-sizing: border-box;
+        }
+        .input-group input:focus { outline: none; border-color: var(--primary); }
+
+        #progress { font-size: 14px; color: #94a3b8; margin-bottom: 20px; text-align: right; font-weight: bold; }
+
+        .svg-container { display: flex; justify-content: center; margin-bottom: 20px; height: 150px; }
+        .svg-container svg { max-height: 100%; max-width: 100%; border-radius: 8px; background-color: #0b1120; padding: 10px; }
+
+        #question { font-size: 20px; font-weight: 600; margin-bottom: 25px; line-height: 1.4; }
+
+        .btn {
+            background-color: #334155; border: 2px solid #475569; color: white;
+            padding: 15px 20px; width: 100%; border-radius: 8px; font-size: 16px;
+            cursor: pointer; margin-bottom: 15px; transition: all 0.2s; text-align: left;
+        }
+        .btn:hover:not(:disabled) { background-color: #475569; }
+        .btn.selected { background-color: rgba(59, 130, 246, 0.2); border-color: var(--selected); color: #fff; }
+
+        #next-btn, #start-btn {
+            background-color: var(--primary); color: #000; border: none;
+            font-weight: bold; text-align: center; display: block; margin-top: 20px;
+        }
+        #next-btn { display: none; }
+        #next-btn:hover, #start-btn:hover { background-color: #00a3cc; }
+
+        #score-container, #question-container { display: none; }
+        #score-container { text-align: center; }
+
+        .score-text { font-size: 48px; font-weight: bold; color: var(--primary); margin: 10px 0; }
+        
+        #send-status {
+            background: rgba(59, 130, 246, 0.2); border: 1px solid var(--selected); padding: 15px;
+            border-radius: 8px; margin: 20px 0; font-weight: bold; color: var(--primary);
+        }
+        #send-status.success { background: rgba(34, 197, 94, 0.2); border-color: var(--success); color: var(--success); }
+        
+        #correction-list { text-align: left; margin-top: 30px; font-size: 14px; max-height: 300px; overflow-y: auto; padding-right: 10px; }
+        .corr-item { background: #0f172a; padding: 10px; margin-bottom: 10px; border-radius: 6px; border-left: 4px solid var(--error); }
+        .corr-item.correct { border-left-color: var(--success); }
+        .corr-q { font-weight: bold; color: #f8fafc; margin-bottom: 5px; }
+        .corr-your-ans { color: #ef4444; }
+        .corr-right-ans { color: #22c55e; margin-top: 5px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="quiz-container">
+        
+        <div id="start-container">
+            <h1>Évaluation : L'Univers</h1>
+            <p style="text-align: center; color: #cbd5e1; margin-bottom: 25px; font-size: 14px;">Ce test contient 10 questions. Votre note sera envoyée à votre professeur.</p>
+            
+            <div class="input-group">
+                <label for="student-nom">Votre Nom :</label>
+                <input type="text" id="student-nom" placeholder="Ex: DUPONT" required>
+            </div>
+            <div class="input-group">
+                <label for="student-prenom">Votre Prénom :</label>
+                <input type="text" id="student-prenom" placeholder="Ex: Jean" required>
+            </div>
+            <div class="input-group">
+                <label for="student-classe">Votre Classe :</label>
+                <input type="text" id="student-classe" placeholder="Ex: 3ème A" required>
+            </div>
+
+            <button id="start-btn" class="btn">Commencer l'évaluation</button>
+            <p id="error-msg" style="color: var(--error); text-align: center; display: none; font-size: 14px;">Veuillez remplir tous les champs (Nom, Prénom, Classe).</p>
+        </div>
+
+        <div id="question-container">
+            <div id="progress">Question 1 / 10</div>
+            <div id="image-box" class="svg-container"></div>
+            <div id="question">Question text</div>
+            <div id="answer-buttons"></div>
+            <button id="next-btn" class="btn">Valider et passer à la suite</button>
+        </div>
+
+        <div id="score-container">
+            <h1>Évaluation terminée</h1>
+            <p style="font-size: 18px; color: #e2e8f0;">Bravo <span id="display-name" style="font-weight:bold; color:var(--primary);"></span> !</p>
+            <div class="score-text"><span id="score">0</span> / 10</div>
+            
+            <div id="send-status">⏳ Envoi de la note au professeur en cours...</div>
+            
+            <h3 style="margin-top: 40px; border-bottom: 1px solid #475569; padding-bottom: 10px; color:var(--primary);">Votre correction détaillée :</h3>
+            <div id="correction-list"></div>
+        </div>
+
+    </div>
+
+    <script>
+        const svgBigBang = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="5" fill="#fff"/><g stroke="#00d2ff" stroke-width="1"><line x1="50" y1="40" x2="30" y2="20"/><line x1="60" y1="50" x2="80" y2="50"/><line x1="50" y1="60" x2="40" y2="80"/><line x1="40" y1="50" x2="20" y2="60"/><line x1="60" y1="40" x2="80" y2="20"/></g><circle cx="30" cy="20" r="2" fill="#ff8800"/><circle cx="80" cy="50" r="2" fill="#3388ff"/><circle cx="40" cy="80" r="2" fill="#88ff33"/></svg>`;
+        const svgAtome = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="8" fill="#ef4444"/><ellipse cx="50" cy="50" rx="35" ry="12" fill="none" stroke="#3388ff" stroke-width="1" transform="rotate(30 50 50)"/><ellipse cx="50" cy="50" rx="35" ry="12" fill="none" stroke="#3388ff" stroke-width="1" transform="rotate(-30 50 50)"/><circle cx="20" cy="32" r="3" fill="#3388ff"/><circle cx="80" cy="68" r="3" fill="#3388ff"/></svg>`;
+        const svgSolar = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="12" fill="#eab308"/><circle cx="50" cy="50" r="25" fill="none" stroke="#475569" stroke-width="1"/><circle cx="50" cy="50" r="40" fill="none" stroke="#475569" stroke-width="1"/><circle cx="25" cy="50" r="3" fill="#a8a29e"/><circle cx="90" cy="50" r="4" fill="#3b82f6"/></svg>`;
+        const svgDino = `<svg viewBox="0 0 100 100"><path d="M10,90 Q50,70 90,90 L90,100 L10,100 Z" fill="#3b82f6"/><path d="M0,0 L30,40" stroke="#f97316" stroke-width="3" stroke-dasharray="5,2"/><circle cx="35" cy="45" r="15" fill="none" stroke="#ef4444" stroke-width="1"/><text x="70" y="20" fill="#ef4444" font-size="20">☄️</text></svg>`;
+        const svgGalaxy = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="6" fill="#fff" filter="blur(2px)"/><path d="M50,50 Q70,30 90,60 T50,50" fill="none" stroke="#cbd5e1" stroke-width="3"/><path d="M50,50 Q30,70 10,40 T50,50" fill="none" stroke="#cbd5e1" stroke-width="3"/></svg>`;
+
+        const allQuestions = [
+            { q: "Quel est l'âge estimé de l'Univers ?", options: ["13,8 milliards d'années", "4,6 milliards d'années", "65 millions d'années", "2000 ans"], answer: 0, svg: svgBigBang },
+            { q: "Comment s'appelle le modèle scientifique décrivant l'origine de l'Univers ?", options: ["Le Big Bang", "La Nucléosynthèse", "La Supernova", "Le Système Solaire"], answer: 0, svg: svgBigBang },
+            { q: "Dans le modèle du Big Bang, comment étaient l'espace et la matière au tout début ?", options: ["Infiniment denses et chauds", "Froids et vides", "Composés uniquement de planètes", "Gazeux et sombres"], answer: 0, svg: null },
+            { q: "Depuis ses débuts, comment évoluent les dimensions de l'Univers ?", options: ["Elles augmentent (expansion)", "Elles diminuent (contraction)", "Elles restent stables", "Elles clignotent"], answer: 0, svg: svgBigBang },
+            { q: "Que forment les quarks lorsqu'ils s'associent par groupes de 3 ?", options: ["Des protons et des neutrons", "Des électrons", "Des atomes", "Des galaxies"], answer: 0, svg: null },
+            { q: "Combien de temps après le Big Bang les premiers atomes se sont-ils formés ?", options: ["380 000 ans", "3 minutes", "13,8 milliards d'années", "1 microseconde"], answer: 0, svg: svgAtome },
+            { q: "Pourquoi l'Univers est-il devenu transparent 380 000 ans après le Big Bang ?", options: ["Les électrons se sont liés aux noyaux, libérant la lumière", "Les étoiles se sont toutes allumées d'un coup", "La poussière a disparu", "Le Soleil s'est formé"], answer: 0, svg: null },
+            { q: "Où ont été fabriqués les atomes de carbone et d'oxygène qui composent le corps humain ?", options: ["Au cœur des étoiles", "Pendant le Big Bang", "Dans le noyau de la Terre", "Sur la Lune"], answer: 0, svg: svgGalaxy },
+            { q: "Comment sont fabriqués les éléments chimiques plus lourds que le fer (comme l'or) ?", options: ["Lors de l'explosion des étoiles massives (supernovas)", "Lors du Big Bang", "À l'intérieur des planètes gazeuses", "Ils ont toujours existé"], answer: 0, svg: svgGalaxy },
+            { q: "Quel est l'âge du système solaire ?", options: ["4,6 milliards d'années", "13,8 milliards d'années", "65 millions d'années", "380 000 ans"], answer: 0, svg: svgSolar },
+            { q: "À partir de quoi le système solaire s'est-il formé ?", options: ["Un nuage de gaz et de poussières (nébuleuse)", "La collision de deux galaxies", "L'explosion de la Terre", "Un trou noir"], answer: 0, svg: svgGalaxy },
+            { q: "D'après les scientifiques, comment la Lune s'est-elle formée ?", options: ["Suite à une collision géante entre la Terre et une protoplanète", "Elle a été capturée par la gravité de la Terre", "Elle s'est formée en même temps que le Soleil", "C'est un morceau arraché au Soleil"], answer: 0, svg: svgDino }, 
+            { q: "Il y a combien de temps l'événement ayant causé la disparition des dinosaures a-t-il eu lieu ?", options: ["65 millions d'années", "4,6 milliards d'années", "13,8 milliards d'années", "Il y a 2000 ans"], answer: 0, svg: svgDino },
+            { q: "D'après les documents du cours, quel événement a engendré le phénomène des saisons sur Terre ?", options: ["Une collision géante qui a incliné l'axe de rotation de la Terre", "La disparition des dinosaures", "L'apparition de la Lune", "L'expansion de l'Univers"], answer: 0, svg: null },
+            { q: "L'ordre des astres du plus simple au plus complexe est :", options: ["Particules -> Atomes -> Étoiles -> Galaxies", "Étoiles -> Atomes -> Galaxies -> Particules", "Galaxies -> Étoiles -> Atomes -> Particules", "Atomes -> Particules -> Galaxies -> Étoiles"], answer: 0, svg: null }
+        ];
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let studentNom = "";
+        let studentPrenom = "";
+        let studentClasse = "";
+        let studentHistory = [];
+
+        const startContainer = document.getElementById('start-container');
+        const questionContainer = document.getElementById('question-container');
+        const scoreContainer = document.getElementById('score-container');
+        const answerButtonsElement = document.getElementById('answer-buttons');
+        const nextButton = document.getElementById('next-btn');
+        let currentSelectedAnswer = null;
+
+        document.getElementById('start-btn').addEventListener('click', startQuiz);
+        nextButton.addEventListener('click', handleNextButton);
+
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            studentNom = document.getElementById('student-nom').value.trim().toUpperCase();
+            studentPrenom = document.getElementById('student-prenom').value.trim();
+            studentClasse = document.getElementById('student-classe').value.trim();
+            
+            if (studentNom === "" || studentPrenom === "" || studentClasse === "") {
+                document.getElementById('error-msg').style.display = "block";
+                return;
+            }
+
+            document.getElementById('display-name').innerText = studentPrenom + " " + studentNom;
+
+            startContainer.style.display = 'none';
+            questionContainer.style.display = 'block';
+            
+            let shuffledPool = shuffleArray([...allQuestions]);
+            currentQuestions = shuffledPool.slice(0, 10);
+            
+            setNextQuestion();
+        }
+
+        function setNextQuestion() {
+            currentSelectedAnswer = null;
+            nextButton.style.display = 'none';
+            while (answerButtonsElement.firstChild) {
+                answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+            }
+            showQuestion(currentQuestions[currentQuestionIndex]);
+        }
+
+        function showQuestion(questionData) {
+            document.getElementById('progress').innerText = `Question ${currentQuestionIndex + 1} / 10`;
+            document.getElementById('question').innerText = questionData.q;
+            
+            const imageBox = document.getElementById('image-box');
+            if (questionData.svg) {
+                imageBox.innerHTML = questionData.svg;
+                imageBox.style.display = 'flex';
+            } else {
+                imageBox.innerHTML = '';
+                imageBox.style.display = 'none';
+            }
+
+            let answers = questionData.options.map((text, index) => {
+                return { text: text, isCorrect: index === questionData.answer };
+            });
+            answers = shuffleArray(answers);
+
+            answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer.text;
+                button.classList.add('btn');
+                button.dataset.isCorrect = answer.isCorrect;
+                button.addEventListener('click', () => selectAnswer(button, answer));
+                answerButtonsElement.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedButton, answerData) {
+            Array.from(answerButtonsElement.children).forEach(btn => btn.classList.remove('selected'));
+            selectedButton.classList.add('selected');
+            
+            currentSelectedAnswer = {
+                questionText: currentQuestions[currentQuestionIndex].q,
+                studentAnswer: answerData.text,
+                isCorrect: answerData.isCorrect,
+                correctAnswerText: currentQuestions[currentQuestionIndex].options[currentQuestions[currentQuestionIndex].answer]
+            };
+            nextButton.style.display = 'block';
+        }
+
+        function handleNextButton() {
+            studentHistory.push(currentSelectedAnswer);
+            if (currentSelectedAnswer.isCorrect) score++;
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuestions.length) {
+                setNextQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        function showScore() {
+            questionContainer.style.display = 'none';
+            scoreContainer.style.display = 'block';
+            document.getElementById('score').innerText = score;
+            buildCorrectionList();
+            sendScoreToGoogleSheet();
+        }
+
+        function buildCorrectionList() {
+            const listDiv = document.getElementById('correction-list');
+            studentHistory.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.classList.add('corr-item');
+                if(item.isCorrect) div.classList.add('correct');
+
+                let html = `<div class="corr-q">${index + 1}. ${item.questionText}</div>`;
+                if (item.isCorrect) {
+                    html += `<div class="corr-right-ans">✓ Votre réponse : ${item.studentAnswer}</div>`;
+                } else {
+                    html += `<div class="corr-your-ans">✗ Votre réponse : ${item.studentAnswer}</div>`;
+                    html += `<div class="corr-right-ans">👉 Bonne réponse : ${item.correctAnswerText}</div>`;
+                }
+                div.innerHTML = html;
+                listDiv.appendChild(div);
+            });
+        }
+
+        function sendScoreToGoogleSheet() {
+            // Utilisation de votre NOUVELLE URL D'ACCÈS À VOTRE GOOGLE SCRIPT
+            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrhFaGUCFADL_XWMKZxyAydLqwtVlrZc98zWBBWeSWC8G8L2-bi-1IYO9XYZDi0h5c/exec"; 
+
+            const urlWithParams = `${GOOGLE_SCRIPT_URL}?nom=${encodeURIComponent(studentNom)}&prenom=${encodeURIComponent(studentPrenom)}&classe=${encodeURIComponent(studentClasse)}&note=${score}`;
+
+            fetch(urlWithParams, { mode: 'no-cors' })
+                .then(() => {
+                    const statusDiv = document.getElementById('send-status');
+                    statusDiv.classList.add('success');
+                    statusDiv.innerHTML = "✓ Note envoyée avec succès dans le tableau du professeur !";
+                })
+                .catch(error => {
+                    const statusDiv = document.getElementById('send-status');
+                    statusDiv.innerHTML = "⚠️ Erreur lors de l'envoi de la note. Prévenez votre professeur.";
+                    statusDiv.style.color = "var(--error)";
+                    statusDiv.style.borderColor = "var(--error)";
+                });
+        }
+    </script>
+</body>
+</html>
