@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>QCM : Activité 1 - La matière à très petite échelle</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; max-width: 800px; margin: 20px auto; padding: 20px; background-color: #f4f7f6; color: #333; }
+        h1 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .card { background: white; padding: 25px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        button { background-color: #3498db; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: background 0.3s; }
+        button:hover { background-color: #2980b9; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .options { list-style-type: none; padding: 0; }
+        .options li { margin: 12px 0; background: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee; transition: background 0.2s; }
+        .options li:hover { background: #f1f1f1; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
+        #quiz-section, #result-section { display: none; }
+        .result-box { text-align: center; padding: 20px; border-radius: 8px; font-size: 20px; font-weight: bold; margin-top: 20px; }
+        
+        /* Styles pour la correction */
+        .success, .correct-answer { background-color: #d4edda !important; color: #155724 !important; border-color: #c3e6cb !important; }
+        .error, .wrong-answer { background-color: #f8d7da !important; color: #721c24 !important; border-color: #f5c6cb !important; }
+        .correction-mark { float: right; font-weight: bold; }
+        
+        #error-msg { color: #e74c3c; font-weight: bold; display: none; text-align: center; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <h1>QCM : La matière à très petite échelle</h1>
+
+    <div id="intro-section" class="card">
+        <h2>Identifiez-vous pour commencer</h2>
+        <div class="form-group">
+            <label for="classe">Classe :</label>
+            <input type="text" id="classe" placeholder="Ex: 4ème A" required>
+        </div>
+        <div class="form-group">
+            <label for="nom">Nom :</label>
+            <input type="text" id="nom" placeholder="Votre nom" required>
+        </div>
+        <div class="form-group">
+            <label for="prenom">Prénom :</label>
+            <input type="text" id="prenom" placeholder="Votre prénom" required>
+        </div>
+        <p id="error-msg">⚠️ Veuillez remplir votre classe, nom et prénom pour commencer.</p>
+        <button type="button" onclick="startQuiz()">Commencer le QCM</button>
+    </div>
+
+    <div id="quiz-section">
+        <div id="quiz-container"></div>
+        <button type="button" id="submitBtn" onclick="calculateAndSendScore()">Valider mes réponses</button>
+    </div>
+
+    <div id="result-section">
+        <div id="result" class="result-box"></div>
+    </div>
+
+    <script>
+        // Banque de 40 questions strictement basées sur l'Activité 1
+        const questionBank = [
+            { q: "À l'échelle microscopique, comment décrit-on la matière ?", options: ["Comme un bloc continu", "Constituée de particules nombreuses et extrêmement petites", "Visible à l'œil nu", "Composée uniquement d'air"], correct: 1 },
+            { q: "Pour modéliser la matière à très petite échelle, on utilise souvent :", options: ["Des dessins comme des ronds, triangles ou carrés", "Des photographies", "Des traits continus", "Rien, c'est impossible à modéliser"], correct: 0 },
+            { q: "Quelle est la propriété principale d'un solide à notre échelle ?", options: ["Il est compressible", "Il prend la forme du récipient", "Il possède une forme propre", "Il occupe tout l'espace disponible"], correct: 2 },
+            { q: "Une des caractéristiques d'un liquide au repos est que :", options: ["Il a une forme propre", "Sa surface libre est plane et horizontale", "Il est fortement compressible", "Il s'échappe de son récipient"], correct: 1 },
+            { q: "Quel état de la matière occupe tout le volume disponible ?", options: ["L'état solide", "L'état liquide", "L'état gazeux", "Tous les états"], correct: 2 },
+            { q: "Un gaz se caractérise par le fait qu'il est :", options: ["Incompressible", "De forme propre", "Compressible", "Toujours visible"], correct: 2 },
+            { q: "Dans le modèle particulaire, comment sont disposées les particules d'un solide ?", options: ["Désordonnées et espacées", "Ordonnées et rapprochées", "Désordonnées et rapprochées", "Ordonnées et espacées"], correct: 1 },
+            { q: "Comment sont les particules à l'état liquide ?", options: ["Désordonnées, rapprochées et peu liées", "Ordonnées, rapprochées et liées", "Désordonnées, espacées et non liées", "Ordonnées, espacées et non liées"], correct: 0 },
+            { q: "Comment sont les particules à l'état gazeux ?", options: ["Ordonnées et liées", "Désordonnées, espacées et non liées", "Rapprochées et peu liées", "Ordonnées et immobiles"], correct: 1 },
+            { q: "Si un corps a une forme propre, c'est parce que ses particules sont :", options: ["Très agitées", "Espacées", "Liées", "Non liées"], correct: 2 },
+            { q: "Pourquoi un liquide n'a-t-il pas de forme propre ?", options: ["Ses particules sont liées solidement", "Ses particules sont espacées", "Ses particules sont peu liées", "Ses particules sont immobiles"], correct: 2 },
+            { q: "On dit qu'un gaz se diffuse car :", options: ["Il devient liquide", "Il se condense sur les parois", "Il occupe tout l'espace disponible", "Il reste au fond du récipient"], correct: 2 },
+            { q: "Que se passe-t-il si l'on enlève la séparation entre deux flacons contenant des gaz différents ?", options: ["Les gaz restent séparés", "Les gaz s'annulent", "Les gaz se répartissent dans les deux récipients", "Un gaz pousse l'autre"], correct: 2 },
+            { q: "Dans l'animation sur la diffusion, lorsqu'on supprime la paroi, les particules de gaz :", options: ["Restent dans leur compartiment", "Se répartissent dans les deux compartiments", "Tombent au fond", "Se regroupent au centre"], correct: 1 },
+            { q: "Si un gaz se répand partout, c'est parce que ses particules sont :", options: ["Non liées et très agitées", "Liées et immobiles", "Ordonnées", "Rapprochées"], correct: 0 },
+            { q: "Dans l'animation sur les états de l'eau, que fait l'agitation des molécules quand on chauffe de 0°C à 80°C ?", options: ["Elle diminue", "Elle augmente", "Elle ne change pas", "Elle s'arrête"], correct: 1 },
+            { q: "Lorsqu'on chauffe l'eau jusqu'à 200°C, elle passe à l'état gazeux. Ses molécules deviennent :", options: ["Liées", "Rapprochées", "Très espacées", "Ordonnées"], correct: 2 },
+            { q: "Si l'on diminue la température d'un gaz, l'agitation de ses particules :", options: ["Augmente", "Diminue", "Reste identique", "Devient maximale"], correct: 1 },
+            { q: "Complétez la règle vue dans l'activité : Plus la température augmente...", options: ["Plus les particules sont grosses", "Plus les particules sont agitées", "Moins les particules bougent", "Plus les particules se lient"], correct: 1 },
+            { q: "L'apport d'énergie thermique (en chauffant) permet à l'eau de :", options: ["Changer de couleur", "Changer d'état physique", "Changer de masse", "Disparaître totalement"], correct: 1 },
+            { q: "Lorsqu'on pousse le piston d'une seringue contenant de l'air :", options: ["Les particules de gaz grossissent", "L'espace entre les particules augmente", "L'espace entre les particules diminue", "Les particules s'arrêtent"], correct: 2 },
+            { q: "Un gaz est compressible. Cela s'explique car ses particules sont :", options: ["Ordonnées", "Rapprochées", "Liées", "Espacées"], correct: 3 },
+            { q: "Un liquide est quasiment incompressible car ses particules sont :", options: ["Désordonnées", "Rapprochées", "Espacées", "Très agitées"], correct: 1 },
+            { q: "Un solide est incompressible car ses particules sont déjà :", options: ["Très agitées", "Ordonnées", "Rapprochées", "Espacées"], correct: 2 },
+            { q: "Je suis un état de la matière où les particules sont liées et immobiles. Je suis :", options: ["Le solide", "Le liquide", "Le gaz", "Le plasma"], correct: 0 },
+            { q: "Je suis un état où les particules glissent les unes sur les autres (peu liées). Je suis :", options: ["Le solide", "Le liquide", "Le gaz", "La glace"], correct: 1 },
+            { q: "Je suis un état où l'agitation des particules est la plus forte. Je suis :", options: ["Le solide", "Le liquide", "Le gaz", "Le froid"], correct: 2 },
+            { q: "Lors du passage de l'état solide à liquide, les particules :", options: ["S'ordonnent", "Perdent leur arrangement strict et deviennent mobiles", "Se séparent par un grand vide", "Deviennent plus petites"], correct: 1 },
+            { q: "La surface plane et horizontale est une propriété macroscopique exclusive aux :", options: ["Solides", "Liquides", "Gaz", "Particules"], correct: 1 },
+            { q: "Le gaz roux de l'expérience vidéo finit par se mélanger à l'air incolore par le phénomène de :", options: ["Solidification", "Compression", "Diffusion", "Fusion"], correct: 2 },
+            { q: "Quelle action sur la seringue montre qu'un gaz est expansible (occupe plus de place) ?", options: ["Pousser le piston", "Tirer le piston", "Chauffer la seringue", "Boucher la seringue"], correct: 1 },
+            { q: "Laquelle de ces propositions est fausse pour les particules d'un gaz ?", options: ["Elles sont très agitées", "Elles sont très espacées", "Elles sont liées", "Elles sont désordonnées"], correct: 2 },
+            { q: "Laquelle de ces propositions est vraie pour un glaçon (solide) ?", options: ["Il est compressible", "Il n'a pas de forme propre", "Ses particules sont ordonnées et liées", "Ses particules sont agitées"], correct: 2 },
+            { q: "Quand on refroidit de l'eau de 80°C à -20°C, les particules finissent par :", options: ["S'agiter violemment", "S'ordonner et se lier", "S'éparpiller", "Grossir"], correct: 1 },
+            { q: "Qu'est-ce qui explique qu'un liquide coule ?", options: ["Ses particules sont très espacées", "Ses particules sont ordonnées", "Ses particules sont désordonnées et mobiles", "Ses particules sont compressibles"], correct: 2 },
+            { q: "Un solide ne prend pas la forme du récipient car :", options: ["Il y a trop de vide entre ses particules", "Ses particules sont liées et immobiles", "Il a une surface libre horizontale", "Ses particules sont agitées"], correct: 1 },
+            { q: "Le fait qu'un gaz prenne toute la place disponible montre que ses particules sont :", options: ["Rapprochées", "Lourdes", "Non liées", "Ordonnées"], correct: 2 },
+            { q: "Dans l'animation PhET, l'état où le thermomètre indique la température la plus basse correspond aux particules :", options: ["Très agitées", "Immobiles et ordonnées", "Mobiles et rapprochées", "Espacées"], correct: 1 },
+            { q: "L'air emprisonné dans une seringue peut être réduit en volume. On dit qu'il est :", options: ["Diffusible", "Rigide", "Incompressible", "Compressible"], correct: 3 },
+            { q: "À l'échelle microscopique, que se passe-t-il lors d'une baisse d'énergie thermique ?", options: ["L'agitation des particules augmente", "L'agitation des particules diminue", "Les particules grossissent", "L'espace entre les particules d'un gaz augmente"], correct: 1 }
+        ];
+
+        let selectedQuestions = [];
+        let userData = {};
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            userData.classe = document.getElementById('classe').value.trim();
+            userData.nom = document.getElementById('nom').value.trim();
+            userData.prenom = document.getElementById('prenom').value.trim();
+            const errorMsg = document.getElementById('error-msg');
+
+            if (userData.classe === "" || userData.nom === "" || userData.prenom === "") {
+                errorMsg.style.display = "block";
+                return; 
+            }
+
+            errorMsg.style.display = "none";
+            document.getElementById('intro-section').style.display = 'none';
+            document.getElementById('quiz-section').style.display = 'block';
+
+            shuffleArray(questionBank);
+            selectedQuestions = questionBank.slice(0, 10);
+
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            let html = "";
+            
+            selectedQuestions.forEach((item, index) => {
+                html += `<div class="card" id="card-${index}">
+                    <p><strong>Question ${index + 1} / 10 :</strong> ${item.q}</p>
+                    <ul class="options" id="options-${index}">`;
+                
+                item.options.forEach((opt, i) => {
+                    html += `<li id="li-${index}-${i}"><label style="cursor: pointer; display: block;"><input type="radio" name="q${index}" value="${i}"> ${opt}</label></li>`;
+                });
+                
+                html += `</ul></div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function calculateAndSendScore() {
+            let score = 0;
+            let allAnswered = true;
+
+            // Vérifier si tout a été répondu
+            selectedQuestions.forEach((item, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                if (!selected) {
+                    allAnswered = false;
+                }
+            });
+
+            if (!allAnswered) {
+                if (!confirm("Vous n'avez pas répondu à toutes les questions. Voulez-vous vraiment valider ?")) {
+                    return;
+                }
+            }
+
+            // Bloquer le bouton
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerText = "Enregistrement en cours...";
+
+            // Calculer le score et afficher la correction visuelle
+            selectedQuestions.forEach((item, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                
+                const allRadios = document.querySelectorAll(`input[name="q${index}"]`);
+                allRadios.forEach(radio => radio.disabled = true);
+
+                const correctLi = document.getElementById(`li-${index}-${item.correct}`);
+                correctLi.classList.add('correct-answer');
+                correctLi.innerHTML += `<span class="correction-mark">✔ Bonne réponse</span>`;
+
+                if (selected) {
+                    const selectedValue = parseInt(selected.value);
+                    if (selectedValue === item.correct) {
+                        score++;
+                    } else {
+                        const wrongLi = document.getElementById(`li-${index}-${selectedValue}`);
+                        wrongLi.classList.add('wrong-answer');
+                        wrongLi.innerHTML += `<span class="correction-mark">❌ Votre réponse</span>`;
+                    }
+                }
+            });
+
+            // Afficher le résultat
+            document.getElementById('result-section').style.display = 'block';
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = "result-box";
+            resultDiv.innerHTML = `Calcul en cours...`;
+
+            // L'URL exacte de votre Apps Script
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbxFiiHGTp1PFZbngtn8WcB-TTYCviuc7TB6iRTDcSDrHoHCAJc-uVnW6h9p7IcXmtItnA/exec'; 
+            
+            let formData = new URLSearchParams();
+            formData.append('classe', userData.classe);
+            formData.append('nom', userData.nom);
+            formData.append('prenom', userData.prenom);
+            formData.append('note', score);
+
+            // Envoi des données (mode: 'no-cors' inclus)
+            fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors' })
+                .then(() => {
+                    resultDiv.classList.add(score >= 5 ? 'success' : 'error');
+                    resultDiv.innerHTML = `Bravo ${userData.prenom}, le QCM est terminé !<br>Votre note est de <strong>${score} / 10</strong>.<br>✓ La note a bien été transmise à votre professeur.`;
+                    document.getElementById('submitBtn').innerText = "QCM Terminé - Correction affichée au-dessus";
+                })
+                .catch(error => {
+                    resultDiv.classList.add('error');
+                    resultDiv.innerHTML = `Votre note est de <strong>${score} / 10</strong>.<br>⚠ Une erreur a empêché l'affichage de la confirmation, mais la note a peut-être été envoyée. Prévenez votre professeur.`;
+                    document.getElementById('submitBtn').disabled = false;
+                    document.getElementById('submitBtn').innerText = "Réessayer l'envoi";
+                });
+        }
+    </script>
+</body>
+</html>
