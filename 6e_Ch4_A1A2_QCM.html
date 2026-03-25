@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QCM - La diversité et les états de la matière</title>
+    <style>
+        :root {
+            --primary: #2980b9;
+            --secondary: #34495e;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --bg: #f5f7fa;
+            --hint: #f39c12;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--secondary);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 15px;
+            margin-bottom: 5px;
+            font-size: 2em;
+        }
+        .intro {
+            text-align: center;
+            font-size: 1.1em;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        .question-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary);
+        }
+        .question-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+        .question-hint {
+            font-size: 0.9em;
+            color: var(--hint);
+            font-style: italic;
+            margin-bottom: 15px;
+            display: block;
+            background-color: #fff9e6;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border-left: 3px solid var(--hint);
+        }
+        .illustration {
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px dashed #bdc3c7;
+        }
+        /* Rendre les SVG "Responsive" pour mobile */
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            margin-bottom: 12px;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--light);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1em;
+        }
+        .option-label:hover {
+            background-color: #d6eaf8;
+            border-color: var(--primary);
+        }
+        input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.4);
+            cursor: pointer;
+            flex-shrink: 0; /* Empêche le bouton radio de s'écraser sur mobile */
+        }
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2em;
+            color: white;
+            background-color: var(--success);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2);
+        }
+        #submit-btn:hover {
+            background-color: #219653;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.05em;
+            display: none;
+        }
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        #score-display {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .reload-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        .reload-btn:hover {
+            background-color: #1f618d;
+        }
+
+        /* --- MEDIA QUERIES POUR SMARTPHONES --- */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.6em;
+            }
+            .intro {
+                font-size: 1em;
+                margin-bottom: 20px;
+            }
+            .question-card {
+                padding: 15px;
+                border-left-width: 4px;
+            }
+            .question-title {
+                font-size: 1.1em;
+            }
+            .option-label {
+                padding: 12px 10px; /* Zones de clics larges mais adaptées au bord de l'écran */
+                font-size: 0.95em;
+            }
+            input[type="radio"] {
+                margin-right: 10px;
+            }
+            #score-display {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1 id="titre-qcm">QCM : Diversité et États de la Matière (6ème)</h1>
+    <p class="intro">10 questions tirées au sort pour tester tes connaissances.</p>
+
+    <div id="quiz-container"></div>
+    
+    <button id="submit-btn" onclick="checkAnswers()">Valider mes réponses</button>
+    <div id="score-display"></div>
+    <button class="reload-btn" onclick="restartQuiz()" style="display:none;" id="reload-btn">Recommencer un nouveau QCM</button>
+
+    <script>
+        // --- ILLUSTRATIONS (SVG) ---
+        const svgAimant = `<svg width="200" height="100" viewBox="0 0 200 100">
+            <path d="M 50 80 L 50 40 A 40 40 0 0 1 130 40 L 130 80 L 110 80 L 110 40 A 20 20 0 0 0 70 40 L 70 80 Z" fill="#e74c3c"/>
+            <rect x="50" y="80" width="20" height="15" fill="#bdc3c7"/><rect x="110" y="80" width="20" height="15" fill="#bdc3c7"/>
+            <text x="90" y="90" text-anchor="middle" font-size="20" fill="#34495e">⚡</text>
+            <rect x="80" y="10" width="20" height="8" fill="#7f8c8d" transform="rotate(15 90 14)"/>
+        </svg>`;
+
+        const svgCasserole = `<svg width="200" height="120" viewBox="0 0 200 120">
+            <rect x="60" y="50" width="80" height="50" fill="#bdc3c7" rx="5"/>
+            <path d="M 50 60 L 60 60 L 60 70 L 50 70 Z" fill="#7f8c8d"/>
+            <path d="M 140 60 L 150 60 L 150 70 L 140 70 Z" fill="#7f8c8d"/>
+            <path d="M 60 50 Q 100 30 140 50" fill="none" stroke="#bdc3c7" stroke-width="3"/>
+            <rect x="90" y="30" width="20" height="10" fill="#34495e"/>
+            <path d="M 70 105 Q 75 90 80 105 Z" fill="#e67e22"/><path d="M 95 105 Q 100 85 105 105 Z" fill="#e74c3c"/><path d="M 120 105 Q 125 90 130 105 Z" fill="#e67e22"/>
+            <circle cx="90" cy="45" r="3" fill="#3498db"/><circle cx="110" cy="40" r="3" fill="#3498db"/>
+        </svg>`;
+
+        const svgRecyclage = `<svg width="120" height="120" viewBox="0 0 120 120">
+            <path d="M 60 20 L 75 45 L 65 45 A 30 30 0 0 1 85 80 L 95 70 A 40 40 0 0 0 55 35 L 45 35 Z" fill="#27ae60"/>
+            <path d="M 30 70 L 55 85 L 50 75 A 30 30 0 0 1 40 40 L 30 30 A 40 40 0 0 0 40 85 L 35 95 Z" fill="#2ecc71"/>
+            <path d="M 90 60 L 65 85 L 75 80 A 30 30 0 0 1 35 60 L 20 65 A 40 40 0 0 0 85 95 L 95 105 Z" fill="#1abc9c"/>
+        </svg>`;
+
+        // --- BANQUE DE QUESTIONS (37 Questions) ---
+        const questionBank = [
+            // Déchets et biodégradabilité
+            { q: "Quelle est la durée de vie estimée d'une bouteille ou d'un sac en plastique dans la nature ?", options: ["2 à 12 mois", "25 à 40 ans", "100 à 500 ans", "4 000 ans"], ans: 2, exp: "Le plastique est fabriqué à partir de pétrole et met très longtemps à disparaître." },
+            { q: "Quelle matière met jusqu'à 4 000 ans à se décomposer dans la nature ?", options: ["Le verre", "Le carton", "L'aluminium", "Le cuir"], ans: 0, exp: "Le verre, fabriqué à partir de sable fondu, est extrêmement résistant dans la nature." },
+            { q: "Que signifie l'expression « objet biodégradable » ?", options: ["Il peut être recyclé indéfiniment", "Il se décompose rapidement sous l'effet de micro-organismes (bactéries...)", "Il est fabriqué avec des roches"], ans: 1, exp: "Les micro-organismes transforment naturellement cette matière organique." },
+            { q: "Parmi les déchets suivants, lequel se décompose le plus vite (quelques jours à 1 mois) ?", options: ["Brique de lait", "Pelure d'orange", "Canette en aluminium", "Chewing-gum"], ans: 1, exp: "La pelure d'orange est une matière organique biodégradable." },
+            
+            // Les familles de matériaux et propriétés
+            { q: "Un T-shirt en coton ou une chaussure en cuir font partie de la famille des matières :", options: ["Minérales", "Organiques", "Plastiques", "Métalliques"], ans: 1, exp: "Elles proviennent d'êtres vivants (animaux ou végétaux)." },
+            { q: "Les roches, le sable ou le calcaire appartiennent à la famille des :", options: ["Matières plastiques", "Verres", "Minéraux", "Matières organiques"], ans: 2, exp: "Ce sont des matières non vivantes extraites du sous-sol terrestre." },
+            { q: "Les matières plastiques sont principalement fabriquées par l'être humain à partir de :", options: ["Bois", "Pétrole", "Argile", "Sable"], ans: 1, exp: "Le plastique est un dérivé industriel du pétrole." },
+            { q: "L'aluminium d'une canette appartient à la famille des :", options: ["Minéraux", "Métaux", "Plastiques"], ans: 1, exp: "L'aluminium est un métal léger." },
+            { q: "Une matière qui laisse bien passer le courant électrique (comme le cuivre) est un :", options: ["Conducteur électrique", "Isolant électrique", "Isolant thermique"], ans: 0, exp: "Les métaux sont d'excellents conducteurs d'électricité." },
+            { q: "L'étain conduit-il le courant électrique ?", hint: "💡 Indice : L'étain est un métal. On l'utilise souvent sous forme de fil fondu pour relier et souder les composants sur les circuits électroniques.", options: ["Non, c'est un isolant", "Oui, il laisse passer le courant", "Seulement s'il est à l'état gazeux"], ans: 1, exp: "L'étain est un métal, et comme tous les métaux, c'est un très bon conducteur électrique." },
+            { q: "Si une matière laisse bien passer la chaleur (une poêle en fer par exemple), on dit qu'elle est un bon :", options: ["Conducteur électrique", "Conducteur thermique", "Isolant thermique"], ans: 1, exp: "La conductivité thermique est la capacité à propager la chaleur." },
+            { q: "Le fer et l'acier (qui est un alliage contenant du fer) ont une propriété physique particulière par rapport aux autres matériaux :", options: ["Ils flottent sur l'eau", "Ils sont transparents", "Ils sont attirés par un aimant"], ans: 2, svg: svgAimant, exp: "Le magnétisme est une propriété spécifique du fer." },
+            
+            // Devinettes : Identifier la famille (Basées sur le tableau et la vie courante)
+            { q: "Devinette : Je suis un bâtonnet en bois. Je suis dur et opaque. À quelle famille de matériaux j'appartiens ?", options: ["Matières organiques", "Plastiques", "Minéraux"], ans: 0, exp: "Le bois est une matière dure et opaque issue du vivant, c'est donc une matière organique." },
+            { q: "Devinette : Je suis un bécher de laboratoire en polypropylène. Je suis transparent et dur. À quelle famille j'appartiens ?", options: ["Verres", "Plastiques", "Métaux"], ans: 1, exp: "Le polypropylène est transparent et dur, c'est un matériau synthétique de la famille des plastiques." },
+            { q: "Devinette : Je suis un pot fabriqué en terre cuite (argile). Je suis dur, cassant et opaque. À quelle famille de matériaux j'appartiens ?", options: ["Minéraux", "Plastiques", "Matières organiques"], ans: 0, exp: "La terre cuite ou l'argile, dure, cassante et opaque, appartient à la famille des minéraux extraits du sol." },
+            { q: "Devinette : Je suis un fil électrique en cuivre. Je suis dur, brillant et opaque. À quelle famille j'appartiens ?", options: ["Métaux", "Verres", "Minéraux"], ans: 0, exp: "Le cuivre, comme beaucoup de matières dures, brillantes et opaques, fait partie de la famille des métaux." },
+            { q: "Devinette : Je suis une tige fabriquée dans une matière à la fois cassante et transparente. À quelle famille j'appartiens ?", options: ["Verres", "Plastiques", "Métaux"], ans: 0, exp: "La tige est cassante et transparente, ce sont les propriétés physiques caractéristiques de la famille des verres." },
+            { q: "Devinette : Je suis un trombone de bureau. Je suis gris, je brille à la lumière et je suis attiré par un aimant. À quelle famille de matériaux j'appartiens ?", options: ["Matières plastiques", "Métaux", "Minéraux"], ans: 1, svg: svgAimant, exp: "Le trombone est fabriqué en acier, un métal contenant du fer (d'où l'attraction par l'aimant)." },
+            { q: "Devinette : Je suis une feuille de papier. Je suis fabriquée à partir du bois des arbres et je suis biodégradable. À quelle famille j'appartiens ?", options: ["Matières organiques", "Verres", "Plastiques"], ans: 0, exp: "Le papier provient du bois, qui est issu d'un être vivant (un végétal), c'est donc une matière organique." },
+            { q: "Devinette : Je suis une brique de construction (comme un Lego). Je suis rouge, légère, très solide, et je suis fabriquée en usine à partir de pétrole. À quelle famille j'appartiens ?", options: ["Verres", "Métaux", "Matières plastiques"], ans: 2, exp: "Les objets en plastique sont légers, peuvent avoir toutes les couleurs et sont dérivés du pétrole." },
+            { q: "Devinette : Je suis la vitre d'une fenêtre. Je suis très dure, je laisse parfaitement passer la lumière (transparente) mais je me brise facilement si on me frappe. À quelle famille j'appartiens ?", options: ["Verres", "Minéraux", "Plastiques"], ans: 0, exp: "La dureté, la transparence et la fragilité (cassant) sont les propriétés typiques des verres." },
+            { q: "Devinette : Je suis le bâton de craie que le professeur utilise pour écrire au tableau. Je suis fabriqué à partir d'une roche calcaire extraite du sol. À quelle famille j'appartiens ?", options: ["Matières organiques", "Minéraux", "Verres"], ans: 1, exp: "La craie (calcaire) est une roche extraite de la terre, elle appartient donc à la famille des minéraux." },
+
+            // Anciennes Devinettes : Identifier la famille
+            { q: "Devinette : Je suis extrait du sous-sol de la Terre (comme la roche ou le sable) et je n'ai jamais été vivant. À quelle famille de matériaux j'appartiens ?", options: ["Les minéraux", "Les matières organiques", "Les plastiques"], ans: 0, exp: "Les minéraux regroupent tout ce qui vient du sol et qui n'est pas issu du monde vivant." },
+            { q: "Devinette : Je suis souvent brillant, je conduis très bien la chaleur et l'électricité. À quelle famille j'appartiens ?", options: ["Les verres", "Les matières organiques", "Les métaux"], ans: 2, exp: "Les métaux (cuivre, fer, aluminium, zinc...) sont d'excellents conducteurs thermiques et électriques." },
+            { q: "Devinette : Je proviens d'un être vivant (végétal ou animal). Dans la nature, je suis biodégradable. À quelle famille de matériaux j'appartiens ?", options: ["Les métaux", "Les matières organiques", "Les minéraux"], ans: 1, exp: "Le bois, le coton, le cuir ou les restes alimentaires sont des matières organiques." },
+            { q: "Devinette : Je suis fabriqué artificiellement à partir de pétrole. Je peux être souple, dur, transparent ou opaque, mais je mets très longtemps à me décomposer dans la nature. À quelle famille j'appartiens ?", options: ["Les matières plastiques", "Les verres", "Les matières organiques"], ans: 0, exp: "Les matières plastiques offrent beaucoup de propriétés différentes mais polluent longtemps la nature." },
+
+            // États de la matière
+            { q: "Sous l'effet du froid en altitude, la vapeur d'eau forme des nuages. Un nuage contient de l'eau à l'état :", options: ["Gazeux uniquement", "Liquide ou solide (gouttelettes ou cristaux)", "Toujours à l'état solide"], ans: 1, exp: "La vapeur d'eau se transforme en eau liquide ou en glace pour former les nuages." },
+            { q: "Contrairement à un nuage, la vapeur d'eau est :", options: ["Blanche", "Totalement invisible", "Froide"], ans: 1, exp: "L'eau à l'état gazeux (vapeur d'eau) ne se voit pas à l'œil nu." },
+            { q: "L'eau des glaciers fond de plus en plus vite à cause :", options: ["Du froid", "Du vent", "Du réchauffement climatique (augmentation de la température)"], ans: 2, exp: "L'augmentation de la chaleur provoque la fonte accélérée des glaces." },
+            { q: "L'eau d'un glacier est à l'état __________, tandis que l'eau des océans est à l'état __________.", options: ["Gazeux / Liquide", "Solide / Liquide", "Liquide / Solide"], ans: 1, exp: "La glace est solide, l'océan est liquide." },
+            { q: "Pour recycler une canette en aluminium indéfiniment, on doit :", options: ["La faire fondre à plus de 800°C pour la remouler", "La laisser se décomposer dans la terre", "La compacter avec du plastique"], ans: 0, svg: svgRecyclage, exp: "Les métaux peuvent fondre sous l'effet de la chaleur sans perdre leurs propriétés." },
+            { q: "Lorsque l'on chauffe de l'eau dans une casserole et qu'elle bout, elle se transforme en :", options: ["Glace", "Vapeur d'eau (gaz)", "Plastique"], ans: 1, svg: svgCasserole, exp: "L'eau liquide devient du gaz sous l'effet de la chaleur." },
+            { q: "Si on place un couvercle très froid (-19°C) au-dessus de l'eau qui bout, on observe :", options: ["De la glace", "Des gouttes d'eau liquide", "Rien du tout"], ans: 1, exp: "La vapeur d'eau redevient liquide au contact du couvercle froid." },
+            
+            // Divers
+            { q: "Que signifie le mot « Matériau » ?", options: ["Une qualité d'un objet", "Une matière utilisée pour fabriquer un objet", "Un déchet naturel"], ans: 1, exp: "Par exemple, l'aluminium est le matériau utilisé pour fabriquer une canette." },
+            { q: "Pourquoi vaut-il mieux utiliser un emballage en carton plutôt qu'en plastique ?", options: ["C'est plus beau", "Le carton se dégrade bien plus vite dans la nature", "Le carton est transparent"], ans: 1, exp: "Le carton met de 2 à 12 mois à disparaître, contre des siècles pour le plastique." },
+            { q: "Une règle des 3R pour protéger l'environnement est :", options: ["Réduire, Réutiliser, Recycler", "Regarder, Ranger, Respirer", "Remplacer, Ramasser, Rouler"], ans: 0, exp: "Ces trois actions limitent la production de déchets." },
+            { q: "Quel est l'état physique d'une clé en métal à température ambiante ?", options: ["Liquide", "Solide", "Gazeux"], ans: 1, exp: "Les métaux (sauf le mercure) sont solides à température ambiante." },
+            { q: "Dans une déchèterie, quel outil permet de trier facilement les objets en acier (alliage contenant du fer) des autres métaux ?", options: ["Un gros ventilateur", "Un aimant géant", "Un jet d'eau"], ans: 1, exp: "L'aimant attire uniquement l'acier et le fer, ce qui facilite le tri." },
+            { q: "Si le niveau des mers s'élève, c'est parce que :", options: ["Il pleut plus", "Les poissons prennent de la place", "Les glaciers terrestres fondent et ajoutent de l'eau liquide"], ans: 2, exp: "La fonte des glaces continentales augmente le volume global des océans." },
+            { q: "Laquelle de ces matières n'est PAS un bon conducteur thermique ?", options: ["Le fer", "Le cuivre", "Le bois (matière organique)"], ans: 2, exp: "Le bois isole de la chaleur, c'est pour cela qu'on fait des manches de casseroles en bois ou en plastique." }
+        ];
+
+        let currentQuestions = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            // Tirer 10 questions au sort parmi la banque
+            let shuffled = shuffleArray([...questionBank]);
+            currentQuestions = shuffled.slice(0, 10);
+
+            currentQuestions.forEach((qObj, index) => {
+                let optionsHtml = '';
+                qObj.options.forEach((opt, optIndex) => {
+                    optionsHtml += `
+                        <li class="option-item">
+                            <label class="option-label" id="label-${index}-${optIndex}">
+                                <input type="radio" name="q${index}" value="${optIndex}">
+                                ${opt}
+                            </label>
+                        </li>
+                    `;
+                });
+
+                let hintHtml = qObj.hint ? `<span class="question-hint">${qObj.hint}</span>` : '';
+                let svgHtml = qObj.svg ? `<div class="illustration">${qObj.svg}</div>` : '';
+
+                const qHtml = `
+                    <div class="question-card" id="card-${index}">
+                        <div class="question-title">${index + 1}. ${qObj.q}</div>
+                        ${hintHtml}
+                        ${svgHtml}
+                        <ul class="options-list">
+                            ${optionsHtml}
+                        </ul>
+                        <div class="feedback" id="feedback-${index}"></div>
+                    </div>
+                `;
+                container.innerHTML += qHtml;
+            });
+            
+            document.getElementById('submit-btn').style.display = 'block';
+            document.getElementById('score-display').style.display = 'none';
+            document.getElementById('reload-btn').style.display = 'none';
+        }
+
+        function checkAnswers() {
+            let score = 0;
+
+            currentQuestions.forEach((qObj, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                const feedbackDiv = document.getElementById(`feedback-${index}`);
+                
+                const radios = document.querySelectorAll(`input[name="q${index}"]`);
+                radios.forEach(r => r.disabled = true);
+
+                if (selected) {
+                    const selectedValue = parseInt(selected.value);
+                    if (selectedValue === qObj.ans) {
+                        score++;
+                        feedbackDiv.innerHTML = `✅ <strong>Vrai !</strong> ${qObj.exp}`;
+                        feedbackDiv.className = "feedback correct";
+                        document.getElementById(`label-${index}-${selectedValue}`).style.borderColor = "#27ae60";
+                        document.getElementById(`label-${index}-${selectedValue}`).style.backgroundColor = "#d4edda";
+                    } else {
+                        feedbackDiv.innerHTML = `❌ <strong>Faux.</strong> La réponse était : <em>${qObj.options[qObj.ans]}</em>.<br>${qObj.exp}`;
+                        feedbackDiv.className = "feedback incorrect";
+                        document.getElementById(`label-${index}-${selectedValue}`).style.borderColor = "#e74c3c";
+                        document.getElementById(`label-${index}-${selectedValue}`).style.backgroundColor = "#f8d7da";
+                    }
+                } else {
+                    feedbackDiv.innerHTML = `⚠️ <strong>Aucune réponse.</strong> La réponse était : <em>${qObj.options[qObj.ans]}</em>.<br>${qObj.exp}`;
+                    feedbackDiv.className = "feedback incorrect";
+                }
+                
+                feedbackDiv.style.display = "block";
+            });
+
+            const scoreDisplay = document.getElementById('score-display');
+            let appreciation = "";
+            if(score === 10) appreciation = "Exceptionnel ! Tu maîtrises le sujet. 🏆";
+            else if(score >= 7) appreciation = "Très bon travail ! 👍";
+            else if(score >= 5) appreciation = "C'est moyen, tu as compris l'essentiel mais il faut réviser encore un peu. 📚";
+            else appreciation = "Il faut relire ton cours attentivement ! 💪";
+
+            scoreDisplay.innerHTML = `Score : ${score} / 10<br><span style="font-size:0.6em; font-weight:normal;">${appreciation}</span>`;
+            scoreDisplay.style.display = 'block';
+            
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('reload-btn').style.display = 'block';
+            
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        // Fonction pour recommencer en douceur
+        function restartQuiz() {
+            renderQuiz();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.onload = renderQuiz;
+    </script>
+</body>
+</html>
