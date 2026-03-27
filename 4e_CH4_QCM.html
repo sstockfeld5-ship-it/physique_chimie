@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM Aléatoire : Résistance et Loi d'Ohm</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #2d3748;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #quiz-container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            max-width: 750px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #1a202c;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+        .level-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+        .facile { background-color: #38b2ac; }
+        .moyen { background-color: #ecc94b; color: #744210; }
+        .difficile { background-color: #e53e3e; }
+        
+        .question {
+            font-size: 1.25em;
+            margin-bottom: 20px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        .schema-container {
+            text-align: center;
+            margin-bottom: 25px;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            overflow-x: auto;
+        }
+        .schema-container svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .mesure-table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .mesure-table th, .mesure-table td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: center;
+        }
+        .mesure-table th {
+            background-color: #edf2f7;
+            font-weight: 600;
+            color: #4a5568;
+            width: 30%;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        button.option-btn {
+            background-color: #edf2f7;
+            border: 2px solid #cbd5e0;
+            padding: 14px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.05em;
+            transition: all 0.2s ease;
+            text-align: left;
+            color: #2d3748;
+        }
+        button.option-btn:hover:not(:disabled) {
+            background-color: #e2e8f0;
+            border-color: #a0aec0;
+        }
+        button.option-btn.correct {
+            background-color: #c6f6d5;
+            border-color: #48bb78;
+            color: #22543d;
+            font-weight: bold;
+        }
+        button.option-btn.wrong {
+            background-color: #fed7d7;
+            border-color: #f56565;
+            color: #742a2a;
+        }
+        button.option-btn:disabled {
+            cursor: not-allowed;
+        }
+        
+        /* Style dynamique pour la boîte d'explication */
+        #explanation-box {
+            display: none;
+            margin-top: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            line-height: 1.5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .explanation-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        #next-btn {
+            margin-top: 25px;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+            display: none;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        #next-btn:hover {
+            background-color: #3182ce;
+        }
+        #score-container {
+            text-align: center;
+            display: none;
+        }
+        #score-text {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 30px;
+        }
+        #restart-btn {
+            background-color: #48bb78;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        #restart-btn:hover {
+            background-color: #38a169;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #edf2f7;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #4299e1;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <h1>Évaluation : Loi d'Ohm</h1>
+    
+    <div id="quiz-content">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+        <span id="level-badge" class="level-badge"></span>
+        <div class="question" id="question-text"></div>
+        <div id="schema-display" class="schema-container" style="display: none;"></div>
+        <div class="options" id="options-container"></div>
+        
+        <div id="explanation-box">
+            <span class="explanation-title" id="explanation-title">Explication :</span>
+            <span id="explanation-text"></span>
+        </div>
+
+        <button id="next-btn" onclick="nextQuestion()">Valider et Continuer</button>
+    </div>
+    
+    <div id="score-container">
+        <h2>Résultats du test</h2>
+        <div id="score-text"></div>
+        <button id="restart-btn" onclick="startQuiz()">Générer un nouveau QCM</button>
+    </div>
+</div>
+
+<script>
+    // --- SCHÉMAS SVG & TABLEAUX HTML ---
+    
+    const svgGraphiqueLecture = `<svg viewBox="-30 -30 350 280" width="350" height="280" stroke="black" fill="none">
+        <g stroke="#cbd5e0" stroke-width="1" stroke-dasharray="4,4">
+            <line x1="0" y1="200" x2="250" y2="200" /><line x1="0" y1="160" x2="250" y2="160" /><line x1="0" y1="120" x2="250" y2="120" /><line x1="0" y1="80" x2="250" y2="80" /><line x1="0" y1="40" x2="250" y2="40" /><line x1="0" y1="0" x2="250" y2="0" />
+            <line x1="0" y1="200" x2="0" y2="0" /><line x1="50" y1="200" x2="50" y2="0" /><line x1="100" y1="200" x2="100" y2="0" /><line x1="150" y1="200" x2="150" y2="0" /><line x1="200" y1="200" x2="200" y2="0" /><line x1="250" y1="200" x2="250" y2="0" />
+        </g>
+        <g stroke="#1a202c" stroke-width="2">
+            <line x1="0" y1="200" x2="280" y2="200" /><polygon points="280,195 290,200 280,205" fill="#1a202c"/>
+            <line x1="0" y1="200" x2="0" y2="-10" /><polygon points="-5,-10 0,-20 5,-10" fill="#1a202c"/>
+        </g>
+        <text x="270" y="225" font-size="14" font-weight="bold" fill="#1a202c" stroke="none">I (A)</text>
+        <text x="-20" y="-20" font-size="14" font-weight="bold" fill="#1a202c" stroke="none">U (V)</text>
+        <text x="-5" y="220" font-size="12" fill="#4a5568" stroke="none">0</text>
+        <text x="40" y="220" font-size="12" fill="#4a5568" stroke="none">0,1</text>
+        <text x="90" y="220" font-size="12" fill="#4a5568" stroke="none">0,2</text>
+        <text x="140" y="220" font-size="12" fill="#4a5568" stroke="none">0,3</text>
+        <text x="190" y="220" font-size="12" fill="#4a5568" stroke="none">0,4</text>
+        <text x="240" y="220" font-size="12" fill="#4a5568" stroke="none">0,5</text>
+        <text x="-15" y="164" font-size="12" fill="#4a5568" stroke="none">2</text>
+        <text x="-15" y="124" font-size="12" fill="#4a5568" stroke="none">4</text>
+        <text x="-15" y="84" font-size="12" fill="#4a5568" stroke="none">6</text>
+        <text x="-15" y="44" font-size="12" fill="#4a5568" stroke="none">8</text>
+        <text x="-22" y="4" font-size="12" fill="#4a5568" stroke="none">10</text>
+        <line x1="0" y1="200" x2="250" y2="0" stroke="#e53e3e" stroke-width="3"/>
+    </svg>`;
+
+    const svgMesureLoiOhm = `<svg viewBox="0 0 300 150" width="300" height="150" stroke="black" stroke-width="2" fill="none">
+        <rect x="100" y="60" width="60" height="20" fill="#e2e8f0"/><text x="130" y="75" font-size="14" fill="black" text-anchor="middle" stroke="none">R</text>
+        <path d="M 50 70 L 100 70 M 160 70 L 250 70 L 250 20 L 160 20" /><path d="M 50 70 L 50 20 L 130 20" />
+        <line x1="130" y1="10" x2="130" y2="30" stroke-width="3"/><line x1="140" y1="5" x2="140" y2="35" stroke-width="1"/><line x1="140" y1="20" x2="160" y2="20" /><text x="120" y="15" font-size="12" stroke="none" fill="black">+</text>
+        <circle cx="210" cy="70" r="15" fill="white"/><text x="210" y="75" font-size="14" fill="black" text-anchor="middle" stroke="none">A</text>
+        <path d="M 80 70 L 80 120 L 115 120 M 145 120 L 180 120 L 180 70" /><circle cx="130" cy="120" r="15" fill="white"/><text x="130" y="125" font-size="14" fill="black" text-anchor="middle" stroke="none">V</text>
+    </svg>`;
+
+    const svgGraphiqueDouble = `<svg viewBox="0 0 250 200" width="250" height="200" stroke="black" stroke-width="2" fill="none">
+        <line x1="30" y1="170" x2="230" y2="170" /><line x1="30" y1="170" x2="30" y2="20" />
+        <polygon points="230,165 240,170 230,175" fill="black"/><polygon points="25,30 30,20 35,30" fill="black"/>
+        <text x="220" y="190" font-size="12" fill="black" stroke="none">I (A)</text><text x="40" y="30" font-size="12" fill="black" stroke="none">U (V)</text><text x="15" y="185" font-size="12" fill="black" stroke="none">0</text>
+        <line x1="30" y1="170" x2="110" y2="40" stroke="#48bb78" stroke-width="3"/><text x="80" y="55" font-size="14" fill="#48bb78" font-weight="bold" stroke="none">R1</text>
+        <line x1="30" y1="170" x2="190" y2="60" stroke="#ed8936" stroke-width="3"/><text x="170" y="85" font-size="14" fill="#ed8936" font-weight="bold" stroke="none">R2</text>
+    </svg>`;
+
+    const svgGraphiqueFaux = `<svg viewBox="0 0 200 150" width="200" height="150" stroke="black" stroke-width="2" fill="none">
+        <line x1="20" y1="130" x2="180" y2="130" /><line x1="20" y1="130" x2="20" y2="20" />
+        <text x="170" y="145" font-size="12" fill="black" stroke="none">I</text><text x="30" y="30" font-size="12" fill="black" stroke="none">U</text>
+        <path d="M 20 130 Q 100 130 160 30" stroke="#e53e3e" stroke-width="3"/>
+    </svg>`;
+    
+    const svgSymboleOhm = `<svg viewBox="0 0 100 50" width="100" height="50" stroke="black" stroke-width="2" fill="none">
+        <circle cx="50" cy="25" r="20" fill="#e2e8f0" stroke="black"/>
+        <text x="50" y="31" font-size="18" font-weight="bold" fill="black" text-anchor="middle" stroke="none">Ω</text>
+        <line x1="10" y1="25" x2="30" y2="25"/><line x1="70" y1="25" x2="90" y2="25"/>
+    </svg>`;
+
+    const tableProportionnel = `
+    <table class="mesure-table">
+        <tr><th>Intensité I (A)</th><td>0,1</td><td>0,2</td><td>0,3</td><td>0,4</td></tr>
+        <tr><th>Tension U (V)</th><td>2</td><td>4</td><td>6</td><td>8</td></tr>
+    </table>`;
+
+    const tableNonProportionnel = `
+    <table class="mesure-table">
+        <tr><th>Intensité I (A)</th><td>0,1</td><td>0,2</td><td>0,3</td><td>0,4</td></tr>
+        <tr><th>Tension U (V)</th><td>2</td><td>5</td><td>9</td><td>14</td></tr>
+    </table>`;
+
+    // --- BANQUE DE QUESTIONS ---
+    const questionBank = [
+        // --- FACILES ---
+        { level: "Facile", class: "facile", schema: null, question: "Quelle est l'unité de mesure de la résistance électrique ?", options: ["Le Volt (V)", "L'Ampère (A)", "L'Ohm (Ω)", "Le Watt (W)"], answer: 2 },
+        { level: "Facile", class: "facile", schema: null, question: "Quel est l'appareil permettant de mesurer la résistance ?", options: ["Voltmètre", "Ohmmètre", "Ampèremètre", "Chronomètre"], answer: 1 },
+        { level: "Facile", class: "facile", schema: svgSymboleOhm, question: "Que représente le symbole ci-dessus lorsqu'il est placé dans un circuit de mesure ?", options: ["Un générateur", "Un ohmmètre", "Une lampe", "Un interrupteur"], answer: 1 },
+        { level: "Facile", class: "facile", schema: null, question: "Lorsqu'on ajoute un résistor dans un circuit en série, que se passe-t-il ?", options: ["L'intensité augmente", "L'intensité diminue", "La tension du générateur augmente", "L'intensité ne change pas"], answer: 1 },
+        { level: "Facile", class: "facile", schema: null, question: "Quel physicien allemand a donné son nom à l'unité de la résistance ?", options: ["James Joule", "André-Marie Ampère", "Alessandro Volta", "Georg Ohm"], answer: 3 },
+        { level: "Facile", class: "facile", schema: null, question: "L'effet Joule est le dégagement...", options: ["...de lumière.", "...de mouvement.", "...de chaleur (énergie thermique).", "...de froid."], answer: 2 },
+        { level: "Facile", class: "facile", schema: null, question: "Combien vaut 1 kΩ (kiloohm) ?", options: ["10 Ω", "100 Ω", "1 000 Ω", "1 000 000 Ω"], answer: 2 },
+        { level: "Facile", class: "facile", schema: null, question: "Combien vaut 1 MΩ (Mégaohm) ?", options: ["1 000 Ω", "10 000 Ω", "100 000 Ω", "1 000 000 Ω"], answer: 3 }, 
+
+        // --- MOYENS ---
+        { level: "Moyen", class: "moyen", schema: null, question: "La formule de base traduisant la loi d'Ohm est :", options: ["I = R × U", "U = R / I", "U = R × I", "R = U × I"], answer: 2 },
+        { level: "Moyen", class: "moyen", schema: null, question: "À partir de la loi d'Ohm (U = R × I), quelle formule permet de calculer l'intensité I du courant ?", options: ["I = U / R", "I = R / U", "I = U × R", "I = U - R"], answer: 0 },
+        { level: "Moyen", class: "moyen", schema: null, question: "À partir de la loi d'Ohm, quelle formule permet de calculer la résistance R d'un composant ?", options: ["R = U × I", "R = I / U", "R = U / I", "R = U + I"], answer: 2 },
+        { level: "Moyen", class: "moyen", schema: svgMesureLoiOhm, question: "Dans ce circuit, comment sont branchés les appareils de mesure ?", options: ["Voltmètre en série, Ampèremètre en dérivation.", "Voltmètre en dérivation, Ampèremètre en série.", "Les deux en série.", "Les deux en dérivation."], answer: 1 },
+        { level: "Moyen", class: "moyen", schema: svgGraphiqueFaux, question: "Ce graphique représente-t-il la caractéristique d'un dipôle ohmique (exemple : résistor) ?", options: ["Oui, car la courbe monte.", "Non, car ce n'est pas une droite passant par l'origine.", "Oui, car il part de zéro.", "Non, car il manque les unités."], answer: 1 },
+        { level: "Moyen", class: "moyen", schema: null, question: "La caractéristique d'un dipôle ohmique (exemple : résistor) est :", options: ["Une droite qui ne passe pas par l'origine.", "Une courbe exponentielle.", "Une droite passant par l'origine.", "Une parabole."], answer: 2 },
+        { level: "Moyen", class: "moyen", schema: svgGraphiqueLecture, question: "En lisant ce graphique, quelle est la tension aux bornes du résistor lorsqu'il est traversé par un courant de 0,3 A ?", options: ["2 V", "4 V", "6 V", "8 V"], answer: 2 },
+        { level: "Moyen", class: "moyen", schema: svgGraphiqueLecture, question: "D'après ce graphique, quelle est l'intensité du courant qui traverse le résistor si la tension à ses bornes est de 8 V ?", options: ["0,1 A", "0,2 A", "0,3 A", "0,4 A"], answer: 3 },
+
+        // --- DIFFICILES (AVEC EXPLICATIONS SYSTÉMATIQUES) ---
+        { 
+            level: "Difficile", class: "difficile", schema: null, 
+            question: "Convertissez une résistance de 2,5 MΩ (Mégaohms) en ohms.", 
+            options: ["2 500 Ω", "25 000 Ω", "250 000 Ω", "2 500 000 Ω"], 
+            answer: 3,
+            explication: "Le préfixe Méga (M) correspond à un million (1 000 000). Pour convertir des Mégaohms en ohms, il faut multiplier par un million. Ainsi, 2,5 MΩ = 2,5 × 1 000 000 = 2 500 000 Ω."
+        },
+        { 
+            level: "Difficile", class: "difficile", schema: tableProportionnel, 
+            question: "Voici un tableau de mesures pour un composant inconnu. La tension U et l'intensité I sont-elles proportionnelles, et qu'est-ce que cela prouve ?", 
+            options: ["Oui, le quotient U/I est constant. C'est donc un dipôle ohmique (exemple : résistor).", "Non, les valeurs augmentent. Ce n'est pas un dipôle ohmique.", "Oui, car la tension est toujours plus grande que l'intensité.", "Non, car l'intensité n'est pas mesurée en milliampères."], 
+            answer: 0,
+            explication: "Dans ce tableau, si l'on divise U par I pour chaque colonne (ex: 2/0.1, 4/0.2, 6/0.3), on trouve toujours 20. Ce quotient constant (U/I = constante) prouve la proportionnalité, ce qui est la définition parfaite d'un dipôle ohmique."
+        },
+        { 
+            level: "Difficile", class: "difficile", schema: tableNonProportionnel, 
+            question: "En observant ce tableau de mesures, ce dipôle est-il un dipôle ohmique (exemple : résistor) ?", 
+            options: ["Oui, car la tension et l'intensité augmentent ensemble.", "Oui, car le graphique formera une droite.", "Non, car le quotient U/I n'est pas constant (il n'y a pas de proportionnalité stricte).", "Impossible de savoir sans faire le graphique."], 
+            answer: 2,
+            explication: "Pour être un dipôle ohmique, l'augmentation doit être strictement proportionnelle. Ici, 2 / 0,1 = 20, mais 5 / 0,2 = 25. Le rapport n'est pas constant, la loi d'Ohm n'est donc pas respectée (il s'agit probablement d'une lampe qui chauffe)."
+        },
+        { 
+            level: "Difficile", class: "difficile", schema: tableProportionnel, 
+            question: "À partir des valeurs de ce tableau de proportionnalité, déterminez la valeur de la résistance R de ce dipôle.", 
+            options: ["R = 2 Ω", "R = 0,05 Ω", "R = 20 Ω", "R = 8 Ω"], 
+            answer: 2,
+            explication: "D'après la loi d'Ohm, R = U / I. Prenez n'importe quelle colonne du tableau : par exemple U = 4 V et I = 0,2 A. Le calcul donne R = 4 ÷ 0,2 = 20 Ω."
+        },
+        { 
+            level: "Difficile", class: "difficile", schema: null, 
+            question: "On applique une tension U = 9 V à un résistor de 150 Ω. Quelle intensité I le traverse ?", 
+            options: ["I = 1350 A", "I = 16,6 A", "I = 0,06 A", "I = 0,6 A"], 
+            answer: 2,
+            explication: "Il faut transformer la formule U = R × I pour trouver l'intensité. On obtient I = U / R. Le calcul est donc I = 9 ÷ 150 = 0,06 A."
+        },
+        { 
+            level: "Difficile", class: "difficile", schema: null, 
+            question: "On mesure U = 6 V et I = 150 mA. Quelle est la résistance R ?", 
+            options: ["R = 40 Ω", "R = 0,04 Ω", "R = 900 Ω", "R = 25 Ω"], 
+            answer: 0,
+            explication: "Attention au piège des unités ! L'intensité doit être en Ampères (A) dans la formule. 150 mA = 0,150 A. Ensuite, on applique R = U / I = 6 ÷ 0,150 = 40 Ω."
+        },
+        { 
+            level: "Difficile", class: "difficile", schema: svgGraphiqueDouble, 
+            question: "Sur ce graphique, quelle résistance a la valeur en Ohms la plus grande ?", 
+            options: ["R1 (droite la plus pentue)", "R2 (droite la moins pentue)", "Elles sont égales", "Impossible de savoir"], 
+            answer: 0,
+            explication: "Plus la droite est pentue (proche de l'axe de la tension U), plus il faut une tension forte pour faire passer un même courant. Cela signifie que le composant \"résiste\" davantage au courant. R1 est donc supérieure à R2."
+        },
+        { 
+            level: "Difficile", class: "difficile", schema: null, 
+            question: "Dans le tableau de valeurs d'un dipôle ohmique (exemple : résistor), si on calcule le rapport U/I (en V et A), on trouve :", 
+            options: ["Une valeur qui augmente.", "Une valeur qui diminue.", "Une valeur constante égale à la résistance R.", "Zéro."], 
+            answer: 2,
+            explication: "La loi d'Ohm stipule que U = R × I. Si on divise U par I (U / I), on retombe mathématiquement sur R. Puisque la résistance d'un dipôle ohmique ne change pas, ce rapport est donc une constante."
+        },
+        { 
+            level: "Difficile", class: "difficile", schema: svgGraphiqueLecture, 
+            question: "À l'aide des coordonnées de la droite tracée sur ce graphique, calculez la valeur de la résistance de ce dipôle ohmique.", 
+            options: ["R = 20 Ω", "R = 0,05 Ω", "R = 10 Ω", "R = 2 Ω"], 
+            answer: 0,
+            explication: "Il faut lire un point sur la droite. Par exemple, à I = 0,2 A correspond U = 4 V. On applique ensuite la loi d'Ohm : R = U / I = 4 ÷ 0,2 = 20 Ω."
+        }
+    ];
+
+    // --- LOGIQUE DU QCM ---
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    // Fonction de mélange
+    function shuffleArray(array) {
+        let shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    // Éléments du DOM
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const nextBtn = document.getElementById("next-btn");
+    const scoreContainer = document.getElementById("score-container");
+    const quizContent = document.getElementById("quiz-content");
+    const scoreText = document.getElementById("score-text");
+    const levelBadge = document.getElementById("level-badge");
+    const schemaDisplay = document.getElementById("schema-display");
+    const progressBar = document.getElementById("progress");
+    const explanationBox = document.getElementById("explanation-box");
+    const explanationTitle = document.getElementById("explanation-title");
+    const explanationText = document.getElementById("explanation-text");
+
+    function startQuiz() {
+        currentQuestions = shuffleArray(questionBank).slice(0, 10);
+        currentQuestionIndex = 0;
+        score = 0;
+        
+        scoreContainer.style.display = "none";
+        quizContent.style.display = "block";
+        
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        nextBtn.style.display = "none";
+        explanationBox.style.display = "none"; // Cacher l'explication à chaque nouvelle question
+        optionsContainer.innerHTML = "";
+        
+        const progressPercent = (currentQuestionIndex / 10) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+        
+        const currentQ = currentQuestions[currentQuestionIndex];
+        questionText.textContent = `Question ${currentQuestionIndex + 1}/10 : ${currentQ.question}`;
+        
+        levelBadge.textContent = currentQ.level;
+        levelBadge.className = `level-badge ${currentQ.class}`;
+
+        if (currentQ.schema) {
+            schemaDisplay.innerHTML = currentQ.schema;
+            schemaDisplay.style.display = "block";
+        } else {
+            schemaDisplay.style.display = "none";
+        }
+
+        currentQ.options.forEach((option, index) => {
+            const button = document.createElement("button");
+            button.textContent = option;
+            button.className = "option-btn";
+            button.onclick = () => selectAnswer(index, button);
+            optionsContainer.appendChild(button);
+        });
+    }
+
+    function selectAnswer(selectedIndex, buttonElement) {
+        if (answered) return;
+        answered = true;
+
+        const currentQ = currentQuestions[currentQuestionIndex];
+        const correctIndex = currentQ.answer;
+        const allButtons = optionsContainer.children;
+
+        // Vérification de la réponse
+        if (selectedIndex === correctIndex) {
+            buttonElement.classList.add("correct");
+            score++;
+        } else {
+            buttonElement.classList.add("wrong");
+            allButtons[correctIndex].classList.add("correct");
+        }
+
+        // Affichage de l'explication (quelle que soit la réponse) si elle existe
+        if (currentQ.explication) {
+            explanationText.textContent = currentQ.explication;
+            explanationBox.style.display = "block";
+            
+            // Design dynamique selon que l'élève a juste ou faux
+            if (selectedIndex === correctIndex) {
+                explanationBox.style.borderLeft = "5px solid #48bb78"; // Vert
+                explanationBox.style.backgroundColor = "#f0fff4";
+                explanationTitle.style.color = "#2f855a";
+                explanationTitle.textContent = "Exact ! Voici l'explication :";
+            } else {
+                explanationBox.style.borderLeft = "5px solid #f56565"; // Rouge
+                explanationBox.style.backgroundColor = "#fff5f5";
+                explanationTitle.style.color = "#c53030";
+                explanationTitle.textContent = "Aïe... Voici l'explication :";
+            }
+        }
+
+        // Désactiver les boutons après avoir cliqué
+        for (let btn of allButtons) {
+            btn.disabled = true;
+        }
+
+        nextBtn.style.display = "block";
+        
+        if (currentQuestionIndex === 9) {
+            nextBtn.textContent = "Voir les résultats";
+        } else {
+            nextBtn.textContent = "Question Suivante";
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < 10) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        quizContent.style.display = "none";
+        scoreContainer.style.display = "block";
+        
+        let appreciation = "";
+        if(score >= 8) appreciation = "Excellent travail ! Vous maîtrisez la loi d'Ohm.";
+        else if(score >= 5) appreciation = "Bon travail, mais quelques révisions sont encore nécessaires.";
+        else appreciation = "Il faut revoir le cours sur les résistances et la loi d'Ohm.";
+            
+        scoreText.innerHTML = `Votre score : <span style="color: #4299e1;">${score} / 10</span><br><br><span style="font-size: 0.6em; font-weight: normal;">${appreciation}</span>`;
+    }
+
+    startQuiz();
+</script>
+
+</body>
+</html>
