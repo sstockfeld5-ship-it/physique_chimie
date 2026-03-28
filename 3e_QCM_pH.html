@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QCM 3ème : Acides, Bases et Équations</title>
+    <style>
+        /* Optimisations pour mobile et tablettes */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f0f2f5; 
+            color: #1c1e21; 
+            margin: 0; 
+            padding: 15px; 
+            font-size: 16px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        h1 { 
+            text-align: center; 
+            color: #2c3e50; 
+            border-bottom: 3px solid #3498db; 
+            padding-bottom: 10px; 
+            font-size: 1.5em;
+            margin-top: 5px;
+        }
+        .header-info { 
+            text-align: center; 
+            font-size: 0.9em; 
+            color: #606770; 
+            margin-bottom: 25px; 
+            background: #e4e6eb;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .question-card { 
+            background: #ffffff; 
+            border-radius: 12px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            border-left: 6px solid #bdc3c7; 
+        }
+        .q-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+        }
+        .q-title { font-weight: bold; font-size: 1.1em; color: #2980b9; margin: 0; }
+        .badge { 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.75em; 
+            font-weight: bold; 
+            color: white; 
+            letter-spacing: 0.5px;
+        }
+        .facile { background-color: #27ae60; }
+        .moyen { background-color: #f39c12; }
+        .difficile { background-color: #c0392b; }
+        
+        .q-text { font-size: 1.05em; line-height: 1.4; margin-bottom: 15px; }
+        
+        /* Options adaptées au tactile */
+        .options { list-style: none; padding: 0; margin: 0; }
+        .options li { margin-bottom: 12px; }
+        label { 
+            cursor: pointer; 
+            display: flex; 
+            align-items: flex-start; /* Aligne en haut si le texte passe sur 2 lignes */
+            width: 100%; 
+            padding: 15px; 
+            background: #f8f9fa; 
+            border: 2px solid #e9ecef;
+            border-radius: 10px; 
+            transition: all 0.2s ease;
+            font-size: 1em;
+        }
+        label:active { background: #e2e6ea; }
+        input[type="radio"] { 
+            margin-right: 15px; 
+            margin-top: 3px;
+            transform: scale(1.4); 
+            accent-color: #3498db;
+        }
+        
+        /* Schémas HD et responsifs */
+        .schema { 
+            text-align: center; 
+            margin: 15px 0; 
+            padding: 15px; 
+            background: #fafbfc; 
+            border: 1px dashed #bdc3c7; 
+            border-radius: 8px; 
+        }
+        .schema svg { max-width: 100%; height: auto; }
+        
+        /* Boutons larges pour mobile */
+        .btn-submit, .btn-reload { 
+            display: block; 
+            width: 100%; 
+            padding: 18px; 
+            font-size: 1.1em; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            margin-top: 10px;
+        }
+        .btn-submit { background: #3498db; }
+        .btn-submit:active { background: #2980b9; transform: translateY(2px); }
+        .btn-reload { display: none; background: #2ecc71; margin-bottom: 40px; }
+        .btn-reload:active { background: #27ae60; transform: translateY(2px); }
+        
+        #result-box { 
+            display: none; 
+            margin-top: 25px; 
+            padding: 20px; 
+            border-radius: 10px; 
+            text-align: center; 
+            font-size: 1.2em; 
+            font-weight: bold; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .explanation { 
+            display: none; 
+            margin-top: 15px; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-size: 0.95em; 
+            line-height: 1.4;
+            color: #333; 
+        }
+        .exp-wrong { background: #fadbd8; border-left: 4px solid #e74c3c; }
+        .exp-correct { background: #d4efdf; border-left: 4px solid #27ae60; }
+        .correct-ans { color: #27ae60; font-weight: bold; }
+        .wrong-ans { color: #e74c3c; font-weight: bold; text-decoration: line-through; }
+
+        @media (min-width: 600px) {
+            body { padding: 30px; }
+            h1 { font-size: 2em; }
+            label:hover { background: #e9ecef; border-color: #ced4da; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>QCM Révisions 3ème</h1>
+        <div class="header-info">10 questions tirées au sort (dont <strong>plusieurs questions difficiles</strong> sur les équations) !</div>
+
+        <form id="qcmForm">
+            <div id="questions-container"></div>
+            <button type="button" class="btn-submit" id="btn-valider" onclick="checkAnswers()">Valider mes réponses</button>
+            <div id="result-box"></div>
+            <button type="button" class="btn-reload" id="btn-reload" onclick="location.reload()">Recommencer un nouveau test</button>
+        </form>
+    </div>
+
+    <script>
+        // --- Banques de SVG Haute Qualité ---
+        
+        // Pictogramme Corrosif HD (GHS05) repensé
+        const svgCorrosif = `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" fill="#ffffff" rx="10"/>
+            <polygon points="50,4 96,50 50,96 4,50" fill="none" stroke="#da291c" stroke-width="8" stroke-linejoin="round"/>
+            
+            <rect x="22" y="68" width="22" height="6" fill="#000000" rx="1"/>
+            <path d="M 30 68 Q 33 62 36 68 Z" fill="#ffffff"/> <path d="M 58 74 C 58 60, 76 60, 78 74 L 75 74 C 73 66, 61 66, 61 74 Z" fill="#000000"/>
+            <path d="M 68 74 Q 69 68 70 74 Z" fill="#ffffff"/> <path d="M 33 55 Q 33 60 30 60 Q 27 60 27 55 L 30 50 Z" fill="#000000" transform="translate(3,0) scale(0.8)"/>
+            <path d="M 69 55 Q 69 60 66 60 Q 63 60 63 55 L 66 50 Z" fill="#000000" transform="translate(3,0) scale(0.8)"/>
+            
+            <g transform="translate(33, 40) rotate(-35)">
+                <path d="M -5 -25 L -5 5 C -5 8, 5 8, 5 5 L 5 -25 Z" fill="none" stroke="#000000" stroke-width="3"/>
+                <line x1="-7" y1="-25" x2="7" y2="-25" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+                <path d="M -3 -10 L -3 4 C -3 6, 3 6, 3 4 L 3 -10 Z" fill="#000000"/>
+            </g>
+            <g transform="translate(69, 40) rotate(35)">
+                <path d="M -5 -25 L -5 5 C -5 8, 5 8, 5 5 L 5 -25 Z" fill="none" stroke="#000000" stroke-width="3"/>
+                <line x1="-7" y1="-25" x2="7" y2="-25" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+                <path d="M -3 -10 L -3 4 C -3 6, 3 6, 3 4 L 3 -10 Z" fill="#000000"/>
+            </g>
+        </svg>`;
+        
+        // Schéma Ions Adapté
+        const svgIons = `<svg width="180" height="150" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 20 20 L 20 100 A 10 10 0 0 0 30 110 L 70 110 A 10 10 0 0 0 80 100 L 80 20" fill="none" stroke="#2c3e50" stroke-width="5" stroke-linecap="round"/>
+            <path d="M 22.5 50 L 77.5 50 L 77.5 100 A 7.5 7.5 0 0 1 70 107.5 L 30 107.5 A 7.5 7.5 0 0 1 22.5 100 Z" fill="#e0f7fa" opacity="0.8"/>
+            <circle cx="35" cy="85" r="14" fill="#ff7675"/>
+            <text x="35" y="90" font-size="16" font-family="Arial" font-weight="bold" fill="#d63031" text-anchor="middle">H⁺</text>
+            <circle cx="68" cy="85" r="12" fill="#74b9ff"/>
+            <text x="68" y="89" font-size="11" font-family="Arial" font-weight="bold" fill="#0984e3" text-anchor="middle">HO⁻</text>
+            <circle cx="50" cy="62" r="14" fill="#ff7675"/>
+            <text x="50" y="67" font-size="16" font-family="Arial" font-weight="bold" fill="#d63031" text-anchor="middle">H⁺</text>
+        </svg>`;
+
+        // Base de questions
+        const db = [
+            // --- FACILE ---
+            { q: "Quel est le pH d'une solution neutre ?", lvl: "Facile", opt: ["0", "7", "14"], ans: 1, exp: "Le pH d'une solution neutre (comme l'eau pure) est exactement 7." },
+            { q: "Quel appareil permet de mesurer le pH avec la plus grande précision ?", lvl: "Facile", opt: ["Le papier pH", "Le pH-mètre", "Un thermomètre"], ans: 1, exp: "Le pH-mètre donne une valeur numérique précise avec des décimales." },
+            { q: "Le Coca-Cola a un pH de 2,5. Cette boisson est :", lvl: "Facile", opt: ["Acide", "Basique", "Neutre"], ans: 0, exp: "Toute solution ayant un pH inférieur à 7 est considérée comme acide." },
+            { q: "L'eau de Javel a un pH de 12. Elle est donc :", lvl: "Facile", opt: ["Acide", "Basique", "Neutre"], ans: 1, exp: "Un pH supérieur à 7 (entre 7 et 14) caractérise une solution basique." },
+            { q: "Plus le pH d'une solution s'approche de 0, plus la solution est :", lvl: "Facile", opt: ["Basique", "Acide", "Neutre"], ans: 1, exp: "L'échelle d'acidité est inversée : plus le pH est petit (vers 0), plus la solution est fortement acide." },
+            { q: "Plus le pH d'une solution s'approche de 14, plus la solution est :", lvl: "Facile", opt: ["Basique", "Acide", "Neutre"], ans: 0, exp: "Vers 14, la concentration en ions hydroxyde est très forte, la solution est donc très basique." },
+            { q: "Que signifie ce pictogramme ?", svg: svgCorrosif, lvl: "Facile", opt: ["Inflammable", "Toxique", "Corrosif"], ans: 2, exp: "Ce pictogramme avertit d'un danger de corrosion. Le produit ronge les métaux et détruit les tissus de la peau." },
+            { q: "Quelle protection est indispensable pour manipuler un produit corrosif ?", lvl: "Facile", opt: ["Un casque", "Des lunettes et des gants", "Un masque à gaz"], ans: 1, exp: "Les gants et les lunettes protègent les zones du corps les plus exposées aux brûlures chimiques." },
+            { q: "L'eau distillée (pure) a un pH de :", lvl: "Facile", opt: ["7", "0", "14"], ans: 0, exp: "L'eau pure contient autant d'ions H⁺ que de HO⁻, elle est donc parfaitement neutre (pH = 7)." },
+            { q: "Le papier pH change de couleur en fonction de :", lvl: "Facile", opt: ["La température", "L'acidité de la solution", "La quantité de liquide"], ans: 1, exp: "Le papier pH est imprégné d'indicateurs colorés qui réagissent chimiquement à la concentration en ions responsables de l'acidité." },
+            { q: "L'acide chlorhydrique a un pH inférieur à 7. C'est une solution :", lvl: "Facile", opt: ["Acide", "Basique", "Neutre"], ans: 0, exp: "Par définition, pH < 7 correspond à une solution acide." },
+            { q: "La soude a un pH supérieur à 7. C'est une solution :", lvl: "Facile", opt: ["Acide", "Basique", "Neutre"], ans: 1, exp: "Par définition, pH > 7 correspond à une solution basique." },
+            { q: "Une solution dont le pH passe de 5 à 3 devient :", lvl: "Facile", opt: ["Moins acide", "Plus acide", "Plus basique"], ans: 1, exp: "L'échelle de pH est inversée : plus le chiffre s'approche de 0, plus la solution est acide." },
+            { q: "Lequel de ces produits est basique ?", lvl: "Facile", opt: ["Jus de citron", "Coca-Cola", "Déboucheur d'évier (soude)"], ans: 2, exp: "Les déboucheurs de canalisations sont souvent composés de soude, une base très forte." },
+            { q: "Un indicateur coloré comme le chou rouge :", lvl: "Facile", opt: ["Change de couleur selon le pH", "Détruit l'acide", "Mesure la température"], ans: 0, exp: "Le chou rouge contient des pigments naturels qui réagissent à l'acidité en changeant de teinte." },
+            { q: "Quelle est la formule chimique du gaz dihydrogène ?", lvl: "Facile", opt: ["H", "H₂", "H₂O"], ans: 1, exp: "Le préfixe 'di' indique que la molécule est formée de deux atomes d'hydrogène (H₂)." },
+            
+            // --- MOYEN ---
+            { q: "Quel est l'ion responsable de l'acidité d'une solution ?", lvl: "Moyen", opt: ["L'ion chlorure (Cl⁻)", "L'ion hydrogène (H⁺)", "L'ion hydroxyde (HO⁻)"], ans: 1, exp: "C'est la présence majoritaire des ions hydrogène (H⁺) qui confère le caractère acide." },
+            { q: "Quel est l'ion majoritaire dans une solution basique ?", lvl: "Moyen", opt: ["L'ion hydrogène (H⁺)", "L'ion sodium (Na⁺)", "L'ion hydroxyde (HO⁻)"], ans: 2, exp: "Une base se caractérise par une forte concentration en ions hydroxyde (HO⁻)." },
+            { q: "Dans une solution neutre, que peut-on dire des ions H⁺ et HO⁻ ?", lvl: "Moyen", opt: ["Il n'y a aucun ion.", "Il y a autant d'ions H⁺ que d'ions HO⁻.", "Il y a plus d'ions H⁺ que de HO⁻."], ans: 1, exp: "La neutralité signifie un équilibre parfait entre les ions responsables de l'acidité et de la basicité." },
+            { q: "Si on ajoute beaucoup d'eau à de l'acide (dilution), comment évolue son pH ?", lvl: "Moyen", opt: ["Il diminue vers 0", "Il reste identique", "Il augmente et se rapproche de 7"], ans: 2, exp: "Diluer un acide diminue sa concentration. Il devient moins fort, donc son pH remonte vers la neutralité (7)." },
+            { q: "Si on dilue une solution de soude (pH = 12), son pH va :", lvl: "Moyen", opt: ["Diminuer et se rapprocher de 7", "Augmenter vers 14", "Devenir acide (pH < 7)"], ans: 0, exp: "Diluer une base la rend moins forte. Son pH baisse et se rapproche de la neutralité (7)." },
+            { q: "Observez ce schéma d'ions dans un bécher. Quelle est la nature de la solution ?", svg: svgIons, lvl: "Moyen", opt: ["Acide", "Basique", "Neutre"], ans: 0, exp: "Sur le schéma, on compte deux ions H⁺ pour un seul ion HO⁻. Les H⁺ étant majoritaires, la solution est acide." },
+            { q: "Quel test permet d'identifier la présence du gaz dihydrogène (H₂) ?", lvl: "Moyen", opt: ["L'eau de chaux se trouble", "L'allumette provoque une détonation (POP)", "La flamme s'éteint"], ans: 1, exp: "Le test caractéristique du dihydrogène est sa détonation (le fameux 'pop') à l'approche d'une flamme." },
+            { q: "Quel test permet d'identifier le dioxyde de carbone (CO₂) ?", lvl: "Moyen", opt: ["Le test à l'eau de chaux", "Le test de la flamme", "L'ajout de soude"], ans: 0, exp: "Le CO₂ trouble l'eau de chaux en formant un précipité blanc." },
+            { q: "Comment met-on en évidence la présence d'ions Fer II (Fe²⁺) dans une solution ?", lvl: "Moyen", opt: ["On mesure le pH", "On ajoute de la soude : un précipité vert se forme", "On approche une allumette"], ans: 1, exp: "Le test à la soude forme un précipité vert caractéristique de l'ion Fer II." },
+            { q: "Que produit le mélange d'un acide (H⁺) et d'une base (HO⁻) ?", lvl: "Moyen", opt: ["Du dioxygène", "Du dihydrogène", "De l'eau (H₂O)"], ans: 2, exp: "La réaction s'écrit : H⁺ + HO⁻ &rarr; H₂O. L'acide et la base se neutralisent pour former de l'eau." },
+            { q: "Lorsqu'on verse de l'acide chlorhydrique sur du fer, le fer :", lvl: "Moyen", opt: ["Reste intact", "Est consommé (c'est un réactif)", "Est produit (c'est un produit)"], ans: 1, exp: "Le fer est attaqué par l'acide. Il disparaît pour se transformer en ions, c'est donc un réactif." },
+            { q: "Au cours d'une transformation chimique, les espèces qui disparaissent sont appelées :", lvl: "Moyen", opt: ["Les produits", "Les réactifs", "Les catalyseurs"], ans: 1, exp: "Ceux qui réagissent ensemble et disparaissent sont les réactifs." },
+            { q: "Une solution contient une majorité d'ions HO⁻. Son pH est probablement de :", lvl: "Moyen", opt: ["2", "7", "11"], ans: 2, exp: "Une majorité de HO⁻ indique une solution basique. Le seul pH basique proposé est 11." },
+            { q: "Quel métal réagit avec l'acide chlorhydrique ?", lvl: "Moyen", opt: ["L'or", "Le cuivre", "Le fer"], ans: 2, exp: "L'acide attaque le fer, mais laisse l'or et le cuivre intacts." },
+            { q: "L'ajout d'une base dans un acide fait :", lvl: "Moyen", opt: ["Baisser le pH", "Augmenter le pH", "Ne modifie pas le pH"], ans: 1, exp: "La base consomme les ions H⁺ de l'acide. La solution devient moins acide, donc le pH augmente vers 7." },
+            { q: "Laquelle de ces formules correspond au dioxyde de carbone ?", lvl: "Moyen", opt: ["CO", "CO₂", "O₂"], ans: 1, exp: "Di-oxyde signifie 2 atomes d'oxygène, Carbone signifie 1 atome de carbone : CO₂." },
+            { q: "Le vinaigre blanc a un pH de 2,5. Il contient donc une majorité d'ions :", lvl: "Moyen", opt: ["H⁺", "HO⁻", "Cl⁻"], ans: 0, exp: "Puisque le vinaigre est acide (pH < 7), les ions responsables sont obligatoirement les ions hydrogène (H⁺)." },
+            { q: "Quel est le risque de verser de l'eau violemment dans un acide concentré ?", lvl: "Moyen", opt: ["Créer de la glace", "Provoquer des projections brûlantes", "Annuler l'acide"], ans: 1, exp: "La réaction dégage beaucoup de chaleur, l'eau peut bouillir instantanément et projeter de l'acide concentré. On verse toujours l'acide dans l'eau, jamais l'inverse." },
+            { q: "Dans le test du fer à la soude, de quelle couleur est le précipité de Fer II ?", lvl: "Moyen", opt: ["Rouille", "Vert", "Bleu"], ans: 1, exp: "Le précipité vert obtenu caractérise la présence d'ions Fer II (Fe²⁺)." },
+            
+            // --- DIFFICILE ---
+            { q: "Quel est le bilan en toutes lettres de la réaction entre le fer et l'acide chlorhydrique ?", lvl: "Difficile", opt: ["Fer + Acide chlorhydrique &rarr; Dihydrogène + Chlorure de fer II", "Fer + Eau &rarr; Rouille", "Acide + Base &rarr; Eau + Sel"], ans: 0, exp: "Le fer et l'acide réagissent ensemble. Il se forme du dihydrogène gazeux, et les ions fer II restent en solution." },
+            { q: "Quelle est l'équation-bilan équilibrée de la réaction entre le fer et l'acide (ions H⁺) ?", lvl: "Difficile", opt: ["Fe + H⁺ &rarr; Fe²⁺ + H₂", "Fe + 2 H⁺ &rarr; Fe²⁺ + H₂", "2 Fe + H⁺ &rarr; Fe²⁺ + H₂"], ans: 1, exp: "Pour respecter la conservation des atomes, il faut 2 atomes de H à gauche pour former la molécule H₂ à droite." },
+            { q: "Ajuste l'équation suivante : C + O₂ &rarr; ... CO₂", lvl: "Difficile", opt: ["1 (l'équation est déjà équilibrée)", "2", "3"], ans: 0, exp: "Il y a 1 atome de C et 2 atomes de O de chaque côté. C'est parfaitement équilibré." },
+            { q: "Ajuste l'équation suivante : CH₄ + ... O₂ &rarr; CO₂ + ... H₂O", lvl: "Difficile", opt: ["2 O₂ et 2 H₂O", "1 O₂ et 2 H₂O", "2 O₂ et 1 H₂O"], ans: 0, exp: "Pour 4 hydrogènes de CH₄, il faut 2 H₂O. Total des oxygènes à droite = 4. Il faut donc 2 O₂ à gauche." },
+            { q: "Ajuste l'équation suivante : ... H₂ + O₂ &rarr; ... H₂O", lvl: "Difficile", opt: ["1 H₂ et 2 H₂O", "2 H₂ et 2 H₂O", "2 H₂ et 1 H₂O"], ans: 1, exp: "Il faut 2 molécules de H₂O pour caser les 2 atomes d'oxygène du O₂. Cela nécessite 4 atomes d'hydrogène, donc 2 H₂." },
+            { q: "Ajuste l'équation suivante : C₃H₈ + 5 O₂ &rarr; ... CO₂ + 4 H₂O", lvl: "Difficile", opt: ["2 CO₂", "3 CO₂", "4 CO₂"], ans: 1, exp: "Le réactif C₃H₈ contient 3 atomes de carbone. Ils forment donc obligatoirement 3 molécules de CO₂." },
+            { q: "Dans l'équation ajustée : N₂ + 3 H₂ &rarr; 2 NH₃, combien d'atomes d'hydrogène (H) y a-t-il au total dans les réactifs ?", lvl: "Difficile", opt: ["2", "3", "6"], ans: 2, exp: "Il y a 3 molécules de dihydrogène (H₂). 3 x 2 = 6 atomes d'hydrogène." },
+            { q: "Dans un litre d'eau de pH 7, on ajoute 10 mL d'acide de pH 2. Le pH final sera :", lvl: "Difficile", opt: ["Inférieur à 2", "Compris entre 2 et 7", "Supérieur à 7"], ans: 1, exp: "C'est une dilution. La solution finale est acide (pH < 7) mais beaucoup moins agressive que la goutte initiale (pH > 2)." },
+            { q: "Pourquoi l'acide chlorhydrique ne réagit-il pas avec une bouteille en plastique ?", lvl: "Difficile", opt: ["Car le plastique est basique", "Car le plastique résiste aux acides", "Car le pH du plastique est de 0"], ans: 1, exp: "Le plastique et le verre sont des matériaux chimiquement inertes face à la plupart des acides." },
+            { q: "Un précipité vert (Fe²⁺) laissé à l'air libre devient couleur rouille. Pourquoi ?", lvl: "Difficile", opt: ["L'eau s'évapore", "L'ion Fe²⁺ réagit avec le dioxygène pour devenir Fe³⁺", "Le pH devient acide"], ans: 1, exp: "Les ions Fer II s'oxydent lentement avec le dioxygène de l'air pour se transformer en ions Fer III (rouille)." },
+            { q: "Ajuste l'équation : 2 Al + ... O₂ &rarr; 2 Al₂O₃", lvl: "Difficile", opt: ["2", "3", "4"], ans: 1, exp: "À droite, il y a 2 x 3 = 6 atomes d'oxygène. À gauche, l'oxygène est O₂. Il faut donc 3 molécules de O₂." },
+            { q: "Ajuste l'équation : ... Fe + 3 O₂ &rarr; 2 Fe₂O₃", lvl: "Difficile", opt: ["2", "3", "4"], ans: 2, exp: "À droite, 2 molécules de Fe₂O₃ donnent 2 x 2 = 4 atomes de fer. Il faut écrire 4 Fe dans les réactifs." },
+            { q: "Que se passe-t-il si on mélange de l'eau de Javel (pH 13) et du détartrant (pH 1) ?", lvl: "Difficile", opt: ["Rien, l'eau se forme", "C'est inoffensif", "Un gaz très toxique (dichlore) se dégage"], ans: 2, exp: "Ce mélange est très dangereux et produit du dichlore, un gaz mortel." },
+            { q: "Dans l'équation CH₄ + 2 O₂ &rarr; CO₂ + 2 H₂O, combien y a-t-il d'atomes d'oxygène (O) au total dans les produits ?", lvl: "Difficile", opt: ["2", "3", "4"], ans: 2, exp: "Les produits sont à droite : CO₂ compte 2 atomes de O. 2 H₂O compte 2 atomes de O. Total = 4." },
+            { q: "Pourquoi dit-on que la réaction Fer + Acide est une transformation chimique ?", lvl: "Difficile", opt: ["Parce que la température change.", "Parce que de nouvelles espèces chimiques sont créées.", "Parce qu'il y a des bulles."], ans: 1, exp: "Une transformation chimique est définie par l'apparition de nouvelles espèces (ici le gaz dihydrogène et les ions fer II)." },
+            { q: "Ajuste l'équation suivante : ... C + ... O₂ &rarr; ... CO", lvl: "Difficile", opt: ["1, 1, 1", "2, 1, 2", "1, 2, 2"], ans: 1, exp: "Pour utiliser la molécule O₂ (2 atomes d'O) entièrement, il faut produire 2 molécules de CO. Cela nécessite donc 2 atomes de Carbone au départ." }
+        ];
+
+        let currentQuestions = [];
+
+        // Mélanger un tableau
+        function shuffle(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Initialisation : tirer 10 questions (Garantir entre 3 et 5 Difficiles)
+        function initQuiz() {
+            const diffQs = db.filter(q => q.lvl === "Difficile");
+            const otherQs = db.filter(q => q.lvl !== "Difficile");
+            
+            const shuffledDiff = shuffle(diffQs);
+            const shuffledOther = shuffle(otherQs);
+            
+            const numDiff = Math.floor(Math.random() * 3) + 3; // Entre 3 et 5
+            const numOther = 10 - numDiff;
+            
+            let selected = [...shuffledDiff.slice(0, numDiff), ...shuffledOther.slice(0, numOther)];
+            currentQuestions = shuffle(selected);
+            renderQuiz();
+        }
+
+        // Afficher le quiz
+        function renderQuiz() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = "";
+
+            currentQuestions.forEach((q, index) => {
+                let badgeClass = q.lvl === "Facile" ? "facile" : (q.lvl === "Moyen" ? "moyen" : "difficile");
+                
+                let optionsHtml = "";
+                q.opt.forEach((opt, i) => {
+                    optionsHtml += `
+                        <li>
+                            <label>
+                                <input type="radio" name="q${index}" value="${i}">
+                                <span>${opt}</span>
+                            </label>
+                        </li>
+                    `;
+                });
+
+                let schemaHtml = q.svg ? `<div class="schema">${q.svg}</div>` : "";
+                let expHtml = `<div class="explanation" id="exp-${index}"><strong>💡 Explication :</strong> ${q.exp}</div>`;
+
+                let html = `
+                    <div class="question-card" id="card-${index}">
+                        <div class="q-header">
+                            <h3 class="q-title">Question ${index + 1}</h3>
+                            <span class="badge ${badgeClass}">${q.lvl}</span>
+                        </div>
+                        <div class="q-text">${q.q}</div>
+                        ${schemaHtml}
+                        <ul class="options" id="options-${index}">
+                            ${optionsHtml}
+                        </ul>
+                        ${expHtml}
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        // Vérifier les réponses
+        function checkAnswers() {
+            let score = 0;
+            const form = document.getElementById('qcmForm');
+
+            currentQuestions.forEach((q, index) => {
+                const selectedCard = document.getElementById(`card-${index}`);
+                const selectedOption = form.querySelector(`input[name="q${index}"]:checked`);
+                const expBox = document.getElementById(`exp-${index}`);
+                const labels = selectedCard.querySelectorAll('label span');
+
+                // Nettoyer
+                selectedCard.style.borderLeftColor = "#bdc3c7";
+                labels.forEach(l => l.classList.remove('correct-ans', 'wrong-ans'));
+                expBox.classList.remove('exp-correct', 'exp-wrong');
+
+                if (selectedOption) {
+                    const ansValue = parseInt(selectedOption.value);
+                    if (ansValue === q.ans) {
+                        score++;
+                        selectedCard.style.borderLeftColor = "#27ae60"; 
+                        expBox.classList.add('exp-correct');
+                        expBox.innerHTML = `<strong>✅ Bonne réponse !</strong> <br>${q.exp}`;
+                    } else {
+                        selectedCard.style.borderLeftColor = "#e74c3c"; 
+                        labels[ansValue].classList.add('wrong-ans'); 
+                        expBox.classList.add('exp-wrong');
+                        expBox.innerHTML = `<strong>❌ Erreur.</strong> <br>${q.exp}`;
+                    }
+                } else {
+                    selectedCard.style.borderLeftColor = "#e74c3c"; 
+                    expBox.classList.add('exp-wrong');
+                    expBox.innerHTML = `<strong>❌ Oubli !</strong> <br>${q.exp}`;
+                }
+
+                labels[q.ans].classList.add('correct-ans');
+                expBox.style.display = "block";
+            });
+
+            // Score final
+            const resultBox = document.getElementById('result-box');
+            resultBox.style.display = "block";
+            
+            if (score >= 8) {
+                resultBox.style.backgroundColor = "#d4efdf";
+                resultBox.style.color = "#1e8449";
+                resultBox.innerHTML = `🎉 Bravo ! Ton score : ${score} / 10. Tu es prêt pour le DS !`;
+            } else if (score >= 5) {
+                resultBox.style.backgroundColor = "#fcf3cf";
+                resultBox.style.color = "#d4ac0d";
+                resultBox.innerHTML = `👍 Bon travail ! Ton score : ${score} / 10. Relis bien les corrections.`;
+            } else {
+                resultBox.style.backgroundColor = "#fadbd8";
+                resultBox.style.color = "#cb4335";
+                resultBox.innerHTML = `💪 Courage ! Ton score : ${score} / 10. Prends le temps de comprendre tes erreurs.`;
+            }
+
+            document.getElementById('btn-valider').style.display = "none";
+            document.getElementById('btn-reload').style.display = "block";
+            
+            // Remonter au résultat
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
