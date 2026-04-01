@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QCM Avancé - Diversité et États de la Matière</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --bg: #f8f9fa;
+            --hint: #f39c12;
+            --hard: #8e44ad;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--secondary);
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 15px; /* Légèrement réduit pour mobile */
+            line-height: 1.6;
+            -webkit-tap-highlight-color: transparent; /* Retire le flash bleu sur mobile */
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+            font-size: 1.5em; /* Adapté mobile */
+        }
+        .intro {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+        }
+        .question-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--accent);
+            position: relative;
+        }
+        .badge-diff {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 0.75em;
+            padding: 4px 10px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .diff-easy { background-color: var(--success); }
+        .diff-medium { background-color: var(--hint); }
+        .diff-hard { background-color: var(--hard); }
+        
+        .question-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-right: 80px;
+        }
+        .illustration {
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            border: 1px solid #dfe6e9;
+            overflow-x: auto; /* Permet le scroll horizontal des tableaux sur smartphone */
+            -webkit-overflow-scrolling: touch;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .option-item {
+            margin-bottom: 10px;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px; /* Large zone pour le doigt */
+            background-color: var(--light);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95em;
+        }
+        .option-label:active {
+            background-color: #d6eaf8; /* Retour visuel au tap */
+        }
+        @media (hover: hover) {
+            .option-label:hover {
+                background-color: #d6eaf8;
+                border-color: var(--accent);
+            }
+        }
+        input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.4);
+            cursor: pointer;
+            flex-shrink: 0; /* Empêche le bouton radio de s'écraser */
+        }
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2em;
+            color: white;
+            background-color: var(--accent);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-bottom: 40px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        #submit-btn:active { transform: scale(0.98); }
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        #score-display {
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .reload-btn {
+            display: block;
+            margin: 20px auto 40px auto;
+            padding: 18px 20px;
+            font-size: 1.1em;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        
+        /* Ajustements stricts pour smartphones */
+        @media (max-width: 600px) {
+            .question-title { 
+                font-size: 1.05em; 
+                padding-right: 0; 
+                margin-top: 25px; /* Laisse la place au badge */
+            }
+            .badge-diff { 
+                top: 10px; 
+                left: 15px; 
+                right: auto; 
+            }
+            .option-label {
+                padding: 12px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>QCM Bilan : Chapitre 4 (6ème)</h1>
+    <p class="intro">10 questions tirées au sort (Facile, Moyen, Difficile) avec tâches complexes.</p>
+
+    <div id="quiz-container"></div>
+    <button id="submit-btn" onclick="checkAnswers()">Valider mes réponses</button>
+    <div id="score-display"></div>
+    <button class="reload-btn" onclick="location.reload()" style="display:none;" id="reload-btn">Générer un nouveau QCM aléatoire</button>
+
+    <script>
+        // --- ILLUSTRATIONS (SVG) ---
+        const svgVaporisation = `<svg width="350" height="220" viewBox="0 0 350 220">
+            <rect x="40" y="20" width="10" height="180" fill="#7f8c8d"/>
+            <rect x="20" y="200" width="50" height="10" fill="#34495e"/>
+            <rect x="45" y="80" width="75" height="6" fill="#95a5a6"/>
+            <path d="M 115 75 L 125 85 L 115 95 Z" fill="#7f8c8d"/>
+
+            <path d="M 110 160 Q 150 200 190 160 Z" fill="#bdc3c7" stroke="#7f8c8d" stroke-width="2"/>
+            <rect x="110" y="160" width="80" height="30" fill="#ecf0f1" stroke="#95a5a6" stroke-width="2"/>
+            <circle cx="130" cy="175" r="5" fill="#e74c3c"/> <circle cx="170" cy="175" r="5" fill="#34495e"/> <text x="60" y="185" font-size="12" fill="#34495e" font-weight="bold">Chauffage</text>
+
+            <path d="M 140 50 L 140 90 A 40 40 0 1 0 160 90 L 160 50 Z" fill="rgba(52, 152, 219, 0.1)" stroke="#3498db" stroke-width="2"/>
+            <path d="M 114 120 A 40 40 0 0 0 186 120 Q 150 125 114 120" fill="rgba(52, 152, 219, 0.4)"/>
+            
+            <circle cx="130" cy="140" r="3" fill="white" stroke="#2980b9"/>
+            <circle cx="145" cy="130" r="4" fill="white" stroke="#2980b9"/>
+            <circle cx="160" cy="145" r="3" fill="white" stroke="#2980b9"/>
+            <circle cx="150" cy="110" r="2" fill="white" stroke="#2980b9"/>
+            <circle cx="135" cy="100" r="3" fill="white" stroke="#2980b9"/>
+            
+            <path d="M 145 80 Q 155 70 145 60" fill="none" stroke="#bdc3c7" stroke-width="2" stroke-dasharray="4"/>
+            <path d="M 155 85 Q 145 75 155 65" fill="none" stroke="#bdc3c7" stroke-width="2" stroke-dasharray="4"/>
+
+            <rect x="147" y="10" width="6" height="130" fill="rgba(255,255,255,0.8)" stroke="#7f8c8d" stroke-width="1" rx="3"/>
+            <rect x="149" y="80" width="2" height="55" fill="#e74c3c"/>
+            <circle cx="150" cy="135" r="4" fill="#e74c3c"/>
+            
+            <line x1="160" y1="30" x2="220" y2="30" stroke="#e74c3c" stroke-width="1" stroke-dasharray="2"/>
+            <text x="225" y="34" font-size="12" fill="#e74c3c" font-weight="bold">Thermomètre</text>
+
+            <line x1="180" y1="100" x2="220" y2="100" stroke="#2980b9" stroke-width="1" stroke-dasharray="2"/>
+            <text x="225" y="104" font-size="12" fill="#2980b9" font-weight="bold">Ballon (Eau pure)</text>
+            
+            <line x1="180" y1="130" x2="220" y2="130" stroke="#8e44ad" stroke-width="1" stroke-dasharray="2"/>
+            <text x="225" y="134" font-size="12" fill="#8e44ad" font-weight="bold">Ébullition (bulles)</text>
+        </svg>`;
+
+        const svgTableauPalier = `<svg width="380" height="100" viewBox="0 0 380 100">
+            <rect x="0" y="0" width="380" height="100" fill="white" stroke="#34495e" stroke-width="2"/>
+            <line x1="0" y1="50" x2="380" y2="50" stroke="#34495e" stroke-width="2"/>
+            <line x1="90" y1="0" x2="90" y2="100" stroke="#34495e" stroke-width="2"/>
+            
+            <text x="5" y="30" font-size="12" font-weight="bold">Temps (min)</text>
+            <text x="5" y="80" font-size="12" font-weight="bold">Temp. (°C)</text>
+
+            <text x="110" y="30" font-size="12">0</text>
+            <text x="150" y="30" font-size="12">2</text>
+            <text x="190" y="30" font-size="12">4</text>
+            <text x="230" y="30" font-size="12">6</text>
+            <text x="270" y="30" font-size="12">8</text>
+            <text x="310" y="30" font-size="12">10</text>
+            <text x="350" y="30" font-size="12">12</text>
+
+            <text x="105" y="80" font-size="12">20</text>
+            <text x="145" y="80" font-size="12">45</text>
+            <text x="185" y="80" font-size="12">78</text>
+            <text x="220" y="80" font-size="12" fill="#e74c3c" font-weight="bold">100</text>
+            <text x="260" y="80" font-size="12" fill="#e74c3c" font-weight="bold">100</text>
+            <text x="300" y="80" font-size="12" fill="#e74c3c" font-weight="bold">100</text>
+            <text x="340" y="80" font-size="12" fill="#e74c3c" font-weight="bold">100</text>
+        </svg>`;
+
+        const svgTableauInconnu = `<svg width="320" height="100" viewBox="0 0 320 100">
+            <rect x="0" y="0" width="320" height="100" fill="white" stroke="#34495e" stroke-width="2"/>
+            <line x1="0" y1="50" x2="320" y2="50" stroke="#34495e" stroke-width="2"/>
+            <line x1="90" y1="0" x2="90" y2="100" stroke="#34495e" stroke-width="2"/>
+
+            <text x="5" y="30" font-size="12" font-weight="bold">Temps (min)</text>
+            <text x="5" y="80" font-size="12" font-weight="bold">Temp. (°C)</text>
+
+            <text x="110" y="30" font-size="12">0</text>
+            <text x="150" y="30" font-size="12">2</text>
+            <text x="190" y="30" font-size="12">4</text>
+            <text x="230" y="30" font-size="12">6</text>
+            <text x="270" y="30" font-size="12">8</text>
+
+            <text x="105" y="80" font-size="12">20</text>
+            <text x="145" y="80" font-size="12">40</text>
+            <text x="185" y="80" font-size="12" fill="#e74c3c" font-weight="bold">78</text>
+            <text x="225" y="80" font-size="12" fill="#e74c3c" font-weight="bold">78</text>
+            <text x="265" y="80" font-size="12" fill="#e74c3c" font-weight="bold">78</text>
+        </svg>`;
+
+        const svgTableMetaux = `<svg width="300" height="150" viewBox="0 0 300 150">
+            <rect x="10" y="10" width="280" height="130" fill="white" stroke="#34495e" stroke-width="2"/>
+            <line x1="10" y1="40" x2="290" y2="40" stroke="#34495e" stroke-width="1"/>
+            <line x1="10" y1="70" x2="290" y2="70" stroke="#34495e" stroke-width="1"/>
+            <line x1="10" y1="100" x2="290" y2="100" stroke="#34495e" stroke-width="1"/>
+            <text x="20" y="30" font-size="12" font-weight="bold">Métal</text>
+            <text x="100" y="30" font-size="12" font-weight="bold">Couleur</text>
+            <text x="170" y="30" font-size="12" font-weight="bold">T. Fusion</text>
+            <text x="240" y="30" font-size="12" font-weight="bold">Aimant</text>
+            
+            <text x="20" y="60" font-size="11">Aluminium</text><text x="100" y="60" font-size="11">Gris clair</text><text x="170" y="60" font-size="11">660°C</text><text x="240" y="60" font-size="11">Non</text>
+            <text x="20" y="90" font-size="11">Fer</text><text x="100" y="90" font-size="11">Gris</text><text x="170" y="90" font-size="11">1538°C</text><text x="240" y="90" font-size="11" fill="red" font-weight="bold">Oui</text>
+            <text x="20" y="120" font-size="11">Cuivre</text><text x="100" y="120" font-size="11">Orange</text><text x="170" y="120" font-size="11">1085°C</text><text x="240" y="120" font-size="11">Non</text>
+        </svg>`;
+
+        // --- BANQUE DE QUESTIONS (59 Questions) ---
+        const questionBank = [
+            // ================= FACILES (20 questions) =================
+            { diff: "easy", q: "Quelle est la durée de vie d'un trognon de pomme dans la nature ?", options: ["100 ans", "Quelques jours à 1 mois", "4000 ans", "Jamais"], ans: 1, exp: "C'est une matière organique biodégradable qui se décompose vite." },
+            { diff: "easy", q: "Quelle matière met environ 4000 ans à disparaître ?", options: ["Le plastique", "Le verre", "Le papier", "L'acier"], ans: 1, exp: "Le verre est fabriqué à partir de sable fondu et est extrêmement résistant." },
+            { diff: "easy", q: "Une matière biodégradable est détruite naturellement par :", options: ["Le soleil uniquement", "Les micro-organismes (bactéries...)", "Le vent"], ans: 1, exp: "Les micro-organismes mangent la matière organique." },
+            { diff: "easy", q: "Le plastique est fabriqué par l'humain à partir de :", options: ["Bois", "Pétrole", "Roche", "Sable"], ans: 1, exp: "Les plastiques sont des dérivés industriels du pétrole." },
+            { diff: "easy", q: "Un T-shirt en coton appartient à la famille des :", options: ["Matières organiques", "Plastiques", "Minéraux"], ans: 0, exp: "Le coton provient d'une plante (être vivant)." },
+            { diff: "easy", q: "Le sable et les roches appartiennent à la famille des :", options: ["Métaux", "Minéraux", "Plastiques"], ans: 1, exp: "Les minéraux sont issus du sous-sol de la Terre." },
+            { diff: "easy", q: "L'aluminium appartient à la famille des :", options: ["Verres", "Métaux", "Plastiques"], ans: 1, exp: "C'est un métal léger très utilisé pour les canettes." },
+            { diff: "easy", q: "L'unité de mesure de la température est :", options: ["Le mètre", "Le degré Celsius (°C)", "Le gramme"], ans: 1, exp: "On la mesure avec un thermomètre en °C." },
+            { diff: "easy", q: "Le passage de l'état liquide à l'état gazeux s'appelle :", options: ["La fusion", "La vaporisation", "La solidification"], ans: 1, exp: "L'eau liquide se transforme en vapeur (gaz) sous l'effet de la chaleur." },
+            { diff: "easy", q: "Le passage de l'état solide à l'état liquide s'appelle :", options: ["La fusion", "La vaporisation", "La condensation"], ans: 0, exp: "Exemple: un glaçon qui fond." },
+            { diff: "easy", q: "Dans quel état physique est l'eau d'un glacier ?", options: ["Solide", "Liquide", "Gazeux"], ans: 0, exp: "La glace est de l'eau à l'état solide." },
+            { diff: "easy", q: "Dans quel état physique se trouve la vapeur d'eau ?", options: ["Solide", "Liquide", "Gazeux"], ans: 2, exp: "C'est un gaz invisible." },
+            { diff: "easy", q: "Quel objet utilise-t-on pour mesurer l'évolution de la température de l'eau ?", options: ["Un chronomètre", "Un thermomètre", "Une balance"], ans: 1, exp: "Le thermomètre indique la température en °C." },
+            { diff: "easy", q: "Quel métal est attiré par un aimant ?", options: ["L'aluminium", "Le cuivre", "Le fer"], ans: 2, exp: "Le magnétisme est une propriété spécifique du fer (et de l'acier)." },
+            { diff: "easy", q: "Un matériau qui laisse bien passer le courant électrique est dit :", options: ["Isolant électrique", "Conducteur électrique", "Minéral"], ans: 1, exp: "Les métaux sont de très bons conducteurs." },
+            { diff: "easy", q: "Que signifie le mot 'Matériau' en sciences ?", options: ["La matière utilisée pour fabriquer un objet", "La couleur d'un objet", "La forme d'un objet"], ans: 0, exp: "Exemple : le bois est le matériau d'une chaise." },
+            { diff: "easy", q: "Les canettes en aluminium se jettent dans le bac :", options: ["Jaune (recyclage)", "Vert (verre)", "Gris (ordures ménagères)"], ans: 0, exp: "Le métal est recyclable à 100%." },
+            { diff: "easy", q: "Combien de temps met un chewing-gum à disparaître ?", options: ["5 jours", "5 ans", "100 ans"], ans: 1, exp: "Il met environ 5 ans à se dégrader." },
+            { diff: "easy", q: "Laquelle de ces matières a la propriété de laisser passer la lumière (transparente) ?", options: ["Le bois", "Le verre", "Le fer"], ans: 1, exp: "Le verre a la propriété d'être transparent." },
+            { diff: "easy", q: "L'eau des océans est à l'état :", options: ["Solide", "Liquide", "Gazeux"], ans: 1, exp: "L'océan est une immense étendue d'eau liquide." },
+
+            // ================= MOYENNES (20 questions) =================
+            { diff: "medium", q: "Pourquoi dit-on que l'ébullition de l'eau pure forme un 'palier de température' ?", options: ["La température augmente très vite", "La température reste bloquée à 100°C pendant le changement d'état", "La température descend puis monte"], ans: 1, exp: "Pendant tout le temps où l'eau bout et se vaporise, elle reste à 100°C." },
+            { diff: "medium", q: "Quel changement d'état observe-t-on si on laisse un glaçon à température ambiante (20°C) ?", options: ["Vaporisation", "Solidification", "Fusion"], ans: 2, exp: "La glace (solide) devient liquide sous l'effet de la chaleur ambiante." },
+            { diff: "medium", q: "À quelle température la glace fond-elle (fusion de l'eau pure) ?", options: ["100°C", "0°C", "-10°C", "20°C"], ans: 1, exp: "Le palier de fusion de l'eau se situe à 0°C." },
+            { diff: "medium", q: "L'acier est souvent attiré par un aimant. De quoi est très exactement composé l'acier ?", options: ["Uniquement de fer pur", "C'est un alliage (un mélange) de fer et de carbone", "De plastique et d'aluminium"], ans: 1, exp: "L'acier tire sa résistance et son magnétisme de son mélange à base de fer et de carbone." },
+            { diff: "medium", q: "Si la température de la Terre augmente, que se passe-t-il aux pôles ?", options: ["La glace fond et le niveau des mers monte", "L'eau s'évapore et les mers se vident", "Il y a plus de glaciers"], ans: 0, exp: "La fonte des glaciers terrestres ajoute de l'eau liquide aux océans." },
+            { diff: "medium", q: "Les fils électriques sont en cuivre entourés de plastique. Pourquoi du plastique ?", options: ["Pour faire joli", "Car c'est un isolant électrique qui protège des chocs", "Car c'est un conducteur de chaleur"], ans: 1, exp: "Le plastique empêche le courant de s'échapper du fil et évite les électrocutions." },
+            { diff: "medium", q: "Je suis opaque, dur et très cassant (comme la terre cuite). Quelle est ma famille ?", options: ["Minéraux", "Plastiques", "Verres"], ans: 0, exp: "L'argile/terre cuite appartient aux minéraux extraits du sol." },
+            { diff: "medium", q: "Je suis dur, brillant et bon conducteur thermique. Quelle est ma famille ?", options: ["Matières organiques", "Métaux", "Verres"], ans: 1, exp: "Les métaux (fer, cuivre, aluminium...) sont les seuls à posséder toutes ces propriétés." },
+            { diff: "medium", q: "Lors de la fusion de la glace, l'eau se trouve :", options: ["Uniquement à l'état solide", "Uniquement à l'état liquide", "À la fois solide et liquide en même temps"], ans: 2, exp: "Pendant le palier à 0°C, tant que tout n'a pas fondu, les deux états coexistent." },
+            { diff: "medium", q: "Un nuage dans le ciel est constitué de :", options: ["Gaz uniquement", "Gouttelettes d'eau liquide ou cristaux de glace", "Poussière noire"], ans: 1, exp: "La vapeur d'eau invisible s'est condensée sous l'effet du froid en altitude." },
+            { diff: "medium", q: "Quelle propriété permet d'utiliser l'aluminium pour recycler des canettes indéfiniment ?", options: ["Il est léger", "Il peut fondre et être coulé dans de nouveaux moules", "Il est transparent"], ans: 1, exp: "On le fait fondre à plus de 800°C pour recréer des blocs de métal." },
+            { diff: "medium", q: "Une casserole a souvent un manche en bois ou en plastique car :", options: ["Ce sont de bons isolants thermiques (ils ne brûlent pas la main)", "Ce sont de bons conducteurs", "Ils fondent vite"], ans: 0, exp: "Ils empêchent la chaleur de se propager jusqu'à la main." },
+            { diff: "medium", q: "Le papier est fait à partir du bois. Est-il biodégradable ?", options: ["Non, c'est industriel", "Oui, en 2 à 12 mois car c'est une matière organique", "Oui, en 100 ans"], ans: 1, exp: "Issu du végétal, le papier est facilement et rapidement dégradé par la nature." },
+            { diff: "medium", q: "À 15°C, l'eau pure se trouve à l'état :", options: ["Solide", "Liquide", "Gazeux"], ans: 1, exp: "À 15°C, l'eau a fondu (après 0°C) mais ne bout pas encore (avant 100°C)." },
+            { diff: "medium", q: "Dans une déchèterie, quel outil permet de séparer facilement l'acier (qui contient du fer) de l'aluminium ?", options: ["Un aimant", "L'eau", "Le feu"], ans: 0, exp: "L'acier réagit à l'aimant grâce au fer qu'il contient, l'aluminium ne réagit pas." },
+            { diff: "medium", q: "Quelle est la principale différence entre la vapeur d'eau et un nuage ?", options: ["La vapeur d'eau est froide, le nuage est chaud", "La vapeur d'eau est un gaz invisible, le nuage est visible (liquide/solide)", "Il n'y a aucune différence"], ans: 1, exp: "La vapeur d'eau ne se voit pas à l'œil nu, contrairement au nuage blanc." },
+            { diff: "medium", q: "Pourquoi préfère-t-on les emballages en carton plutôt qu'en plastique ?", options: ["Le carton est transparent", "Le carton pollue beaucoup moins longtemps dans la nature", "Le plastique est trop cher"], ans: 1, exp: "Le plastique (dérivé du pétrole) pollue la nature pendant des siècles." },
+            { diff: "medium", q: "La grêle qui tombe du ciel est de l'eau à l'état :", options: ["Solide", "Liquide", "Gazeux"], ans: 0, exp: "Ce sont des petits morceaux de glace qui tombent lors des orages." },
+            { diff: "medium", q: "Quel est le bon ordre d'apparition des états lorsqu'on chauffe un glaçon en continu ?", options: ["Liquide -> Gaz -> Solide", "Solide -> Liquide -> Gaz", "Gaz -> Solide -> Liquide"], ans: 1, exp: "Fusion (solide devient liquide) puis Vaporisation (liquide devient gaz)." },
+            { diff: "medium", q: "Je suis élastique et fabriqué à partir de pétrole. Qui suis-je ?", options: ["Le plastique", "Le verre", "La laine"], ans: 0, exp: "Les matières plastiques peuvent avoir des propriétés très variées, dont l'élasticité (mous) ou la rigidité (durs)." },
+
+            // ================= DIFFICILES / TÂCHES COMPLEXES (19 questions, après retrait) =================
+            { diff: "hard", complex: true, svg: svgVaporisation, q: "Observe le montage de vaporisation ci-dessus. Quel instrument apporte la chaleur nécessaire pour provoquer le changement d'état ?", options: ["Le thermomètre", "Le ballon en verre", "Le chauffe-ballon électrique"], ans: 2, exp: "Le dispositif électrique en bas (chauffe-ballon) transfère l'énergie thermique à l'eau." },
+            { diff: "hard", complex: true, svg: svgTableauPalier, q: "Observe ce tableau de relevés pour l'eau pure. À partir de 6 minutes, on remarque que la température reste bloquée à 100°C. Comment appelle-t-on ce phénomène ?", options: ["Un bug du thermomètre", "Le palier de température de l'ébullition", "La fusion de l'eau"], ans: 1, exp: "Tant que l'eau liquide se transforme en gaz (vaporisation), sa température ne dépasse pas 100°C. C'est le palier." },
+            { diff: "hard", complex: true, svg: svgTableauPalier, q: "En observant ce même tableau, que fait l'eau pure dans le ballon entre la minute 0 et la minute 4 (la température passe de 20°C à 78°C) ?", options: ["Elle est sous forme de gaz", "Elle s'échauffe mais reste à l'état liquide", "Elle bout à gros bouillons"], ans: 1, exp: "Avant d'atteindre le palier de 100°C, la chaleur sert uniquement à augmenter la température du liquide." },
+            { diff: "hard", complex: true, svg: svgTableauInconnu, q: "Analyse de données : Observe le tableau de relevés ci-dessus (chauffage d'un liquide inconnu). D'après ces données, s'agit-il d'eau pure ?", options: ["Oui, c'est le palier de l'eau", "Non, l'eau pure forme un palier d'ébullition à 100°C, pas 78°C", "On ne peut pas savoir sans thermomètre rouge"], ans: 1, exp: "Chaque matière pure a sa propre température d'ébullition. Pour l'eau pure, le palier est exactement à 100°C." },
+            { diff: "hard", complex: true, svg: svgTableMetaux, q: "Un employé de déchèterie trouve un morceau de métal gris, attiré par un aimant et qui fond à 1538°C. De quel métal s'agit-il d'après le tableau ?", options: ["Aluminium", "Fer", "Cuivre", "Or"], ans: 1, exp: "Seul le fer correspond aux trois propriétés : aspect gris, magnétique, et T° de fusion de 1538°C." },
+            { diff: "hard", complex: true, svg: svgTableMetaux, q: "Un artisan veut fabriquer une casserole. Il choisit un métal orange qui n'est pas attiré par un aimant. D'après le tableau, à quelle température ce métal va-t-il fondre s'il le chauffe trop fort ?", options: ["660°C", "1085°C", "1538°C"], ans: 1, exp: "Le métal orange non magnétique est le cuivre. Sa température de fusion indiquée est de 1085°C." },
+            { diff: "hard", complex: true, q: "Tâche complexe : Tu dois trier un mélange de billes en fer, de billes en verre et de billes en bois poli. Quelle est la méthode la plus intelligente et rapide ?", options: ["Tout trier à la main une par une", "Utiliser un aimant pour retirer le fer, puis mettre le reste dans l'eau (le bois flotte, le verre coule)", "Faire fondre le tout au chalumeau"], ans: 1, exp: "L'aimant exploite la propriété de magnétisme du fer. L'eau exploite la densité (le bois, matière organique, flotte sur l'eau)." },
+            { diff: "hard", complex: true, q: "Expérience : Si on place un couvercle en verre très froid (-19°C) au-dessus d'une casserole d'eau bouillante, que va-t-il se passer sur le couvercle ?", options: ["Il ne se passe rien", "La vapeur d'eau va se refroidir et redevenir des gouttes d'eau liquide", "La vapeur d'eau va brûler et casser le verre"], ans: 1, exp: "Le contact avec le froid ramène le gaz à l'état liquide : c'est la liquéfaction (ou condensation)." },
+            { diff: "hard", q: "Un glaçon à -10°C est sorti du congélateur. À la minute 5, le thermomètre inséré dedans indique exactement 0°C. Que trouve-t-on dans le récipient à ce moment précis ?", options: ["Uniquement de la glace dure", "Uniquement de l'eau liquide", "Un mélange des deux (solide + liquide)"], ans: 2, exp: "À 0°C, on est en plein milieu du changement d'état (la fusion). Les deux états coexistent tant que le palier n'est pas fini." },
+            { diff: "hard", q: "Pourquoi l'acier est-il massivement utilisé pour fabriquer la structure des grands bâtiments et des ponts ?", options: ["Parce qu'il est organique et léger", "Parce que cet alliage de fer et de carbone possède une grande résistance mécanique", "Parce qu'il est transparent aux rayons du soleil"], ans: 1, exp: "L'alliage fer/carbone (l'acier) modifie les propriétés du fer pour le rendre extrêmement robuste." },
+            { diff: "hard", q: "Tu verses 200mL d'eau dans un ballon. Tu chauffes. Au bout de 15 minutes, l'eau s'est totalement transformée en gaz. Que va indiquer le thermomètre à la minute 16 si le gaz continue d'être chauffé ?", options: ["Il redescend à 0°C", "Il reste bloqué à 100°C pour l'éternité", "La température du gaz va se remettre à augmenter au-delà de 100°C"], ans: 2, exp: "Le palier n'existe QUE pendant le changement d'état. S'il n'y a plus d'eau liquide, le gaz va chauffer et dépasser 100°C." },
+            { diff: "hard", q: "Un câble pour alimenter les TGV en électricité est fabriqué avec un fil intérieur enrobé d'une gaine. Quelle est sa composition logique ?", options: ["Intérieur Cuivre (conducteur) + Gaine en fer (isolant)", "Intérieur Cuivre (conducteur) + Gaine en plastique (isolant)", "Intérieur Plastique (conducteur) + Gaine Cuivre (isolant)"], ans: 1, exp: "Le métal (cuivre) laisse passer le courant électrique. Le plastique (isolant) empêche le courant de sortir pour éviter les électrocutions." },
+            { diff: "hard", q: "On jette une brique de lait dans la nature. Elle est composée de carton et d'un film plastique à l'intérieur. Que va-t-il se passer ?", options: ["Tout disparaît en 2 mois car c'est petit", "Le plastique disparaît vite mais le carton reste 100 ans", "Le carton se dégrade en quelques mois, mais le film plastique mettra des siècles à disparaître"], ans: 2, exp: "Un objet fabriqué avec plusieurs matériaux va se dégrader au rythme du matériau le plus polluant/résistant." },
+            { diff: "hard", q: "Lorsqu'un métal atteint sa température de fusion (par exemple le Zinc à 420°C), il change d'état. Il passe de l'état :", options: ["Liquide à Solide", "Gazeux à Liquide", "Solide à Liquide"], ans: 2, exp: "La fusion est le terme scientifique pour définir le passage de l'état solide à l'état liquide (comme un glaçon qui fond)." },
+            { diff: "hard", q: "Le cristal est un matériau très fragile utilisé pour faire de beaux verres. Il est transparent, cassant et contient du sable fondu. C'est :", options: ["Une matière plastique de laboratoire", "Un minéral métallique", "Un matériau de la famille des verres"], ans: 2, exp: "Fabriqué à partir de silice (sable) avec pour propriétés d'être transparent et cassant, il est classé dans la famille des verres." },
+            { diff: "hard", q: "Un thermomètre affiche -3°C dans un gros bloc de glace. On le place au soleil. Pendant combien de temps affichera-t-il la valeur du palier (0°C) ?", options: ["Pendant une seconde pile", "Tant qu'il restera de la glace qui n'a pas encore fondu", "Jusqu'à ce que l'eau se mette à bouillir"], ans: 1, exp: "C'est le principe fondamental du palier : la température reste constante tant que le changement d'état n'est pas TOTALEMENT terminé." },
+            { diff: "hard", q: "Dans la nature, la formation d'un nuage de pluie ou de neige est le phénomène inverse de :", options: ["La condensation de la vapeur sur un couvercle", "La vaporisation de l'eau dans une casserole qui bout", "La solidification d'un lac en hiver"], ans: 1, exp: "Dans la casserole, le liquide devient gaz (vaporisation). Dans le ciel, le gaz invisible redevient liquide/solide (liquéfaction/condensation)." },
+            { diff: "hard", q: "Quelle propriété permet d'affirmer avec certitude que l'ébullition étudiée dans le ballon est bien celle de l'EAU PURE et pas d'un autre liquide ?", options: ["Il y a des bulles qui se forment", "Le palier de température se stabilise très exactement à 100°C", "Le liquide diminue de volume"], ans: 1, exp: "Tous les liquides font des bulles en bouillant, mais l'eau PURE est la seule substance de l'univers à bouillir avec un palier à 100°C (sous pression normale)." }
+        ];
+
+        let currentQuiz = [];
+
+        function getRandomElements(arr, num) {
+            const shuffled = [...arr].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, num);
+        }
+
+        function generateQuizData() {
+            const easyQs = questionBank.filter(q => q.diff === 'easy');
+            const medQs = questionBank.filter(q => q.diff === 'medium');
+            const hardQs = questionBank.filter(q => q.diff === 'hard');
+            
+            // On veut au moins 1 tâche complexe dans les questions difficiles
+            const hardComplex = hardQs.filter(q => q.complex);
+            const hardNormal = hardQs.filter(q => !q.complex);
+            
+            // Sélection : 3 faciles, 4 moyennes, 3 difficiles (1 complexe + 2 aléatoires)
+            const selEasy = getRandomElements(easyQs, 3);
+            const selMed = getRandomElements(medQs, 4);
+            
+            let selHard = [];
+            const chosenComplex = getRandomElements(hardComplex, 1)[0];
+            selHard.push(chosenComplex);
+            
+            const remainingHard = [...hardComplex.filter(q => q !== chosenComplex), ...hardNormal];
+            selHard = selHard.concat(getRandomElements(remainingHard, 2));
+
+            let finalQuiz = [...selEasy, ...selMed, ...selHard];
+            return finalQuiz.sort(() => 0.5 - Math.random()); // Mélange final
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            currentQuiz = generateQuizData();
+
+            currentQuiz.forEach((qObj, index) => {
+                let diffLabel, diffClass;
+                if(qObj.diff === 'easy') { diffLabel = 'Facile'; diffClass = 'diff-easy'; }
+                else if(qObj.diff === 'medium') { diffLabel = 'Moyen'; diffClass = 'diff-medium'; }
+                else { diffLabel = qObj.complex ? 'Tâche Complexe' : 'Difficile'; diffClass = 'diff-hard'; }
+
+                let optionsHtml = '';
+                qObj.options.forEach((opt, optIndex) => {
+                    optionsHtml += `
+                        <li class="option-item">
+                            <label class="option-label" id="label-${index}-${optIndex}">
+                                <input type="radio" name="q${index}" value="${optIndex}">
+                                ${opt}
+                            </label>
+                        </li>
+                    `;
+                });
+
+                let svgHtml = qObj.svg ? `<div class="illustration">${qObj.svg}</div>` : '';
+
+                const qHtml = `
+                    <div class="question-card" id="card-${index}">
+                        <div class="badge-diff ${diffClass}">${diffLabel}</div>
+                        <div class="question-title">${index + 1}. ${qObj.q}</div>
+                        ${svgHtml}
+                        <ul class="options-list">
+                            ${optionsHtml}
+                        </ul>
+                        <div class="feedback" id="feedback-${index}"></div>
+                    </div>
+                `;
+                container.innerHTML += qHtml;
+            });
+            
+            document.getElementById('submit-btn').style.display = 'block';
+            document.getElementById('score-display').style.display = 'none';
+            document.getElementById('reload-btn').style.display = 'none';
+        }
+
+        function checkAnswers() {
+            let score = 0;
+
+            currentQuiz.forEach((qObj, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                const feedbackDiv = document.getElementById(`feedback-${index}`);
+                
+                const radios = document.querySelectorAll(`input[name="q${index}"]`);
+                radios.forEach(r => r.disabled = true);
+
+                if (selected) {
+                    const selectedValue = parseInt(selected.value);
+                    if (selectedValue === qObj.ans) {
+                        score++;
+                        feedbackDiv.innerHTML = `✅ <strong>Correct !</strong> ${qObj.exp}`;
+                        feedbackDiv.className = "feedback correct";
+                        document.getElementById(`label-${index}-${selectedValue}`).style.borderColor = "#27ae60";
+                        document.getElementById(`label-${index}-${selectedValue}`).style.backgroundColor = "#d4edda";
+                    } else {
+                        feedbackDiv.innerHTML = `❌ <strong>Faux.</strong> La bonne réponse était : <em>${qObj.options[qObj.ans]}</em>.<br><br>💡 ${qObj.exp}`;
+                        feedbackDiv.className = "feedback incorrect";
+                        document.getElementById(`label-${index}-${selectedValue}`).style.borderColor = "#e74c3c";
+                        document.getElementById(`label-${index}-${selectedValue}`).style.backgroundColor = "#f8d7da";
+                        document.getElementById(`label-${index}-${qObj.ans}`).style.border = "2px dashed #27ae60"; // Montrer la bonne réponse
+                    }
+                } else {
+                    feedbackDiv.innerHTML = `⚠️ <strong>Aucune réponse.</strong> La bonne réponse était : <em>${qObj.options[qObj.ans]}</em>.<br><br>💡 ${qObj.exp}`;
+                    feedbackDiv.className = "feedback incorrect";
+                }
+                
+                feedbackDiv.style.display = "block";
+            });
+
+            const scoreDisplay = document.getElementById('score-display');
+            let appreciation = "";
+            if(score === 10) appreciation = "Parfait ! Tu es un expert de la matière ! 🏆";
+            else if(score >= 7) appreciation = "Très bon résultat, félicitations ! 👏";
+            else if(score >= 5) appreciation = "C'est la moyenne, mais relis bien les bilans sur les changements d'état. 📚";
+            else appreciation = "Aïe, il faut vraiment réviser le Chapitre avant l'évaluation ! 💪";
+
+            scoreDisplay.innerHTML = `Score : <span style="color:var(--accent)">${score} / 10</span><br><span style="font-size:0.6em; font-weight:normal;">${appreciation}</span>`;
+            scoreDisplay.style.display = 'block';
+            
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('reload-btn').style.display = 'block';
+            
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        // Lancer la génération au chargement
+        window.onload = renderQuiz;
+    </script>
+</body>
+</html>
