@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM Aléatoire : L'Univers à grande échelle</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 { text-align: center; color: #2c3e50; }
+        .info-text { text-align: center; color: #555; margin-bottom: 30px; }
+        .question-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .difficulty {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .facile { background-color: #d4edda; color: #155724; }
+        .moyenne { background-color: #fff3cd; color: #856404; }
+        .difficile { background-color: #f8d7da; color: #721c24; }
+        
+        .options { list-style-type: none; padding: 0; }
+        .options li { margin: 10px 0; }
+        label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        label:hover { background: #e2e6ea; }
+        input[type="radio"] { margin-right: 10px; }
+        
+        button {
+            background-color: #007bff;
+            color: white; border: none;
+            padding: 10px 20px; border-radius: 4px;
+            cursor: pointer; font-size: 16px; margin-top: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        
+        .btn-restart { background-color: #28a745; display: block; margin: 20px auto; font-size: 18px; }
+        .btn-restart:hover { background-color: #218838; }
+
+        .feedback { margin-top: 15px; padding: 15px; border-radius: 4px; display: none; }
+        .correct { background-color: #d4edda; border-left: 5px solid #28a745; }
+        .incorrect { background-color: #f8d7da; border-left: 5px solid #dc3545; }
+        
+        .score-panel {
+            text-align: center; font-size: 1.5em; font-weight: bold;
+            margin-top: 20px; padding: 20px; background: #e2e3e5; border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>QCM : L'Univers à grande échelle</h1>
+    <p class="info-text">10 questions tirées au sort pour t'entraîner !</p>
+    
+    <div id="quiz-container"></div>
+    
+    <div class="score-panel" id="score-panel" style="display: none;">
+        Score final : <span id="score">0</span> / 10
+        <button class="btn-restart" onclick="initQuiz()">Recommencer avec de nouvelles questions</button>
+    </div>
+
+    <script>
+        // Banque de 30 questions (Tu peux en ajouter d'autres ici pour aller jusqu'à 60)
+        const allQuestions = [
+    // --- 🟢 DÉFINITIONS ET STRUCTURE DE L'UNIVERS (Facile) ---
+    { q: "Qu'est-ce qu'une galaxie ?", options: ["Un système composé uniquement de planètes.", "Un regroupement d'un très grand nombre d'étoiles, de gaz et de poussières.", "Une étoile géante isolée dans le vide."], ans: 1, diff: "facile", expl: "Une galaxie est un gigantesque amas d'étoiles, de gaz et de poussières." },
+    { q: "Comment s'appelle notre galaxie ?", options: ["Andromède", "La Voie Lactée", "Le Grand Nuage de Magellan"], ans: 1, diff: "facile", expl: "Le système solaire se trouve dans la Voie Lactée." },
+    { q: "Que trouve-t-on majoritairement entre le Soleil et les planètes du système solaire ?", options: ["Du vide", "De l'air", "Des astéroïdes"], ans: 0, diff: "facile", expl: "L'Univers a une structure lacunaire : il est essentiellement constitué de vide." },
+    { q: "Qu'est-ce qu'une comète ?", options: ["Une boule de feu géante.", "Un corps constitué de glace et de poussière formant une queue.", "Une étoile qui meurt."], ans: 1, diff: "facile", expl: "Une comète est un corps en orbite autour du Soleil constitué d'un noyau de glace, suivi d'un long nuage de poussière." },
+    { q: "Où se situe principalement la ceinture d'astéroïdes ?", options: ["Entre la Terre et Mars", "Entre Mars et Jupiter", "Au-delà de Pluton"], ans: 1, diff: "facile", expl: "Les astéroïdes sont des corps rocheux dont l'orbite se situe principalement entre Mars et Jupiter." },
+    { q: "Qu'est-ce qu'une étoile ?", options: ["Une planète rocheuse", "Une boule de gaz très chaude qui produit de la lumière", "Un astéroïde brillant"], ans: 1, diff: "facile", expl: "Une étoile, comme notre Soleil, est une boule de gaz très chaude." },
+    { q: "Combien y a-t-il d'étoiles dans une galaxie typique ?", options: ["Quelques milliers", "Des centaines de milliards", "Une seule"], ans: 1, diff: "facile", expl: "Une galaxie contient des centaines de milliards d'étoiles." },
+    { q: "La lumière peut-elle se propager dans le vide ?", options: ["Oui", "Non", "Seulement si la distance est courte"], ans: 0, diff: "facile", expl: "Contrairement au son, la lumière (et les ondes radio) se propage très bien dans le vide." },
+    { q: "Peut-on entendre le son d'une explosion dans l'espace ?", options: ["Oui, très fort", "Oui, mais faiblement", "Non, le son ne se propage pas dans le vide"], ans: 2, diff: "facile", expl: "L'espace étant vide, le son ne peut pas s'y propager (contrairement à la lumière)." },
+    { q: "Comment appelle-t-on une explication simplifiée de la réalité en sciences ?", options: ["Une théorie absolue", "Un modèle", "Un ordre de grandeur"], ans: 1, diff: "facile", expl: "Un modèle est une explication simplifiée de la réalité (ex: le modèle du Big Bang)." },
+
+    // --- 🟢 UNITÉS ET VITESSES (Facile) ---
+    { q: "Quelle est la valeur de la vitesse de la lumière dans le vide ?", options: ["300 000 km/s", "340 m/s", "150 000 km/s"], ans: 0, diff: "facile", expl: "La lumière se propage dans le vide à 300 000 km/s (soit 3 x 10^8 m/s)." },
+    { q: "À quelle distance correspond une unité astronomique (ua) ?", options: ["La distance Terre-Lune", "La distance Terre-Soleil", "La taille du système solaire"], ans: 1, diff: "facile", expl: "L'unité astronomique (ua) est la distance moyenne entre la Terre et le Soleil, soit 150 millions de km." },
+    { q: "L'année-lumière (a.l.) est une unité qui permet de mesurer...", options: ["Une durée", "Une vitesse", "Une distance"], ans: 2, diff: "facile", expl: "Malgré le mot 'année', c'est la distance parcourue par la lumière dans le vide en un an." },
+    { q: "Quelle unité est la plus adaptée pour mesurer la distance entre deux étoiles ?", options: ["Le kilomètre", "L'Unité Astronomique (ua)", "L'année-lumière (a.l.)"], ans: 2, diff: "facile", expl: "Les étoiles sont tellement éloignées que l'on utilise l'année-lumière pour éviter de manipuler des nombres géants." },
+    { q: "Quelle unité est la plus adaptée pour mesurer la distance entre la Terre et Mars ?", options: ["L'année-lumière (a.l.)", "L'Unité Astronomique (ua)", "Le mètre"], ans: 1, diff: "facile", expl: "L'Unité Astronomique (ua) est adaptée aux distances à l'intérieur du système solaire." },
+    { q: "En km, à combien correspond environ 1 unité astronomique (ua) ?", options: ["150 millions de km", "300 000 km", "10 000 milliards de km"], ans: 0, diff: "facile", expl: "1 ua correspond à 150 000 000 km." },
+    { q: "Un objet situé à 10 années-lumière nous apparaît-il tel qu'il est aujourd'hui ?", options: ["Oui", "Non, on le voit tel qu'il était il y a 10 ans", "Non, on le voit tel qu'il sera dans 10 ans"], ans: 1, diff: "facile", expl: "La lumière a mis 10 ans pour voyager jusqu'à nous. On voit donc l'objet dans le passé !" },
+    { q: "Les ondes radio voyagent-elles à la même vitesse que la lumière ?", options: ["Oui, car elles sont de même nature", "Non, elles vont beaucoup moins vite", "Non, elles vont plus vite"], ans: 0, diff: "facile", expl: "Les ondes radio et la lumière sont de même nature (ondes électromagnétiques) et voyagent à 300 000 km/s." },
+
+    // --- 🟠 HISTOIRE DE L'UNIVERS ET CHRONOLOGIE (Moyenne) ---
+    { q: "Quel événement marque la naissance de l'Univers selon le modèle actuel ?", options: ["La formation de la Voie Lactée", "Le Big Bang", "L'apparition du système solaire"], ans: 1, diff: "moyenne", expl: "Le Big Bang est le modèle qui décrit les débuts de l'Univers, il y a 13,8 milliards d'années." },
+    { q: "Comment évoluent les dimensions de l'Univers depuis ses débuts ?", options: ["Elles diminuent", "Elles ne changent pas", "Elles augmentent"], ans: 2, diff: "moyenne", expl: "L'Univers est en expansion : les galaxies s'éloignent continuellement les unes des autres." },
+    { q: "L'univers observable a un âge d'environ :", options: ["13,8 milliards d'années", "10,1 milliards d'années", "4,6 milliards d'années"], ans: 0, diff: "moyenne", expl: "Selon la théorie, l'Univers est né il y a 13,8 milliards d'années." },
+    { q: "Le système solaire s'est formé il y a environ :", options: ["13,8 milliards d'années", "4,6 milliards d'années", "380 000 ans"], ans: 1, diff: "moyenne", expl: "Notre système solaire est bien plus jeune que l'Univers, il s'est formé il y a environ 4,6 milliards d'années." },
+    { q: "Comment évolue la température de l'Univers depuis le Big Bang ?", options: ["Elle augmente", "Elle reste stable", "Elle diminue"], ans: 2, diff: "moyenne", expl: "L'Univers est né dans un état extrêmement dense et chaud. En s'étendant, il s'est refroidi." },
+    { q: "Où ont été fabriqués les premiers éléments chimiques légers (hydrogène, hélium) ?", options: ["Dans les étoiles", "Lors des premières fractions de secondes après le Big Bang", "Sur la Terre"], ans: 1, diff: "moyenne", expl: "L'hydrogène et l'hélium se sont formés très rapidement après le Big Bang." },
+    { q: "Où ont été fabriqués les atomes plus lourds que le fer (comme ceux de notre corps) ?", options: ["Lors du Big Bang", "Dans le cœur des étoiles", "Sur la Terre primitive"], ans: 1, diff: "moyenne", expl: "Les éléments complexes (carbone, oxygène, fer...) sont synthétisés à l'intérieur des étoiles lors de réactions nucléaires." },
+    { q: "Classe ces objets du plus petit au plus grand : Univers, Soleil, Voie Lactée, Terre.", options: ["Terre, Soleil, Voie Lactée, Univers", "Soleil, Terre, Univers, Voie Lactée", "Terre, Voie Lactée, Soleil, Univers"], ans: 0, diff: "moyenne", expl: "La Terre tourne autour du Soleil, qui est dans la Voie Lactée, qui est elle-même dans l'Univers." },
+    { q: "Quel est l'ordre d'apparition chronologique correct des éléments de l'Univers ?", options: ["Atomes ➔ Particules ➔ Étoiles ➔ Galaxies", "Particules ➔ Atomes ➔ Étoiles ➔ Système solaire", "Galaxies ➔ Étoiles ➔ Atomes ➔ Particules"], ans: 1, diff: "moyenne", expl: "Les éléments se sont formés du plus simple au plus complexe : particules (protons), puis atomes, puis étoiles/galaxies, puis planètes." },
+    { q: "Peut-on dire que l'Univers a une histoire ?", options: ["Non, il a toujours été identique.", "Oui, car sa matière, ses dimensions et son organisation ont évolué.", "Oui, mais uniquement sur la Terre."], ans: 1, diff: "moyenne", expl: "L'Univers a évolué au cours du temps : expansion, refroidissement, formation des atomes, puis des galaxies." },
+
+    // --- 🟠 NOTATION SCIENTIFIQUE ET ORDRES DE GRANDEUR (Moyenne) ---
+    { q: "Parmi ces nombres, lequel est écrit en notation scientifique ?", options: ["25 × 10³", "2,5 × 10⁴", "0,25 × 10⁵"], ans: 1, diff: "moyenne", expl: "En notation scientifique (a × 10ⁿ), le nombre 'a' doit être compris entre 1 inclus et 10 exclus." },
+    { q: "Quel est l'ordre de grandeur du nombre 1,25 × 10⁷ ?", options: ["10⁶", "10⁷", "10⁸"], ans: 1, diff: "moyenne", expl: "L'ordre de grandeur est donné par la puissance de 10. 1,25 est très proche de 1, donc on garde 10⁷." },
+    { q: "La distance Terre-Soleil est de 150 millions de km. Comment l'écrire en notation scientifique ?", options: ["15 × 10⁷ km", "1,5 × 10⁸ km", "0,15 × 10⁹ km"], ans: 1, diff: "moyenne", expl: "150 000 000 s'écrit 1,5 × 10⁸ (on décale la virgule de 8 rangs vers la gauche)." },
+    { q: "Le nombre 0,956 × 10⁴ n'est pas en notation scientifique. Quelle est la bonne écriture ?", options: ["9,56 × 10³", "95,6 × 10²", "9,56 × 10⁵"], ans: 0, diff: "moyenne", expl: "On décale la virgule d'un rang vers la droite (9,56), il faut donc soustraire 1 à l'exposant : 10^(4-1) = 10³." },
+    { q: "L'ordre de grandeur de la dimension d'une galaxie est de...", options: ["10⁷ m", "10²¹ m", "10¹³ m"], ans: 1, diff: "moyenne", expl: "Une galaxie est immense, son ordre de grandeur est d'environ 10²¹ mètres." },
+    { q: "L'ordre de grandeur de la taille d'un humain est de...", options: ["10⁰ m", "10² m", "10⁻² m"], ans: 0, diff: "moyenne", expl: "10⁰ m est égal à 1 mètre. C'est l'ordre de grandeur adapté pour un humain (environ 1,70 m)." },
+
+    // --- 🔴 MATHS ET FORMULES (Vitesse, Distance, TEMPS) (Difficile) ---
+    { q: "Quelle relation mathématique relie la vitesse (v), la distance (d) et le temps (t) ?", options: ["v = d × t", "v = d / t", "d = v / t"], ans: 1, diff: "difficile", expl: "La vitesse est la distance divisée par le temps." },
+    { q: "Quelle est la formule correcte pour calculer une distance (d) ?", options: ["d = v / t", "d = v × t", "d = t / v"], ans: 1, diff: "difficile", expl: "Si tu connais la vitesse et la durée du trajet, tu les multiplies pour obtenir la distance (d = v × t)." },
+    { q: "⭐ Quelle est la formule correcte pour calculer un temps de parcours (t) ?", options: ["t = d / v", "t = v / d", "t = d × v"], ans: 0, diff: "difficile", expl: "Pour trouver le temps, on divise la distance à parcourir par la vitesse (t = d / v)." },
+    
+    // --- CALCULS DE TEMPS (t = d/v) ---
+    { q: "⭐ La Terre est à 150 000 000 km du Soleil. Combien de temps met la lumière pour nous atteindre ? (v = 300 000 km/s)", options: ["50 secondes", "500 secondes", "5000 secondes"], ans: 1, diff: "difficile", expl: "t = d / v. Soit 150 000 000 / 300 000 = 500 secondes." },
+    { q: "⭐ Sachant que la lumière du Soleil met 500 secondes pour arriver, combien cela fait-il en minutes ?", options: ["Environ 8 min 20 s", "Environ 5 min", "Environ 12 min"], ans: 0, diff: "difficile", expl: "500 divisé par 60 donne 8, avec un reste de 20. Donc 8 minutes et 20 secondes." },
+    { q: "⭐ Curiosity est sur Mars à 56 millions de km. Combien de temps met son signal radio pour arriver sur Terre ? (v=300 000 km/s)", options: ["Environ 3 secondes", "Environ 186 secondes (≈ 3 minutes)", "Environ 18 minutes"], ans: 1, diff: "difficile", expl: "t = d / v. t = 56 000 000 / 300 000 ≈ 186,6 secondes." },
+    { q: "⭐ Mars s'éloigne parfois à 400 millions de km. Quel est alors le délai de communication ? (t = d / v)", options: ["Environ 5 minutes", "Environ 1333 secondes (≈ 22 minutes)", "Environ 2 heures"], ans: 1, diff: "difficile", expl: "t = 400 000 000 / 300 000 ≈ 1333 secondes. 1333 / 60 ≈ 22,2 minutes." },
+    { q: "⭐ La comète Tchouri (sonde Rosetta) était à 500 millions de km de la Terre. Temps du signal radio ?", options: ["1666 secondes (≈ 28 minutes)", "500 secondes", "3000 secondes"], ans: 0, diff: "difficile", expl: "t = d / v. t = 500 000 000 / 300 000 ≈ 1666 secondes." },
+    { q: "⭐ Jupiter est à environ 600 millions de km de la Terre. Temps de communication avec une sonde ? (v=300 000 km/s)", options: ["2000 secondes (≈ 33 min)", "200 secondes", "10 minutes"], ans: 0, diff: "difficile", expl: "t = 600 000 000 / 300 000 = 2000 secondes, soit un peu plus d'une demi-heure." },
+    { q: "⭐ Si un vaisseau imaginaire voyageait à 150 000 km/s vers la Lune (300 000 km), combien de temps mettrait-il ?", options: ["1 seconde", "2 secondes", "4 secondes"], ans: 1, diff: "difficile", expl: "t = d / v. t = 300 000 / 150 000 = 2 secondes." },
+
+    // --- CALCULS DE DISTANCES ET VITESSES ---
+    { q: "Le laser envoyé vers la Lune met 2,56 secondes pour faire un ALLER-RETOUR. Quelle est la distance Terre-Lune ?", options: ["768 000 km", "384 000 km", "300 000 km"], ans: 1, diff: "difficile", expl: "Distance totale (aller-retour) = v × t = 300 000 × 2,56 = 768 000 km. Pour l'aller simple, on divise par 2 : 384 000 km." },
+    { q: "La lumière met 12 minutes pour parvenir du Soleil à Mars. Quelle est la distance Soleil-Mars ? (indice: 12 min = 720 s)", options: ["216 millions de km", "150 millions de km", "300 millions de km"], ans: 0, diff: "difficile", expl: "d = v × t. d = 300 000 × 720 = 216 000 000 km." },
+    { q: "La planète Mars est à environ 450 000 000 km de la Terre. Combien cela fait-il en unités astronomiques (ua) ?", options: ["3 ua", "4,5 ua", "0,33 ua"], ans: 0, diff: "difficile", expl: "Sachant que 1 ua = 150 000 000 km, on divise 450 millions par 150 millions, ce qui donne 3 ua." },
+    { q: "Si la lumière d'une étoile met 4,3 ans à nous parvenir, à quelle distance en kilomètres est-elle ? (1 al ≈ 9,5 × 10¹² km)", options: ["4,08 × 10¹³ km", "40,8 × 10¹³ km", "4,3 × 10¹² km"], ans: 0, diff: "difficile", expl: "d = 4,3 × (9,5 × 10¹²) = 40,85 × 10¹². En notation scientifique : 4,085 × 10¹³ km." },
+    { q: "L'amas d'Hercule est situé à 25 000 a.l. Combien de temps a voyagé sa lumière que l'on observe aujourd'hui ?", options: ["25 000 jours", "25 000 ans", "Impossible à savoir"], ans: 1, diff: "difficile", expl: "Par définition, la lumière parcourt 1 année-lumière en 1 an. Donc pour 25 000 a.l., elle met 25 000 ans." },
+    
+    // --- EXERCICES ÉCRITURES SCIENTIFIQUES COMPLEXES ---
+    { q: "Le diamètre de Jupiter est de 71 492 000 m. Quelle est son écriture scientifique ?", options: ["7,1492 × 10⁷ m", "71,492 × 10⁶ m", "7,1492 × 10⁻⁷ m"], ans: 0, diff: "difficile", expl: "Pour avoir un nombre entre 1 et 10, on place la virgule après le 7, ce qui fait un décalage de 7 rangs vers la gauche." },
+    { q: "Le diamètre de Saturne est de 602,68 × 10⁵ m. Écris-le en notation scientifique.", options: ["6,0268 × 10³ m", "6,0268 × 10⁷ m", "60,268 × 10⁶ m"], ans: 1, diff: "difficile", expl: "602,68 n'est pas scientifique. On décale de 2 rangs vers la gauche : 6,0268. On ajoute 2 à l'exposant : 5 + 2 = 7." },
+    { q: "Le rayon du Soleil est de 7 × 10⁵ km. Combien cela fait-il en mètres (m) ? (Rappel: 1 km = 10³ m)", options: ["7 × 10² m", "7 × 10⁸ m", "7 × 10⁵ m"], ans: 1, diff: "difficile", expl: "Il faut multiplier par 1000 (ou 10³). Selon les règles des puissances : 10⁵ × 10³ = 10⁸." },
+    { q: "Le rayon de Jupiter est de 0,7 × 10⁸ m. Quelle est l'écriture scientifique correcte ?", options: ["7 × 10⁷ m", "7 × 10⁹ m", "7 × 10⁸ m"], ans: 0, diff: "difficile", expl: "0,7 est plus petit que 1. On décale la virgule d'un cran vers la droite pour avoir 7, et on enlève 1 à l'exposant (8 - 1 = 7)." },
+    { q: "L'étoile polaire est à environ 4 × 10¹⁶ km. L'année lumière vaut 10¹³ km. Distance en a.l. ?", options: ["4 a.l.", "4000 a.l.", "400 a.l."], ans: 1, diff: "difficile", expl: "(4 × 10¹⁶) / 10¹³ = 4 × 10³ = 4000 années-lumière." },
+    
+    // --- VRAI/FAUX PIÈGES LOGIQUES ---
+    { q: "Dans les manuels, le système solaire est souvent représenté 'hors échelle'. Pourquoi ?", options: ["Car les planètes changent de taille.", "Car le Soleil est trop petit.", "Car si on respecte la taille des planètes, les distances seraient impossibles à dessiner sur une feuille."], ans: 2, diff: "moyenne", expl: "Les distances sont tellement immenses par rapport à la taille des planètes qu'un dessin à l'échelle tiendrait sur plusieurs kilomètres !" },
+    { q: "Une année-lumière correspond environ à...", options: ["10 000 milliards de kilomètres", "300 000 kilomètres", "150 millions de kilomètres"], ans: 0, diff: "difficile", expl: "d = v × t. d = 300 000 km/s × 31 536 000 secondes (1 an) ≈ 9,46 × 10¹² km (soit près de 10 000 milliards de km)." }
+];
+
+        let selectedQuestions = [];
+        let currentScore = 0;
+        let answeredCount = 0;
+
+        // Fonction pour mélanger un tableau (Fisher-Yates)
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
+        // Initialisation du quiz
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = ''; // Nettoyer le container
+            document.getElementById('score-panel').style.display = 'none';
+            currentScore = 0;
+            answeredCount = 0;
+
+            // Mélanger toutes les questions et en prendre 10
+            let shuffled = shuffleArray([...allQuestions]);
+            selectedQuestions = shuffled.slice(0, 10);
+
+            // Générer le HTML pour ces 10 questions
+            selectedQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                questionDiv.id = `q-block-${index}`;
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIndex) => {
+                    optionsHtml += `
+                        <li>
+                            <label>
+                                <input type="radio" name="q${index}" value="${optIndex}">
+                                ${opt}
+                            </label>
+                        </li>
+                    `;
+                });
+
+                questionDiv.innerHTML = `
+                    <span class="difficulty ${q.diff}">${q.diff}</span>
+                    <h3>Question ${index + 1} : ${q.q}</h3>
+                    <ul class="options">${optionsHtml}</ul>
+                    <button onclick="checkAnswer(${index})">Valider</button>
+                    <div class="feedback" id="feedback-${index}"></div>
+                `;
+                container.appendChild(questionDiv);
+            });
+            
+            // Remonter en haut de la page au démarrage
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Vérification de la réponse
+        function checkAnswer(index) {
+            const block = document.getElementById(`q-block-${index}`);
+            const selected = block.querySelector(`input[name="q${index}"]:checked`);
+            const feedbackBlock = document.getElementById(`feedback-${index}`);
+            const btn = block.querySelector('button');
+
+            if (!selected) {
+                alert("Sélectionne une réponse avant de valider !");
+                return;
+            }
+
+            // Désactiver les boutons radio pour empêcher la triche
+            const radios = block.querySelectorAll(`input[name="q${index}"]`);
+            radios.forEach(r => r.disabled = true);
+            btn.style.display = 'none';
+
+            const question = selectedQuestions[index];
+            const isCorrect = parseInt(selected.value) === question.ans;
+
+            if (isCorrect) {
+                currentScore++;
+                feedbackBlock.className = 'feedback correct';
+                feedbackBlock.innerHTML = `<strong>Exact !</strong> ${question.expl}`;
+            } else {
+                feedbackBlock.className = 'feedback incorrect';
+                feedbackBlock.innerHTML = `<strong>Faux.</strong> La bonne réponse était la n°${question.ans + 1}.<br><br>${question.expl}`;
+            }
+            
+            feedbackBlock.style.display = 'block';
+            answeredCount++;
+
+            // Afficher le score final quand tout est répondu
+            if (answeredCount === selectedQuestions.length) {
+                const scorePanel = document.getElementById('score-panel');
+                document.getElementById('score').innerText = currentScore;
+                scorePanel.style.display = 'block';
+                // Faire défiler jusqu'au score
+                setTimeout(() => scorePanel.scrollIntoView({ behavior: 'smooth' }), 300);
+            }
+        }
+
+        // Lancer le quiz au chargement de la page
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
