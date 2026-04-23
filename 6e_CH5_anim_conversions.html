@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertisseur Pédagogique - Masses et Volumes</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --primary-hover: #0056b3;
+            --success: #27ae60;
+            --dark: #343a40;
+            --bg-body: #f0f2f5;
+            --bg-panel: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: var(--bg-body); 
+            margin: 0; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+
+        /* --- NAVIGATION --- */
+        .tabs { 
+            display: flex; 
+            gap: 5px; 
+            width: 100%; 
+            max-width: 1150px; 
+            margin-bottom: -2px; 
+            z-index: 2; 
+        }
+        .tab-btn { 
+            flex: 1; 
+            padding: 12px; 
+            border: none; 
+            background: #dee2e6; 
+            cursor: pointer; 
+            border-radius: 10px 10px 0 0; 
+            font-weight: bold; 
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem); 
+            color: #495057; 
+            transition: 0.2s;
+        }
+        .tab-btn.active { 
+            background: white; 
+            color: var(--primary); 
+            border: 2px solid var(--dark); 
+            border-bottom: none; 
+        }
+
+        /* --- CONTENEUR PRINCIPAL --- */
+        .app-container { 
+            background: white; 
+            padding: clamp(15px, 3vw, 25px); 
+            border-radius: 0 0 15px 15px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 1150px; 
+            box-sizing: border-box; 
+            border: 2px solid var(--dark); 
+        }
+
+        /* --- ZONE DE CONFIGURATION --- */
+        .setup-zone { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 20px; 
+            background: var(--bg-panel); 
+            padding: 15px; 
+            border-radius: 10px; 
+        }
+        .setup-zone input, .setup-zone select, .btn-action { 
+            padding: 12px; 
+            font-size: 1rem; 
+            border: 2px solid var(--border-color); 
+            border-radius: 8px; 
+            outline: none; 
+        }
+        .setup-zone input { 
+            width: 120px; 
+            text-align: center; 
+            font-weight: bold; 
+            cursor: pointer; 
+            background: #fff; 
+        }
+        .setup-zone input:focus { border-color: var(--primary); }
+        .setup-zone select { flex: 1; min-width: 100px; background: #fff; cursor: pointer; }
+        
+        .btn-action { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: bold; 
+            flex-grow: 1;
+            transition: 0.2s;
+        }
+        .btn-action:hover:not(:disabled) { background: var(--primary-hover); }
+        .btn-action:disabled { background: #6c757d; cursor: not-allowed; opacity: 0.7; }
+
+        /* --- MISE EN PAGE : PANNEAUX --- */
+        .main-layout { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+        }
+        .left-panel { flex: 1; width: 100%; min-width: 0; }
+        .right-panel { 
+            background: var(--bg-panel); 
+            border: 2px solid var(--border-color); 
+            border-radius: 10px; 
+            padding: 15px; 
+            width: 100%; 
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 900px) {
+            .main-layout { flex-direction: row; align-items: flex-start; }
+            .right-panel { width: 320px; min-height: 400px; }
+            .setup-zone select { flex: 0 1 auto; }
+            .btn-action { flex-grow: 0; }
+        }
+
+        .instruction { 
+            font-size: 1.05rem; 
+            color: #495057; 
+            font-weight: 500; 
+            border-left: 5px solid var(--primary); 
+            padding: 10px 15px; 
+            background: #eef6ff; 
+            margin: 0 0 15px 0; 
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* --- TABLEAU RESPONSIVE --- */
+        .table-wrapper { 
+            width: 100%; 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch; 
+            position: relative; 
+            border: 2px solid var(--dark);
+            border-radius: 8px;
+            background: white;
+        }
+        
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            min-width: 650px; 
+            table-layout: fixed; 
+        }
+        th, td { 
+            border: 1px solid #666; 
+            height: 55px; 
+            text-align: center; 
+            font-size: 1.6rem; 
+            font-weight: bold; 
+        }
+        th { background: var(--dark); color: white; font-size: 0.9rem; height: 35px; }
+        
+        /* Couleurs du tableau */
+        .bg-yellow { background-color: #fcf3cf !important; color: #000; border-bottom: 2px solid #000; }
+        .bg-blue-light { background-color: #e0f7fa !important; color: #0056b3; font-size: 1rem; }
+        .bg-green-light { background-color: #d1f2eb !important; color: #0056b3; font-size: 1rem; }
+        .highlight-l { background-color: #e8f8f5 !important; border: 2px solid #1abc9c !important; font-weight: bold; color: #16a085; }
+        .border-bottom-green { border-bottom: 2px solid #1abc9c !important; }
+        .border-left-green { border-left: 2px solid #1abc9c !important; }
+        .border-right-green { border-right: 2px solid #1abc9c !important; }
+
+        .ligne-active { background-color: #fff9db; }
+        .ligne-terminee { background-color: #f8f9fa; color: #adb5bd; }
+
+        /* --- ELEMENTS INTERACTIFS --- */
+        .virgule-mobile {
+            position: absolute;
+            color: #dc3545;
+            font-size: 2.8rem;
+            font-weight: bold;
+            z-index: 10;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: none;
+        }
+
+        .chiffre-unite { color: #fd7e14; text-decoration: underline; }
+        .zero-ajoute { color: #dc3545; }
+        .zero-cliquable { cursor: pointer; transition: 0.2s; }
+        .zero-cliquable:hover, .zero-cliquable:active { background-color: #ffe3e3; }
+
+        /* --- RESULTATS --- */
+        .results-title { margin-top: 0; text-align: center; color: #2c3e50; border-bottom: 2px solid #bdc3c7; padding-bottom: 10px; font-size: 1.2rem; }
+        .results-container { display: flex; flex-direction: column; gap: 10px; }
+        .result-item {
+            background: var(--success);
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* --- PAVE NUMERIQUE --- */
+        .numpad {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #e9ecef;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            z-index: 2000;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+            border-radius: 15px 15px 0 0;
+        }
+        @media (min-width: 600px) {
+            .numpad {
+                bottom: 20px;
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+                width: 300px;
+                border-radius: 10px;
+                border: 2px solid var(--dark);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            }
+        }
+        .numpad button { 
+            height: 55px; 
+            font-size: 1.4rem; 
+            font-weight: bold; 
+            border-radius: 8px; 
+            border: 1px solid #ced4da;
+            background: white; 
+            color: var(--dark); 
+            cursor: pointer; 
+        }
+        .numpad button:active { background: #dee2e6; transform: scale(0.95); }
+        .numpad .btn-del { background: #e74c3c; color: white; border: none; }
+        .numpad .btn-ok { grid-column: span 3; background: #2ecc71; color: white; border: none; }
+
+        .hidden { display: none !important; }
+        .reset-btn { margin-top: 20px; width: 100%; max-width: 1150px; padding: 15px; font-size: 1.1rem; border-radius: 8px; background-color: #6c757d; }
+    </style>
+</head>
+<body>
+
+    <div class="tabs">
+        <button type="button" id="tab-masse" class="tab-btn active" onclick="switchTab('masse')">⚖️ Masses</button>
+        <button type="button" id="tab-volume" class="tab-btn" onclick="switchTab('volume')">🧊 Volumes & Capacités</button>
+    </div>
+
+    <div id="numpad" class="numpad hidden">
+        <button type="button" onclick="typeNum('1')">1</button>
+        <button type="button" onclick="typeNum('2')">2</button>
+        <button type="button" onclick="typeNum('3')">3</button>
+        <button type="button" onclick="typeNum('4')">4</button>
+        <button type="button" onclick="typeNum('5')">5</button>
+        <button type="button" onclick="typeNum('6')">6</button>
+        <button type="button" onclick="typeNum('7')">7</button>
+        <button type="button" onclick="typeNum('8')">8</button>
+        <button type="button" onclick="typeNum('9')">9</button>
+        <button type="button" onclick="typeNum(',')">,</button>
+        <button type="button" onclick="typeNum('0')">0</button>
+        <button type="button" class="btn-del" onclick="typeNum('DEL')">⌫</button>
+        <button type="button" class="btn-ok" onclick="hideNumpad()">VALIDER</button>
+    </div>
+
+    <div id="content-masse" class="app-container">
+        <div class="setup-zone">
+            <input type="text" id="val-masse" placeholder="Nombre" readonly onclick="showNumpad('val-masse')">
+            <select id="dep-masse">
+                <option value="0">t</option><option value="1">q</option><option value="2">.</option>
+                <option value="3" selected>kg</option><option value="4">hg</option><option value="5">dag</option>
+                <option value="6">g</option><option value="7">dg</option><option value="8">cg</option><option value="9">mg</option>
+            </select>
+            <span style="font-weight:bold; font-size:1.2rem;">➔</span>
+            <select id="arr-masse">
+                <option value="0">t</option><option value="1">q</option><option value="2">.</option>
+                <option value="3">kg</option><option value="4">hg</option><option value="5">dag</option>
+                <option value="6" selected>g</option><option value="7">dg</option><option value="8">cg</option><option value="9">mg</option>
+            </select>
+            <button type="button" id="btn-masse" class="btn-action" onclick="gererEtape('masse')">Démarrer</button>
+        </div>
+        
+        <div class="main-layout">
+            <div class="left-panel">
+                <p class="instruction" id="aide-masse">Cliquez sur "Nombre" pour taper la valeur.</p>
+                <div class="table-wrapper" id="wrap-masse">
+                    <table id="tab-masse">
+                        <thead>
+                            <tr><th>t</th><th>q</th><th>.</th><th>kg</th><th>hg</th><th>dag</th><th>g</th><th>dg</th><th>cg</th><th>mg</th></tr>
+                        </thead>
+                        <tbody id="body-masse">
+                            <tr id="masse-L0" class="ligne-active"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                            <tr id="masse-L1"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                            <tr id="masse-L2"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                            <tr id="masse-L3"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        </tbody>
+                    </table>
+                    <div id="virgule-masse" class="virgule-mobile">,</div>
+                </div>
+            </div>
+            <div class="right-panel">
+                <h3 class="results-title">📊 Résultats</h3>
+                <div id="res-list-masse" class="results-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="content-volume" class="app-container hidden">
+        <div class="setup-zone">
+            <input type="text" id="val-volume" placeholder="Nombre" readonly onclick="showNumpad('val-volume')">
+            <select id="dep-volume">
+                <optgroup label="Volumes (m³)">
+                    <option value="0">m³</option><option value="3">dm³</option><option value="6">cm³</option>
+                </optgroup>
+                <optgroup label="Capacités (L)">
+                    <option value="0">kL</option><option value="1">hL</option><option value="2">daL</option>
+                    <option value="3" selected>L</option><option value="4">dL</option><option value="5">cL</option><option value="6">mL</option>
+                </optgroup>
+            </select>
+            <span style="font-weight:bold; font-size:1.2rem;">➔</span>
+            <select id="arr-volume">
+                <optgroup label="Volumes (m³)">
+                    <option value="0">m³</option><option value="3">dm³</option><option value="6" selected>cm³</option>
+                </optgroup>
+                <optgroup label="Capacités (L)">
+                    <option value="3">L</option><option value="6">mL</option>
+                </optgroup>
+            </select>
+            <button type="button" id="btn-volume" class="btn-action" onclick="gererEtape('volume')">Démarrer</button>
+        </div>
+
+        <div class="main-layout">
+            <div class="left-panel">
+                <p class="instruction" id="aide-volume">Cliquez sur "Nombre" pour taper le volume.</p>
+                <div class="table-wrapper" id="wrap-volume">
+                    <table id="tab-volume">
+                        <thead>
+                            <tr>
+                                <th class="bg-yellow" style="width: 14.28%;">m³</th><th style="width: 14.28%; border-bottom: 2px solid #000;"></th><th style="width: 14.28%; border-bottom: 2px solid #000;"></th>
+                                <th class="bg-yellow" style="width: 14.28%;">dm³</th><th style="width: 14.28%; border-bottom: 2px solid #000;"></th><th style="width: 14.28%; border-bottom: 2px solid #000;"></th>
+                                <th class="bg-yellow" style="width: 14.28%;">cm³</th>
+                            </tr>
+                            <tr>
+                                <th class="bg-green-light">kL</th><th class="bg-blue-light">hL</th><th class="bg-blue-light">daL</th>
+                                <th class="highlight-l">L</th><th class="bg-blue-light">dL</th><th class="bg-blue-light">cL</th>
+                                <th class="highlight-l">mL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="body-volume">
+                            <tr id="volume-L0" class="ligne-active"><td></td><td></td><td></td><td class="border-left-green border-right-green border-bottom-green"></td><td></td><td></td><td class="border-left-green border-right-green border-bottom-green"></td></tr>
+                            <tr id="volume-L1"><td></td><td></td><td></td><td class="border-left-green border-right-green border-bottom-green"></td><td></td><td></td><td class="border-left-green border-right-green border-bottom-green"></td></tr>
+                            <tr id="volume-L2"><td></td><td></td><td></td><td class="border-left-green border-right-green border-bottom-green"></td><td></td><td></td><td class="border-left-green border-right-green border-bottom-green"></td></tr>
+                            <tr id="volume-L3"><td></td><td></td><td></td><td class="border-left-green border-right-green border-bottom-green"></td><td></td><td></td><td class="border-left-green border-right-green border-bottom-green"></td></tr>
+                        </tbody>
+                    </table>
+                    <div id="virgule-volume" class="virgule-mobile">,</div>
+                </div>
+            </div>
+            <div class="right-panel">
+                <h3 class="results-title">📊 Résultats</h3>
+                <div id="res-list-volume" class="results-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" onclick="window.location.reload()" class="btn-action reset-btn">🔄 Réinitialiser tout l'exercice</button>
+
+    <script>
+        // --- GESTION DU PAVE NUMERIQUE ET CLAVIER PHYSIQUE ---
+        let inputActif = null;
+
+        function showNumpad(inputId) {
+            inputActif = document.getElementById(inputId);
+            document.getElementById('numpad').classList.remove('hidden');
+            inputActif.style.borderColor = "var(--primary)";
+        }
+
+        function hideNumpad() {
+            if (inputActif) inputActif.style.borderColor = "var(--border-color)";
+            document.getElementById('numpad').classList.add('hidden');
+            inputActif = null;
+        }
+
+        function typeNum(char) {
+            if (!inputActif) return;
+            if (char === 'DEL') {
+                inputActif.value = inputActif.value.slice(0, -1);
+            } else if (char === ',') {
+                if (!inputActif.value.includes(',')) inputActif.value += ',';
+            } else {
+                inputActif.value += char;
+            }
+        }
+
+        // Écouteur pour autoriser l'utilisation du clavier de l'ordinateur
+        document.addEventListener('keydown', function(e) {
+            if (!inputActif) return; // Ignore si aucune case n'est cliquée
+            
+            const validKeys = ['0','1','2','3','4','5','6','7','8','9'];
+            if (validKeys.includes(e.key)) {
+                e.preventDefault();
+                typeNum(e.key);
+            } else if (e.key === ',' || e.key === '.') {
+                e.preventDefault();
+                typeNum(',');
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                typeNum('DEL');
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                hideNumpad();
+            }
+        });
+
+        // --- GESTION DE L'ANIMATION ET DU TABLEAU ---
+        let state = {
+            masse: { etape: 0, ligne: 0, memo: {}, resultAdded: false },
+            volume: { etape: 0, ligne: 0, memo: {}, resultAdded: false }
+        };
+
+        function switchTab(tab) {
+            hideNumpad();
+            // Retrait de la classe active de tous les boutons d'onglets
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            // Ajout sécurisé de la classe active via l'ID
+            document.getElementById('tab-' + tab).classList.add('active');
+            
+            document.getElementById('content-masse').classList.toggle('hidden', tab !== 'masse');
+            document.getElementById('content-volume').classList.toggle('hidden', tab !== 'volume');
+        }
+
+        function getLabel(type, i) {
+            if (type === 'masse') return ["t", "q", ".", "kg", "hg", "dag", "g", "dg", "cg", "mg"][i];
+            if (type === 'volume') return ["kL (m³)", "hL", "daL", "L (dm³)", "dL", "cL", "mL (cm³)"][i];
+        }
+
+        function calculerResultat(valStr, depIndex, arrIndex) {
+            let num = parseFloat(valStr.replace(',', '.'));
+            let factor = Math.pow(10, arrIndex - depIndex);
+            let res = num * factor;
+            return parseFloat(res.toPrecision(12)).toString().replace('.', ',');
+        }
+
+        function placerVirgule(type, col, lig) {
+            const tab = document.getElementById(`tab-${type}`);
+            const headerOffset = (type === 'volume' ? 2 : 1);
+            const cell = tab.rows[lig + headerOffset].cells[col];
+            const virgule = document.getElementById(`virgule-${type}`);
+
+            virgule.style.display = "block";
+            virgule.style.left = (cell.offsetLeft + cell.offsetWidth - 12) + "px";
+            virgule.style.top = (cell.offsetTop + 5) + "px";
+        }
+
+        function gererEtape(type) {
+            hideNumpad();
+            let s = state[type];
+            const valInput = document.getElementById(`val-${type}`).value;
+            if (!valInput) return;
+            
+            const selectDep = document.getElementById(`dep-${type}`);
+            const selectArr = document.getElementById(`arr-${type}`);
+            const dep = parseInt(selectDep.value);
+            const arr = parseInt(selectArr.value);
+            
+            const aide = document.getElementById(`aide-${type}`);
+            const btn = document.getElementById(`btn-${type}`);
+            const virgule = document.getElementById(`virgule-${type}`);
+            const resList = document.getElementById(`res-list-${type}`);
+            
+            const tr = document.getElementById(`${type}-L${s.ligne}`);
+            const td = tr.getElementsByTagName('td');
+
+            if (s.etape === 0) {
+                let valStr = valInput.replace(',', '.');
+                let partieEntiere = valStr.split('.')[0];
+                if (partieEntiere === "") partieEntiere = "0";
+                
+                let chiffreU = partieEntiere[partieEntiere.length - 1];
+                s.memo = { valStr: valInput, partieEntiere, chiffreU, dep, arr, decimales: valStr.split('.')[1] || "" };
+                s.resultAdded = false; 
+
+                td[dep].innerHTML = `<span class="chiffre-unite">${chiffreU}</span>`;
+                placerVirgule(type, dep, s.ligne);
+
+                aide.innerHTML = `Etape 1 : Place le chiffre des unités (<b>${chiffreU}</b>) dans la colonne <b>${getLabel(type, dep)}</b>.`;
+                btn.innerText = "Placer les autres chiffres";
+                s.etape = 1;
+
+            } else if (s.etape === 1) {
+                let gauche = s.memo.partieEntiere.slice(0, -1);
+                let colG = s.memo.dep - 1;
+                for (let i = gauche.length - 1; i >= 0; i--) {
+                    if (colG >= 0) td[colG].innerText = gauche[i];
+                    colG--;
+                }
+                let droite = s.memo.decimales;
+                let colD = s.memo.dep + 1;
+                for (let i = 0; i < droite.length; i++) {
+                    if (colD < td.length) td[colD].innerText = droite[i];
+                    colD++;
+                }
+                aide.innerText = "Etape 2 : Écris les autres chiffres autour de l'unité.";
+                btn.innerText = "Déplacer la virgule (Convertir)";
+                s.etape = 2;
+
+            } else if (s.etape === 2) {
+                btn.disabled = true;
+                
+                lancerAnim(type, s.memo.dep, s.memo.arr, td, () => {
+                    identifierZeros(td, s.memo.arr);
+                    let necessaire = false;
+                    for (let i = s.memo.arr + 1; i < td.length; i++) {
+                        if (td[i].innerText !== "" && td[i].innerText !== "0") { necessaire = true; break; }
+                    }
+                    if (!necessaire) virgule.style.display = "none";
+                    
+                    if (!s.resultAdded) {
+                        let resCalcul = calculerResultat(s.memo.valStr, s.memo.dep, s.memo.arr);
+                        let txtDep = selectDep.options[selectDep.selectedIndex].text;
+                        let txtArr = selectArr.options[selectArr.selectedIndex].text;
+                        
+                        let newItem = document.createElement('div');
+                        newItem.className = 'result-item';
+                        newItem.innerHTML = `<span style="font-size:0.9em; opacity:0.8; margin-right:5px;">L. ${s.ligne + 1} :</span> ${s.memo.valStr} ${txtDep} <b>= ${resCalcul} ${txtArr}</b>`;
+                        resList.appendChild(newItem);
+                        s.resultAdded = true;
+                    }
+                    
+                    aide.innerHTML = "<b>Fini !</b> Clique sur les zéros inutiles dans le tableau pour les effacer.";
+                    btn.innerText = "Ligne Suivante";
+                    btn.disabled = false; 
+                    s.etape = 3;
+                });
+
+            } else if (s.etape === 3) {
+                tr.classList.remove('ligne-active');
+                tr.classList.add('ligne-terminee');
+                for(let cell of td) { cell.onclick = null; cell.classList.remove('zero-cliquable'); }
+                s.ligne++;
+                if (s.ligne > 3) { 
+                    btn.disabled = true; 
+                    aide.innerText = "Tableau plein. Cliquez sur Réinitialiser."; 
+                }
+                else {
+                    document.getElementById(`${type}-L${s.ligne}`).classList.add('ligne-active');
+                    virgule.style.display = "none";
+                    s.etape = 0;
+                    btn.innerText = "Démarrer";
+                    document.getElementById(`val-${type}`).value = "";
+                    aide.innerText = "Prêt pour une autre conversion.";
+                }
+            }
+        }
+
+        async function lancerAnim(type, start, end, cells, cb) {
+            let curr = start;
+            let dir = start < end ? 1 : -1;
+            while (curr !== end) {
+                curr += dir;
+                placerVirgule(type, curr, state[type].ligne);
+                await new Promise(r => setTimeout(r, 500));
+                if (cells[curr].innerText === "") cells[curr].innerHTML = `<span class="zero-ajoute">0</span>`;
+            }
+            cb();
+        }
+
+        function identifierZeros(cells, posV) {
+            for (let i = 0; i < posV; i++) {
+                if (cells[i].innerText === "0") {
+                    cells[i].classList.add('zero-cliquable');
+                    cells[i].onclick = function() { this.innerText = ""; this.classList.remove('zero-cliquable'); };
+                } else if (cells[i].innerText !== "") break;
+            }
+            let significatif = false;
+            for(let j = posV + 1; j < cells.length; j++) {
+                if(cells[j].innerText !== "" && cells[j].innerText !== "0") significatif = true;
+            }
+            if (!significatif) {
+                for (let i = cells.length - 1; i > posV; i--) {
+                    if (cells[i].innerText === "0") {
+                        cells[i].classList.add('zero-cliquable');
+                        cells[i].onclick = function() { this.innerText = ""; this.classList.remove('zero-cliquable'); };
+                    } else if (cells[i].innerText !== "") break;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
