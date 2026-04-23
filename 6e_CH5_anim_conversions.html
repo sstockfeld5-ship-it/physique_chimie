@@ -410,9 +410,8 @@
             }
         }
 
-        // Écouteur pour autoriser l'utilisation du clavier de l'ordinateur
         document.addEventListener('keydown', function(e) {
-            if (!inputActif) return; // Ignore si aucune case n'est cliquée
+            if (!inputActif) return;
             
             const validKeys = ['0','1','2','3','4','5','6','7','8','9'];
             if (validKeys.includes(e.key)) {
@@ -438,11 +437,8 @@
 
         function switchTab(tab) {
             hideNumpad();
-            // Retrait de la classe active de tous les boutons d'onglets
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            // Ajout sécurisé de la classe active via l'ID
             document.getElementById('tab-' + tab).classList.add('active');
-            
             document.getElementById('content-masse').classList.toggle('hidden', tab !== 'masse');
             document.getElementById('content-volume').classList.toggle('hidden', tab !== 'volume');
         }
@@ -459,15 +455,20 @@
             return parseFloat(res.toPrecision(12)).toString().replace('.', ',');
         }
 
+        // Fix de placement de la virgule 100% robuste même en cas de scroll
         function placerVirgule(type, col, lig) {
+            const wrap = document.getElementById(`wrap-${type}`);
             const tab = document.getElementById(`tab-${type}`);
             const headerOffset = (type === 'volume' ? 2 : 1);
             const cell = tab.rows[lig + headerOffset].cells[col];
             const virgule = document.getElementById(`virgule-${type}`);
 
+            const cellRect = cell.getBoundingClientRect();
+            const wrapRect = wrap.getBoundingClientRect();
+
             virgule.style.display = "block";
-            virgule.style.left = (cell.offsetLeft + cell.offsetWidth - 12) + "px";
-            virgule.style.top = (cell.offsetTop + 5) + "px";
+            virgule.style.left = (cellRect.right - wrapRect.left + wrap.scrollLeft - 10) + "px";
+            virgule.style.top = (cellRect.top - wrapRect.top + wrap.scrollTop + 5) + "px";
         }
 
         function gererEtape(type) {
@@ -490,6 +491,7 @@
             const td = tr.getElementsByTagName('td');
 
             if (s.etape === 0) {
+                // ETAPE FUSIONNÉE : On place tout le nombre d'un coup
                 let valStr = valInput.replace(',', '.');
                 let partieEntiere = valStr.split('.')[0];
                 if (partieEntiere === "") partieEntiere = "0";
@@ -498,31 +500,32 @@
                 s.memo = { valStr: valInput, partieEntiere, chiffreU, dep, arr, decimales: valStr.split('.')[1] || "" };
                 s.resultAdded = false; 
 
+                // Place l'unité (en orange)
                 td[dep].innerHTML = `<span class="chiffre-unite">${chiffreU}</span>`;
-                placerVirgule(type, dep, s.ligne);
-
-                aide.innerHTML = `Etape 1 : Place le chiffre des unités (<b>${chiffreU}</b>) dans la colonne <b>${getLabel(type, dep)}</b>.`;
-                btn.innerText = "Placer les autres chiffres";
-                s.etape = 1;
-
-            } else if (s.etape === 1) {
+                
+                // Place la partie gauche
                 let gauche = s.memo.partieEntiere.slice(0, -1);
-                let colG = s.memo.dep - 1;
+                let colG = dep - 1;
                 for (let i = gauche.length - 1; i >= 0; i--) {
                     if (colG >= 0) td[colG].innerText = gauche[i];
                     colG--;
                 }
+                
+                // Place la partie droite (décimales)
                 let droite = s.memo.decimales;
-                let colD = s.memo.dep + 1;
+                let colD = dep + 1;
                 for (let i = 0; i < droite.length; i++) {
                     if (colD < td.length) td[colD].innerText = droite[i];
                     colD++;
                 }
-                aide.innerText = "Etape 2 : Écris les autres chiffres autour de l'unité.";
-                btn.innerText = "Déplacer la virgule (Convertir)";
-                s.etape = 2;
 
-            } else if (s.etape === 2) {
+                placerVirgule(type, dep, s.ligne);
+
+                aide.innerHTML = `Le nombre est placé. L'unité (<b>${chiffreU}</b>) est bien dans la colonne <b>${getLabel(type, dep)}</b>.`;
+                btn.innerText = "Déplacer la virgule (Convertir)";
+                s.etape = 1; // On passe directement à l'attente de l'animation
+
+            } else if (s.etape === 1) {
                 btn.disabled = true;
                 
                 lancerAnim(type, s.memo.dep, s.memo.arr, td, () => {
@@ -545,20 +548,20 @@
                         s.resultAdded = true;
                     }
                     
-                    aide.innerHTML = "<b>Fini !</b> Clique sur les zéros inutiles dans le tableau pour les effacer.";
-                    btn.innerText = "Ligne Suivante";
+                    aide.innerHTML = "<b>Fini !</b> Tu peux cliquer sur les zéros inutiles dans le tableau pour les effacer.";
+                    btn.innerText = "Conversion Suivante";
                     btn.disabled = false; 
-                    s.etape = 3;
+                    s.etape = 2;
                 });
 
-            } else if (s.etape === 3) {
+            } else if (s.etape === 2) {
                 tr.classList.remove('ligne-active');
                 tr.classList.add('ligne-terminee');
                 for(let cell of td) { cell.onclick = null; cell.classList.remove('zero-cliquable'); }
                 s.ligne++;
                 if (s.ligne > 3) { 
                     btn.disabled = true; 
-                    aide.innerText = "Tableau plein. Cliquez sur Réinitialiser."; 
+                    aide.innerText = "Le tableau est plein. Cliquez sur Réinitialiser tout l'exercice en bas."; 
                 }
                 else {
                     document.getElementById(`${type}-L${s.ligne}`).classList.add('ligne-active');
@@ -566,7 +569,7 @@
                     s.etape = 0;
                     btn.innerText = "Démarrer";
                     document.getElementById(`val-${type}`).value = "";
-                    aide.innerText = "Prêt pour une autre conversion.";
+                    aide.innerText = "Prêt pour une nouvelle conversion.";
                 }
             }
         }
