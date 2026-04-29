@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activité 2: actions et forces</title>
+    <style>
+        /* =========================================
+           STYLES GÉNÉRAUX ET STRUCTURE A4
+        ========================================= */
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: #f0f0f0; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 20px; 
+            color: #333;
+        }
+
+        /* Simulation de la feuille A4 sur l'écran */
+        .page-a4 {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 3px;
+            position: relative;
+        }
+
+        /* =========================================
+           STYLES DU CONTENU
+        ========================================= */
+        header { border-bottom: 3px solid #2c3e50; margin-bottom: 25px; padding-bottom: 10px; }
+        .chapitre-info { text-align: left; font-size: 0.85rem; color: #555; margin-bottom: -5px; }
+        h1 { color: #2c3e50; text-align: center; margin: 10px 0; font-size: 1.7rem; text-transform: uppercase; }
+
+        section { margin-bottom: 30px; border-left: 5px solid #3498db; padding-left: 20px; }
+        h2 { color: #2980b9; margin-top: 0; font-size: 1.3rem; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        
+        .consigne-box { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 12px; border-radius: 6px; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; }
+        .consigne-box::before { content: '💻'; margin-right: 10px; font-size: 1.2rem; }
+
+        .dotted { border-bottom: 1px dotted #000; display: inline-block; min-width: 200px; padding: 0 5px; margin: 5px 5px; height: 1.2em; vertical-align: bottom; }
+        .definition-box { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        table, th, td { border: 1px solid #444; }
+        th, td { padding: 10px; text-align: center; }
+        th { background-color: #f2f2f2; }
+
+        .retenir { background-color: #e8f8f5; border: 2px solid #27ae60; padding: 20px; margin-top: 25px; border-radius: 8px; }
+        .retenir h3 { margin-top: 0; color: #1e8449; font-size: 1.2rem; text-transform: uppercase; border-bottom: 1px solid #27ae60; padding-bottom: 5px; }
+        
+        ul li { margin-bottom: 10px; line-height: 1.6; }
+
+        .btn-lien { display: inline-block; padding: 12px 24px; color: white; text-decoration: none; font-weight: bold; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.2s; }
+        .btn-animation { background-color: #3498db; }
+        .btn-qcm { background-color: #e67e22; }
+        .qcm-box { background-color: #fdf2e9; border: 2px solid #e67e22; padding: 15px; border-radius: 8px; margin-top: 25px; text-align: center; }
+
+        /* =========================================
+           STYLES STRICTS POUR L'IMPRESSION (2x A4)
+        ========================================= */
+        @media print {
+            /* Fixe la taille de la page imprimante à A4 sans aucune marge logicielle */
+            @page { 
+                size: A4; 
+                margin: 0 !important; 
+            }
+            body { 
+                background: none; 
+                padding: 0; 
+                margin: 0; 
+                font-size: 11.5pt;
+                color: black;
+            }
+            
+            /* On force la page à faire EXACTEMENT 297mm de haut, le navigateur ne peut plus tricher */
+            .page-a4 { 
+                width: 210mm; 
+                height: 297mm; 
+                min-height: 297mm; 
+                padding: 15mm; /* C'est cette div qui crée la marge, pas l'imprimante */
+                box-shadow: none; 
+                border-radius: 0;
+                margin: 0; 
+                page-break-after: always; /* Force la 2e feuille après la div 1 */
+                overflow: hidden; /* Empêche tout contenu de déborder sur une page fantôme */
+            }
+
+            /* Cache tous les boutons à l'impression */
+            .no-print { display: none !important; }
+            
+            /* Conserve les couleurs d'arrière-plan à l'impression */
+            .consigne-box { background-color: #f9f9f9 !important; border: 1px solid #ccc !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .retenir { background-color: #f4fdf7 !important; border: 2px solid #27ae60 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            
+            /* Ajustements d'espacement pour l'impression papier */
+            section { margin-bottom: 25px; }
+            .dotted { min-width: 220px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-a4">
+        <header>
+            <div class="chapitre-info">Chapitre 7: Forces et interactions</div>
+            <h1>Activité 2: actions et forces</h1>
+        </header>
+
+        <div style="text-align: center; margin-bottom: 30px;" class="no-print">
+            <a href="https://sstockfeld5-ship-it.github.io/physique_chimie/3e_Ch7_%20A2_animation.html" target="_blank" class="btn-lien btn-animation">
+                ▶️ Lancer l'animation de l'activité
+            </a>
+        </div>
+
+        <section>
+            <h2>1. Les effets d'une action mécanique</h2>
+            <div class="consigne-box">
+                Consigne : Manipule l'étape 1 de l'animation pour observer les effets produits sur l'objet. Complète ensuite le texte ci-dessous.
+            </div>
+            <p>Une action mécanique exercée par un auteur sur un receveur peut avoir plusieurs effets :</p>
+            <ul>
+                <li>Elle peut mettre l'objet en <strong><span class="dotted"></span></strong>.</li>
+                <li>Elle peut modifier la <strong><span class="dotted"></span></strong> de l'objet.</li>
+                <li>Elle peut <strong><span class="dotted"></span></strong> l'objet.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>2. Modéliser une action : La Force</h2>
+            <div class="consigne-box">
+                Consigne : Utilise l'étape 2 pour découvrir comment on représente une force. Complète ensuite la définition et les caractéristiques ci-dessous.
+            </div>
+            <div class="definition-box">
+                <strong>Définition :</strong> Une <strong>force</strong> est un outil qui permet de <strong><span class="dotted" style="min-width:300px"></span></strong> ou de représenter une action mécanique.
+            </div>
+            
+            <p>Pour définir précisément une force, on utilise 4 caractéristiques. Complète les pointillés devant chaque définition :</p>
+            
+            <ul style="list-style: none; padding-left: 0;">
+                <li><strong><span class="dotted"></span></strong> : C'est l'endroit où s'exerce la force.</li>
+                <li><strong><span class="dotted"></span></strong> : C'est la droite d'action (horizontale, verticale...).</li>
+                <li><strong><span class="dotted"></span></strong> : C'est l'orientation (vers le haut, le bas, la gauche, la droite).</li>
+                <li><strong><span class="dotted"></span></strong> : C'est la valeur de la force exprimée en Newton (N).</li>
+            </ul>
+        </section>
+    </div>
+
+    <div class="page-a4">
+        <section>
+            <h2>3. Mesurer l'intensité d'une force</h2>
+            <div class="consigne-box">
+                Consigne : Passe à l'étape 3. Accroche successivement la pomme et le poids en fonte au dynamomètre. Note tes mesures puis complète l'observation.
+            </div>
+            <p>L'appareil de mesure de la force s'appelle le <strong><span class="dotted"></span></strong>.</p>
+            <p>L'unité de la force est le <strong><span class="dotted"></span></strong>, son symbole est <strong><span class="dotted" style="min-width:60px"></span></strong>.</p>
+            
+            <table>
+                <tr>
+                    <th>Objet utilisé</th>
+                    <th>Masse (en kg)</th>
+                    <th>Poids mesuré (en N)</th>
+                </tr>
+                <tr>
+                    <td>Pomme</td>
+                    <td>0,1 kg</td>
+                    <td>.............................. N</td>
+                </tr>
+                <tr>
+                    <td>Poids en fonte</td>
+                    <td>0,5 kg</td>
+                    <td>.............................. N</td>
+                </tr>
+            </table>
+            <p><strong>Observation :</strong> Pour trouver le Poids en Newton sur Terre, on remarque qu'il faut multiplier la masse en kg par environ <strong><span class="dotted" style="min-width:80px"></span></strong>.</p>
+        </section>
+
+        <section>
+            <h2>4. Représentation graphique : le vecteur</h2>
+            <div class="consigne-box">
+                Consigne : Termine par l'étape 4 en traçant le vecteur force sur ton écran. Complète ensuite les règles de représentation.
+            </div>
+            <p>On représente une force par une flèche appelée <strong>vecteur force</strong> :</p>
+            <ul>
+                <li>L'origine de la flèche correspond au point d'application.</li>
+                <li>L'inclinaison et la pointe de la flèche correspondent à la direction et au sens.</li>
+                <li>La longueur de la flèche est proportionnelle à l'<strong><span class="dotted"></span></strong> de la force (on utilise une échelle).</li>
+            </ul>
+            <p><strong>Exemple :</strong> Si l'échelle est 1 cm pour 1 N, une force de 3 N se représente par une flèche de <strong><span class="dotted" style="min-width:60px"></span></strong> cm.</p>
+        </section>
+
+        <div class="retenir">
+            <h3>⭐ Ce que je dois retenir</h3>
+            <ul>
+                <li>Le <strong>Poids (P)</strong> est une <strong>force</strong>. Il se mesure en <strong>Newton (N)</strong> avec un <strong>dynamomètre</strong>.</li>
+                <li>La <strong>Masse (m)</strong> se mesure en <strong>kg</strong> avec une <strong>balance</strong>.</li>
+                <li>Une force se définit par 4 caractéristiques : Point d'application, Direction, Sens, Intensité.</li>
+                <li>Sur Terre, le poids d'un objet est environ 10 fois plus grand que sa masse (en kg).</li>
+            </ul>
+        </div>
+
+        <div class="qcm-box no-print">
+            <h3 style="color: #d35400; margin-top: 0;">✅ Évaluation</h3>
+            <p><strong>Consigne :</strong> Pour valider tes connaissances, clique sur le lien ci-dessous et réponds au QCM noté.</p>
+            <a href="https://sstockfeld5-ship-it.github.io/physique_chimie/3e_Ch7_A2Forces_qcm.html" target="_blank" class="btn-lien btn-qcm">
+                📝 Faire le QCM noté
+            </a>
+        </div>
+    </div>
+
+    <div style="text-align:center; margin-top:10px; margin-bottom: 30px;" class="no-print">
+        <button onclick="window.print()" style="padding:15px 30px; cursor:pointer; font-weight:bold; background:#2c3e50; color:white; border:none; border-radius:6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 1rem;">
+            🖨️ Imprimer la fiche (2 pages A4 exactes)
+        </button>
+    </div>
+
+</body>
+</html>
