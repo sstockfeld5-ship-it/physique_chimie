@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM Physique-Chimie - 60 Questions</title>
+    <style>
+        :root {
+            --primary: #2b6cb0;
+            --bg-color: #edf2f7;
+            --text-color: #2d3748;
+            --easy: #48bb78;
+            --medium: #ed8936;
+            --hard: #e53e3e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        .question-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            background-color: #fff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .badge-Facile { background-color: var(--easy); }
+        .badge-Moyen { background-color: var(--medium); }
+        .badge-Difficile { background-color: var(--hard); }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .options-list li { margin-bottom: 10px; }
+
+        .options-list label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 6px;
+            background-color: #f7fafc;
+            border: 1px solid #cbd5e0;
+            transition: all 0.2s;
+        }
+
+        .options-list label:hover { background-color: #e2e8f0; }
+
+        input[type="radio"] { margin-right: 15px; transform: scale(1.2); }
+
+        .schema-container {
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover { background-color: #2c5282; }
+        
+        .btn-restart { background-color: #4a5568; display: none; }
+        .btn-restart:hover { background-color: #2d3748; }
+
+        #result-container {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .correct-answer { background-color: #c6f6d5 !important; border-color: var(--easy) !important; }
+        .wrong-answer { background-color: #fed7d7 !important; border-color: var(--hard) !important; }
+        .feedback { font-size: 0.95rem; margin-top: 15px; padding: 10px; border-left: 4px solid var(--primary); background: #ebf8ff; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔬 QCM Interactif : Tirage Aléatoire</h1>
+    <p style="text-align: center; margin-bottom: 25px;"><strong>10 questions</strong> ont été piochées aléatoirement parmi les 60 questions de la banque. Bonne chance !</p>
+
+    <div id="quiz-container"></div>
+
+    <button type="button" class="btn-action" id="btn-valider" onclick="checkAnswers()">Valider mes réponses</button>
+    
+    <div id="result-container">
+        Score: <span id="score">0</span> / 10
+        <p id="score-message" style="font-size: 1.1rem; font-weight: normal; margin-top: 10px;"></p>
+    </div>
+
+    <button type="button" class="btn-action btn-restart" id="btn-restart" onclick="initQuiz()">🔄 Recommencer avec 10 nouvelles questions</button>
+</div>
+
+<script>
+    // ==========================================
+    // BANQUE DES 60 QUESTIONS
+    // ==========================================
+    const questionBank = [
+        // --- MODELE PARTICULAIRE & ETATS ---
+        { level: "Facile", question: "Quel schéma représente l'état solide ?", schema: `<svg width="100" height="100"><rect x="10" y="10" width="80" height="80" fill="none" stroke="#333"/><circle cx="25" cy="25" r="5" fill="#3182ce"/><circle cx="40" cy="25" r="5" fill="#3182ce"/><circle cx="55" cy="25" r="5" fill="#3182ce"/><circle cx="70" cy="25" r="5" fill="#3182ce"/><circle cx="25" cy="40" r="5" fill="#3182ce"/><circle cx="40" cy="40" r="5" fill="#3182ce"/><circle cx="55" cy="40" r="5" fill="#3182ce"/><circle cx="70" cy="40" r="5" fill="#3182ce"/><circle cx="25" cy="55" r="5" fill="#3182ce"/><circle cx="40" cy="55" r="5" fill="#3182ce"/><circle cx="55" cy="55" r="5" fill="#3182ce"/><circle cx="70" cy="55" r="5" fill="#3182ce"/></svg>`, options: ["L'état solide", "L'état liquide", "L'état gazeux"], correctIndex: 0, feedback: "À l'état solide, les particules sont compactes et ordonnées." },
+        { level: "Facile", question: "À l'état liquide, les particules sont :", schema: "", options: ["Compactes et ordonnées", "Compactes et désordonnées", "Dispersées et très agitées"], correctIndex: 1, feedback: "Les particules d'un liquide se touchent (compact) mais peuvent glisser les unes sur les autres (désordonné)." },
+        { level: "Facile", question: "Comment qualifie-t-on un gaz car on peut réduire son volume ?", schema: "", options: ["Fluide", "Expansible", "Compressible", "Léger"], correctIndex: 2, feedback: "L'espace vide entre les particules permet de les rapprocher : le gaz est compressible." },
+        { level: "Facile", question: "Quelle propriété correspond à l'état solide ?", schema: "", options: ["Il n'a pas de forme propre.", "Il occupe tout l'espace disponible.", "Il a une forme propre.", "Il est compressible."], correctIndex: 2, feedback: "Un solide garde sa forme (forme propre) car ses particules sont fortement liées." },
+        { level: "Moyen", question: "Que se passe-t-il si on augmente la température d'un liquide ?", schema: "", options: ["Les particules grossissent.", "Le nombre de particules augmente.", "L'agitation des particules augmente.", "Les particules se figent."], correctIndex: 2, feedback: "L'énergie thermique se traduit par une augmentation de la vitesse (agitation) des particules." },
+        { level: "Moyen", question: "On pousse le piston d'une seringue bouchée contenant de l'air. Que fait le gaz ?", schema: "", options: ["Il se liquéfie.", "Il se comprime.", "Il se détend.", "Il s'échappe."], correctIndex: 1, feedback: "Son volume diminue, on dit qu'il se comprime." },
+        { level: "Moyen", question: "On tire sur le piston d'une seringue bouchée contenant de l'air. Que fait le gaz ?", schema: "", options: ["Il se comprime.", "Il se liquéfie.", "Il subit une expansion (il se détend).", "Il gèle."], correctIndex: 2, feedback: "Le volume augmente et les particules s'espacent davantage : c'est l'expansion ou la détente." },
+        { level: "Moyen", question: "Lorsqu'on dissout du sucre dans de l'eau, que fait la masse totale ?", schema: "", options: ["Elle augmente.", "Elle diminue.", "Elle se conserve (reste identique).", "Elle disparaît."], correctIndex: 2, feedback: "La masse se conserve car le nombre total de particules (eau + sucre) ne change pas." },
+        { level: "Moyen", question: "Comment appelle-t-on le phénomène où un gaz se répand dans tout l'espace disponible ?", schema: "", options: ["La fusion", "La diffusion", "La compression", "La dissolution"], correctIndex: 1, feedback: "C'est la diffusion, due à l'agitation désordonnée des particules." },
+        { level: "Facile", question: "Y a-t-il de l'air entre les particules qui composent un gaz comme le dioxygène ?", schema: "", options: ["Oui, de l'air microscopique.", "Non, c'est du vide.", "Oui, de la vapeur d'eau."], correctIndex: 1, feedback: "Entre les particules d'un gaz, il n'y a absolument rien : c'est du vide." },
+        
+        // --- CHANGEMENTS D'ETAT ---
+        { level: "Facile", question: "Comment s'appelle le passage de l'état solide à l'état liquide ?", schema: "", options: ["La solidification", "La liquéfaction", "La fusion", "La vaporisation"], correctIndex: 2, feedback: "Le passage solide -> liquide est la fusion." },
+        { level: "Facile", question: "Comment s'appelle le passage de l'état liquide à l'état gazeux ?", schema: "", options: ["La fusion", "La vaporisation", "La sublimation", "La liquéfaction"], correctIndex: 1, feedback: "C'est la vaporisation (ébullition ou évaporation)." },
+        { level: "Facile", question: "Comment s'appelle le passage de l'état gazeux à l'état liquide ?", schema: "", options: ["La liquéfaction", "La solidification", "La fusion", "L'évaporation"], correctIndex: 0, feedback: "C'est la liquéfaction (ou condensation liquide)." },
+        { level: "Facile", question: "Comment s'appelle le passage de l'état liquide à l'état solide ?", schema: "", options: ["La fusion", "La liquéfaction", "La vaporisation", "La solidification"], correctIndex: 3, feedback: "C'est la solidification." },
+        { level: "Moyen", question: "Que se passe-t-il pour la masse lors de la fonte d'un glaçon ?", schema: "", options: ["Elle diminue.", "Elle augmente.", "Elle reste exactement la même."], correctIndex: 2, feedback: "La masse se conserve lors d'un changement d'état car le nombre de molécules reste le même." },
+        { level: "Moyen", question: "Une bouteille d'eau remplie à ras bord est placée au congélateur. Que risque-t-il d'arriver ?", schema: "", options: ["La bouteille va rétrécir.", "La bouteille va éclater.", "Rien du tout."], correctIndex: 1, feedback: "Le volume de l'eau augmente lorsqu'elle se solidifie (la glace prend plus de place)." },
+        { level: "Difficile", question: "À l'échelle particulaire, que provoque la vaporisation ?", schema: "", options: ["La rupture des liaisons entre les particules.", "La création de nouvelles particules.", "Le rapprochement des particules."], correctIndex: 0, feedback: "Les particules s'agitent tellement qu'elles rompent les liaisons qui les maintenaient à l'état liquide." },
+        { level: "Facile", question: "Le passage direct de l'état solide à l'état gazeux s'appelle :", schema: "", options: ["La liquéfaction", "La sublimation", "La vaporisation"], correctIndex: 1, feedback: "C'est la sublimation (ex: la glace carbonique)." },
+        { level: "Moyen", question: "L'eau bout à 100°C. Si on continue de chauffer, que fait la température ?", schema: "", options: ["Elle augmente encore.", "Elle redescend.", "Elle reste bloquée à 100°C."], correctIndex: 2, feedback: "Lors d'un changement d'état d'un corps pur, la température reste constante (palier)." },
+        { level: "Facile", question: "Quel thermomètre indique la température de fusion de l'eau pure ?", schema: "", options: ["-10°C", "0°C", "100°C", "20°C"], correctIndex: 1, feedback: "L'eau pure gèle (ou la glace fond) à 0°C sous pression normale." },
+
+        // --- FORMULES & CALCULS RHO ---
+        { level: "Facile", question: "Quelle est la formule correcte de la masse volumique (ρ) ?", schema: "", options: ["ρ = m × V", "ρ = m + V", "ρ = m / V", "ρ = V / m"], correctIndex: 2, feedback: "La masse volumique est la masse divisée par le volume (ex: g/cm³)." },
+        { level: "Facile", question: "Parmi ces unités, laquelle est une unité de masse volumique ?", schema: "", options: ["kg/mL", "g/cm³", "m/s", "L/kg"], correctIndex: 1, feedback: "Les g/cm³ (ou kg/m³) expriment bien une masse par unité de volume." },
+        { level: "Moyen", question: "Un objet a une masse m = 10 g et un volume V = 2 cm³. Quelle est sa masse volumique ?", schema: "", options: ["20 g/cm³", "5 g/cm³", "8 g/cm³", "0,2 g/cm³"], correctIndex: 1, feedback: "ρ = 10 / 2 = 5 g/cm³." },
+        { level: "Moyen", question: "Une roche a une masse m = 60 g et un volume V = 30 cm³. Quelle est sa masse volumique ?", schema: "", options: ["1800 g/cm³", "0,5 g/cm³", "2,0 g/cm³", "90 g/cm³"], correctIndex: 2, feedback: "ρ = 60 / 30 = 2,0 g/cm³." },
+        { level: "Moyen", question: "Un liquide a une masse de 80 g pour un volume de 100 mL. Quelle est sa masse volumique ?", schema: "", options: ["8000 g/mL", "0,8 g/mL", "1,25 g/mL"], correctIndex: 1, feedback: "ρ = 80 / 100 = 0,8 g/mL." },
+        { level: "Difficile", question: "Un bloc de fer a une masse de 79 g et un volume de 10 cm³. Quelle est sa masse volumique ?", schema: "", options: ["7,9 g/cm³", "790 g/cm³", "0,12 g/cm³"], correctIndex: 0, feedback: "ρ = 79 / 10 = 7,9 g/cm³." },
+        { level: "Difficile", question: "Une bague en or pèse 19,3 g pour un volume de 1 cm³. Quelle est sa masse volumique ?", schema: "", options: ["19,3 g/cm³", "1,93 g/cm³", "38,6 g/cm³"], correctIndex: 0, feedback: "ρ = 19,3 / 1 = 19,3 g/cm³." },
+        { level: "Difficile", question: "Un bloc de bois pèse 120 g pour un volume de 200 cm³. Quelle est sa masse volumique ?", schema: "", options: ["1,6 g/cm³", "0,6 g/cm³", "24000 g/cm³"], correctIndex: 1, feedback: "ρ = 120 / 200 = 0,6 g/cm³." },
+        { level: "Moyen", question: "Quelle est approximativement la masse volumique de l'eau pure ?", schema: "", options: ["1,0 g/cm³", "10 g/cm³", "0,1 g/cm³", "100 g/cm³"], correctIndex: 0, feedback: "L'eau pure a une masse volumique de 1 g/mL (soit 1 g/cm³)." },
+        { level: "Moyen", question: "Un cube d'aluminium de volume 10 cm³ a une masse de 27 g. Sa masse volumique est :", schema: "", options: ["0,37 g/cm³", "2,7 g/cm³", "270 g/cm³"], correctIndex: 1, feedback: "ρ = 27 / 10 = 2,7 g/cm³." },
+
+        // --- CALCULS MASSE & VOLUME ---
+        { level: "Moyen", question: "Quelle formule permet de calculer la masse (m) si on connaît ρ et V ?", schema: "", options: ["m = ρ / V", "m = V / ρ", "m = ρ × V"], correctIndex: 2, feedback: "À partir de ρ = m/V, on isole m : m = ρ × V." },
+        { level: "Moyen", question: "Quelle formule permet de calculer le volume (V) si on connaît ρ et m ?", schema: "", options: ["V = m × ρ", "V = m / ρ", "V = ρ / m"], correctIndex: 1, feedback: "À partir de ρ = m/V, on isole V : V = m / ρ." },
+        { level: "Difficile", question: "Un métal a une masse volumique ρ = 8 g/cm³. Si son volume est V = 5 cm³, quelle est sa masse ?", schema: "", options: ["40 g", "1,6 g", "0,625 g"], correctIndex: 0, feedback: "m = ρ × V = 8 × 5 = 40 g." },
+        { level: "Difficile", question: "Un liquide a une masse volumique ρ = 0,8 g/mL. Si on en prend un volume V = 50 mL, quelle est sa masse ?", schema: "", options: ["62,5 g", "40 g", "400 g"], correctIndex: 1, feedback: "m = 0,8 × 50 = 40 g." },
+        { level: "Difficile", question: "Une roche a une masse volumique ρ = 3 g/cm³. Si sa masse est m = 300 g, quel est son volume ?", schema: "", options: ["900 cm³", "100 cm³", "0,01 cm³"], correctIndex: 1, feedback: "V = m / ρ = 300 / 3 = 100 cm³." },
+        { level: "Difficile", question: "L'éthanol a une masse volumique ρ = 0,79 g/mL. Quel volume occupe une masse de 79 g ?", schema: "", options: ["100 mL", "10 mL", "62,4 mL"], correctIndex: 0, feedback: "V = m / ρ = 79 / 0,79 = 100 mL." },
+        { level: "Moyen", question: "L'eau a une masse volumique de 1 kg/L. Quelle est la masse de 5 Litres d'eau ?", schema: "", options: ["0,5 kg", "5 kg", "50 kg"], correctIndex: 1, feedback: "m = 1 × 5 = 5 kg." },
+        { level: "Moyen", question: "L'air a une masse volumique d'environ 1,2 g/L. Quelle est la masse de l'air dans une bouteille de 2 L ?", schema: "", options: ["2,4 g", "1,2 g", "0,6 g"], correctIndex: 0, feedback: "m = 1,2 × 2 = 2,4 g." },
+        { level: "Moyen", question: "Un glaçon a une masse volumique de 0,9 g/cm³. S'il fait 10 cm³, quelle est sa masse ?", schema: "", options: ["11,1 g", "9 g", "90 g"], correctIndex: 1, feedback: "m = 0,9 × 10 = 9 g." },
+        { level: "Difficile", question: "On a 250 g d'eau (ρ = 1 g/mL). Quel est le volume ?", schema: "", options: ["250 L", "250 mL", "2,5 mL"], correctIndex: 1, feedback: "V = 250 / 1 = 250 mL." },
+
+        // --- EPROUVETTE & METHODE DE DEPLACEMENT D'EAU ---
+        { level: "Moyen", question: "On plonge un solide dans une éprouvette. Le niveau passe de 40 mL à 55 mL. Quel est le volume du solide ?", schema: `<svg width="200" height="120"><rect x="30" y="10" width="30" height="100" fill="none" stroke="#333"/><rect x="30" y="60" width="30" height="50" fill="#3182ce" opacity="0.5"/><text x="5" y="65" font-size="12">40</text><path d="M 75 60 L 100 60" stroke="#333" marker-end="url(#arr)"/><rect x="120" y="10" width="30" height="100" fill="none" stroke="#333"/><rect x="120" y="35" width="30" height="75" fill="#3182ce" opacity="0.5"/><circle cx="135" cy="85" r="10" fill="#718096"/><text x="95" y="40" font-size="12">55</text></svg>`, options: ["40 mL", "55 mL", "15 mL", "95 mL"], correctIndex: 2, feedback: "Volume = 55 - 40 = 15 mL." },
+        { level: "Moyen", question: "Dans une éprouvette graduée, 1 mL correspond à quel volume pour un solide ?", schema: "", options: ["1 mm³", "1 cm³", "1 dm³", "1 m³"], correctIndex: 1, feedback: "1 mL équivaut rigoureusement à 1 cm³." },
+        { level: "Difficile", question: "Le niveau d'eau passe de 50 mL à 58 mL quand on y plonge un bracelet de 57,6 g. Quelle est sa masse volumique ?", schema: "", options: ["7,2 g/cm³", "1,15 g/cm³", "0,99 g/cm³"], correctIndex: 0, feedback: "V = 58 - 50 = 8 mL (soit 8 cm³). ρ = 57,6 / 8 = 7,2 g/cm³." },
+        { level: "Difficile", question: "Une pierre de 40 g fait monter le niveau de l'eau de 20 mL. Quelle est sa masse volumique ?", schema: "", options: ["0,5 g/cm³", "2,0 g/cm³", "800 g/cm³"], correctIndex: 1, feedback: "Le volume de la pierre est 20 mL (20 cm³). ρ = 40 / 20 = 2,0 g/cm³." },
+        { level: "Moyen", question: "Si je veux mesurer précisément le volume d'un liquide, j'utilise :", schema: "", options: ["Un bécher", "Un tube à essai", "Une éprouvette graduée"], correctIndex: 2, feedback: "L'éprouvette graduée est l'instrument le plus précis au collège pour le volume." },
+
+        // --- CONVERSIONS ---
+        { level: "Difficile", question: "Convertis : 1 L = ...", schema: "", options: ["1 cm³", "1 dm³", "1 m³"], correctIndex: 1, feedback: "Un litre correspond au volume d'un cube de 10 cm de côté, soit 1 dm³." },
+        { level: "Difficile", question: "Si ρ = 1,0 g/cm³, quelle est cette valeur en kg/m³ ?", schema: "", options: ["10 kg/m³", "100 kg/m³", "1000 kg/m³"], correctIndex: 2, feedback: "Il faut multiplier par 1000. L'eau a une masse volumique de 1000 kg/m³." },
+        { level: "Difficile", question: "L'aluminium a une masse volumique de 2700 kg/m³. Convertis en g/cm³ :", schema: "", options: ["2,7 g/cm³", "27 g/cm³", "0,27 g/cm³"], correctIndex: 0, feedback: "Il faut diviser par 1000, ce qui donne 2,7 g/cm³." },
+        { level: "Difficile", question: "Un objet pèse 0,12 kg. Quelle est sa masse en grammes ?", schema: "", options: ["1,2 g", "12 g", "120 g"], correctIndex: 2, feedback: "On multiplie par 1000 : 0,12 kg = 120 g." },
+        { level: "Difficile", question: "Un volume V = 10 mL. À combien de Litres (L) cela correspond-il ?", schema: "", options: ["0,1 L", "0,01 L", "0,001 L"], correctIndex: 1, feedback: "10 mL = 10 / 1000 L = 0,01 L." },
+
+        // --- FLOTTAISON ---
+        { level: "Facile", question: "Pour savoir si un solide flotte sur l'eau, il faut comparer :", schema: "", options: ["Sa masse à celle de l'eau.", "Son volume à celui de l'eau.", "Sa masse volumique à celle de l'eau."], correctIndex: 2, feedback: "C'est la comparaison des masses volumiques (densités) qui détermine la flottaison." },
+        { level: "Facile", question: "Un objet flotte sur l'eau (ρ = 1,0 g/cm³) si :", schema: "", options: ["Sa masse volumique est supérieure à 1,0.", "Sa masse volumique est inférieure à 1,0.", "Sa masse est inférieure à 100 g."], correctIndex: 1, feedback: "Un objet moins dense que le liquide flotte." },
+        { level: "Moyen", question: "L'huile (ρ = 0,92 g/mL) est versée dans l'eau (ρ = 1,0 g/mL). Que se passe-t-il ?", schema: "", options: ["L'huile coule sous l'eau.", "L'huile flotte sur l'eau.", "Elles se mélangent."], correctIndex: 1, feedback: "0,92 < 1,0. L'huile est moins dense, elle flotte au-dessus." },
+        { level: "Moyen", question: "Un bloc de bois a une masse volumique de 0,6 g/cm³. Dans l'eau, va-t-il flotter ?", schema: "", options: ["Oui, il flotte.", "Non, il coule."], correctIndex: 0, feedback: "0,6 < 1,0, donc il flotte." },
+        { level: "Moyen", question: "Un bloc d'or (ρ = 19,3 g/cm³) dans l'eau :", schema: "", options: ["Flotte.", "Coule."], correctIndex: 1, feedback: "19,3 > 1,0, donc il coule lourdement." },
+        { level: "Difficile", question: "Le glaçon (ρ = 0,92 g/cm³) est placé dans l'huile (ρ = 0,80 g/cm³). Que fait-il ?", schema: "", options: ["Il flotte.", "Il coule."], correctIndex: 1, feedback: "Attention au piège ! Le glaçon (0,92) est PLUS DENSE que l'huile (0,80), donc il coule au fond de l'huile." },
+        { level: "Difficile", question: "Un objet m = 30 g et V = 10 cm³. Flotte-t-il dans l'eau ?", schema: "", options: ["Oui", "Non"], correctIndex: 1, feedback: "ρ = 30 / 10 = 3,0 g/cm³. Comme 3,0 > 1,0, il coule." },
+        { level: "Difficile", question: "Un objet m = 4 g et V = 10 cm³. Flotte-t-il dans l'eau ?", schema: "", options: ["Oui", "Non"], correctIndex: 0, feedback: "ρ = 4 / 10 = 0,4 g/cm³. Comme 0,4 < 1,0, il flotte." },
+        { level: "Difficile", question: "Le glycérol a ρ = 1,26 g/mL. Si on le verse dans l'eau (1,0 g/mL), où se place-t-il ?", schema: "", options: ["Au-dessus de l'eau.", "En dessous de l'eau."], correctIndex: 1, feedback: "Le glycérol est plus dense (1,26 > 1,0), il se place au fond." },
+        { level: "Difficile", question: "Pourquoi un énorme bateau en acier peut-il flotter ?", schema: "", options: ["Car l'acier flotte naturellement.", "Car son volume contient beaucoup d'air, baissant sa masse volumique globale.", "Car l'eau de mer est magique."], correctIndex: 1, feedback: "Grâce à sa coque remplie d'air, la masse volumique totale (acier + air) est inférieure à celle de l'eau." }
+    ];
+
+    let currentQuestions = [];
+
+    // Mélanger un tableau (Fisher-Yates)
+    function shuffleArray(array) {
+        let shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    // Initialiser le quiz
+    function initQuiz() {
+        document.getElementById('result-container').style.display = 'none';
+        document.getElementById('btn-restart').style.display = 'none';
+        document.getElementById('btn-valider').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = ''; 
+
+        // Piocher 10 questions aléatoires
+        const shuffledBank = shuffleArray(questionBank);
+        currentQuestions = shuffledBank.slice(0, 10);
+
+        // Générer le HTML
+        currentQuestions.forEach((q, index) => {
+            let optionsHtml = '';
+            q.options.forEach((opt, optIndex) => {
+                optionsHtml += `
+                    <li>
+                        <label>
+                            <input type="radio" name="q${index}" value="${optIndex}">
+                            ${opt}
+                        </label>
+                    </li>
+                `;
+            });
+
+            const schemaHtml = q.schema ? `<div class="schema-container">${q.schema}</div>` : '';
+
+            const questionHtml = `
+                <div class="question-card" id="card-${index}">
+                    <span class="badge badge-${q.level}">Niveau : ${q.level}</span>
+                    <div class="question-text">${index + 1}. ${q.question}</div>
+                    ${schemaHtml}
+                    <ul class="options-list">
+                        ${optionsHtml}
+                    </ul>
+                    <div class="feedback" id="feedback-${index}"><strong>Explication :</strong> ${q.feedback}</div>
+                </div>
+            `;
+            container.innerHTML += questionHtml;
+        });
+    }
+
+    // Vérifier les réponses
+    function checkAnswers() {
+        let score = 0;
+        
+        currentQuestions.forEach((q, index) => {
+            const card = document.getElementById(`card-${index}`);
+            const feedback = document.getElementById(`feedback-${index}`);
+            const options = card.querySelectorAll('input[type="radio"]');
+            let answered = false;
+
+            // Retirer les anciennes couleurs
+            card.querySelectorAll('label').forEach(label => {
+                label.classList.remove('correct-answer', 'wrong-answer');
+            });
+            feedback.style.display = 'block';
+
+            options.forEach(option => {
+                if (option.checked) {
+                    answered = true;
+                    if (parseInt(option.value) === q.correctIndex) {
+                        score++;
+                        option.parentElement.classList.add('correct-answer');
+                    } else {
+                        option.parentElement.classList.add('wrong-answer');
+                        // Montrer la bonne réponse
+                        options[q.correctIndex].parentElement.classList.add('correct-answer');
+                    }
+                }
+            });
+
+            // Si non répondu
+            if (!answered) {
+                options[q.correctIndex].parentElement.classList.add('correct-answer');
+            }
+        });
+
+        // Affichage score
+        const resultContainer = document.getElementById('result-container');
+        const scoreSpan = document.getElementById('score');
+        const scoreMessage = document.getElementById('score-message');
+        
+        scoreSpan.textContent = score;
+        resultContainer.style.display = 'block';
+        
+        document.getElementById('btn-valider').style.display = 'none';
+        document.getElementById('btn-restart').style.display = 'block';
+
+        if (score >= 8) {
+            scoreMessage.textContent = "Excellent travail ! Tu maîtrises ces notions.";
+            resultContainer.style.backgroundColor = "#c6f6d5";
+            resultContainer.style.color = "#276749";
+        } else if (score >= 5) {
+            scoreMessage.textContent = "C'est un bon début. Lis bien les explications en bleu pour t'améliorer.";
+            resultContainer.style.backgroundColor = "#feebc8";
+            resultContainer.style.color = "#9c4221";
+        } else {
+            scoreMessage.textContent = "Il faut encore s'entraîner ! Prends le temps de lire la correction sous chaque question.";
+            resultContainer.style.backgroundColor = "#fed7d7";
+            resultContainer.style.color = "#9b2c2c";
+        }
+
+        resultContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Démarrage
+    window.onload = initQuiz;
+</script>
+
+</body>
+</html>
