@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM Aléatoire : L'Univers à grande échelle</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 { text-align: center; color: #2c3e50; }
+        .info-text { text-align: center; color: #555; margin-bottom: 20px; }
+        .question-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .difficulty {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .facile { background-color: #d4edda; color: #155724; }
+        .moyenne { background-color: #fff3cd; color: #856404; }
+        .difficile { background-color: #f8d7da; color: #721c24; }
+        
+        .options { list-style-type: none; padding: 0; }
+        .options li { margin: 10px 0; }
+        label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        label:hover { background: #e2e6ea; }
+        input[type="radio"] { margin-right: 10px; }
+        
+        button {
+            background-color: #007bff;
+            color: white; border: none;
+            padding: 10px 20px; border-radius: 4px;
+            cursor: pointer; font-size: 16px; margin-top: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        
+        .btn-restart { 
+            background-color: #17a2b8; 
+            font-size: 18px; 
+            padding: 15px 30px; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            display: inline-block;
+        }
+        .btn-restart:hover { background-color: #138496; }
+        
+        .bottom-controls { text-align: center; margin-top: 30px; margin-bottom: 40px; }
+
+        .feedback { margin-top: 15px; padding: 15px; border-radius: 4px; display: none; }
+        .correct { background-color: #d4edda; border-left: 5px solid #28a745; }
+        .incorrect { background-color: #f8d7da; border-left: 5px solid #dc3545; }
+        
+        .score-panel {
+            text-align: center; font-size: 1.5em; font-weight: bold;
+            margin-top: 20px; margin-bottom: 20px; padding: 20px; background: #e2e3e5; border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>QCM : L'Univers à grande échelle</h1>
+    <p class="info-text">10 questions tirées au sort pour t'entraîner !</p>
+    
+    <div id="quiz-container"></div>
+    
+    <div class="score-panel" id="score-panel" style="display: none;">
+        Score final : <span id="score">0</span> / 10
+    </div>
+
+    <div class="bottom-controls">
+        <button class="btn-restart" onclick="initQuiz()">🔄 Générer un nouveau QCM</button>
+    </div>
+
+    <script>
+        // Banque de 60 questions avec balises HTML pour garantir l'affichage correct des mathématiques
+        const allQuestions = [
+            // --- STRUCTURE DE L'UNIVERS ET DÉFINITIONS ---
+            { q: "Qu'est-ce qu'une galaxie ?", options: ["Un système composé uniquement de planètes.", "Un regroupement d'un très grand nombre d'étoiles, de gaz et de poussières.", "Une étoile géante isolée dans le vide."], ans: 1, diff: "facile", expl: "Une galaxie est un gigantesque amas d'étoiles, de gaz et de poussières." },
+            { q: "Comment s'appelle notre galaxie ?", options: ["Andromède", "La Voie Lactée", "Le Grand Nuage de Magellan"], ans: 1, diff: "facile", expl: "Le système solaire se trouve dans la Voie Lactée." },
+            { q: "Que signifie l'expression « L'Univers a une structure lacunaire » ?", options: ["Il contient des lacs d'eau glacée.", "Il est essentiellement constitué de vide.", "Les étoiles y sont réparties de manière uniforme."], ans: 1, diff: "facile", expl: "La matière est concentrée par endroits, mais l'Univers est majoritairement composé de vide." },
+            { q: "Qu'est-ce qu'une comète ?", options: ["Une boule de feu géante.", "Un corps constitué d'un noyau de glace et de poussière formant une queue.", "Une étoile qui meurt."], ans: 1, diff: "facile", expl: "Une comète orbite autour du Soleil et développe une longue queue de poussière en s'en approchant." },
+            { q: "Où se situe principalement la ceinture d'astéroïdes ?", options: ["Entre la Terre et Mars", "Entre Mars et Jupiter", "Au-delà de Pluton"], ans: 1, diff: "facile", expl: "Les astéroïdes sont des corps rocheux orbitant majoritairement entre Mars et Jupiter." },
+            { q: "Qu'est-ce qu'une étoile ?", options: ["Une planète rocheuse", "Une boule de gaz très chaude qui produit de la lumière", "Un astéroïde très brillant"], ans: 1, diff: "facile", expl: "Une étoile, comme notre Soleil, produit sa propre lumière." },
+            { q: "Combien y a-t-il d'étoiles dans une galaxie typique ?", options: ["Quelques milliers", "Des centaines de milliards", "Une seule"], ans: 1, diff: "facile", expl: "Une galaxie contient des centaines de milliards d'étoiles." },
+            { q: "Dans l'Univers, on observe que la matière est regroupée dans :", options: ["Des amas de galaxies", "Des nuages de vide", "Le centre du système solaire uniquement"], ans: 0, diff: "moyenne", expl: "À grande échelle, l'Univers est structuré par des dizaines de millions d'amas de galaxies." },
+            { q: "Classe ces objets célestes du plus petit au plus grand :", options: ["Terre, Soleil, Galaxie, Système solaire", "Soleil, Terre, Système solaire, Galaxie", "Terre, Soleil, Système solaire, Galaxie"], ans: 2, diff: "moyenne", expl: "La Terre tourne autour du Soleil. L'ensemble forme le système solaire, qui est une partie d'une galaxie." },
+            { q: "Quel corps céleste n'émet pas sa propre lumière mais diffuse celle du Soleil ?", options: ["Une étoile", "La Lune", "Une supernova"], ans: 1, diff: "facile", expl: "La Lune (tout comme les planètes) ne produit pas de lumière, elle diffuse la lumière qu'elle reçoit du Soleil." },
+            { q: "Pourquoi peut-on voir la Lune depuis la Terre ?", options: ["Car elle produit sa propre lumière.", "Car elle diffuse la lumière du Soleil.", "Car elle réfléchit la lumière du Soleil comme un miroir parfait."], ans: 1, diff: "moyenne", expl: "La Lune ne fonctionne pas comme un miroir parfait ; sa surface irrégulière diffuse la lumière solaire dans toutes les directions vers la Terre." },
+            { q: "Qu'est-ce que Proxima du Centaure ?", options: ["Une galaxie voisine", "L'étoile la plus proche du système solaire", "Un astéroïde géant"], ans: 1, diff: "facile", expl: "C'est l'étoile la plus proche de nous après le Soleil." },
+            { q: "Qu'est-ce que l'amas d'Hercule ?", options: ["Une comète", "Un groupe d'étoiles situé à 25 000 années-lumière", "Une planète naine"], ans: 1, diff: "facile", expl: "L'amas d'Hercule est un vaste regroupement d'étoiles éloigné de la Terre." },
+
+            // --- ONDES ET COMMUNICATIONS ---
+            { q: "La lumière peut-elle se propager dans le vide ?", options: ["Oui", "Non", "Seulement si la distance est courte"], ans: 0, diff: "facile", expl: "Contrairement au son, la lumière se propage parfaitement dans le vide de l'espace." },
+            { q: "Peut-on entendre le son d'une explosion dans l'espace ?", options: ["Oui, très fort", "Oui, mais faiblement", "Non, le son ne se propage pas dans le vide"], ans: 2, diff: "facile", expl: "Le son a besoin de matière (air, eau...) pour se propager. Dans le vide spatial, c'est le silence absolu." },
+            { q: "Quelle est la valeur de la vitesse de la lumière dans le vide ?", options: ["300 000 km/s", "340 m/s", "150 000 km/s"], ans: 0, diff: "facile", expl: "La lumière voyage à 300 000 kilomètres par seconde." },
+            { q: "Les ondes radio voyagent-elles à la même vitesse que la lumière ?", options: ["Oui, car elles sont de même nature", "Non, elles vont beaucoup moins vite", "Non, elles vont plus vite"], ans: 0, diff: "moyenne", expl: "Les ondes radio et la lumière sont toutes deux des ondes électromagnétiques voyageant à 300 000 km/s." },
+            { q: "Avec quel type d'onde la sonde spatiale Rosetta communique-t-elle avec la Terre ?", options: ["Des ondes sonores amplifiées", "Des ondes radio", "Des rayons X"], ans: 1, diff: "moyenne", expl: "Pour communiquer dans l'espace sur de longues distances, on utilise des ondes radio." },
+            { q: "Le rover Curiosity sur Mars communique avec la Terre grâce à des micro-ondes. À quelle vitesse se propagent-elles ?", options: ["À la vitesse du son (340 m/s)", "À 300 000 km/s, comme la lumière", "Instantanément"], ans: 1, diff: "moyenne", expl: "Les micro-ondes sont de même nature que la lumière et vont à la même vitesse." },
+            { q: "Lors de missions lunaires, un décalage audio se produit lors des communications. Pourquoi ?", options: ["À cause de l'atmosphère.", "Car les ondes radio mettent un peu plus d'une seconde pour faire le trajet.", "Le matériel spatial est lent."], ans: 1, diff: "moyenne", expl: "Même à 300 000 km/s, la distance Terre-Lune impose un délai d'environ 1,28 s par trajet." },
+            { q: "Comment les astronautes ont-ils permis de mesurer la distance Terre-Lune avec précision ?", options: ["En tendant un câble.", "En posant des réflecteurs (miroirs) visés par un laser depuis la Terre.", "En chronométrant le trajet de la fusée."], ans: 1, diff: "moyenne", expl: "Des miroirs déposés sur la Lune renvoient le faisceau laser émis depuis la Terre." },
+
+            // --- UNITÉS ET ORDRES DE GRANDEUR ---
+            { q: "À quelle distance correspond une unité astronomique (ua) ?", options: ["La distance Terre-Lune", "La distance Terre-Soleil", "Le diamètre du système solaire"], ans: 1, diff: "facile", expl: "L'ua correspond à la distance moyenne Terre-Soleil (150 millions de km)." },
+            { q: "L'année-lumière (a.l.) est une unité qui permet de mesurer...", options: ["Une durée", "Une vitesse", "Une distance"], ans: 2, diff: "facile", expl: "C'est la distance parcourue par la lumière dans le vide en une année." },
+            { q: "Quelle unité est la plus adaptée pour mesurer la distance entre deux étoiles ?", options: ["Le kilomètre", "L'Unité Astronomique (ua)", "L'année-lumière (a.l.)"], ans: 2, diff: "facile", expl: "Pour les distances interstellaires, on utilise l'année-lumière." },
+            { q: "Quelle unité est la plus adaptée pour mesurer la distance entre la Terre et Mars ?", options: ["L'année-lumière (a.l.)", "L'Unité Astronomique (ua)", "Le mètre"], ans: 1, diff: "facile", expl: "L'ua est l'unité de référence pour les distances à l'intérieur de notre système solaire." },
+            { q: "En kilomètres, à combien correspond 1 unité astronomique (ua) ?", options: ["150 millions de km", "300 000 km", "10 000 milliards de km"], ans: 0, diff: "facile", expl: "1 ua = 150 000 000 km." },
+            { q: "En kilomètres, à combien correspond environ 1 année-lumière (a.l.) ?", options: ["150 millions de km", "9,5 &times; 10<sup>12</sup> km (environ 10 mille milliards de km)", "300 000 km"], ans: 1, diff: "moyenne", expl: "1 a.l. correspond à près de 10 000 milliards de kilomètres." },
+            { q: "Un objet situé à 10 années-lumière nous apparaît-il tel qu'il est aujourd'hui ?", options: ["Oui", "Non, on le voit tel qu'il était il y a 10 ans", "Non, on le voit tel qu'il sera dans 10 ans"], ans: 1, diff: "moyenne", expl: "La lumière a voyagé pendant 10 ans pour nous parvenir, on observe donc l'objet dans le passé." },
+            { q: "Si l'étoile Polaire est à 431 a.l. de la Terre, cela signifie que :", options: ["Elle est 431 fois plus grande que le Soleil.", "La lumière qu'elle émet met 431 ans pour nous parvenir.", "Elle fait le tour de la galaxie en 431 ans."], ans: 1, diff: "moyenne", expl: "On voit l'étoile Polaire telle qu'elle était il y a 431 ans." },
+            { q: "L'ordre de grandeur de la taille d'un humain est de...", options: ["10<sup>0</sup> m", "10<sup>2</sup> m", "10<sup>-2</sup> m"], ans: 0, diff: "moyenne", expl: "10<sup>0</sup> m = 1 mètre, ce qui correspond à l'ordre de grandeur d'un être humain." },
+            { q: "Quel est l'ordre de grandeur de la dimension de la Terre (diamètre d'environ 12 700 km) ?", options: ["10<sup>4</sup> m", "10<sup>7</sup> m", "10<sup>11</sup> m"], ans: 1, diff: "moyenne", expl: "12 700 km = 12 700 000 m = 1,27 &times; 10<sup>7</sup> m. L'ordre de grandeur est donc 10<sup>7</sup> m." },
+            { q: "L'ordre de grandeur de la dimension d'une galaxie est de...", options: ["10<sup>7</sup> m", "10<sup>21</sup> m", "10<sup>13</sup> m"], ans: 1, diff: "moyenne", expl: "Une galaxie est gigantesque, son ordre de grandeur est d'environ 10<sup>21</sup> mètres." },
+            { q: "Dans les manuels, le système solaire est souvent représenté 'hors échelle'. Pourquoi ?", options: ["Car les planètes changent de taille.", "Car le Soleil est trop petit.", "Car si on respecte la taille des planètes, les distances seraient impossibles à dessiner sur une feuille."], ans: 2, diff: "moyenne", expl: "Si la Terre faisait 2 cm, le Soleil serait immense et situé à plusieurs dizaines de mètres sur le papier !" },
+
+            // --- NOTATION SCIENTIFIQUE ---
+            { q: "Parmi ces nombres, lequel est écrit en notation scientifique ?", options: ["25 &times; 10<sup>3</sup>", "2,5 &times; 10<sup>4</sup>", "0,25 &times; 10<sup>5</sup>"], ans: 1, diff: "moyenne", expl: "En notation scientifique (a &times; 10<sup>n</sup>), le nombre 'a' doit être compris entre 1 inclus et 10 exclus." },
+            { q: "Quel est l'ordre de grandeur du nombre 1,25 &times; 10<sup>7</sup> ?", options: ["10<sup>6</sup>", "10<sup>7</sup>", "10<sup>8</sup>"], ans: 1, diff: "moyenne", expl: "1,25 est très proche de 1, l'ordre de grandeur reste donc la puissance de 10 indiquée : 10<sup>7</sup>." },
+            { q: "La distance Terre-Soleil est de 150 000 000 km. Comment l'écrire en notation scientifique ?", options: ["15 &times; 10<sup>7</sup> km", "1,5 &times; 10<sup>8</sup> km", "0,15 &times; 10<sup>9</sup> km"], ans: 1, diff: "moyenne", expl: "On décale la virgule de 8 rangs vers la gauche pour obtenir 1,5." },
+            { q: "Le nombre 0,956 &times; 10<sup>4</sup> n'est pas en notation scientifique. Quelle est la bonne écriture ?", options: ["9,56 &times; 10<sup>3</sup>", "95,6 &times; 10<sup>2</sup>", "9,56 &times; 10<sup>5</sup>"], ans: 0, diff: "moyenne", expl: "On décale la virgule vers la droite pour avoir 9,56, on soustrait donc 1 à l'exposant : 10<sup>3</sup>." },
+            { q: "Quelle est la notation scientifique de 10 &times; 10<sup>6</sup> ?", options: ["1 &times; 10<sup>7</sup>", "10 &times; 10<sup>7</sup>", "1 &times; 10<sup>6</sup>"], ans: 0, diff: "moyenne", expl: "10 n'est pas strictement inférieur à 10. Il faut l'écrire 1 &times; 10<sup>1</sup> et additionner les exposants : 10<sup>7</sup>." },
+            { q: "Le diamètre de Jupiter est de 71 492 000 m. Quelle est son écriture scientifique ?", options: ["7,1492 &times; 10<sup>7</sup> m", "71,492 &times; 10<sup>6</sup> m", "7,1492 &times; 10<sup>-7</sup> m"], ans: 0, diff: "difficile", expl: "La virgule est décalée de 7 rangs vers la gauche." },
+            { q: "Le diamètre de Saturne est de 602,68 &times; 10<sup>5</sup> m. Écris-le en notation scientifique.", options: ["6,0268 &times; 10<sup>3</sup> m", "6,0268 &times; 10<sup>7</sup> m", "60,268 &times; 10<sup>6</sup> m"], ans: 1, diff: "difficile", expl: "On décale la virgule de 2 rangs vers la gauche, on ajoute 2 à l'exposant : 5 + 2 = 7." },
+            { q: "Le rayon du Soleil est de 7 &times; 10<sup>5</sup> km. Combien cela fait-il en mètres (m) ?", options: ["7 &times; 10<sup>2</sup> m", "7 &times; 10<sup>8</sup> m", "7 &times; 10<sup>5</sup> m"], ans: 1, diff: "difficile", expl: "1 km = 10<sup>3</sup> m. On multiplie donc par 10<sup>3</sup> (10<sup>5</sup> &times; 10<sup>3</sup> = 10<sup>8</sup>)." },
+            { q: "Le rayon de Jupiter est de 0,7 &times; 10<sup>8</sup> m. Quelle est l'écriture scientifique correcte ?", options: ["7 &times; 10<sup>7</sup> m", "7 &times; 10<sup>9</sup> m", "7 &times; 10<sup>8</sup> m"], ans: 0, diff: "difficile", expl: "On décale vers la droite pour avoir 7, et on enlève 1 à l'exposant (8 - 1 = 7)." },
+
+            // --- FORMULES ET CALCULS DE DISTANCE / TEMPS / VITESSE ---
+            { q: "Quelle relation mathématique relie la vitesse (v), la distance (d) et le temps (t) ?", options: ["v = d &times; t", "v = d / t", "d = v / t"], ans: 1, diff: "difficile", expl: "La vitesse est égale à la distance divisée par le temps." },
+            { q: "Quelle est la formule correcte pour calculer une distance (d) ?", options: ["d = v / t", "d = v &times; t", "d = t / v"], ans: 1, diff: "difficile", expl: "Distance = vitesse &times; temps." },
+            { q: "Quelle est la formule correcte pour calculer un temps de parcours (t) ?", options: ["t = d / v", "t = v / d", "t = d &times; v"], ans: 0, diff: "difficile", expl: "Temps = distance / vitesse." },
+            { q: "Le laser envoyé vers la Lune met 2,56 secondes pour faire un ALLER-RETOUR. Quelle est la distance Terre-Lune ?", options: ["768 000 km", "384 000 km", "300 000 km"], ans: 1, diff: "difficile", expl: "Distance aller-retour = 300 000 &times; 2,56 = 768 000 km. Pour l'aller simple : 384 000 km." },
+            { q: "La Terre est à 150 millions de km du Soleil. Combien de temps met la lumière pour nous atteindre ? (v = 300 000 km/s)", options: ["50 secondes", "500 secondes", "5000 secondes"], ans: 1, diff: "difficile", expl: "t = 150 000 000 / 300 000 = 500 secondes." },
+            { q: "Sachant que la lumière du Soleil met 500 secondes pour arriver, combien cela fait-il en minutes ?", options: ["Environ 8 min 20 s", "Environ 5 min", "Environ 12 min"], ans: 0, diff: "difficile", expl: "500 / 60 = 8 avec un reste de 20. Soit 8 minutes et 20 secondes." },
+            { q: "Curiosity est sur Mars, au plus près à 56 millions de km. Combien de temps met son signal radio pour arriver sur Terre ?", options: ["Environ 3 secondes", "Environ 186 secondes (soit 3 min environ)", "Environ 18 minutes"], ans: 1, diff: "difficile", expl: "t = 56 000 000 / 300 000 = environ 186,6 secondes." },
+            { q: "Mars s'éloigne parfois à 400 millions de km. Quel est alors le délai de communication ?", options: ["Environ 5 minutes", "Environ 1333 secondes (soit 22 min environ)", "Environ 2 heures"], ans: 1, diff: "difficile", expl: "t = 400 000 000 / 300 000 = environ 1333 secondes. (1333 / 60 = environ 22,2 min)." },
+            { q: "La comète Tchouri (sonde Rosetta) était à 500 millions de km. Temps de trajet du signal radio ?", options: ["1666 secondes (soit 28 min environ)", "500 secondes", "3000 secondes"], ans: 0, diff: "difficile", expl: "t = d / v = 500 000 000 / 300 000 = environ 1666 secondes." },
+            { q: "Jupiter est à environ 600 millions de km de la Terre. Temps de communication avec une sonde là-bas ?", options: ["2000 secondes (soit 33 min environ)", "200 secondes", "10 minutes"], ans: 0, diff: "difficile", expl: "t = 600 000 000 / 300 000 = 2000 secondes." },
+            { q: "Si un vaisseau voyageait à 150 000 km/s vers la Lune (300 000 km), combien de temps mettrait-il ?", options: ["1 seconde", "2 secondes", "4 secondes"], ans: 1, diff: "difficile", expl: "t = d / v = 300 000 / 150 000 = 2 secondes." },
+            { q: "La lumière met 12 minutes (720 s) pour parvenir du Soleil à Mars. Quelle est la distance Soleil-Mars ?", options: ["216 millions de km", "150 millions de km", "300 millions de km"], ans: 0, diff: "difficile", expl: "d = v &times; t = 300 000 &times; 720 = 216 000 000 km." },
+            { q: "La planète Mars est à environ 450 millions de km du Soleil. Combien cela fait-il en unités astronomiques (ua) ?", options: ["3 ua", "4,5 ua", "0,33 ua"], ans: 0, diff: "difficile", expl: "1 ua = 150 millions de km. 450 / 150 = 3 ua." },
+            { q: "La distance Soleil-Jupiter est de 5,2 ua. En kilomètres, cela fait :", options: ["780 millions de km", "150 millions de km", "5,2 millions de km"], ans: 0, diff: "difficile", expl: "5,2 &times; 150 000 000 = 780 000 000 km." },
+            { q: "Si la lumière d'une étoile met 4,3 ans à nous parvenir, à quelle distance en kilomètres est-elle ? (1 al = environ 9,5 &times; 10<sup>12</sup> km)", options: ["4,08 &times; 10<sup>13</sup> km", "40,8 &times; 10<sup>13</sup> km", "4,3 &times; 10<sup>12</sup> km"], ans: 0, diff: "difficile", expl: "4,3 &times; (9,5 &times; 10<sup>12</sup>) = 40,85 &times; 10<sup>12</sup>, soit 4,085 &times; 10<sup>13</sup> km en notation scientifique." },
+            { q: "L'étoile Proxima du Centaure est à 4,1 &times; 10<sup>16</sup> m. Sachant que 1 al = 9,5 &times; 10<sup>15</sup> m, quelle est la distance en al ?", options: ["Environ 4,3 al", "Environ 43 al", "Environ 0,4 al"], ans: 0, diff: "difficile", expl: "(4,1 &times; 10<sup>16</sup>) / (9,5 &times; 10<sup>15</sup>) = environ 4,3 a.l." },
+            { q: "Si un objet se trouve à 20 années-lumière, comment exprimer cette distance en kilomètres ? (1 al = 9,5 &times; 10<sup>12</sup> km)", options: ["1,9 &times; 10<sup>14</sup> km", "2,0 &times; 10<sup>13</sup> km", "19 &times; 10<sup>10</sup> km"], ans: 0, diff: "difficile", expl: "20 &times; 9,5 &times; 10<sup>12</sup> = 190 &times; 10<sup>12</sup> = 1,9 &times; 10<sup>14</sup> km." },
+            { q: "L'amas d'Hercule est à 25 000 a.l. Combien de temps a voyagé sa lumière que l'on observe aujourd'hui ?", options: ["25 000 jours", "25 000 ans", "Impossible à savoir"], ans: 1, diff: "facile", expl: "La lumière parcourt 1 a.l. en 1 an, elle met donc 25 000 ans pour parcourir cette distance." },
+            { q: "Combien y a-t-il de secondes dans une année ? (Environ)", options: ["3,15 &times; 10<sup>7</sup> s", "3,15 &times; 10<sup>5</sup> s", "8,64 &times; 10<sup>4</sup> s"], ans: 0, diff: "difficile", expl: "365,25 jours &times; 24 h &times; 3600 s = environ 31 557 600 s (soit environ 3,15 &times; 10<sup>7</sup> s)." },
+            { q: "Un astéroïde géocroiseur croise l'orbite de la Terre. Quelle unité est adaptée pour suivre sa distance ?", options: ["L'année-lumière", "Le kilomètre ou l'unité astronomique", "Le parsec"], ans: 1, diff: "moyenne", expl: "À l'échelle du système solaire interne, on utilise l'ua ou le kilomètre pour plus de précision." }
+        ];
+
+        let selectedQuestions = [];
+        let currentScore = 0;
+        let answeredCount = 0;
+
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            document.getElementById('score-panel').style.display = 'none';
+            currentScore = 0;
+            answeredCount = 0;
+
+            let shuffled = shuffleArray([...allQuestions]);
+            selectedQuestions = shuffled.slice(0, 10);
+
+            selectedQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                questionDiv.id = `q-block-${index}`;
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIndex) => {
+                    optionsHtml += `
+                        <li>
+                            <label>
+                                <input type="radio" name="q${index}" value="${optIndex}">
+                                ${opt}
+                            </label>
+                        </li>
+                    `;
+                });
+
+                questionDiv.innerHTML = `
+                    <span class="difficulty ${q.diff}">${q.diff}</span>
+                    <h3>Question ${index + 1} : ${q.q}</h3>
+                    <ul class="options">${optionsHtml}</ul>
+                    <button onclick="checkAnswer(${index})">Valider</button>
+                    <div class="feedback" id="feedback-${index}"></div>
+                `;
+                container.appendChild(questionDiv);
+            });
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function checkAnswer(index) {
+            const block = document.getElementById(`q-block-${index}`);
+            const selected = block.querySelector(`input[name="q${index}"]:checked`);
+            const feedbackBlock = document.getElementById(`feedback-${index}`);
+            const btn = block.querySelector('button');
+
+            if (!selected) {
+                alert("Sélectionne une réponse avant de valider !");
+                return;
+            }
+
+            const radios = block.querySelectorAll(`input[name="q${index}"]`);
+            radios.forEach(r => r.disabled = true);
+            btn.style.display = 'none';
+
+            const question = selectedQuestions[index];
+            const isCorrect = parseInt(selected.value) === question.ans;
+
+            if (isCorrect) {
+                currentScore++;
+                feedbackBlock.className = 'feedback correct';
+                feedbackBlock.innerHTML = `<strong>Exact !</strong> ${question.expl}`;
+            } else {
+                feedbackBlock.className = 'feedback incorrect';
+                feedbackBlock.innerHTML = `<strong>Faux.</strong> La bonne réponse était la n°${question.ans + 1}.<br><br>${question.expl}`;
+            }
+            
+            feedbackBlock.style.display = 'block';
+            answeredCount++;
+
+            if (answeredCount === selectedQuestions.length) {
+                const scorePanel = document.getElementById('score-panel');
+                document.getElementById('score').innerText = currentScore;
+                scorePanel.style.display = 'block';
+                setTimeout(() => scorePanel.scrollIntoView({ behavior: 'smooth' }), 300);
+            }
+        }
+
+        // Lancer le quiz au chargement de la page
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
