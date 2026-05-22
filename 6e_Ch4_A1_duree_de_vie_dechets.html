@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mission Tri : L'échelle du temps des déchets</title>
     <style>
         body {
@@ -11,14 +11,17 @@
             color: #333;
             text-align: center;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
+            /* Empêche le pull-to-refresh accidentel sur mobile */
+            overscroll-behavior-y: none; 
         }
         h1 {
             color: #2c3e50;
+            font-size: 1.8em;
         }
         #consigne {
-            font-size: 1.2em;
-            margin-bottom: 30px;
+            font-size: 1.1em;
+            margin-bottom: 20px;
             font-weight: bold;
             color: #2980b9;
         }
@@ -27,8 +30,8 @@
         #bins-container {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 40px;
+            gap: 10px; /* Réduit pour mobile */
+            margin-bottom: 30px;
             flex-wrap: wrap;
         }
         .bin {
@@ -42,21 +45,23 @@
             align-items: center;
             padding: 10px;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
         .bin h3 {
             margin: 0 0 10px 0;
             font-size: 1.1em;
             color: white;
-            padding: 5px 10px;
+            padding: 5px;
             border-radius: 8px;
-            width: 90%;
+            width: 100%;
+            box-sizing: border-box;
         }
         .bin.dragover {
             transform: scale(1.05);
             border-color: #333;
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
-        /* Couleurs des poubelles */
+
         #bin-organique h3 { background-color: #8B4513; }
         #bin-papier h3 { background-color: #2980b9; }
         #bin-metal h3 { background-color: #7f8c8d; }
@@ -67,10 +72,10 @@
         .draggables-container {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
-            min-height: 100px;
-            padding: 20px;
+            min-height: 90px;
+            padding: 15px;
             background-color: #ecf0f1;
             border-radius: 15px;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
@@ -81,24 +86,25 @@
             background-color: white;
             border: 2px solid #bdc3c7;
             border-radius: 50%;
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2.5em;
+            font-size: 2.2em;
             cursor: grab;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s;
+            transition: transform 0.2s;
+            touch-action: none; /* Indispensable pour le drag tactile */
         }
-        .waste-item:hover { transform: translateY(-5px); }
+        .waste-item:hover { transform: translateY(-3px); }
         .waste-item:active { cursor: grabbing; }
         
         .waste-item.phase2-ready {
             border-radius: 15px;
             flex-direction: column;
             height: auto;
-            min-height: 80px;
+            min-height: 70px;
             padding: 10px 5px;
         }
         .waste-item.time-dragover {
@@ -112,16 +118,14 @@
         .time-label {
             background-color: #34495e;
             color: white;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border-radius: 20px;
             cursor: grab;
             font-weight: bold;
-            font-size: 1em;
+            font-size: 0.9em;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            touch-action: none; /* Indispensable pour le drag tactile */
         }
-        .time-label:hover { transform: translateY(-3px); }
-        .time-label:active { cursor: grabbing; }
 
         .time-label.matched {
             background-color: transparent;
@@ -134,9 +138,9 @@
 
         /* Zone de message */
         #message-box {
-            margin-top: 30px;
-            padding: 20px;
-            font-size: 1.5em;
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 1.2em;
             font-weight: bold;
             border-radius: 10px;
             min-height: 40px;
@@ -151,104 +155,49 @@
         .phase-transition { background-color: #fff3cd; color: #856404; border-color: #ffeeba !important; }
 
         /* --- DÉFI FINAL & QUIZ --- */
-        #end-game-section {
-            display: none; /* Caché jusqu'à la fin */
-            margin-top: 40px;
-            animation: fadeIn 1s ease;
-        }
-        
+        #end-game-section { display: none; margin-top: 30px; animation: fadeIn 1s ease; }
         .challenge-box, .quiz-box {
             background-color: #ffffff;
             border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-        }
-
-        .challenge-box { border: 4px solid #f39c12; }
-        .challenge-box h2 { color: #d35400; margin-top: 0; }
-        
-        .quiz-box { border: 4px solid #9b59b6; text-align: left; }
-        .quiz-box h2 { color: #8e44ad; margin-top: 0; text-align: center; }
-
-        .calculator-zone {
-            background-color: #fef9e7;
             padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            font-size: 1.2em;
-        }
-        .calculator-zone input {
-            font-size: 1em;
-            padding: 5px 10px;
-            width: 100px;
-            border: 2px solid #f39c12;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .calculator-zone button {
-            font-size: 1em;
-            padding: 8px 20px;
-            background-color: #f39c12;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-        .calculator-zone button:hover { background-color: #d35400; }
-        #future-result { margin-top: 15px; font-size: 1.3em; color: #c0392b; }
-        
-        .real-world-mission {
-            background-color: #e8f8f5;
-            border-left: 5px solid #1abc9c;
-            padding: 15px;
-            margin-top: 20px;
-            text-align: left;
-        }
-        .real-world-mission h3 { margin-top: 0; color: #16a085; }
-
-        /* Styles du QCM */
-        .quiz-question {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 10px;
             margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-        .quiz-question p { font-size: 1.1em; font-weight: bold; margin-top: 0; }
-        .quiz-options {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .quiz-btn {
-            padding: 10px 15px;
-            font-size: 1em;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
-            background-color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex: 1;
-            min-width: 150px;
-        }
+        .challenge-box { border: 4px solid #f39c12; }
+        .challenge-box h2 { color: #d35400; margin-top: 0; font-size: 1.4em; }
+        .quiz-box { border: 4px solid #9b59b6; text-align: left; }
+        .quiz-box h2 { color: #8e44ad; margin-top: 0; text-align: center; font-size: 1.4em; }
+
+        .calculator-zone { background-color: #fef9e7; padding: 15px; border-radius: 10px; margin: 15px 0; font-size: 1.1em; }
+        .calculator-zone input { font-size: 1em; padding: 5px; width: 80px; border: 2px solid #f39c12; border-radius: 5px; text-align: center; }
+        .calculator-zone button { font-size: 1em; padding: 8px 15px; background-color: #f39c12; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        #future-result { margin-top: 15px; font-size: 1.2em; color: #c0392b; }
+        
+        .real-world-mission { background-color: #e8f8f5; border-left: 5px solid #1abc9c; padding: 15px; margin-top: 20px; text-align: left; }
+        .real-world-mission h3 { margin-top: 0; color: #16a085; font-size: 1.2em;}
+
+        .quiz-question { background-color: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .quiz-question p { font-size: 1.05em; font-weight: bold; margin-top: 0; }
+        .quiz-options { display: flex; gap: 10px; flex-wrap: wrap; }
+        .quiz-btn { padding: 10px; font-size: 1em; border: 2px solid #bdc3c7; border-radius: 8px; background-color: white; cursor: pointer; flex: 1; min-width: 120px; }
         .quiz-btn:hover:not(:disabled) { border-color: #9b59b6; background-color: #f4ecf7; }
-        .quiz-btn:disabled { cursor: not-allowed; }
         .btn-correct { background-color: #27ae60 !important; color: white; border-color: #2ecc71 !important; }
         .btn-wrong { background-color: #e74c3c !important; color: white; border-color: #c0392b !important; }
-        
-        .quiz-feedback {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1.05em;
-        }
+        .quiz-feedback { display: none; margin-top: 15px; padding: 10px; border-radius: 8px; font-size: 1em; }
         .feedback-success { background-color: #d4edda; color: #155724; border-left: 5px solid #28a745; }
         .feedback-error { background-color: #f8d7da; color: #721c24; border-left: 5px solid #dc3545; }
 
         .shake-anim { animation: shake 0.5s; }
+
+        /* --- ADAPTATION MOBILE (Media Queries) --- */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.4em; }
+            .bin { width: 30%; min-width: 90px; min-height: 110px; padding: 5px; }
+            .bin h3 { font-size: 0.85em; padding: 3px; }
+            .waste-item { width: 55px; height: 55px; font-size: 1.8em; }
+            .quiz-btn { flex-basis: 100%; } /* Boutons l'un sous l'autre */
+            #message-box { font-size: 1.1em; }
+        }
 
         @keyframes shake {
             0% { transform: translateX(0); }
@@ -266,32 +215,32 @@
 <body>
 
     <h1>♻️ Mission Tri : L'échelle du temps des déchets !</h1>
-    <p id="consigne">Étape 1 : Glisse chaque déchet dans la poubelle de sa famille de matière.</p>
+    <p id="consigne">Étape 1 : Glisse chaque déchet dans la poubelle de sa famille.</p>
 
     <div id="bins-container">
-        <div class="bin" id="bin-organique" data-family="organique" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
-            <h3>Organique</h3>
+        <div class="bin" data-family="organique" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
+            <h3 id="bin-organique">Organique</h3>
         </div>
-        <div class="bin" id="bin-papier" data-family="papier" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
-            <h3>Papier/Carton</h3>
+        <div class="bin" data-family="papier" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
+            <h3 id="bin-papier">Papier/Carton</h3>
         </div>
-        <div class="bin" id="bin-metal" data-family="metal" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
-            <h3>Métaux</h3>
+        <div class="bin" data-family="metal" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
+            <h3 id="bin-metal">Métaux</h3>
         </div>
-        <div class="bin" id="bin-verre" data-family="verre" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
-            <h3>Verre</h3>
+        <div class="bin" data-family="verre" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
+            <h3 id="bin-verre">Verre</h3>
         </div>
-        <div class="bin" id="bin-plastique" data-family="plastique" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
-            <h3>Plastiques</h3>
+        <div class="bin" data-family="plastique" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
+            <h3 id="bin-plastique">Plastiques</h3>
         </div>
     </div>
 
     <div id="items-container" class="draggables-container">
-        <div class="waste-item" id="waste1" draggable="true" ondragstart="dragWaste(event)" data-family="organique" data-name="Le trognon de pomme" data-lifespan="quelques jours à 1 mois" title="Trognon de pomme"><span>🍎</span></div>
-        <div class="waste-item" id="waste2" draggable="true" ondragstart="dragWaste(event)" data-family="papier" data-name="Le papier imprimé" data-lifespan="2 à 12 mois" title="Papier journal"><span>📰</span></div>
-        <div class="waste-item" id="waste3" draggable="true" ondragstart="dragWaste(event)" data-family="metal" data-name="La canette en aluminium" data-lifespan="150 ans" title="Canette"><span>🥫</span></div>
-        <div class="waste-item" id="waste4" draggable="true" ondragstart="dragWaste(event)" data-family="plastique" data-name="La bouteille en plastique" data-lifespan="100 à 500 ans" title="Bouteille plastique"><span>🧴</span></div>
-        <div class="waste-item" id="waste5" draggable="true" ondragstart="dragWaste(event)" data-family="verre" data-name="La bouteille en verre" data-lifespan="4 000 ans" title="Bouteille en verre"><span>🍾</span></div>
+        <div class="waste-item" id="waste1" draggable="true" ondragstart="dragWaste(event)" data-family="organique" data-name="Le trognon de pomme" data-lifespan="quelques jours à 1 mois"><span>🍎</span></div>
+        <div class="waste-item" id="waste2" draggable="true" ondragstart="dragWaste(event)" data-family="papier" data-name="Le papier imprimé" data-lifespan="2 à 12 mois"><span>📰</span></div>
+        <div class="waste-item" id="waste3" draggable="true" ondragstart="dragWaste(event)" data-family="metal" data-name="La canette en aluminium" data-lifespan="150 ans"><span>🥫</span></div>
+        <div class="waste-item" id="waste4" draggable="true" ondragstart="dragWaste(event)" data-family="plastique" data-name="La bouteille en plastique" data-lifespan="100 à 500 ans"><span>🧴</span></div>
+        <div class="waste-item" id="waste5" draggable="true" ondragstart="dragWaste(event)" data-family="verre" data-name="La bouteille en verre" data-lifespan="4 000 ans"><span>🍾</span></div>
     </div>
 
     <div id="times-container" class="draggables-container">
@@ -306,60 +255,51 @@
 
     <!-- ZONE DE FIN DE JEU : DÉFI + QCM -->
     <div id="end-game-section">
-        
-        <!-- Défi Final -->
         <div class="challenge-box">
-            <h2>🚀 Félicitations ! Place au défi final !</h2>
-            <p>Tu as découvert que nos déchets survivent bien plus longtemps que nous si on ne les recycle pas.</p>
-            
+            <h2>🚀 Félicitations ! Défi final !</h2>
+            <p>Tu as découvert que nos déchets survivent bien plus longtemps que nous.</p>
             <div class="calculator-zone">
-                Si je jette une bouteille aujourd'hui, en l'an : 
-                <input type="number" id="current-year" value="2026">
+                Bouteille jetée en l'an : 
+                <input type="number" id="current-year" value="2024">
                 <button onclick="calculateFuture()">Voir le futur 🔮</button>
                 <div id="future-result"></div>
             </div>
-
             <div class="real-world-mission">
-                <h3>🌍 Ta mission secrète pour aujourd'hui :</h3>
-                <p><strong>1. Observe :</strong> Regarde dans ton cartable ou ta poubelle de classe et trouve <strong>un déchet que tu aurais pu éviter</strong> (comme un emballage de gâteau).</p>
-                <p><strong>2. Agis :</strong> Trouve une alternative pour la prochaine fois (ex: une boîte à goûter lavable). Parles-en à ton voisin !</p>
+                <h3>🌍 Ta mission secrète :</h3>
+                <p>Trouve <strong>un déchet que tu aurais pu éviter</strong> aujourd'hui (ex: emballage jetable) et propose une alternative (ex: gourde) !</p>
             </div>
         </div>
 
-        <!-- Quiz Le Savais-tu -->
         <div class="quiz-box">
-            <h2>🧠 Quiz Bonus : Le savais-tu ?</h2>
+            <h2>🧠 Quiz : Le savais-tu ?</h2>
             
             <div class="quiz-question">
-                <p>1. À ton avis, de quoi est principalement fabriqué le verre ? 🍾</p>
+                <p>1. À ton avis, de quoi est fabriqué le verre ? 🍾</p>
                 <div class="quiz-options">
-                    <button class="quiz-btn" onclick="answerQuiz(this, false, 'Le plastique est fait à partir de pétrole, pas le verre !')">De pétrole</button>
-                    <button class="quiz-btn" onclick="answerQuiz(this, true, 'Le verre est fabriqué en faisant fondre du sable à très haute température (environ 1500°C) !')">De sable</button>
-                    <button class="quiz-btn" onclick="answerQuiz(this, false, 'La roche sert souvent à la construction, mais le verre demande un ingrédient plus fin.')">De roches</button>
+                    <button class="quiz-btn" onclick="answerQuiz(this, false, 'Le plastique est fait à partir de pétrole !')">De pétrole</button>
+                    <button class="quiz-btn" onclick="answerQuiz(this, true, 'Le verre est fabriqué en faisant fondre du sable à très haute température (1500°C) !')">De sable</button>
+                    <button class="quiz-btn" onclick="answerQuiz(this, false, 'Ce n\'est pas la roche !')">De roches</button>
                 </div>
                 <div class="quiz-feedback"></div>
             </div>
 
             <div class="quiz-question">
-                <p>2. Combien de fois peut-on recycler une canette en aluminium ? 🥫</p>
+                <p>2. Combien de fois peut-on recycler une canette ? 🥫</p>
                 <div class="quiz-options">
-                    <button class="quiz-btn" onclick="answerQuiz(this, false, 'C\'est beaucoup plus que ça ! Le plastique, lui, ne se recycle que 2 ou 3 fois.')">2 ou 3 fois</button>
-                    <button class="quiz-btn" onclick="answerQuiz(this, false, 'C\'est encore plus !')">Une dizaine de fois</button>
-                    <button class="quiz-btn" onclick="answerQuiz(this, true, 'L\'aluminium (comme le verre) se recycle à l\'infini sans jamais perdre sa qualité !')">À l'infini</button>
+                    <button class="quiz-btn" onclick="answerQuiz(this, false, 'Le plastique ne se recycle que 2 ou 3 fois, mais l\'aluminium bien plus !')">2 ou 3 fois</button>
+                    <button class="quiz-btn" onclick="answerQuiz(this, true, 'L\'aluminium (comme le verre) se recycle à l\'infini sans perdre sa qualité !')">À l'infini</button>
                 </div>
                 <div class="quiz-feedback"></div>
             </div>
 
             <div class="quiz-question">
-                <p>3. Que devient principalement le plastique de nos bouteilles une fois recyclé ? 🧴</p>
+                <p>3. Que devient le plastique de nos bouteilles recyclées ? 🧴</p>
                 <div class="quiz-options">
-                    <button class="quiz-btn" onclick="answerQuiz(this, true, 'On fabrique de la fibre polyester avec le plastique. Il faut environ 15 bouteilles pour faire un pull polaire !')">Des pulls polaires ou des peluches</button>
-                    <button class="quiz-btn" onclick="answerQuiz(this, false, 'Le carton est fabriqué à partir de bois ou de papier recyclé, pas de plastique !')">Du carton</button>
-                    <button class="quiz-btn" onclick="answerQuiz(this, false, 'C\'est possible, mais ce n\'est pas ce qu\'on fabrique le plus avec.')">Des stylos</button>
+                    <button class="quiz-btn" onclick="answerQuiz(this, true, 'On fabrique de la fibre polyester avec. Il faut 15 bouteilles pour faire un pull polaire !')">Des pulls polaires</button>
+                    <button class="quiz-btn" onclick="answerQuiz(this, false, 'Le carton est fabriqué à partir de bois !')">Du carton</button>
                 </div>
                 <div class="quiz-feedback"></div>
             </div>
-
         </div>
     </div>
 
@@ -373,41 +313,20 @@
             shuffleChildren('items-container');
             shuffleChildren('times-container');
             document.getElementById('current-year').value = new Date().getFullYear();
+            initTouchEvents(); // Activation pour mobile
         };
 
         function shuffleChildren(containerId) {
             let container = document.getElementById(containerId);
             let elementsArray = Array.prototype.slice.call(container.children);
             elementsArray.sort(function() { return 0.5 - Math.random(); });
-            elementsArray.forEach(function(element) {
-                container.appendChild(element);
-            });
+            elementsArray.forEach(function(element) { container.appendChild(element); });
         }
 
-        function allowDrop(ev) { ev.preventDefault(); }
-
-        // --- PHASE 1 ---
-        function dragWaste(ev) { ev.dataTransfer.setData("text/waste", ev.target.id); }
-        function dragEnterBin(ev) {
-            ev.preventDefault();
-            let target = ev.target.closest('.bin');
-            if(target) target.classList.add('dragover');
-        }
-        function dragLeaveBin(ev) {
-            let target = ev.target.closest('.bin');
-            if(target) target.classList.remove('dragover');
-        }
-
-        function dropWaste(ev) {
-            ev.preventDefault();
-            let target = ev.target.closest('.bin');
-            if(target) target.classList.remove('dragover');
-
-            let wasteId = ev.dataTransfer.getData("text/waste");
-            if (!wasteId) return; 
-            
-            let draggedWaste = document.getElementById(wasteId);
-            let targetFamily = target.getAttribute("data-family");
+        // --- GESTION UNIFIÉE DES VALIDATIONS (Mouse + Touch) ---
+        function processPhase1Drop(draggedWaste, targetBin) {
+            if (!targetBin) return;
+            let targetFamily = targetBin.getAttribute("data-family");
             let wasteFamily = draggedWaste.getAttribute("data-family");
             let msgBox = document.getElementById("message-box");
 
@@ -417,7 +336,7 @@
             void msgBox.offsetWidth;
 
             if (targetFamily === wasteFamily) {
-                target.appendChild(draggedWaste);
+                targetBin.appendChild(draggedWaste);
                 draggedWaste.setAttribute('draggable', 'false');
                 draggedWaste.style.cursor = 'default';
                 draggedWaste.style.boxShadow = 'none';
@@ -427,7 +346,7 @@
                 let name = draggedWaste.getAttribute("data-name");
                 
                 if (wasteSortedCount < totalItems) {
-                    msgBox.innerHTML = `✅ Bien joué ! ${name} est dans la bonne poubelle.`;
+                    msgBox.innerHTML = `✅ Bien joué ! ${name} est bien trié.`;
                     msgBox.className = "success";
                 } else {
                     startPhase2();
@@ -443,12 +362,160 @@
             }
         }
 
-        // --- TRANSITION ---
+        function processPhase2Drop(draggedTime, targetWaste) {
+            if (!targetWaste) return;
+            let wasteLifespan = targetWaste.getAttribute("data-lifespan");
+            let timeLifespan = draggedTime.getAttribute("data-lifespan");
+            let msgBox = document.getElementById("message-box");
+
+            clearTimeout(msgTimeout);
+            msgBox.classList.remove("shake-anim");
+            draggedTime.classList.remove("shake-anim");
+            void msgBox.offsetWidth;
+
+            if (wasteLifespan === timeLifespan) {
+                targetWaste.appendChild(draggedTime);
+                targetWaste.classList.remove('phase2-ready');
+                targetWaste.removeAttribute('ondragover');
+                targetWaste.removeAttribute('ondrop');
+                
+                draggedTime.setAttribute('draggable', 'false');
+                draggedTime.className = 'time-label matched';
+                
+                timesSortedCount++;
+                let wasteName = targetWaste.getAttribute("data-name");
+
+                if (timesSortedCount < totalItems) {
+                    msgBox.innerHTML = `✅ Exact ! ${wasteName} met <strong>${timeLifespan}</strong>.`;
+                    msgBox.className = "success";
+                } else {
+                    msgBox.innerHTML = `🏆 MISSION ACCOMPLIE ! 🏆<br>Découvre le quiz !`;
+                    msgBox.className = "success";
+                    document.getElementById('times-container').style.display = 'none';
+                    document.getElementById('end-game-section').style.display = 'block';
+                    setTimeout(() => { document.getElementById('end-game-section').scrollIntoView({ behavior: 'smooth' }); }, 500);
+                }
+            } else {
+                msgBox.innerHTML = `❌ Cherche encore, mauvaise durée !`;
+                msgBox.className = "error shake-anim";
+                draggedTime.classList.add("shake-anim");
+                msgTimeout = setTimeout(() => {
+                    msgBox.classList.remove("shake-anim");
+                    draggedTime.classList.remove("shake-anim");
+                }, 500);
+            }
+        }
+
+        // --- GESTION ORDINATEUR (Drag & Drop HTML5) ---
+        function allowDrop(ev) { ev.preventDefault(); }
+        function dragWaste(ev) { ev.dataTransfer.setData("text/waste", ev.target.id); }
+        function dragEnterBin(ev) { let t = ev.target.closest('.bin'); if(t) t.classList.add('dragover'); }
+        function dragLeaveBin(ev) { let t = ev.target.closest('.bin'); if(t) t.classList.remove('dragover'); }
+        function dropWaste(ev) {
+            ev.preventDefault();
+            let target = ev.target.closest('.bin');
+            if(target) target.classList.remove('dragover');
+            let wasteId = ev.dataTransfer.getData("text/waste");
+            if(wasteId) processPhase1Drop(document.getElementById(wasteId), target);
+        }
+
+        function dragTime(ev) { ev.dataTransfer.setData("text/time", ev.target.id); }
+        function dragEnterWaste(ev) { let t = ev.target.closest('.waste-item'); if(t && t.classList.contains('phase2-ready')) t.classList.add('time-dragover'); }
+        function dragLeaveWaste(ev) { let t = ev.target.closest('.waste-item'); if(t) t.classList.remove('time-dragover'); }
+        function dropTime(ev) {
+            ev.preventDefault();
+            let target = ev.target.closest('.waste-item');
+            if(target) target.classList.remove('time-dragover');
+            let timeId = ev.dataTransfer.getData("text/time");
+            if(timeId) processPhase2Drop(document.getElementById(timeId), target);
+        }
+
+        // --- GESTION MOBILE (Touch Events personnalisés) ---
+        let activeTouchElement = null;
+        let touchOffsetX = 0; let touchOffsetY = 0;
+
+        function initTouchEvents() {
+            document.querySelectorAll('.waste-item, .time-label').forEach(el => {
+                el.addEventListener('touchstart', handleTouchStart, {passive: false});
+                el.addEventListener('touchmove', handleTouchMove, {passive: false});
+                el.addEventListener('touchend', handleTouchEnd);
+            });
+        }
+
+        function handleTouchStart(e) {
+            let el = e.target.closest('.waste-item, .time-label');
+            if (!el || el.getAttribute('draggable') === 'false') return;
+            e.preventDefault(); 
+            activeTouchElement = el;
+            
+            let touch = e.touches[0];
+            let rect = el.getBoundingClientRect();
+            touchOffsetX = touch.clientX - rect.left;
+            touchOffsetY = touch.clientY - rect.top;
+
+            // Élément soulevé par le doigt
+            el.style.position = 'fixed';
+            el.style.zIndex = '1000';
+            el.style.left = (touch.clientX - touchOffsetX) + 'px';
+            el.style.top = (touch.clientY - touchOffsetY) + 'px';
+            el.style.pointerEvents = 'none'; // Pour voir ce qu'il y a en dessous
+        }
+
+        function handleTouchMove(e) {
+            if (!activeTouchElement) return;
+            e.preventDefault();
+            let touch = e.touches[0];
+            activeTouchElement.style.left = (touch.clientX - touchOffsetX) + 'px';
+            activeTouchElement.style.top = (touch.clientY - touchOffsetY) + 'px';
+
+            // Effet visuel au survol
+            let elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            document.querySelectorAll('.bin').forEach(b => b.classList.remove('dragover'));
+            document.querySelectorAll('.waste-item').forEach(w => w.classList.remove('time-dragover'));
+
+            if (elemBelow) {
+                if (activeTouchElement.classList.contains('waste-item')) {
+                    let bin = elemBelow.closest('.bin');
+                    if (bin) bin.classList.add('dragover');
+                } else if (activeTouchElement.classList.contains('time-label')) {
+                    let waste = elemBelow.closest('.waste-item.phase2-ready');
+                    if (waste) waste.classList.add('time-dragover');
+                }
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!activeTouchElement) return;
+            let touch = e.changedTouches[0];
+            let dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            // Nettoyage visuel
+            document.querySelectorAll('.bin').forEach(b => b.classList.remove('dragover'));
+            document.querySelectorAll('.waste-item').forEach(w => w.classList.remove('time-dragover'));
+
+            // Retour à la normale
+            activeTouchElement.style.position = '';
+            activeTouchElement.style.zIndex = '';
+            activeTouchElement.style.left = '';
+            activeTouchElement.style.top = '';
+            activeTouchElement.style.pointerEvents = 'auto';
+
+            // Validation selon la phase
+            if (activeTouchElement.classList.contains('waste-item')) {
+                let bin = dropTarget ? dropTarget.closest('.bin') : null;
+                if (bin) processPhase1Drop(activeTouchElement, bin);
+            } else if (activeTouchElement.classList.contains('time-label')) {
+                let waste = dropTarget ? dropTarget.closest('.waste-item.phase2-ready') : null;
+                if (waste) processPhase2Drop(activeTouchElement, waste);
+            }
+            activeTouchElement = null;
+        }
+
+        // --- TRANSITIONS ET LOGIQUE ---
         function startPhase2() {
             let msgBox = document.getElementById("message-box");
-            msgBox.innerHTML = `🌟 MISSION 1 TERMINÉE ! 🌟<br>Prépare-toi pour l'Étape 2...`;
+            msgBox.innerHTML = `🌟 ÉTAPE 1 TERMINÉE ! 🌟`;
             msgBox.className = "phase-transition";
-            
             document.getElementById('items-container').style.display = 'none';
 
             document.querySelectorAll('.waste-item').forEach(item => {
@@ -460,130 +527,42 @@
             });
 
             setTimeout(() => {
-                document.getElementById('consigne').innerText = "Étape 2 : Glisse maintenant chaque durée de vie sur le déchet correspondant !";
+                document.getElementById('consigne').innerText = "Étape 2 : Glisse la durée de vie sur le bon déchet !";
                 document.getElementById('times-container').style.display = 'flex';
-                msgBox.innerHTML = `À toi de jouer : trouve le temps de dégradation !`;
+                msgBox.innerHTML = `Trouve le temps de dégradation !`;
                 msgBox.className = "";
             }, 2500);
         }
 
-        // --- PHASE 2 ---
-        function dragTime(ev) { ev.dataTransfer.setData("text/time", ev.target.id); }
-        function dragEnterWaste(ev) {
-            ev.preventDefault();
-            let target = ev.target.closest('.waste-item');
-            if(target && target.classList.contains('phase2-ready')) target.classList.add('time-dragover');
-        }
-        function dragLeaveWaste(ev) {
-            let target = ev.target.closest('.waste-item');
-            if(target) target.classList.remove('time-dragover');
-        }
-
-        function dropTime(ev) {
-            ev.preventDefault();
-            let target = ev.target.closest('.waste-item');
-            if(target) target.classList.remove('time-dragover');
-
-            let timeId = ev.dataTransfer.getData("text/time");
-            if (!timeId) return;
-
-            let draggedTime = document.getElementById(timeId);
-            let wasteLifespan = target.getAttribute("data-lifespan");
-            let timeLifespan = draggedTime.getAttribute("data-lifespan");
-            let msgBox = document.getElementById("message-box");
-
-            clearTimeout(msgTimeout);
-            msgBox.classList.remove("shake-anim");
-            draggedTime.classList.remove("shake-anim");
-            void msgBox.offsetWidth;
-
-            if (wasteLifespan === timeLifespan) {
-                target.appendChild(draggedTime);
-                target.classList.remove('phase2-ready');
-                target.removeAttribute('ondragover');
-                target.removeAttribute('ondrop');
-                
-                draggedTime.setAttribute('draggable', 'false');
-                draggedTime.className = 'time-label matched';
-                
-                timesSortedCount++;
-                let wasteName = target.getAttribute("data-name");
-
-                if (timesSortedCount < totalItems) {
-                    msgBox.innerHTML = `✅ Exact ! ${wasteName} met <strong>${timeLifespan}</strong> à disparaître.`;
-                    msgBox.className = "success";
-                } else {
-                    msgBox.innerHTML = `🏆 EXPERT DU RECYCLAGE ! 🏆<br>Découvre ton défi et le quiz bonus juste en bas !`;
-                    msgBox.className = "success";
-                    document.getElementById('times-container').style.display = 'none';
-                    
-                    // Afficher la section finale
-                    document.getElementById('end-game-section').style.display = 'block';
-                    setTimeout(() => {
-                        document.getElementById('end-game-section').scrollIntoView({ behavior: 'smooth' });
-                    }, 500);
-                }
-            } else {
-                msgBox.innerHTML = `❌ Oups ! Cherche encore, ce n'est pas la bonne durée.`;
-                msgBox.className = "error shake-anim";
-                draggedTime.classList.add("shake-anim");
-                msgTimeout = setTimeout(() => {
-                    msgBox.classList.remove("shake-anim");
-                    draggedTime.classList.remove("shake-anim");
-                }, 500);
-            }
-        }
-
-        // --- CALCULATRICE FUTUR ---
         function calculateFuture() {
-            let yearInput = document.getElementById('current-year').value;
-            let currentYear = parseInt(yearInput);
-            
-            if(isNaN(currentYear)) {
-                alert("Mets une année valide (ex: 2024)");
-                return;
-            }
-
-            let plasticYear = currentYear + 500;
-            let glassYear = currentYear + 4000;
-
+            let yearInput = parseInt(document.getElementById('current-year').value);
+            if(isNaN(yearInput)) return;
             let resultDiv = document.getElementById('future-result');
             resultDiv.innerHTML = `
-                <p>🧴 La bouteille en plastique ne disparaîtra qu'en <strong>${plasticYear}</strong> !</p>
-                <p>🍾 Et la bouteille en verre survivra jusqu'en <strong>${glassYear}</strong> !</p>
-                <p style="color:#2c3e50; font-size: 0.8em; margin-top: 10px;"><em>C'est la preuve qu'il vaut mieux utiliser une gourde ! 😉</em></p>
+                <p>🧴 Disparition du plastique en <strong>${yearInput + 500}</strong></p>
+                <p>🍾 Disparition du verre en <strong>${yearInput + 4000}</strong></p>
             `;
-            
             resultDiv.style.opacity = '0';
-            setTimeout(() => {
-                resultDiv.style.transition = 'opacity 0.5s';
-                resultDiv.style.opacity = '1';
-            }, 50);
+            setTimeout(() => { resultDiv.style.transition = 'opacity 0.5s'; resultDiv.style.opacity = '1'; }, 50);
         }
 
-        // --- GESTION DU QCM ---
         function answerQuiz(btn, isCorrect, explanation) {
             let optionsDiv = btn.parentElement;
             let feedbackDiv = optionsDiv.nextElementSibling;
             
-            // Désactiver tous les boutons de cette question
             let buttons = optionsDiv.querySelectorAll('button');
             buttons.forEach(b => {
                 b.disabled = true;
-                if (b === btn) {
-                    b.classList.add(isCorrect ? 'btn-correct' : 'btn-wrong');
-                } else {
-                    b.style.opacity = '0.5';
-                }
+                if (b === btn) b.classList.add(isCorrect ? 'btn-correct' : 'btn-wrong');
+                else b.style.opacity = '0.5';
             });
 
-            // Afficher l'explication "Le Savais-tu"
             feedbackDiv.style.display = 'block';
             if (isCorrect) {
-                feedbackDiv.innerHTML = `🎉 <strong>Bien vu ! Le savais-tu ?</strong><br>${explanation}`;
+                feedbackDiv.innerHTML = `🎉 <strong>Bien vu !</strong><br>${explanation}`;
                 feedbackDiv.className = 'quiz-feedback feedback-success';
             } else {
-                feedbackDiv.innerHTML = `❌ <strong>Oups ! Le savais-tu ?</strong><br>${explanation}`;
+                feedbackDiv.innerHTML = `❌ <strong>Oups !</strong><br>${explanation}`;
                 feedbackDiv.className = 'quiz-feedback feedback-error';
             }
         }
