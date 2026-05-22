@@ -62,6 +62,7 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
+        /* Couleurs des poubelles */
         #bin-organique h3 { background-color: #8B4513; }
         #bin-papier h3 { background-color: #2980b9; }
         #bin-metal h3 { background-color: #7f8c8d; }
@@ -218,20 +219,21 @@
     <p id="consigne">Étape 1 : Glisse chaque déchet dans la poubelle de sa famille.</p>
 
     <div id="bins-container">
-        <div class="bin" data-family="organique" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
-            <h3 id="bin-organique">Organique</h3>
+        <!-- L'ID a été remis sur la div .bin -->
+        <div class="bin" id="bin-organique" data-family="organique" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
+            <h3>Organique</h3>
         </div>
-        <div class="bin" data-family="papier" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
-            <h3 id="bin-papier">Papier/Carton</h3>
+        <div class="bin" id="bin-papier" data-family="papier" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
+            <h3>Papier/Carton</h3>
         </div>
-        <div class="bin" data-family="metal" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
-            <h3 id="bin-metal">Métaux</h3>
+        <div class="bin" id="bin-metal" data-family="metal" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
+            <h3>Métaux</h3>
         </div>
-        <div class="bin" data-family="verre" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
-            <h3 id="bin-verre">Verre</h3>
+        <div class="bin" id="bin-verre" data-family="verre" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
+            <h3>Verre</h3>
         </div>
-        <div class="bin" data-family="plastique" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
-            <h3 id="bin-plastique">Plastiques</h3>
+        <div class="bin" id="bin-plastique" data-family="plastique" ondrop="dropWaste(event)" ondragover="allowDrop(event)" ondragenter="dragEnterBin(event)" ondragleave="dragLeaveBin(event)">
+            <h3>Plastiques</h3>
         </div>
     </div>
 
@@ -260,7 +262,7 @@
             <p>Tu as découvert que nos déchets survivent bien plus longtemps que nous.</p>
             <div class="calculator-zone">
                 Bouteille jetée en l'an : 
-                <input type="number" id="current-year" value="2024">
+                <input type="number" id="current-year" value="2026">
                 <button onclick="calculateFuture()">Voir le futur 🔮</button>
                 <div id="future-result"></div>
             </div>
