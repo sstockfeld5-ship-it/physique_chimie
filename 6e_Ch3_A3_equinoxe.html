@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Cycle des Saisons : Vue 3D & Détails</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #050510; color: white; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Layout Écran partagé */
+        #divider { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #444; z-index: 5; }
+        .label-view {
+            position: absolute; top: 15px; padding: 5px 15px; 
+            font-weight: bold; background: rgba(0,0,0,0.6); border-radius: 4px; z-index: 10; font-size: 0.9rem;
+        }
+        #lbl-left { left: 20px; border-left: 3px solid #00C9FF; color:#00C9FF; }
+        #lbl-right { left: 52%; border-left: 3px solid #FFD700; color:#FFD700; }
+
+        /* Contrôles Principaux (Bas) */
+        #controls {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(20, 20, 30, 0.95); padding: 15px; border-radius: 15px;
+            border: 1px solid #555; display: flex; gap: 10px; z-index: 20;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); align-items: center;
+        }
+
+        /* Boutons Saisons */
+        .btn-season {
+            padding: 10px 15px; border: none; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; transition: all 0.2s;
+            display: flex; flex-direction: column; align-items: center; min-width: 80px; font-size: 0.85rem;
+        }
+        .btn-season span { font-size: 0.7rem; font-weight: normal; margin-top: 3px; color: #222; }
+        .btn-season:hover { transform: translateY(-3px); }
+        .btn-season.active { box-shadow: 0 0 0 2px white; transform: scale(1.05); }
+
+        #btn-winter { background: #a3deff; color: #004466; }
+        #btn-spring { background: #92FE9D; color: #004400; }
+        #btn-summer { background: #FFD700; color: #554400; }
+        #btn-autumn { background: #FF9966; color: #441100; }
+
+        /* Contrôles Caméra (Haut Droite du panneau de droite) */
+        #cam-controls {
+            position: absolute; top: 20px; right: 20px;
+            display: flex; flex-direction: column; gap: 5px; z-index: 20;
+        }
+        .btn-cam {
+            background: rgba(0,0,0,0.6); border: 1px solid #777; color: #ddd;
+            padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; text-align: right;
+        }
+        .btn-cam:hover { background: #444; }
+        .btn-cam.active { background: #FFD700; color: #000; border-color: #FFD700; font-weight: bold;}
+
+        /* Info Panel */
+        #info-box {
+            position: absolute; top: 60px; left: 52%; width: 280px;
+            background: rgba(0,0,0,0.85); padding: 15px; border-radius: 10px;
+            border-left: 5px solid #fff; display: none; z-index: 15; pointer-events: none;
+        }
+        #info-title { font-size: 1rem; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display:block;}
+        #info-desc { font-size: 0.85rem; line-height: 1.4; color: #ddd; }
+    </style>
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+    </script>
+</head>
+<body>
+
+    <div id="divider"></div>
+    <div id="lbl-left" class="label-view">Vue Système (3D Inclinée)</div>
+    <div id="lbl-right" class="label-view">Zoom Terre</div>
+
+    <div id="cam-controls">
+        <button id="btn-side" class="btn-cam active">👁 Vue de Profil (Voir l'Axe)</button>
+        <button id="btn-front" class="btn-cam">☀ Vue de Face (Voir l'Éclairement)</button>
+    </div>
+
+    <div id="info-box">
+        <span id="info-title">Saison</span>
+        <span id="info-desc">Description...</span>
+    </div>
+
+    <div id="controls">
+        <button id="btn-winter" class="btn-season">HIVER<span>Solstice</span></button>
+        <button id="btn-spring" class="btn-season">PRINTEMPS<span>Équinoxe</span></button>
+        <button id="btn-summer" class="btn-season">ÉTÉ<span>Solstice</span></button>
+        <button id="btn-autumn" class="btn-season">AUTOMNE<span>Équinoxe</span></button>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- SCÈNE ---
+        const scene = new THREE.Scene();
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // --- CAMÉRAS ---
+        
+        // 1. Vue Système (Gauche) - MODIFIÉ : Vue inclinée (plus de dessus strict)
+        const camSystem = new THREE.PerspectiveCamera(35, 0.5 * window.innerWidth / window.innerHeight, 1, 2000);
+        // Position X=0, Y=200 (hauteur), Z=350 (recul) pour voir l'orbite en perspective
+        camSystem.position.set(0, 200, 350); 
+        camSystem.lookAt(0, 0, 0);
+
+        // 2. Vue Terre (Droite) - Dynamique
+        const camEarth = new THREE.PerspectiveCamera(40, 0.5 * window.innerWidth / window.innerHeight, 1, 1000);
+
+        // --- LUMIÈRE (SOLEIL) ---
+        const sunLight = new THREE.PointLight(0xffffff, 2.5, 0, 0);
+        sunLight.position.set(0, 0, 0);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048; sunLight.shadow.mapSize.height = 2048;
+        scene.add(sunLight);
+        scene.add(new THREE.AmbientLight(0x222233, 1.2)); // Ambiance
+
+        // Soleil Visuel
+        const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(12, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffcc00 }));
+        scene.add(sunMesh);
+
+        // Fond étoilé
+        const starGeo = new THREE.BufferGeometry();
+        const starsArr = [];
+        for(let i=0; i<4000; i++) starsArr.push(THREE.MathUtils.randFloatSpread(1000), THREE.MathUtils.randFloatSpread(1000), THREE.MathUtils.randFloatSpread(1000));
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starsArr, 3));
+        scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xaaaaaa, size: 0.8})));
+
+        // --- LA TERRE ---
+        const earthGroup = new THREE.Group();
+        scene.add(earthGroup);
+
+        const tiltGroup = new THREE.Group();
+        // INCLINAISON FIXE : 23.5 degrés.
+        // Dans cette configuration : L'inclinaison pointe vers +X (Droite de l'écran système).
+        tiltGroup.rotation.z = -23.5 * (Math.PI / 180); 
+        earthGroup.add(tiltGroup);
+
+        // Terre
+        const textureLoader = new THREE.TextureLoader();
+        const earthMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(8, 64, 64),
+            new THREE.MeshStandardMaterial({ color: 0x2244ff, roughness: 0.5 })
+        );
+        earthMesh.castShadow = true; earthMesh.receiveShadow = true;
+        tiltGroup.add(earthMesh);
+
+        textureLoader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg', (t) => {
+            t.colorSpace = THREE.SRGBColorSpace;
+            earthMesh.material.map = t;
+            earthMesh.material.color.setHex(0xffffff);
+            earthMesh.material.needsUpdate = true;
+        });
+
+        // Axe Rouge
+        tiltGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 28, 8), new THREE.MeshBasicMaterial({ color: 0xff0000, toneMapped:false })));
+
+        // --- ORBITE & REPÈRES ---
+        const orbitRad = 120;
+        const orbitCurve = new THREE.EllipseCurve(0,0,orbitRad,orbitRad,0,2*Math.PI);
+        const orbitPts = orbitCurve.getPoints(100);
+        const orbitGeo = new THREE.BufferGeometry().setFromPoints(orbitPts);
+        const orbitLine = new THREE.Line(orbitGeo, new THREE.LineBasicMaterial({color: 0x444444}));
+        orbitLine.rotation.x = -Math.PI/2;
+        scene.add(orbitLine);
+
+        // Repères visuels sur l'orbite
+        function createMarker(x, z, color) {
+            const mesh = new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 16), new THREE.MeshBasicMaterial({color: color}));
+            mesh.position.set(x, 0, z);
+            scene.add(mesh);
+        }
+        // Hiver (Droite), Printemps (Haut - arrière), Été (Gauche), Automne (Bas - devant)
+        createMarker(orbitRad, 0, 0xa3deff); // Hiver
+        createMarker(0, -orbitRad, 0x92FE9D); // Printemps
+        createMarker(-orbitRad, 0, 0xFFD700); // Été
+        createMarker(0, orbitRad, 0xFF9966); // Automne
+
+        // --- LOGIQUE D'ANIMATION ---
+        let angle = 0; 
+        let targetAngle = 0;
+        let isMoving = false;
+        
+        // Mode de vue caméra Droite : 'SIDE' (Profil) ou 'FRONT' (Face)
+        let viewMode = 'SIDE'; 
+
+        // Configuration des Saisons (Angles en radians)
+        // Configuration avec Axe penchant vers +X :
+        // 0 rad (Droite, X+) : Terre à droite, Axe penche à droite (vers l'extérieur). Soleil à gauche. -> HIVER
+        // PI/2 rad (Bas, Z+) : Terre "devant". Axe penche à droite. Soleil derrière. -> AUTOMNE (dans sens trigo inverse) ou PRINTEMPS selon sens.
+        // Utilisons le sens standard anti-horaire :
+        // 0 = Hiver
+        // PI/2 = Printemps (Terre en "haut" Z-, Axe penche coté)
+        // PI = Été (Terre à gauche X-, Axe penche droite VERS soleil)
+        // 3PI/2 = Automne (Terre en "bas" Z+, Axe penche coté)
+        
+        const seasons = {
+            winter: 0,
+            spring: Math.PI / 2 * 3, // En ThreeJS Z- est "haut" visuellement mais 270deg trigo
+            summer: Math.PI,     
+            autumn: Math.PI / 2  // En ThreeJS Z+ est "bas" visuellement mais 90deg trigo
+        };
+        // Correction sens rotation : On va tourner dans le sens anti-horaire
+        // Hiver (X+) -> Printemps (Z-) -> Eté (X-) -> Automne (Z+)
+        // Angles ThreeJS : X+ (0), Z- (3PI/2 ou -PI/2), X- (PI), Z+ (PI/2)
+        
+        // Redéfinition correcte pour correspondre à l'orbite visuelle
+        const seasonAngles = {
+            'winter': 0,             // Droite
+            'spring': Math.PI * 1.5, // Haut (Z négatif)
+            'summer': Math.PI,       // Gauche
+            'autumn': Math.PI * 0.5  // Bas (Z positif)
+        };
+
+        function goToSeason(sName) {
+            let dest = seasonAngles[sName];
+            
+            // Calcul du chemin le plus court ou sens logique
+            // On normalise l'angle actuel entre 0 et 2PI
+            let currentMod = angle % (2*Math.PI);
+            if(currentMod < 0) currentMod += 2*Math.PI;
+
+            // On veut toujours avancer dans le sens orbital (anti-horaire ici pour l'exemple)
+            if (dest <= currentMod) {
+                dest += 2 * Math.PI;
+            }
+            
+            targetAngle = angle + (dest - currentMod);
+            isMoving = true;
+            updateInfo(sName);
+        }
+
+        function updateInfo(s) {
+            const box = document.getElementById('info-box');
+            const title = document.getElementById('info-title');
+            const desc = document.getElementById('info-desc');
+            const btns = document.querySelectorAll('.btn-season');
+            btns.forEach(b => b.classList.remove('active'));
+
+            box.style.display = 'block';
+
+            if (s === 'winter') {
+                box.style.borderLeftColor = "#a3deff";
+                title.innerHTML = "SOLSTICE D'HIVER";
+                title.style.color = "#a3deff";
+                desc.innerHTML = "L'axe rouge penche <strong>à l'opposé</strong> du Soleil.<br>Le Pôle Nord est dans l'ombre.";
+                document.getElementById('btn-winter').classList.add('active');
+            } else if (s === 'spring') {
+                box.style.borderLeftColor = "#92FE9D";
+                title.innerHTML = "ÉQUINOXE DE PRINTEMPS";
+                title.style.color = "#92FE9D";
+                desc.innerHTML = "L'axe penche <strong>sur le côté</strong>.<br>La lumière arrive de face.<br>Jour = Nuit.";
+                document.getElementById('btn-spring').classList.add('active');
+            } else if (s === 'summer') {
+                box.style.borderLeftColor = "#FFD700";
+                title.innerHTML = "SOLSTICE D'ÉTÉ";
+                title.style.color = "#FFD700";
+                desc.innerHTML = "L'axe rouge penche <strong>VERS</strong> le Soleil.<br>Le Pôle Nord est éclairé 24h/24.";
+                document.getElementById('btn-summer').classList.add('active');
+            } else if (s === 'autumn') {
+                box.style.borderLeftColor = "#FF9966";
+                title.innerHTML = "ÉQUINOXE D'AUTOMNE";
+                title.style.color = "#FF9966";
+                desc.innerHTML = "Comme au printemps, l'axe est neutre par rapport au Soleil.<br>Le soleil éclaire les deux pôles.";
+                document.getElementById('btn-autumn').classList.add('active');
+            }
+        }
+
+        function update() {
+            // Animation déplacement
+            if (isMoving) {
+                const dist = targetAngle - angle;
+                if (Math.abs(dist) < 0.005) {
+                    angle = targetAngle;
+                    isMoving = false;
+                } else {
+                    angle += dist * 0.04;
+                }
+            }
+
+            // Positionnement Terre
+            // Sens anti-horaire : x = cos(a), z = -sin(a) pour tourner "dans le bon sens" visuel orbitale
+            // Mais pour correspondre à nos angles définis plus haut :
+            earthGroup.position.x = Math.cos(angle) * orbitRad;
+            earthGroup.position.z = Math.sin(angle) * orbitRad; 
+
+            // Rotation journalière
+            earthMesh.rotation.y += 0.02;
+
+            // --- GESTION CAMÉRA DROITE (ZOOM) ---
+            const earthPos = earthGroup.position;
+            
+            // Vecteur Terre -> Soleil
+            const toSun = new THREE.Vector3().subVectors(new THREE.Vector3(0,0,0), earthPos).normalize();
+            // Vecteur Tangent (Perpendiculaire à Terre-Soleil) pour la vue de profil
+            // Si toSun est (x, 0, z), tangent est (-z, 0, x)
+            const sideVec = new THREE.Vector3(-toSun.z, 0, toSun.x).normalize();
+            
+            // Sélection de la position cible selon le mode
+            let targetOffset;
+            const dist = 40;
+
+            if (viewMode === 'FRONT') {
+                // On se place entre le Soleil et la Terre
+                targetOffset = toSun.clone().multiplyScalar(dist);
+            } else {
+                // On se place sur le côté (Profil)
+                targetOffset = sideVec.clone().multiplyScalar(dist);
+            }
+
+            // Application fluide
+            const targetCamPos = earthPos.clone().add(targetOffset);
+            targetCamPos.y += 5; // Un peu de hauteur pour voir le pôle
+
+            camEarth.position.lerp(targetCamPos, 0.1);
+            camEarth.lookAt(earthPos);
+        }
+
+        function render() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            renderer.setScissorTest(true);
+
+            // Vue Gauche (Système)
+            renderer.setScissor(0, 0, w/2, h);
+            renderer.setViewport(0, 0, w/2, h);
+            renderer.render(scene, camSystem);
+
+            // Vue Droite (Zoom)
+            renderer.setScissor(w/2, 0, w/2, h);
+            renderer.setViewport(w/2, 0, w/2, h);
+            renderer.render(scene, camEarth);
+            
+            renderer.setScissorTest(false);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            update();
+            render();
+        }
+        animate();
+
+        // Listeners Saisons
+        document.getElementById('btn-winter').onclick = () => goToSeason('winter');
+        document.getElementById('btn-spring').onclick = () => goToSeason('spring');
+        document.getElementById('btn-summer').onclick = () => goToSeason('summer');
+        document.getElementById('btn-autumn').onclick = () => goToSeason('autumn');
+
+        // Listeners Caméra
+        document.getElementById('btn-side').onclick = (e) => {
+            viewMode = 'SIDE';
+            document.querySelectorAll('.btn-cam').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+        };
+        document.getElementById('btn-front').onclick = (e) => {
+            viewMode = 'FRONT';
+            document.querySelectorAll('.btn-cam').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+        };
+
+        window.onresize = () => {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            renderer.setSize(w, h);
+            camSystem.aspect = (w/2)/h; camSystem.updateProjectionMatrix();
+            camEarth.aspect = (w/2)/h; camEarth.updateProjectionMatrix();
+        };
+        
+        // Init
+        goToSeason('winter');
+
+    </script>
+</body>
+</html>
