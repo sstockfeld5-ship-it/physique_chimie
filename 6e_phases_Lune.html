@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>La Lunaison - Ultra Réaliste & Tablette</title>
+    <style>
+        :root {
+            --bg-color: #080810;
+            --panel-bg: rgba(255, 255, 255, 0.05);
+            --accent: #4fabff;
+            --text-color: #eee;
+            --mech-size: 240px; 
+            --zoom-size: 180px; 
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 10px;
+            display: flex; flex-direction: column; align-items: center;
+            background-image: radial-gradient(white, rgba(255,255,255,.2) 1px, transparent 1.5px);
+            background-size: 300px 300px;
+            touch-action: manipulation; /* Empêche le zoom accidentel sur tablette */
+        }
+
+        /* --- NAVIGATION --- */
+        .tabs { display: flex; gap: 8px; margin-bottom: 15px; width: 100%; max-width: 600px; }
+        .tab-btn { 
+            flex: 1; padding: 15px; background: #1a1a25; color: white; border: 1px solid #333; 
+            border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tab-btn.active { background: var(--accent); color: #000; border: none; }
+
+        .content-section { display: none; width: 100%; flex-direction: column; align-items: center; }
+        .content-section.active { display: flex; }
+
+        h1 { margin: 10px 0; text-align: center; font-size: 1.6rem; color: #ffd700; text-shadow: 0 0 10px #ffd700; }
+        
+        .controls { 
+            background: #1a1a25; padding: 12px 20px; border-radius: 40px; 
+            display: flex; gap: 20px; align-items: center; margin-bottom: 20px; 
+            border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        button.ctrl-btn { 
+            background: var(--accent); border: none; padding: 12px 24px; 
+            border-radius: 25px; color: #000; font-weight: bold; font-size: 1rem; cursor: pointer;
+        }
+        input[type=range] { width: 140px; height: 30px; accent-color: var(--accent); cursor: pointer; }
+
+        .main-container { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 1000px; }
+        .panel { 
+            background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 20px; padding: 15px; display: flex; flex-direction: column; 
+            align-items: center; width: 90%; 
+        }
+        h2 { color: var(--accent); border-bottom: 1px solid #444; width: 100%; text-align: center; padding-bottom: 8px; margin-top: 0; font-size: 1.1rem; }
+
+        /* --- VUE ESPACE --- */
+        .scene-mech { position: relative; width: var(--mech-size); height: var(--mech-size); display: flex; justify-content: center; align-items: center; }
+        .sun-indicator { position: absolute; left: -85px; color: #ffd700; font-weight: bold; text-align: center; font-size: 1.2rem; }
+        .earth { width: 50px; height: 50px; background: radial-gradient(circle at 30% 30%, #2e86c1, #001f3f); border-radius: 50%; z-index: 5; box-shadow: 0 0 15px rgba(46, 134, 193, 0.4); }
+        .orbit { position: absolute; width: 200px; height: 200px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 50%; }
+        
+        #moon-container { position: absolute; top: 50%; left: 50%; width: 36px; height: 36px; z-index: 10; }
+        
+        /* Couche 1 : Corps de la Lune avec l'image réaliste (z-index: 1) */
+        #moon-body { position: absolute; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; z-index: 1; }
+        #moon-body img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Couche 2 : Ombre spatiale progressive (z-index: 2) */
+        .moon-shadow-fix { 
+            position: absolute; width: 100%; height: 100%; border-radius: 50%; 
+            background: linear-gradient(90deg, rgba(0,0,0,0) 25%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.95) 85%); 
+            pointer-events: none; z-index: 2;
+        }
+
+        /* Couche 3 : Conteneur du point rouge (z-index: 3, toujours visible au-dessus de l'ombre) */
+        #moon-dot-container { position: absolute; width: 100%; height: 100%; border-radius: 50%; z-index: 3; }
+        .red-dot { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: #ff3333; border-radius: 50%; box-shadow: 0 0 5px red; }
+
+        /* --- VUE TERRE --- */
+        .scene-zoom { position: relative; width: var(--zoom-size); height: var(--zoom-size); border-radius: 50%; background: #000; overflow: hidden; }
+        canvas { width: 100%; height: 100%; }
+        
+        .day-counter { background: #000; color: #ffd700; padding: 10px 25px; border-radius: 12px; border: 1px solid #ffd700; font-family: monospace; font-size: 1.1rem; margin-top: 10px; text-align: center; font-weight: bold; }
+
+        /* EXPLICATIONS */
+        .explanation-section { width: 95%; max-width: 900px; margin-top: 25px; display: grid; gap: 15px; grid-template-columns: 1fr; padding-bottom: 40px;}
+        .exp-card { background: rgba(255, 255, 255, 0.08); padding: 18px; border-radius: 15px; border-left: 4px solid var(--accent); font-size: 1rem; line-height: 1.5; }
+        .exp-card h3 { color: var(--accent); margin: 0 0 10px 0; font-size: 1.1rem;}
+
+        /* QUIZ */
+        .quiz-box { width: 95%; max-width: 600px; background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 2px solid var(--accent); }
+        .q-btn { display: block; width: 100%; padding: 18px; margin: 12px 0; background: #222; color: white; border: 1px solid #444; border-radius: 12px; text-align: left; font-size: 1.1rem; cursor: pointer; }
+
+        @media (min-width: 768px) {
+            .main-container { flex-direction: row; }
+            .explanation-section { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Mais qui a croqué la Lune ? 🥐</h1>
+
+    <div class="tabs">
+        <button id="tab-simu" class="tab-btn active" onclick="openTab('simu')">🔭 Animation</button>
+        <button id="tab-quiz" class="tab-btn" onclick="openTab('quiz')">📝 Quiz</button>
+    </div>
+
+    <div id="simu" class="content-section active">
+        <div class="controls">
+            <button id="btn-pause" class="ctrl-btn" onclick="togglePause()">⏸ Pause</button>
+            <div class="slider-group">
+                <span>Vitesse :</span>
+                <input type="range" id="speed" min="0" max="0.5" step="0.01" value="0.25">
+            </div>
+        </div>
+
+        <div class="main-container">
+            <div class="panel">
+                <h2>1. Vue de l'Espace (Orbites)</h2>
+                <div class="scene-mech">
+                    <div class="sun-indicator">☀️<br><small>SOLEIL</small></div>
+                    <div class="earth"></div>
+                    <div class="orbit"></div>
+                    
+                    <div id="moon-container">
+                        <div id="moon-body">
+                            <img id="moon-texture" src="https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg" crossorigin="anonymous" alt="Lune">
+                        </div>
+                        <div class="moon-shadow-fix"></div>
+                        <div id="moon-dot-container">
+                            <div class="red-dot"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="day-counter">
+                    <div style="font-size:0.8rem; opacity:0.8;">LUNAISON</div>
+                    <span id="day-display">Jour 0.0</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>2. Vue depuis la Terre (Phases)</h2>
+                <div class="scene-zoom">
+                    <canvas id="moonCanvas" width="400" height="400"></canvas>
+                </div>
+                <div id="label" style="font-size:1.2rem; font-weight:bold; color:var(--accent); margin:10px 0;">Nouvelle Lune</div>
+            </div>
+        </div>
+
+        <div class="explanation-section">
+            <div class="exp-card">
+                <h3>🌑 Jour 0 : Nouvelle Lune</h3>
+                <p>La Lune est physiquement <strong>entre le Soleil et la Terre</strong>. Sa face éclairée nous tourne le dos, elle est invisible dans le ciel.</p>
+            </div>
+            <div class="exp-card">
+                <h3>🌕 La Pleine Lune (Milieu de cycle)</h3>
+                <p>La Terre est <strong>entre le Soleil et la Lune</strong>. Toute la face que nous voyons est éclairée par le Soleil.</p>
+            </div>
+            <div class="exp-card">
+                <h3>💡 Lumière diffusée</h3>
+                <p>La Lune agit comme un grand miroir rocheux : elle ne brille pas d'elle-même, mais elle <strong>diffuse</strong> la lumière du Soleil vers nous.</p>
+            </div>
+            <div class="exp-card">
+                <h3>🔴 Rotation Synchrone</h3>
+                <p>Remarque que le <strong>point rouge reste toujours visible et tourné vers la Terre</strong>, même dans la zone d'ombre ! La Lune tourne sur elle-même à la même vitesse qu'elle tourne autour de nous.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="quiz" class="content-section">
+        <div class="quiz-box">
+            <h2 id="q-num" style="color:var(--accent); margin-top:0;">Question 1/10</h2>
+            <p id="q-text" style="font-size:1.2rem; font-weight:bold;"></p>
+            <div id="q-options" style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;"></div>
+            <button id="next-btn" onclick="nextQ()" style="display:none; width:100%; padding:15px; background:white; color:black; border-radius:12px; font-weight:bold; margin-top:20px; border:none; cursor:pointer; font-size:1.1rem;">Question suivante ➜</button>
+        </div>
+    </div>
+
+    <script>
+        function openTab(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('tab-' + id).classList.add('active');
+        }
+
+        let angle = 0; let speedVal = 0.25; let isPaused = false;
+        const orbitRadius = 100;
+        
+        const moonContainer = document.getElementById('moon-container');
+        const moonBody = document.getElementById('moon-body');
+        const moonDotContainer = document.getElementById('moon-dot-container');
+        const dayDisplay = document.getElementById('day-display');
+        const canvas = document.getElementById('moonCanvas');
+        const ctx = canvas.getContext('2d');
+        const label = document.getElementById('label');
+
+        // Récupération de l'image de la balise HTML pour le Canvas (sécurisé)
+        const moonImg = document.getElementById('moon-texture');
+
+        document.getElementById('speed').addEventListener('input', (e) => speedVal = parseFloat(e.target.value));
+        function togglePause() { isPaused = !isPaused; document.getElementById('btn-pause').textContent = isPaused ? "▶ Lecture" : "⏸ Pause"; }
+
+        function drawMoon(pAngle) {
+            ctx.clearRect(0, 0, 400, 400);
+            
+            // 1. Fond réaliste
+            if (moonImg.complete && moonImg.naturalWidth > 0) {
+                ctx.save(); ctx.beginPath(); ctx.arc(200, 200, 200, 0, Math.PI * 2); ctx.clip();
+                ctx.drawImage(moonImg, 0, 0, 400, 400); ctx.restore();
+            } else {
+                ctx.fillStyle = "#ccc"; ctx.beginPath(); ctx.arc(200, 200, 200, 0, Math.PI * 2); ctx.fill();
+            }
+            
+            // 2. Ombre qui suit la phase
+            ctx.fillStyle = "rgba(5, 5, 15, 0.98)";
+            ctx.beginPath();
+            if (pAngle < 180) {
+                ctx.arc(200, 200, 200, Math.PI/2, 3*Math.PI/2, false);
+                let rx = 200 * Math.cos(pAngle * Math.PI / 180);
+                ctx.ellipse(200, 200, Math.abs(rx), 200, 0, 3*Math.PI/2, Math.PI/2, pAngle > 90);
+            } else {
+                ctx.arc(200, 200, 200, Math.PI/2, 3*Math.PI/2, true);
+                let rx = 200 * Math.cos((pAngle - 180) * Math.PI / 180);
+                ctx.ellipse(200, 200, Math.abs(rx), 200, 0, 3*Math.PI/2, Math.PI/2, pAngle > 270);
+            }
+            ctx.fill();
+            updateLabel(pAngle);
+        }
+
+        function updateLabel(p) {
+            let t = "";
+            if(p >= 355 || p < 5) t = "Nouvelle Lune 🌑";
+            else if(p < 85) t = "Premier Croissant 🌒";
+            else if(p < 95) t = "Premier Quartier 🌓";
+            else if(p < 175) t = "Gibbeuse Croissante 🌔";
+            else if(p < 185) t = "Pleine Lune 🌕";
+            else if(p < 265) t = "Gibbeuse Décroissante 🌖";
+            else if(p < 275) t = "Dernier Quartier 🌗";
+            else t = "Dernier Croissant 🌘";
+            label.innerText = t;
+        }
+
+        function loop() {
+            if (!isPaused) { angle = (angle + speedVal) % 360; }
+            let rad = angle * Math.PI / 180;
+            
+            // Calcul position spatiale (0° = Gauche)
+            let x = -orbitRadius * Math.cos(rad);
+            let y = orbitRadius * Math.sin(rad); 
+            moonContainer.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+            
+            // Rotation Synchrone : La Texture ET le Point rouge visent la Terre
+            let angleToEarth = Math.atan2(-y, -x) * 180 / Math.PI;
+            moonBody.style.transform = `rotate(${angleToEarth}deg)`;
+            moonDotContainer.style.transform = `rotate(${angleToEarth}deg)`;
+            
+            dayDisplay.innerText = `Jour ${(angle * 29.5 / 360).toFixed(1)}`;
+            drawMoon(angle);
+            requestAnimationFrame(loop);
+        }
+        
+        moonImg.onload = loop;
+        setTimeout(loop, 500); // Lancement de sécurité
+
+        // --- QUIZ 10 QUESTIONS ---
+        const questions = [
+            { t: "La Lune ne brille pas seule, elle...", o: ["Brûle comme une étoile", "Diffuse la lumière du Soleil", "Est éclairée par la Terre"], a: 1 },
+            { t: "Comment appelle-t-on un cycle complet de 29,5 jours ?", o: ["Une lunaison", "Une rotation", "Une saison"], a: 0 },
+            { t: "Au Jour 0 (Nouvelle Lune), où se trouve la Lune ?", o: ["Derrière la Terre", "Entre le Soleil et la Terre", "Sur le côté"], a: 1 },
+            { t: "Pourquoi voit-on toujours la même face ?", o: ["Elle ne bouge pas", "Sa rotation est synchrone", "Elle est bloquée"], a: 1 },
+            { t: "Laquelle ressemble à la lettre 'p' ?", o: ["Dernier Quartier", "Premier Quartier", "Pleine Lune"], a: 1 },
+            { t: "Laquelle ressemble à la lettre 'd' ?", o: ["Dernier Quartier", "Croissant", "Gibbeuse"], a: 0 },
+            { t: "Lors de la Pleine Lune, la Terre est située...", o: ["Derrière la Lune", "Entre le Soleil et la Lune", "Devant le Soleil"], a: 1 },
+            { t: "Si la partie éclairée augmente, elle est...", o: ["Décroissante", "Croissante", "Remplie"], a: 1 },
+            { t: "Que représente le point rouge de l'animation ?", o: ["Un volcan chaud", "La face visible depuis la Terre", "Le pôle Sud"], a: 1 },
+            { t: "La Lune est le satellite naturel de...", o: ["Mars", "La Terre", "Le Soleil"], a: 1 }
+        ];
+
+        let curQ = 0; let score = 0;
+        function loadQ() {
+            let q = questions[curQ];
+            document.getElementById('q-num').innerText = `Question ${curQ+1}/10`;
+            document.getElementById('q-text').innerText = q.t;
+            const opts = document.getElementById('q-options'); opts.innerHTML = '';
+            q.o.forEach((opt, i) => {
+                let b = document.createElement('button'); b.className = 'q-btn'; b.innerText = opt;
+                b.onclick = () => {
+                    let btns = document.querySelectorAll('.q-btn'); btns.forEach(btn => btn.disabled = true);
+                    if(i === q.a) { b.style.background = "#2ecc71"; b.style.color = "black"; score++; }
+                    else { b.style.background = "#e74c3c"; btns[q.a].style.background = "#2ecc71"; btns[q.a].style.color = "black"; }
+                    document.getElementById('next-btn').style.display = 'block';
+                };
+                opts.appendChild(b);
+            });
+            document.getElementById('next-btn').style.display = 'none';
+        }
+        function nextQ() { curQ++; if(curQ < questions.length) loadQ(); else document.getElementById('quiz').innerHTML = `<h2 style='text-align:center; font-size:1.8rem;'>Score final : ${score}/10 🚀</h2><button class='ctrl-btn' onclick='location.reload()' style='width:100%; padding:15px; margin-top:20px; font-size:1.2rem;'>Recommencer</button>`; }
+        loadQ();
+    </script>
+</body>
+</html>
