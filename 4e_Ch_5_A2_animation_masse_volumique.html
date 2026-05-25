@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investigation : Masse et Volume</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 5px; }
+        p { color: #7f8c8d; text-align: center; margin-bottom: 20px; font-size: 1.1em; }
+
+        #app-container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Sélecteur de Mode --- */
+        .mode-selector {
+            background: #eef2f5;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 3px solid #bdc3c7;
+        }
+        .mode-selector label {
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: 2px solid #ccc;
+            transition: all 0.2s;
+        }
+        .mode-selector input[type="radio"] { transform: scale(1.3); cursor: pointer; }
+        .mode-active { border-color: #2980b9 !important; background-color: #e8f4f8 !important; }
+
+        .instruction-box {
+            text-align: center;
+            font-size: 1.1em;
+            color: #2c3e50;
+            font-weight: bold;
+            padding: 15px;
+            background: #fdfdfd;
+            border-bottom: 2px solid #eee;
+        }
+        .instruction-highlight { color: #c0392b; }
+
+        /* --- Disposition en 3 Colonnes --- */
+        #main-workspace {
+            display: flex;
+            width: 100%;
+            background-color: #ffffff;
+            min-height: 600px;
+        }
+
+        .side-panel {
+            flex: 1;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 250px;
+            max-width: 300px;
+            background-color: #fcfcfc;
+        }
+        #panel-left { border-right: 2px solid #eee; }
+        #panel-right { border-left: 2px solid #eee; }
+
+        #center-stage {
+            flex: 3;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        /* --- Composants UI --- */
+        .panel-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 3px solid;
+            margin-bottom: 5px;
+        }
+        .title-gauche { color: #2980b9; border-color: #2980b9; }
+        .title-droite { color: #e67e22; border-color: #e67e22; }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-label { font-weight: bold; color: #34495e; font-size: 15px; }
+        
+        select {
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #bdc3c7;
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #2c3e50;
+            cursor: pointer;
+            width: 100%;
+            background-color: white;
+        }
+        
+        input[type="range"] { padding: 10px 0; cursor: pointer; width: 100%; }
+
+        .val-display {
+            font-size: 1.8em; 
+            font-weight: bold;
+            text-align: center;
+            background: #f4f7fa;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #bdc3c7;
+        }
+
+        .actions {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background-color: #fdfdfd;
+            border-top: 2px solid #eee;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #btn-pour { background-color: #27ae60; box-shadow: 0 4px 6px rgba(39,174,96,0.3); }
+        #btn-pour:hover:not(:disabled) { background-color: #219150; transform: translateY(-2px); }
+        #btn-pour:disabled { background-color: #95a5a6; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        #btn-reset { background-color: #e74c3c; box-shadow: 0 4px 6px rgba(231,76,60,0.2); }
+        #btn-reset:hover:not(:disabled) { background-color: #c0392b; transform: translateY(-2px); }
+        #btn-reset:disabled { background-color: #95a5a6; cursor: not-allowed; }
+
+        /* --- SVG --- */
+        svg { width: 100%; height: 100%; max-height: 700px; display: block; }
+        .metal { fill: #d1d5db; stroke: #6b7280; stroke-width: 2; }
+        .dark-metal { fill: #9ca3af; stroke: #4b5563; stroke-width: 2; }
+        .glass { fill: rgba(255, 255, 255, 0.2); stroke: #9ca3af; stroke-width: 2; }
+        .glass-back { fill: #fcfcfc; stroke: #9ca3af; stroke-width: 2; }
+        .pivot { fill: #f3f4f6; stroke: #374151; stroke-width: 2; }
+        .beaker-rot { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .svg-liquid-label { font-size: 24px; font-weight: bold; font-family: sans-serif; text-anchor: middle; }
+    </style>
+</head>
+<body>
+
+    <h1>Investigation Expérimentale</h1>
+    <p>Utilisez la balance de Roberval virtuelle pour découvrir quel liquide est le plus dense.</p>
+
+    <div id="app-container">
+        
+        <div class="mode-selector">
+            <span style="font-size: 1.2em; font-weight: bold; color: #34495e;">Je souhaite :</span>
+            <label id="lbl-mode-vol" class="mode-active">
+                <input type="radio" name="mode" value="volume" checked> 
+                1. Fixer le Volume (Observer la balance)
+            </label>
+            <label id="lbl-mode-masse">
+                <input type="radio" name="mode" value="masse"> 
+                2. Fixer la Masse (Lire l'éprouvette)
+            </label>
+        </div>
+
+        <div id="instruction-texte" class="instruction-box">
+            Mode 1 : <span class="instruction-highlight">Observez l'inclinaison de la balance</span> pour déduire quel liquide a la plus grande masse.
+        </div>
+
+        <div id="main-workspace">
+            
+            <div id="panel-left" class="side-panel">
+                <div class="panel-title title-gauche">Éprouvette Gauche</div>
+                
+                <div class="control-group">
+                    <label class="control-label">1. Choisir le liquide :</label>
+                    <select id="liq-gauche">
+                        <option value="eau" data-rho="1.0" data-color="rgba(0, 150, 255, 0.8)">Eau</option>
+                        <option value="huile" data-rho="0.92" data-color="rgba(241, 196, 15, 0.85)">Huile</option>
+                        <option value="petrole" data-rho="0.85" data-color="rgba(100, 60, 30, 0.9)">Pétrole</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">2. Fixer la <span class="lbl-input">quantité</span> :</label>
+                    <input type="range" id="input-gauche" min="10" max="100" value="100" step="10">
+                    <div class="val-display" style="color:#2980b9;">
+                        <span id="val-input-gauche">100</span> <span class="unit-input" style="font-size:0.6em;">mL</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="center-stage">
+                <svg viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <clipPath id="beak-clip-g"><path d="M -8,5 L -23,88 L -73,88 L -80,5 Z"/></clipPath>
+                        <clipPath id="beak-clip-d"><path d="M 8,5 L 23,88 L 73,88 L 80,5 Z"/></clipPath>
+                    </defs>
+
+                    <g id="base">
+                        <path d="M 250 750 L 750 750 L 720 700 L 280 700 Z" fill="#e5e7eb" stroke="#9ca3af" stroke-width="3"/>
+                        <rect x="250" y="750" width="500" height="15" fill="#d1d5db" stroke="#9ca3af" stroke-width="2"/>
+                        <rect x="475" y="550" width="50" height="150" fill="#f3f4f6" stroke="#9ca3af" stroke-width="3"/>
+                        <path d="M 450 700 L 550 700 L 530 670 L 470 670 Z" fill="#e5e7eb" stroke="#9ca3af" stroke-width="3"/>
+                        <circle cx="500" cy="670" r="8" class="pivot"/>
+                        <path d="M 440 500 A 60 60 0 0 1 560 500 Z" fill="white" stroke="#9ca3af" stroke-width="2"/>
+                        <line x1="500" y1="500" x2="500" y2="480" stroke="#333" stroke-width="2"/>
+                    </g>
+
+                    <g id="bras-gauche-back">
+                        <line x1="300" y1="500" x2="300" y2="670" stroke="#4b5563" stroke-width="8"/>
+                        <path d="M 200 500 L 400 500 L 380 520 L 220 520 Z" class="dark-metal"/>
+                        <rect x="290" y="520" width="20" height="50" class="metal"/>
+                        <g transform="translate(265, 140)">
+                            <rect x="5" y="0" width="60" height="360" class="glass-back" rx="3"/>
+                            <rect id="cyl-liq-g" x="5" y="360" width="60" height="0" fill="rgba(0,150,255,0.8)"/>
+                        </g>
+                    </g>
+
+                    <g id="bras-droit-back">
+                        <line x1="700" y1="500" x2="700" y2="670" stroke="#4b5563" stroke-width="8"/>
+                        <path d="M 600 500 L 800 500 L 780 520 L 620 520 Z" class="dark-metal"/>
+                        <rect x="690" y="520" width="20" height="50" class="metal"/>
+                        <g transform="translate(665, 140)">
+                            <rect x="5" y="0" width="60" height="360" class="glass-back" rx="3"/>
+                            <rect id="cyl-liq-d" x="5" y="360" width="60" height="0" fill="rgba(241,196,15,0.85)"/>
+                        </g>
+                    </g>
+
+                    <polygon id="stream-g" points="300,120 300,120 300,120 300,120" fill="transparent" />
+                    <polygon id="stream-d" points="700,120 700,120 700,120 700,120" fill="transparent" />
+
+                    <g id="bras-gauche-front">
+                        <text id="nom-liquide-svg-g" x="300" y="550" class="svg-liquid-label" fill="#2980b9">Eau</text>
+                        <g transform="translate(265, 140)">
+                            <ellipse cx="35" cy="0" rx="30" ry="8" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
+                            <rect x="5" y="0" width="60" height="360" class="glass" rx="3"/>
+                            <g id="graduations-g" transform="translate(5, 0)"></g>
+                            <path d="M 5 0 A 30 8 0 0 0 65 0" fill="none" stroke="#9ca3af" stroke-width="2"/>
+                        </g>
+                    </g>
+
+                    <g id="bras-droit-front">
+                        <text id="nom-liquide-svg-d" x="700" y="550" class="svg-liquid-label" fill="#e67e22">Huile</text>
+                        <g transform="translate(665, 140)">
+                            <ellipse cx="35" cy="0" rx="30" ry="8" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
+                            <rect x="5" y="0" width="60" height="360" class="glass" rx="3"/>
+                            <g id="graduations-d" transform="translate(5, 0)"></g>
+                            <path d="M 5 0 A 30 8 0 0 0 65 0" fill="none" stroke="#9ca3af" stroke-width="2"/>
+                        </g>
+                    </g>
+
+                    <g id="fleau" transform="rotate(0, 500, 500)">
+                        <polygon points="485,500 515,500 500,520" fill="#6b7280"/>
+                        <circle cx="500" cy="500" r="6" class="pivot"/>
+                        <path d="M 300,490 L 700,490 L 700,510 L 300,510 Z" class="metal"/>
+                        <polygon points="497,490 503,490 501,360 499,360" fill="#e74c3c"/>
+                        <circle cx="300" cy="500" r="6" class="pivot"/>
+                        <circle cx="700" cy="500" r="6" class="pivot"/>
+                    </g>
+                    <g id="contre-fleau" transform="rotate(0, 500, 670)">
+                        <line x1="300" y1="670" x2="700" y2="670" stroke="#9ca3af" stroke-width="10" stroke-linecap="round"/>
+                        <circle cx="300" cy="670" r="6" class="pivot"/>
+                        <circle cx="700" cy="670" r="6" class="pivot"/>
+                    </g>
+
+                    <g id="beaker-g" transform="translate(300, 120)">
+                        <g id="beaker-rot-g" style="transition: transform 0.4s;" transform="rotate(0)">
+                            <rect id="beak-liq-g" x="-80" y="5" width="80" height="80" fill="rgba(0,150,255,0.8)" clip-path="url(#beak-clip-g)"/>
+                            <path d="M 0,0 L -10,10 L -20,80 L -70,80 L -80,0 Z" class="glass"/>
+                        </g>
+                    </g>
+                    <g id="beaker-d" transform="translate(700, 120)">
+                        <g id="beaker-rot-d" style="transition: transform 0.4s;" transform="rotate(0)">
+                            <rect id="beak-liq-d" x="0" y="5" width="80" height="80" fill="rgba(241,196,15,0.85)" clip-path="url(#beak-clip-d)"/>
+                            <path d="M 0,0 L 10,10 L 20,80 L 70,80 L 80,0 Z" class="glass"/>
+                        </g>
+                    </g>
+
+                </svg>
+            </div>
+
+            <div id="panel-right" class="side-panel">
+                <div class="panel-title title-droite">Plateau Droit</div>
+                
+                <div class="control-group">
+                    <label class="control-label">1. Choisir le liquide :</label>
+                    <select id="liq-droite">
+                        <option value="eau" data-rho="1.0" data-color="rgba(0, 150, 255, 0.8)">Eau</option>
+                        <option value="huile" data-rho="0.92" data-color="rgba(241, 196, 15, 0.85)" selected>Huile</option>
+                        <option value="petrole" data-rho="0.85" data-color="rgba(100, 60, 30, 0.9)">Pétrole</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">2. Fixer la <span class="lbl-input">quantité</span> :</label>
+                    <input type="range" id="input-droite" min="10" max="100" value="100" step="10">
+                    <div class="val-display" style="color:#e67e22;">
+                        <span id="val-input-droite">100</span> <span class="unit-input" style="font-size:0.6em;">mL</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="btn-pour">▶ Lancer l'expérience</button>
+            <button id="btn-reset" disabled>↻ Vider et réinitialiser</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Éléments du DOM ---
+        const modeRadios = document.querySelectorAll('input[name="mode"]');
+        const lblModeVol = document.getElementById('lbl-mode-vol');
+        const lblModeMasse = document.getElementById('lbl-mode-masse');
+        const instructionTexte = document.getElementById('instruction-texte');
+        
+        let currentMode = 'volume'; 
+
+        const inputG = document.getElementById('input-gauche');
+        const inputD = document.getElementById('input-droite');
+        const dispInputG = document.getElementById('val-input-gauche');
+        const dispInputD = document.getElementById('val-input-droite');
+        const unitInputs = document.querySelectorAll('.unit-input');
+        
+        const selG = document.getElementById('liq-gauche');
+        const selD = document.getElementById('liq-droite');
+
+        const cylLiqG = document.getElementById('cyl-liq-g');
+        const beakLiqG = document.getElementById('beak-liq-g');
+        const beakerRotG = document.getElementById('beaker-rot-g');
+        const streamG = document.getElementById('stream-g');
+        const svgNomG = document.getElementById('nom-liquide-svg-g');
+
+        const cylLiqD = document.getElementById('cyl-liq-d');
+        const beakLiqD = document.getElementById('beak-liq-d');
+        const beakerRotD = document.getElementById('beaker-rot-d');
+        const streamD = document.getElementById('stream-d');
+        const svgNomD = document.getElementById('nom-liquide-svg-d');
+
+        const brasGaucheBack = document.getElementById('bras-gauche-back');
+        const brasGaucheFront = document.getElementById('bras-gauche-front');
+        const brasDroitBack = document.getElementById('bras-droit-back');
+        const brasDroitFront = document.getElementById('bras-droit-front');
+
+        const btnPour = document.getElementById('btn-pour');
+        const btnReset = document.getElementById('btn-reset');
+        const fleau = document.getElementById('fleau');
+        const contreFleau = document.getElementById('contre-fleau');
+
+        // --- Constantes Mathématiques & Physique ---
+        const pivotX = 500; 
+        const pivotY_Fleau = 500; 
+        const pivotY_Contre = 670;
+        const rayonBras = 200; 
+        const becY = 120; // Position Y des becs verseurs (fixe)
+        
+        // Géométrie des éprouvettes
+        const maxVol = 120; // Capacité totale visuelle (pour absorber les 118mL du pétrole en mode masse)
+        const hCyl = 360; // Hauteur en pixels
+        const pxPerMl = hCyl / maxVol; // 3 pixels = 1 mL (très précis !)
+
+        let isAnimating = false;
+        let animInterval;
+        let startTimeout;
+        let endTimeout;
+        
+        let currentPanY_G = 500; 
+        let currentPanY_D = 500; 
+
+        // --- Génération dynamique des graduations ultra-fines ---
+        function dessinerGraduations() {
+            const conteneurs = ['graduations-g', 'graduations-d'];
+            conteneurs.forEach(id => {
+                const svgG = document.getElementById(id);
+                let html = '';
+                // Boucle tous les 2 mL
+                for (let v = 10; v <= maxVol; v += 2) {
+                    const y = hCyl - (v * pxPerMl);
+                    if (v % 10 === 0) {
+                        html += `<line x1="0" y1="${y}" x2="15" y2="${y}" stroke="#2c3e50" stroke-width="2"/>`;
+                        html += `<text x="20" y="${y+4}" font-size="14" fill="#2c3e50" font-weight="bold">${v}</text>`;
+                    } else {
+                        html += `<line x1="0" y1="${y}" x2="8" y2="${y}" stroke="#7f8c8d" stroke-width="1"/>`;
+                    }
+                }
+                svgG.innerHTML = html;
+            });
+        }
+
+        // --- Gestion du Mode d'Investigation ---
+        modeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                currentMode = e.target.value;
+                updateModeUI();
+                btnReset.disabled = false;
+                btnReset.click(); 
+            });
+        });
+
+        function updateModeUI() {
+            if (currentMode === 'volume') {
+                lblModeVol.classList.add('mode-active');
+                lblModeMasse.classList.remove('mode-active');
+                unitInputs.forEach(u => u.textContent = "mL");
+                
+                inputG.max = 100; inputD.max = 100;
+                inputG.value = 100; inputD.value = 100;
+                inputG.step = 10; inputD.step = 10;
+                
+                instructionTexte.innerHTML = "Mode 1 : <span class='instruction-highlight'>Observez l'inclinaison de la balance</span> pour déduire quel liquide a la plus grande masse.";
+            } else {
+                lblModeMasse.classList.add('mode-active');
+                lblModeVol.classList.remove('mode-active');
+                unitInputs.forEach(u => u.textContent = "g");
+                
+                // Limité à 85g pour que le pétrole (rho=0.85) ne dépasse pas 100 mL
+                inputG.max = 85; inputD.max = 85;
+                inputG.value = 85; inputD.value = 85;
+                inputG.step = 5; inputD.step = 5;
+                
+                instructionTexte.innerHTML = "Mode 2 : L'équilibre est parfait. <span class='instruction-highlight'>Lisez précisément les graduations</span> pour comparer l'espace occupé par chaque liquide.";
+            }
+            preparerExperience();
+        }
+
+        function preparerExperience() {
+            dispInputG.textContent = inputG.value;
+            dispInputD.textContent = inputD.value;
+            
+            const colorG = selG.options[selG.selectedIndex].getAttribute('data-color');
+            beakLiqG.setAttribute('fill', colorG);
+            cylLiqG.setAttribute('fill', colorG);
+            streamG.setAttribute('fill', colorG);
+            
+            const colorD = selD.options[selD.selectedIndex].getAttribute('data-color');
+            beakLiqD.setAttribute('fill', colorD);
+            cylLiqD.setAttribute('fill', colorD);
+            streamD.setAttribute('fill', colorD);
+
+            svgNomG.textContent = selG.options[selG.selectedIndex].text.toUpperCase();
+            svgNomD.textContent = selD.options[selD.selectedIndex].text.toUpperCase();
+        }
+
+        selG.addEventListener('change', preparerExperience);
+        inputG.addEventListener('input', preparerExperience);
+        selD.addEventListener('change', preparerExperience);
+        inputD.addEventListener('input', preparerExperience);
+
+        function setBalanceAngle(angleDeg) {
+            const angleRad = angleDeg * Math.PI / 180;
+            
+            fleau.setAttribute('transform', `rotate(${angleDeg}, ${pivotX}, ${pivotY_Fleau})`);
+            contreFleau.setAttribute('transform', `rotate(${angleDeg}, ${pivotX}, ${pivotY_Contre})`);
+            
+            currentPanY_G = pivotY_Fleau - rayonBras * Math.sin(angleRad);
+            const transG = `translate(${pivotX - rayonBras * Math.cos(angleRad) - 300}, ${currentPanY_G - 500})`;
+            brasGaucheBack.setAttribute('transform', transG);
+            brasGaucheFront.setAttribute('transform', transG);
+
+            currentPanY_D = pivotY_Fleau + Math.sin(angleRad) * rayonBras;
+            const transD = `translate(${pivotX + rayonBras * Math.cos(angleRad) - 700}, ${currentPanY_D - 500})`;
+            brasDroitBack.setAttribute('transform', transD);
+            brasDroitFront.setAttribute('transform', transD);
+        }
+
+        function updateStreams(pouringG, pouringD, hG, hD) {
+            if (pouringG) {
+                const targetY = currentPanY_G - hG; 
+                streamG.setAttribute('points', `297,${becY} 303,${becY} 301,${targetY} 299,${targetY}`);
+            } else {
+                streamG.setAttribute('points', `300,${becY} 300,${becY} 300,${becY} 300,${becY}`);
+            }
+
+            if (pouringD) {
+                const targetY = currentPanY_D - hD;
+                streamD.setAttribute('points', `697,${becY} 703,${becY} 701,${targetY} 699,${targetY}`);
+            } else {
+                streamD.setAttribute('points', `700,${becY} 700,${becY} 700,${becY} 700,${becY}`);
+            }
+        }
+
+        // --- ANIMATION D'INVESTIGATION ---
+        btnPour.addEventListener('click', () => {
+            if (isAnimating) return;
+            isAnimating = true;
+            btnPour.disabled = true;
+            inputG.disabled = true; inputD.disabled = true;
+            selG.disabled = true; selD.disabled = true;
+            
+            const valInG = parseInt(inputG.value);
+            const valInD = parseInt(inputD.value);
+            const rhoG = parseFloat(selG.options[selG.selectedIndex].getAttribute('data-rho'));
+            const rhoD = parseFloat(selD.options[selD.selectedIndex].getAttribute('data-rho'));
+
+            let targetVolG, targetVolD;
+
+            if (currentMode === 'volume') {
+                targetVolG = valInG;
+                targetVolD = valInD;
+            } else {
+                // V = m / rho. (Ex: 85g de pétrole = 100 mL exact)
+                targetVolG = valInG / rhoG;
+                targetVolD = valInD / rhoD;
+            }
+
+            if (targetVolG > 0) beakerRotG.setAttribute('transform', 'rotate(70)');
+            if (targetVolD > 0) beakerRotD.setAttribute('transform', 'rotate(-70)');
+            
+            startTimeout = setTimeout(() => {
+                let curVolG = 0, curVolD = 0;
+                const flowRate = 1.0; 
+                
+                animInterval = setInterval(() => {
+                    let pouringG = false;
+                    let pouringD = false;
+
+                    if (curVolG < targetVolG) {
+                        curVolG = Math.min(curVolG + flowRate, targetVolG);
+                        pouringG = true;
+                        let hG = curVolG * pxPerMl; 
+                        cylLiqG.setAttribute('height', hG);
+                        cylLiqG.setAttribute('y', hCyl - hG);
+                        let pctG = curVolG / (targetVolG || 1);
+                        beakLiqG.setAttribute('y', 5 + pctG*75);
+                    }
+
+                    if (curVolD < targetVolD) {
+                        curVolD = Math.min(curVolD + flowRate, targetVolD);
+                        pouringD = true;
+                        let hD = curVolD * pxPerMl;
+                        cylLiqD.setAttribute('height', hD);
+                        cylLiqD.setAttribute('y', hCyl - hD);
+                        let pctD = curVolD / (targetVolD || 1);
+                        beakLiqD.setAttribute('y', 5 + pctD*75);
+                    }
+
+                    // Calcul physique (CACHÉ POUR L'ÉLÈVE)
+                    const mG = curVolG * rhoG;
+                    const mD = curVolD * rhoD;
+                    let diffMass = mG - mD;
+                    
+                    // Comportement ultra-sensible (Basculement total dès 2 ou 3g d'écart)
+                    const maxAngle = 12; 
+                    let angle = -Math.sign(diffMass) * maxAngle * (1 - Math.exp(-Math.abs(diffMass) * 0.8));
+                    
+                    setBalanceAngle(angle);
+                    updateStreams(pouringG, pouringD, curVolG * pxPerMl, curVolD * pxPerMl);
+
+                    if (!pouringG && !pouringD) {
+                        clearInterval(animInterval);
+                        endTimeout = setTimeout(() => {
+                            beakerRotG.setAttribute('transform', 'rotate(0)');
+                            beakerRotD.setAttribute('transform', 'rotate(0)');
+                            btnReset.disabled = false;
+                            isAnimating = false;
+                        }, 300); 
+                    }
+                }, 20); 
+
+            }, 400); 
+        });
+
+        // --- RESET ---
+        btnReset.addEventListener('click', () => {
+            clearTimeout(startTimeout);
+            clearInterval(animInterval);
+            clearTimeout(endTimeout);
+            
+            isAnimating = false;
+            
+            setBalanceAngle(0);
+            updateStreams(false, false, 0, 0);
+            
+            cylLiqG.setAttribute('height', '0'); cylLiqG.setAttribute('y', hCyl);
+            cylLiqD.setAttribute('height', '0'); cylLiqD.setAttribute('y', hCyl);
+            
+            beakLiqG.setAttribute('y', '5');
+            beakLiqD.setAttribute('y', '5');
+            
+            beakerRotG.setAttribute('transform', 'rotate(0)');
+            beakerRotD.setAttribute('transform', 'rotate(0)');
+            
+            inputG.disabled = false; inputD.disabled = false;
+            selG.disabled = false; selD.disabled = false;
+            btnPour.disabled = false;
+            btnReset.disabled = true;
+        });
+
+        // Init
+        dessinerGraduations();
+        updateModeUI();
+        setBalanceAngle(0);
+
+    </script>
+</body>
+</html>
