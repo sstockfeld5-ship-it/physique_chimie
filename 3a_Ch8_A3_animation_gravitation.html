@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analogie Gravitationnelle : Dynamomètres liés par les crochets</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #0b132b;
+            color: #ecf0f1;
+        }
+        .container {
+            text-align: center;
+            background: #1c2541;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 950px;
+            width: 95%;
+        }
+        h2 { margin-top: 0; color: #f1c40f; }
+        .explication { color: #8d9bb5; font-size: 0.95rem; margin-bottom: 20px; }
+        
+        .animation-zone {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #eef2f5;
+            border-radius: 10px;
+            position: relative;
+            margin: 20px 0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+        }
+        svg { display: block; max-width: 100%; height: auto; }
+        
+        .controles {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #3a506b;
+            border-radius: 10px;
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .btn-primary { background-color: #2c3e50; color: white; border: 1px solid #7f8c8d; }
+        .btn-primary:hover { background-color: #34495e; }
+        .btn-danger { background-color: #c0392b; color: white; }
+        .btn-danger:hover { background-color: #e74c3c; }
+        
+        .btn-vec-red { background-color: #fce4e4; color: #c0392b; border: 2px solid #c0392b; }
+        .btn-vec-red:hover:not(:disabled) { background-color: #c0392b; color: white; }
+        .btn-vec-red.actif { background-color: #c0392b; color: white; }
+        
+        .btn-vec-blue { background-color: #e4f0fc; color: #2980b9; border: 2px solid #2980b9; }
+        .btn-vec-blue:hover:not(:disabled) { background-color: #2980b9; color: white; }
+        .btn-vec-blue.actif { background-color: #2980b9; color: white; }
+        
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        input[type=range] {
+            width: 80%;
+            margin: 15px 0;
+            cursor: pointer;
+        }
+        input[type=range]:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        .force-totale { font-size: 1.2rem; font-weight: bold; color: #ecf0f1; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Interaction : Analogie Terre - Soleil</h2>
+    <p class="explication">
+        Les deux dynamomètres sont accrochés directement l'un à l'autre par leurs crochets. En écartant les potences, la tension s'exerce au point de contact, faisant sortir les ressorts proportionnellement.
+    </p>
+    
+    <div class="animation-zone">
+        <svg id="animationSvg" width="800" height="320" viewBox="0 0 800 320">
+            <rect x="0" y="290" width="800" height="30" fill="#4a5568"/>
+            <rect x="0" y="290" width="800" height="6" fill="#2d3748"/>
+
+            <g id="potenceLeft" transform="translate(240, 0)">
+                <path d="M-35,290 L35,290 L15,260 L-15,260 Z" fill="#2c3e50"/>
+                <rect x="-6" y="30" width="12" height="230" fill="#7f8c8d"/>
+                <rect x="6" y="60" width="22" height="20" fill="#34495e" rx="3"/>
+                <circle cx="28" cy="70" r="5" fill="#bdc3c7" z-index="10"/>
+                <text x="-40" y="28" font-size="14" font-weight="bold" fill="#f39c12">Analogie : Soleil</text>
+            </g>
+
+            <g id="dyna1Wrap" transform="translate(268, 70)">
+                <g id="hook1Group">
+                    <line x1="62" y1="0" x2="135" y2="0" stroke="#7f8c8d" stroke-width="4"/>
+                    <path d="M 135,2 L 140,2 A 5 5 0 0 0 145,-3 A 5 5 0 0 0 140,-8 L 130,-8" fill="none" stroke="#7f8c8d" stroke-width="4" stroke-linecap="round"/>
+                </g>
+                
+                <rect x="0" y="-4" width="17" height="8" fill="#95a5a6"/>
+                <circle cx="62" cy="0" r="45" fill="#bdc3c7" stroke="#7f8c8d" stroke-width="2"/>
+                <circle cx="62" cy="0" r="35" fill="#fff9e6" stroke="#f39c12" stroke-width="2"/>
+                
+                <g font-size="9" text-anchor="middle" font-weight="bold" fill="#333">
+                    <text x="62" y="-22">0</text>
+                    <text x="73.7" y="-16.1">2</text>
+                    <text x="81" y="-6.1">4</text>
+                    <text x="81" y="6.1">6</text>
+                    <text x="73.7" y="16.1">8</text>
+                    <text x="62" y="22">10</text>
+                </g>
+                <text x="62" y="12" font-size="10" font-weight="bold" text-anchor="middle" fill="#c0392b">N</text>
+                <text x="62" y="42" font-size="11" font-weight="bold" text-anchor="middle" fill="#f39c12">Dyn 1</text>
+                
+                <line id="needleLeft" x1="62" y1="0" x2="62" y2="-30" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="62" cy="0" r="4" fill="#c0392b"/>
+            </g>
+
+            <g id="potenceRight" transform="translate(560, 0)">
+                <path d="M-35,290 L35,290 L15,260 L-15,260 Z" fill="#2c3e50"/>
+                <rect x="-6" y="30" width="12" height="230" fill="#7f8c8d"/>
+                <rect x="-28" y="180" width="22" height="20" fill="#34495e" rx="3"/>
+                <circle cx="-28" cy="190" r="5" fill="#bdc3c7"/>
+                <text x="0" y="28" font-size="14" font-weight="bold" fill="#3498db">Analogie : Terre</text>
+            </g>
+
+            <g id="dyna2Wrap" transform="translate(532, 190)">
+                <g id="hook2Group">
+                    <line x1="-62" y1="0" x2="-135" y2="0" stroke="#7f8c8d" stroke-width="4"/>
+                    <path d="M -135,-2 L -140,-2 A 5 5 0 0 0 -145,3 A 5 5 0 0 0 -140,8 L -130,8" fill="none" stroke="#7f8c8d" stroke-width="4" stroke-linecap="round"/>
+                </g>
+                
+                <rect x="-17" y="-4" width="17" height="8" fill="#95a5a6"/>
+                <circle cx="-62" cy="0" r="45" fill="#bdc3c7" stroke="#7f8c8d" stroke-width="2"/>
+                <circle cx="-62" cy="0" r="35" fill="#e6f2ff" stroke="#3498db" stroke-width="2"/>
+                
+                <g font-size="9" text-anchor="middle" font-weight="bold" fill="#333">
+                    <text x="-62" y="-22">0</text>
+                    <text x="-73.7" y="-16.1">2</text>
+                    <text x="-81" y="-6.1">4</text>
+                    <text x="-81" y="6.1">6</text>
+                    <text x="-73.7" y="16.1">8</text>
+                    <text x="-62" y="22">10</text>
+                </g>
+                <text x="-62" y="12" font-size="10" font-weight="bold" text-anchor="middle" fill="#2980b9">N</text>
+                <text x="-62" y="42" font-size="11" font-weight="bold" text-anchor="middle" fill="#3498db">Dyn 2</text>
+                
+                <line id="needleRight" x1="-62" y1="0" x2="-62" y2="-30" stroke="#2980b9" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="-62" cy="0" r="4" fill="#2980b9"/>
+            </g>
+
+            <g id="vecGroup21" opacity="0">
+                <line id="vec2on1" x1="400" y1="130" x2="400" y2="130" stroke="#c0392b" stroke-width="4" marker-end="url(#arrowRed)"/>
+                <rect id="bgLbl21" x="0" y="0" width="40" height="20" fill="rgba(255,255,255,0.8)" rx="4"/>
+                <text id="lbl2on1" x="0" y="0" fill="#c0392b" font-size="13" font-weight="bold" text-anchor="middle">F₂/₁</text>
+            </g>
+            
+            <g id="vecGroup12" opacity="0">
+                <line id="vec1on2" x1="400" y1="130" x2="400" y2="130" stroke="#2980b9" stroke-width="4" marker-end="url(#arrowBlue)"/>
+                <rect id="bgLbl12" x="0" y="0" width="40" height="20" fill="rgba(255,255,255,0.8)" rx="4"/>
+                <text id="lbl1on2" x="0" y="0" fill="#2980b9" font-size="13" font-weight="bold" text-anchor="middle">F₁/₂</text>
+            </g>
+
+            <defs>
+                <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#c0392b"/>
+                </marker>
+                <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#2980b9"/>
+                </marker>
+            </defs>
+        </svg>
+    </div>
+    
+    <div class="controles">
+        <div class="btn-group">
+            <button id="btnConnect" class="btn btn-primary">1. Accrocher les dynamomètres</button>
+            <button id="btnVec21" class="btn btn-vec-red" disabled>Afficher Force de 2 sur 1 (F₂/₁)</button>
+            <button id="btnVec12" class="btn btn-vec-blue" disabled>Afficher Force de 1 sur 2 (F₁/₂)</button>
+        </div>
+        
+        <label for="forceSlider" style="color: #ecf0f1;"><strong>2. Écarter les potences pour régler la tension :</strong></label><br>
+        <input type="range" id="forceSlider" min="0" max="10" value="0" step="0.1" disabled>
+        
+        <div class="force-totale">Tension mesurée : <span id="forceDisplay">0.0</span> N</div>
+    </div>
+</div>
+
+<script>
+    let isConnected = false;
+    let showF21 = false;
+    let showF12 = false;
+    let currentForce = 0;
+    
+    const btnConnect = document.getElementById('btnConnect');
+    const btnVec21 = document.getElementById('btnVec21');
+    const btnVec12 = document.getElementById('btnVec12');
+    const slider = document.getElementById('forceSlider');
+    const forceDisplay = document.getElementById('forceDisplay');
+    
+    const potenceLeft = document.getElementById('potenceLeft');
+    const potenceRight = document.getElementById('potenceRight');
+    const dyna1Wrap = document.getElementById('dyna1Wrap');
+    const dyna2Wrap = document.getElementById('dyna2Wrap');
+    const hook1Group = document.getElementById('hook1Group');
+    const hook2Group = document.getElementById('hook2Group');
+    const needleLeft = document.getElementById('needleLeft');
+    const needleRight = document.getElementById('needleRight');
+    
+    const vecGroup21 = document.getElementById('vecGroup21');
+    const vec2on1 = document.getElementById('vec2on1');
+    const lbl2on1 = document.getElementById('lbl2on1');
+    const bgLbl21 = document.getElementById('bgLbl21');
+    
+    const vecGroup12 = document.getElementById('vecGroup12');
+    const vec1on2 = document.getElementById('vec1on2');
+    const lbl1on2 = document.getElementById('lbl1on2');
+    const bgLbl12 = document.getElementById('bgLbl12');
+
+    // --- Géométrie exacte pour l'emboîtement des crochets ---
+    // Les crochets sont conçus pour s'emboîter parfaitement à x=145 (depuis le pivot)
+    const baseHookDist = 145; 
+    const pivotLeftY = 70;
+    const pivotRightY = 190;
+    
+    // Le point de contact est toujours exactement au centre
+    const contactPointX = 400;
+    const contactPointY = (pivotLeftY + pivotRightY) / 2; // 130
+    
+    // Positions initiales garantissant l'emboîtement parfait (calcul de Pythagore)
+    // Distance cible = 290. dy = 120. dx = sqrt(290^2 - 120^2) = 264.
+    // Les pivots sont séparés de 264 px horizontaux.
+    const initialPivotLx = contactPointX - 132; // 268
+    const initialPivotRx = contactPointX + 132; // 532
+    
+    // Positionnement initial des potences (tenant compte du décalage de la noix de 28px)
+    const initialBaseLeftX = initialPivotLx - 28; // 240
+    const initialBaseRightX = initialPivotRx + 28; // 560
+
+    // Événements boutons
+    btnConnect.addEventListener('click', () => {
+        if (!isConnected) {
+            isConnected = true;
+            slider.disabled = false;
+            btnVec21.disabled = false;
+            btnVec12.disabled = false;
+            btnConnect.textContent = "Décrocher";
+            btnConnect.classList.replace('btn-primary', 'btn-danger');
+            updateAnimation(currentForce);
+        } else {
+            isConnected = false;
+            currentForce = 0;
+            slider.value = 0;
+            slider.disabled = true;
+            btnVec21.disabled = true;
+            btnVec12.disabled = true;
+            showF21 = false; showF12 = false;
+            btnVec21.classList.remove('actif'); btnVec12.classList.remove('actif');
+            btnVec21.textContent = "Afficher Force de 2 sur 1 (F₂/₁)";
+            btnVec12.textContent = "Afficher Force de 1 sur 2 (F₁/₂)";
+            
+            vecGroup21.setAttribute('opacity', 0);
+            vecGroup12.setAttribute('opacity', 0);
+            btnConnect.textContent = "1. Accrocher les dynamomètres";
+            btnConnect.classList.replace('btn-danger', 'btn-primary');
+            updateAnimation(0);
+            forceDisplay.textContent = "0.0";
+        }
+    });
+
+    btnVec21.addEventListener('click', () => {
+        showF21 = !showF21;
+        btnVec21.classList.toggle('actif');
+        btnVec21.textContent = showF21 ? "Masquer Force (F₂/₁)" : "Afficher Force de 2 sur 1 (F₂/₁)";
+        updateAnimation(currentForce);
+    });
+
+    btnVec12.addEventListener('click', () => {
+        showF12 = !showF12;
+        btnVec12.classList.toggle('actif');
+        btnVec12.textContent = showF12 ? "Masquer Force (F₁/₂)" : "Afficher Force de 1 sur 2 (F₁/₂)";
+        updateAnimation(currentForce);
+    });
+
+    slider.addEventListener('input', (e) => {
+        if (!isConnected) return;
+        currentForce = parseFloat(e.target.value);
+        forceDisplay.textContent = currentForce.toFixed(1);
+        updateAnimation(currentForce);
+    });
+
+    // Fonction de mise à jour géométrique
+    function updateAnimation(force) {
+        // 1. Allongement du ressort (5 pixels par Newton sortent du cadran)
+        const extension = force * 6; 
+        
+        // 2. Cinématique : les crochets restent fixés au point de contact (400, 130)
+        // La distance requise entre chaque pivot et le point de contact augmente de `extension`
+        const targetDist = baseHookDist + extension;
+        const dyHalf = (pivotRightY - pivotLeftY) / 2; // 60
+        
+        // Calcul trigonométrique strict pour trouver la nouvelle position X de chaque potence
+        const dxHalf = Math.sqrt(targetDist * targetDist - dyHalf * dyHalf);
+        
+        const currentPivotLx = contactPointX - dxHalf;
+        const currentPivotRx = contactPointX + dxHalf;
+        
+        const currentLeftX = currentPivotLx - 28;
+        const currentRightX = currentPivotRx + 28;
+        
+        potenceLeft.setAttribute('transform', `translate(${currentLeftX}, 0)`);
+        potenceRight.setAttribute('transform', `translate(${currentRightX}, 0)`);
+        
+        // 3. Les crochets glissent hors du dynamomètre
+        hook1Group.setAttribute('transform', `translate(${extension}, 0)`);
+        hook2Group.setAttribute('transform', `translate(${-extension}, 0)`);
+
+        // 4. Alignement parfait vers le point de contact
+        const angleRad = Math.atan2(dyHalf, dxHalf);
+        const angleDeg = angleRad * (180 / Math.PI);
+        
+        dyna1Wrap.setAttribute('transform', `translate(${currentPivotLx}, ${pivotLeftY}) rotate(${angleDeg})`);
+        dyna2Wrap.setAttribute('transform', `translate(${currentPivotRx}, ${pivotRightY}) rotate(${angleDeg})`);
+        
+        // 5. Rotation des aiguilles
+        const angleNeedle = force * 18; 
+        needleLeft.setAttribute('transform', `rotate(${angleNeedle}, 62, 0)`);
+        needleRight.setAttribute('transform', `rotate(${-angleNeedle}, -62, 0)`);
+        
+        // 6. Gestion des vecteurs qui partent EXCLUSIVEMENT du point de contact central
+        const vectorLen = 30 + (force * 6);
+        
+        if (showF21 && force > 0) {
+            vecGroup21.setAttribute('opacity', 1);
+            // Pointe vers le bas-droite (attirance vers 2)
+            const v1endX = contactPointX + vectorLen * Math.cos(angleRad);
+            const v1endY = contactPointY + vectorLen * Math.sin(angleRad);
+            
+            vec2on1.setAttribute('x2', v1endX);
+            vec2on1.setAttribute('y2', v1endY);
+            
+            const lbl1X = contactPointX + (vectorLen/2) * Math.cos(angleRad) - 25 * Math.sin(angleRad);
+            const lbl1Y = contactPointY + (vectorLen/2) * Math.sin(angleRad) + 25 * Math.cos(angleRad);
+            lbl2on1.setAttribute('x', lbl1X); lbl2on1.setAttribute('y', lbl1Y + 4);
+            bgLbl21.setAttribute('x', lbl1X - 20); bgLbl21.setAttribute('y', lbl1Y - 12);
+        } else {
+            vecGroup21.setAttribute('opacity', 0);
+        }
+        
+        if (showF12 && force > 0) {
+            vecGroup12.setAttribute('opacity', 1);
+            // Pointe vers le haut-gauche (attirance vers 1)
+            const v2endX = contactPointX - vectorLen * Math.cos(angleRad);
+            const v2endY = contactPointY - vectorLen * Math.sin(angleRad);
+            
+            vec1on2.setAttribute('x2', v2endX);
+            vec1on2.setAttribute('y2', v2endY);
+            
+            const lbl2X = contactPointX - (vectorLen/2) * Math.cos(angleRad) + 25 * Math.sin(angleRad);
+            const lbl2Y = contactPointY - (vectorLen/2) * Math.sin(angleRad) - 25 * Math.cos(angleRad);
+            lbl1on2.setAttribute('x', lbl2X); lbl1on2.setAttribute('y', lbl2Y + 4);
+            bgLbl12.setAttribute('x', lbl2X - 20); bgLbl12.setAttribute('y', lbl2Y - 12);
+        } else {
+            vecGroup12.setAttribute('opacity', 0);
+        }
+    }
+    
+    // Initialisation graphique (garantit que l'état initial est visuellement correct)
+    updateAnimation(0);
+</script>
+
+</body>
+</html>
