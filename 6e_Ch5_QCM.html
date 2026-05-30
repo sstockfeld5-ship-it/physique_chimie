@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM Physique-Chimie 6ème : Masse et Volume</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .intro {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .question-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .question-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .difficulty {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .diff-facile { background-color: #2ecc71; }
+        .diff-moyen { background-color: #f39c12; }
+        .diff-difficile { background-color: #e74c3c; }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background: #e9ecef;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: white;
+            background-color: var(--secondary-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #1c5980;
+        }
+
+        .btn-restart {
+            background-color: var(--primary-color);
+            margin-bottom: 40px;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #d5f5e3;
+            border-left: 4px solid var(--success-color);
+            color: #1e8449;
+        }
+
+        .feedback.incorrect {
+            background-color: #fadbd8;
+            border-left: 4px solid var(--danger-color);
+            color: #922b21;
+        }
+
+        #score-container {
+            display: none;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--secondary-color);
+        }
+        
+        .svg-container {
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #fcfcfc;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🧪 QCM : Masse et Volume</h1>
+        <p>Physique-Chimie - Classe de 6ème</p>
+    </header>
+
+    <div class="intro">
+        Entraîne-toi avec ce test de 10 questions tirées au sort !<br>
+        Lis bien les questions et choisis la meilleure réponse.
+    </div>
+
+    <div id="score-container"></div>
+
+    <div id="quiz-container">
+        </div>
+
+    <button id="submit-btn" class="btn" onclick="checkAnswers()">Valider mes réponses</button>
+    <button id="restart-btn" class="btn btn-restart" style="display:none;" onclick="startQuiz()">Recommencer avec 10 nouvelles questions</button>
+</div>
+
+<script>
+    // Variables contenant les schémas SVG pour les illustrations (Corrigées sans les réponses)
+    const svgMiscible1 = "<div class='svg-container'><svg width='60' height='100' viewBox='0 0 60 100'><path d='M 20 10 L 20 85 A 10 10 0 0 0 40 85 L 40 10' fill='none' stroke='#333' stroke-width='2'/><path d='M 21 40 L 21 85 A 9 9 0 0 0 39 85 L 39 40 Z' fill='#aed6f1'/></svg><br><small>Tube après agitation</small></div>";
+    const svgNonMiscible1 = "<div class='svg-container'><svg width='60' height='100' viewBox='0 0 60 100'><path d='M 20 10 L 20 85 A 10 10 0 0 0 40 85 L 40 10' fill='none' stroke='#333' stroke-width='2'/><path d='M 21 60 L 21 85 A 9 9 0 0 0 39 85 L 39 60 Z' fill='#85c1e9'/><path d='M 21 35 L 21 60 L 39 60 L 39 35 Z' fill='#f4d03f'/><line x1='21' y1='60' x2='39' y2='60' stroke='#333' stroke-width='1'/></svg><br><small>Tube après agitation</small></div>";
+    const svgNonMiscible2 = "<div class='svg-container'><svg width='60' height='100' viewBox='0 0 60 100'><path d='M 20 10 L 20 85 A 10 10 0 0 0 40 85 L 40 10' fill='none' stroke='#333' stroke-width='2'/><path d='M 21 60 L 21 85 A 9 9 0 0 0 39 85 L 39 60 Z' fill='#e59866'/><path d='M 21 35 L 21 60 L 39 60 L 39 35 Z' fill='#f4d03f'/><line x1='21' y1='60' x2='39' y2='60' stroke='#333' stroke-width='1'/></svg><br><small>Tube après agitation</small></div>";
+    const svgMiscible2 = "<div class='svg-container'><svg width='60' height='100' viewBox='0 0 60 100'><path d='M 20 10 L 20 85 A 10 10 0 0 0 40 85 L 40 10' fill='none' stroke='#333' stroke-width='2'/><path d='M 21 40 L 21 85 A 9 9 0 0 0 39 85 L 39 40 Z' fill='#e74c3c'/></svg><br><small>Tube après agitation</small></div>";
+    const svgMenisque = "<div class='svg-container'><svg width='120' height='100' viewBox='0 0 120 100'><path d='M 40 10 L 40 90 L 60 90 L 60 10' fill='none' stroke='#333' stroke-width='2'/><line x1='40' y1='30' x2='45' y2='30' stroke='#333' stroke-width='1'/><line x1='40' y1='50' x2='48' y2='50' stroke='#333' stroke-width='1'/><line x1='40' y1='70' x2='45' y2='70' stroke='#333' stroke-width='1'/><path d='M 41 90 L 59 90 L 59 50 Q 50 60 41 50 Z' fill='#3498db' opacity='0.6'/><line x1='50' y1='55' x2='80' y2='55' stroke='#e74c3c' stroke-width='1.5' stroke-dasharray='4'/><path d='M 85 55 Q 95 45 105 55 Q 95 65 85 55 Z' fill='none' stroke='#333' stroke-width='2'/><circle cx='95' cy='55' r='3' fill='#333'/></svg><br><small>Position de l'œil</small></div>";
+    const svgVolumeSolide = "<div class='svg-container'><svg width='150' height='100' viewBox='0 0 150 100'><path d='M 20 10 L 20 90 L 40 90 L 40 10' fill='none' stroke='#333' stroke-width='2'/><path d='M 21 90 L 39 90 L 39 60 L 21 60 Z' fill='#3498db' opacity='0.6'/><text x='5' y='63' font-size='10' fill='#333'>V1</text><line x1='20' y1='60' x2='15' y2='60' stroke='#333' stroke-width='1'/><path d='M 55 50 L 75 50 L 70 45 M 75 50 L 70 55' fill='none' stroke='#2ecc71' stroke-width='2'/><path d='M 90 10 L 90 90 L 110 90 L 110 10' fill='none' stroke='#333' stroke-width='2'/><path d='M 91 90 L 109 90 L 109 40 L 91 40 Z' fill='#3498db' opacity='0.6'/><path d='M 95 85 L 105 80 L 107 88 L 93 89 Z' fill='#7f8c8d'/><text x='115' y='43' font-size='10' fill='#333'>V2</text><line x1='110' y1='40' x2='115' y2='40' stroke='#333' stroke-width='1'/></svg><br><small>Expérience de mesure</small></div>";
+
+    // Banque complète de 59 questions
+    const allQuestions = [
+        // Définitions de base
+        { q: "Quelle est la définition de la masse d'un objet ?", options: ["L'espace qu'il occupe.", "La quantité de matière qu'il contient.", "Son poids sur la Terre.", "La température de l'objet."], answer: 1, difficulty: "facile", explanation: "La masse représente la quantité de matière contenue dans un objet. Elle ne dépend pas de sa forme." },
+        { q: "Quelle est la définition du volume d'un objet ?", options: ["La quantité de matière qu'il contient.", "L'espace physique qu'il occupe en 3D.", "Sa lourdeur.", "Sa taille en longueur."], answer: 1, difficulty: "facile", explanation: "Le volume est la place ou l'espace physique qu'occupe un objet en 3 dimensions." },
+        { q: "La masse d'un objet dépend-elle de sa forme ?", options: ["Oui, toujours.", "Non, jamais.", "Seulement pour les liquides.", "Seulement pour les gaz."], answer: 1, difficulty: "facile", explanation: "La masse ne dépend pas de la forme de l'objet. Si tu modèles un morceau de pâte à modeler différemment, sa quantité de matière reste la même !" },
+        
+        // Appareils de mesure
+        { q: "Quel appareil utilise-t-on pour mesurer la masse d'un objet ?", options: ["L'éprouvette graduée", "Le thermomètre", "La balance", "Le mètre ruban"], answer: 2, difficulty: "facile", explanation: "On utilise une balance pour mesurer la masse. N'oublie pas de l'allumer et de la poser à plat !" },
+        { q: "Quel appareil est le plus précis pour mesurer le volume d'un liquide ?", options: ["Le bécher", "L'éprouvette graduée", "Le tube à essai", "La balance"], answer: 1, difficulty: "facile", explanation: "L'éprouvette graduée est l'instrument de verrerie spécifiquement conçu pour lire des volumes précis de liquides." },
+        { q: "Sur quel bouton de la balance doit-on appuyer pour remettre l'affichage à zéro après avoir posé le récipient vide ?", options: ["ON/OFF", "MODE", "TARE", "ZERO"], answer: 2, difficulty: "facile", explanation: "Le bouton TARE permet de remettre la balance à zéro. Ainsi, on ne mesure que la masse du produit ajouté, sans compter celle du récipient !" },
+        
+        // Protocoles expérimentaux : Masse et Volume (Corrigés sans indices)
+        { q: "Observe ce schéma." + svgMenisque + "Pour lire correctement et précisément le volume d'un liquide dans une éprouvette graduée, comment faut-il se placer ?", options: ["Au-dessus du niveau de l'eau.", "En dessous du niveau de l'eau.", "L'œil horizontalement, aligné avec le bas du ménisque.", "Au niveau de la graduation la plus haute du tube."], answer: 2, difficulty: "facile", explanation: "Pour éviter les erreurs de lecture, il faut toujours placer son œil bien à l'horizontale et viser le bas de la surface creuse du liquide (le ménisque)." },
+        { q: "Observe le schéma de ce protocole expérimental." + svgVolumeSolide + "Comment s'appelle cette méthode permettant de trouver le volume d'un solide de forme irrégulière (comme un caillou) ?", options: ["La méthode de la tare.", "Le déplacement de liquide.", "La décantation.", "La pesée suspendue."], answer: 1, difficulty: "moyen", explanation: "En plongeant l'objet dans l'eau, on force le liquide à monter. Cette technique s'appelle la méthode par déplacement de liquide." },
+        { q: "Sur ce même schéma de déplacement de liquide," + svgVolumeSolide + "quelle formule mathématique permet de calculer le volume exact de l'objet plongé dans l'eau ?", options: ["V = V1 + V2", "V = V1 × V2", "V = V2 - V1", "V = V1 ÷ V2"], answer: 2, difficulty: "facile", explanation: "Il faut soustraire le volume de l'eau seule (V1) au volume total contenant l'objet (V2) pour obtenir le volume de l'objet. Le calcul est donc V2 - V1." },
+        
+        // Unités légales et usuelles
+        { q: "Quelle est l'unité légale (système international) de la masse ?", options: ["Le gramme (g)", "Le kilogramme (kg)", "Le litre (L)", "Le Newton (N)"], answer: 1, difficulty: "facile", explanation: "L'unité légale de la masse est le kilogramme (kg), même si en chimie on utilise très souvent le gramme (g)." },
+        { q: "Quelle est l'unité légale (système international) du volume ?", options: ["Le litre (L)", "Le décimètre cube (dm³)", "Le mètre cube (m³)", "Le millilitre (mL)"], answer: 2, difficulty: "difficile", explanation: "Attention, l'unité légale est le mètre cube (m³). Le litre (L) est une unité usuelle de capacité très utilisée au quotidien." },
+        
+        // Équivalences importantes
+        { q: "Quelle est l'équivalence exacte ?", options: ["1 L = 1 cm³", "1 L = 1 dm³", "1 L = 1 m³", "1 mL = 1 dm³"], answer: 1, difficulty: "moyen", explanation: "Un litre (1 L) rentre exactement dans un cube de 10 cm de côté, c'est-à-dire 1 décimètre cube (1 dm³)." },
+        { q: "A quoi correspond 1 millilitre (1 mL) en volume géométrique ?", options: ["1 dm³", "1 mm³", "1 cm³", "1 m³"], answer: 2, difficulty: "moyen", explanation: "1 mL est exactement égal à 1 centimètre cube (1 cm³), soit l'équivalent d'un petit dé à jouer de 1 cm de côté." },
+        { q: "Quelle est la masse exacte de 1 Litre d'eau pure ?", options: ["100 g", "10 kg", "1 kg", "1 g"], answer: 2, difficulty: "moyen", explanation: "C'est une propriété fondamentale à retenir : 1 Litre d'eau pèse exactement 1 kilogramme (1 kg)." },
+        
+        // Conversions de Masse
+        { q: "Combien y a-t-il de grammes dans 1 kilogramme ?", options: ["10 g", "100 g", "1000 g", "10 000 g"], answer: 2, difficulty: "facile", explanation: "Le préfixe 'kilo' signifie 'mille'. Donc 1 kg = 1000 g." },
+        { q: "Convertis : 2,5 kg = ... g", options: ["25 g", "250 g", "2500 g", "0,025 g"], answer: 2, difficulty: "moyen", explanation: "Puisque 1 kg = 1000 g, il faut multiplier 2,5 par 1000. Cela donne 2500 g." },
+        { q: "Convertis : 450 mg = ... g", options: ["4,5 g", "0,45 g", "45 000 g", "45 g"], answer: 1, difficulty: "difficile", explanation: "Il y a 1000 mg dans 1 g. Pour passer des mg aux g, on divise par 1000. 450 ÷ 1000 = 0,45 g." },
+        { q: "Combien pèse 1 tonne (1 t) ?", options: ["100 kg", "1000 kg", "10 000 kg", "1000 g"], answer: 1, difficulty: "moyen", explanation: "Une tonne est une très grande unité de masse, elle correspond à 1000 kilogrammes." },
+        
+        // Conversions de Volume
+        { q: "Convertis : 1,5 L = ... mL", options: ["15 mL", "150 mL", "1500 mL", "15 000 mL"], answer: 2, difficulty: "moyen", explanation: "Le préfixe 'milli' signifie qu'il faut 1000 mL pour faire 1 L. Donc 1,5 × 1000 = 1500 mL." },
+        { q: "Convertis : 300 cm³ = ... dm³", options: ["3 dm³", "30 dm³", "0,3 dm³", "0,03 dm³"], answer: 2, difficulty: "difficile", explanation: "Dans le tableau des volumes, chaque colonne est divisée en 3. Il faut donc diviser par 1000 pour passer des cm³ aux dm³. 300 ÷ 1000 = 0,3 dm³." },
+        { q: "Convertis : 2 m³ = ... L", options: ["2000 L", "20 L", "200 L", "0,002 L"], answer: 0, difficulty: "difficile", explanation: "1 m³ = 1000 dm³ = 1000 L. Donc 2 m³ équivalent à 2000 Litres d'eau !" },
+        
+        // Miscibilité (Definitions)
+        { q: "Que signifie le mot 'miscibles' pour deux liquides ?", options: ["Ils changent de couleur.", "Ils se mélangent parfaitement pour former un liquide homogène.", "Ils se superposent en deux couches.", "Ils explosent au contact."], answer: 1, difficulty: "facile", explanation: "Deux liquides sont miscibles s'ils se mélangent intimement sans former de couches séparées." },
+        { q: "Si, après avoir agité un tube contenant deux liquides, on observe deux couches distinctes, on dit que ces liquides sont...", options: ["Solubles", "Transparents", "Miscibles", "Non miscibles"], answer: 3, difficulty: "facile", explanation: "S'ils ne se mélangent pas et se superposent, ils sont dits 'non miscibles'." },
+        
+        // Exemples de mélanges AVEC SCHEMAS
+        { q: "Observe le schéma de ce tube contenant de l'eau et de l'alcool." + svgMiscible1 + "L'eau et l'alcool sont-ils miscibles ou non miscibles ?", options: ["Miscibles", "Non miscibles", "Cela dépend de la température.", "Ils forment une émulsion."], answer: 0, difficulty: "moyen", explanation: "Le liquide est homogène (une seule couleur visible), l'eau et l'alcool se mélangent parfaitement : ils sont miscibles." },
+        { q: "Observe le schéma de ce tube contenant de l'eau et de l'huile." + svgNonMiscible1 + "L'eau et l'huile sont-ils miscibles ou non miscibles ?", options: ["Miscibles", "Non miscibles", "L'huile dissout l'eau.", "Ils forment un solide."], answer: 1, difficulty: "facile", explanation: "Le liquide présente deux couches distinctes, l'eau et l'huile ne se mélangent jamais : ils sont non miscibles." },
+        { q: "Observe le schéma de ce tube contenant de l'huile et du vinaigre." + svgNonMiscible2 + "L'huile et le vinaigre sont-ils miscibles ou non miscibles ?", options: ["Oui, totalement.", "Non, ils sont non miscibles.", "Seulement si on chauffe.", "Oui, ils forment de l'eau."], answer: 1, difficulty: "facile", explanation: "On voit deux couches distinctes (comme dans une vinaigrette). Ils finissent par se séparer : ils sont non miscibles." },
+        { q: "Observe le schéma de ce tube contenant de l'eau et du sirop." + svgMiscible2 + "L'eau et le sirop sont-ils miscibles ou non miscibles ?", options: ["Non, le sirop reste toujours au fond.", "Oui, ils sont miscibles.", "Seulement dans l'eau chaude.", "Non, le sirop flotte."], answer: 1, difficulty: "facile", explanation: "Le liquide est homogène (coloré uniformément). Même si le sirop coule au début, après agitation l'eau et le sirop se mélangent parfaitement : ils sont miscibles." },
+        
+        // Densité - Base
+        { q: "Comment savoir lequel de deux objets de MÊME VOLUME est le plus dense ?", options: ["C'est celui qui est le plus grand.", "C'est celui qui a la plus grande masse (le plus lourd).", "C'est celui qui a la plus petite masse.", "C'est celui qui brille le plus."], answer: 1, difficulty: "moyen", explanation: "À volume égal, la matière qui a la masse la plus grande est la plus dense." },
+        { q: "À volume égal, l'aluminium a une masse de 2,7 g et le fer une masse de 7,8 g. Que peut-on en déduire ?", options: ["L'aluminium est plus dense que le fer.", "Le fer est plus dense que l'aluminium.", "Ils ont la même densité.", "Le fer est plus léger."], answer: 1, difficulty: "moyen", explanation: "Puisque, pour une même taille, le fer est plus lourd que l'aluminium, le fer est donc le plus dense." },
+        { q: "Lorsque l'on mélange deux liquides non miscibles, où se place le liquide LE PLUS DENSE ?", options: ["Il se place au-dessus.", "Il se place en dessous.", "Il reste au milieu.", "Il s'évapore."], answer: 1, difficulty: "moyen", explanation: "Dans un mélange non miscible, le liquide le plus lourd (le plus dense) coule et se place au fond (en dessous)." },
+        
+        // Densité - Applications Liquides
+        { q: "On mélange de l'eau (plus dense) et de l'huile (moins dense). Quelle est la position des liquides après décantation ?", options: ["L'eau est au-dessus, l'huile en dessous.", "L'huile est au-dessus, l'eau en dessous.", "Ils sont mélangés.", "L'eau s'évapore."], answer: 1, difficulty: "moyen", explanation: "L'eau étant plus dense (plus lourde à volume égal), elle va au fond. L'huile, moins dense, flotte au-dessus." },
+        { q: "La glycérine est plus lourde que l'eau pour un même volume. Sachant que la glycérine et l'eau sont <strong>non miscibles</strong>, si on les mélange doucement, que se passe-t-il ?", options: ["La glycérine flotte sur l'eau.", "L'eau coule sous la glycérine.", "La glycérine se place en dessous de l'eau.", "Elles s'évaporent toutes les deux."], answer: 2, difficulty: "difficile", explanation: "Comme ils sont non miscibles et que la glycérine est plus dense (plus lourde) que l'eau, elle va logiquement se placer en dessous et former une couche séparée." },
+        { q: "Si 100 mL d'eau ont une masse de 100 g, et 100 mL de pétrole ont une masse de 75 g. Lequel est le moins dense ?", options: ["L'eau.", "Le pétrole.", "Ils ont la même densité.", "On ne peut pas savoir."], answer: 1, difficulty: "moyen", explanation: "À volume égal (100 mL), le pétrole (75 g) est plus léger que l'eau (100 g). Il est donc moins dense et flottera sur l'eau." },
+        { q: "L'alcool est moins dense que l'eau. Si je prends 50 g d'eau et 50 g d'alcool, lequel occupera le plus grand volume ?", options: ["L'eau", "L'alcool", "Ils occuperont le même volume.", "Impossible à dire."], answer: 1, difficulty: "difficile", explanation: "Puisque l'alcool est moins dense, il est plus 'encombrant' pour atteindre la même masse. Il occupera un volume plus grand (environ 64 mL pour 50g, contre 50 mL pour l'eau)." },
+        
+        // Superposition 3 couches (masses fournies)
+        { q: "On dispose des masses suivantes pour 100 mL de liquide : Eau (100 g), Alcool (79 g) et Glycérine (126 g). Si on les verse dans un tube sans les agiter (en supposant qu'ils ne se mélangent pas), quel liquide se placera AU MILIEU ?", options: ["L'Eau", "L'Alcool", "La Glycérine", "L'huile"], answer: 0, difficulty: "difficile", explanation: "La Glycérine est la plus lourde (126 g) donc elle va au fond. L'Alcool est le plus léger (79 g) donc il reste en haut. L'Eau (100 g) a une densité intermédiaire et se place entre les deux, au milieu." },
+        
+        // Calculs de volume
+        { q: "Dans une éprouvette, le volume d'eau initial est V1 = 60 mL. On y plonge une pierre, le niveau monte à V2 = 85 mL. Quel est le volume de la pierre ?", options: ["60 mL", "85 mL", "25 mL", "145 mL"], answer: 2, difficulty: "difficile", explanation: "On utilise la formule V = V2 - V1. Donc 85 - 60 = 25 mL. Le volume de la pierre est de 25 mL." },
+        { q: "Quelle autre unité pourrait-on utiliser pour écrire le volume de cette pierre de 25 mL ?", options: ["25 L", "25 cm³", "25 dm³", "25 m³"], answer: 1, difficulty: "difficile", explanation: "On sait que 1 mL est parfaitement égal à 1 cm³. Donc une pierre de 25 mL a un volume de 25 cm³ !" },
+        
+        // Expériences et Logique
+        { q: "Si je prends un grand carton complètement vide, on peut dire qu'il a :", options: ["Un petit volume et une grande masse.", "Un grand volume et une petite masse.", "Un grand volume et une grande masse.", "Un petit volume et une petite masse."], answer: 1, difficulty: "facile", explanation: "Le carton prend beaucoup de place (grand volume) mais comme il est vide, il est très léger (petite masse)." },
+        { q: "Si je prends une petite bille en plomb (métal très lourd), on peut dire qu'elle a :", options: ["Un petit volume et une grande masse.", "Un grand volume et une petite masse.", "Un grand volume et une grande masse.", "Un petit volume et une petite masse."], answer: 0, difficulty: "facile", explanation: "La bille prend très peu de place (petit volume) mais le plomb est un métal très dense, donc elle est très lourde dans la main (grande masse)." },
+        { q: "J'ai deux cylindres fabriqués avec LA MÊME MATIÈRE (du bois), mais l'un est petit et l'autre est grand. Leurs masses sont-elles identiques ?", options: ["Oui, car c'est la même matière.", "Non, le grand cylindre aura une masse plus grande.", "Non, le petit cylindre aura une masse plus grande.", "Oui, le volume ne change rien."], answer: 1, difficulty: "moyen", explanation: "Pour une même matière, si le volume augmente (le cylindre est plus grand), la quantité de matière augmente, donc la masse augmente aussi !" },
+        
+        // Proportionnalité
+        { q: "Si 10 mL d'huile ont une masse de 9 g, quelle sera la masse de 1000 mL (1 L) d'huile ?", options: ["90 g", "900 g", "9000 g", "1000 g"], answer: 1, difficulty: "difficile", explanation: "Il y a proportionnalité : 1000 mL c'est 100 fois plus que 10 mL. La masse aura donc 100 fois plus grande : 9 × 100 = 900 g." },
+        { q: "On sait que 200 mL d'alcool pèsent 162 g. Combien pèseront 100 mL d'alcool ?", options: ["162 g", "324 g", "81 g", "100 g"], answer: 2, difficulty: "difficile", explanation: "100 mL, c'est la moitié de 200 mL. Donc la masse sera divisée par 2 : 162 ÷ 2 = 81 g." },
+        
+        // Encore des conversions et lectures
+        { q: "Parmi ces liquides non miscibles (Eau, Huile, Pétrole), on obtient dans un tube (de bas en haut) : Eau, puis Huile, puis Pétrole. Qui est le MOINS dense ?", options: ["L'eau", "L'huile", "Le pétrole", "Ils ont la même densité"], answer: 2, difficulty: "moyen", explanation: "Le liquide le moins dense est le plus léger à volume égal, il flotte donc tout en haut. C'est le pétrole." },
+        { q: "On verse un liquide dans une éprouvette posée sur une balance. Pour obtenir la masse DU LIQUIDE SEUL, que fallait-il faire avant ?", options: ["Chauffer l'éprouvette.", "Appuyer sur TARE avec l'éprouvette vide sur la balance.", "Agiter l'éprouvette.", "Ajouter de l'eau."], answer: 1, difficulty: "facile", explanation: "Faire la tare permet de soustraire la masse de l'éprouvette pour ne lire que la masse du liquide que l'on verse." },
+        { q: "Comment appelle-t-on le fait qu'un liquide se sépare d'un autre après avoir été agité (comme l'eau et l'huile) ?", options: ["L'ébullition", "La décantation", "La fusion", "La miscibilité"], answer: 1, difficulty: "moyen", explanation: "Laisser reposer un mélange hétérogène de liquides pour qu'ils se séparent en couches s'appelle la décantation." },
+        { q: "Si 1 cm³ = 1 mL, à quoi correspond 50 cm³ ?", options: ["5 mL", "50 mL", "500 mL", "0,5 mL"], answer: 1, difficulty: "facile", explanation: "Puisque l'équivalence est de 1 pour 1, alors 50 cm³ est exactement égal à 50 mL." },
+        { q: "Laquelle de ces affirmations est FAUSSE ?", options: ["1 L d'eau pèse 1 kg", "L'eau et l'huile sont non miscibles", "La masse se mesure en Litres", "Le volume est l'espace occupé par un objet"], answer: 2, difficulty: "facile", explanation: "La masse se mesure en kilogrammes (kg) ou grammes (g). Le litre (L) est une unité de volume !" },
+        
+        // Remplissage varié
+        { q: "Pour mesurer avec précision 45 mL d'eau, quel instrument vas-tu choisir dans l'armoire ?", options: ["Un bécher de 100 mL", "Une éprouvette graduée de 50 mL", "Une éprouvette graduée de 200 mL", "Un erlenmeyer"], answer: 1, difficulty: "moyen", explanation: "Pour être précis, on choisit l'éprouvette graduée dont la capacité (50 mL) est la plus proche du volume à mesurer (45 mL)." },
+        { q: "Si tu mets un cylindre en laiton (80g) sur une balance et un cylindre en bois de même taille (7,8g) sur une autre, que constates-tu ?", options: ["La balance du bois affiche une plus grande valeur.", "Leurs masses sont identiques car ils ont la même taille.", "Le laiton a une masse bien plus grande que le bois.", "Les deux balances affichent 0g."], answer: 2, difficulty: "facile", explanation: "Le laiton is beaucoup plus dense que le bois. À taille égale, sa masse est bien plus grande." },
+        { q: "Convertis : 2500 mL = ... L", options: ["25 L", "2,5 L", "0,25 L", "250 L"], answer: 1, difficulty: "moyen", explanation: "Il y a 1000 mL dans 1 L. On divise par 1000 : 2500 ÷ 1000 = 2,5 L." },
+        { q: "Quel est le symbole du décimètre cube ?", options: ["dcm³", "dm³", "m³", "dc³"], answer: 1, difficulty: "facile", explanation: "Le symbole s'écrit 'dm³' (décimètre cube)." },
+        { q: "1 dm³ d'eau pèse...", options: ["1 gramme", "10 grammes", "1 kilogramme", "10 kilogrammes"], answer: 2, difficulty: "moyen", explanation: "1 dm³ est égal à 1 Litre. Et on sait que 1 Litre d'eau pure pèse exactement 1 kilogramme (1 kg)." },
+        { q: "Un élève plonge un caillou dans une éprouvette avec de l'eau. Le niveau passe de 40 mL à 55 mL. Quel calcul doit-il écrire sur sa copie ?", options: ["40 + 55 = 95 mL", "55 / 40 = 1,3 mL", "55 - 40 = 15 mL", "55 x 40 = 2200 mL"], answer: 2, difficulty: "facile", explanation: "Le calcul correct est la soustraction : V2 - V1, soit 55 - 40 = 15 mL." },
+        { q: "Je mesure la masse de 50 mL de pétrole et je trouve 40 g. Mon ami mesure 100 mL de pétrole. Que trouvera-t-il sur sa balance ?", options: ["40 g", "50 g", "80 g", "100 g"], answer: 2, difficulty: "difficile", explanation: "Si le volume double (de 50 à 100 mL), la quantité de matière double. La masse est donc doublée : 40 × 2 = 80 g." },
+        { q: "Vrai ou Faux : Tous les liquides ont la même masse s'ils ont le même volume.", options: ["Vrai, la masse dépend uniquement de l'espace occupé.", "Faux, la masse dépend de la nature du liquide (sa densité)."], answer: 1, difficulty: "facile", explanation: "Faux ! Par exemple, 1L d'eau (1000g) n'a pas la même masse que 1L d'huile (900g)." },
+        { q: "Le volume d'une bouteille d'eau classique est de 1,5 L. En dm³, cela s'écrit :", options: ["1,5 dm³", "15 dm³", "150 dm³", "0,15 dm³"], answer: 0, difficulty: "moyen", explanation: "Les litres et les décimètres cubes sont strictement équivalents (1 L = 1 dm³). Donc 1,5 L = 1,5 dm³." },
+        { q: "Convertis : 12 000 mg = ... g", options: ["12 g", "120 g", "1,2 g", "12 000 000 g"], answer: 0, difficulty: "difficile", explanation: "Il y a 1000 mg dans 1 g. On divise donc par 1000 : 12000 ÷ 1000 = 12 g." }
+    ];
+
+    let currentQuestions = [];
+
+    function shuffleArray(array) {
+        let curId = array.length;
+        while (0 !== curId) {
+            let randId = Math.floor(Math.random() * curId);
+            curId -= 1;
+            let tmp = array[curId];
+            array[curId] = array[randId];
+            array[randId] = tmp;
+        }
+        return array;
+    }
+
+    function startQuiz() {
+        document.getElementById('score-container').style.display = 'none';
+        document.getElementById('submit-btn').style.display = 'block';
+        document.getElementById('restart-btn').style.display = 'none';
+        
+        const shuffledPool = shuffleArray([...allQuestions]);
+        currentQuestions = shuffledPool.slice(0, 10);
+        
+        renderQuiz();
+    }
+
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+
+        currentQuestions.forEach((qObj, index) => {
+            const qDiv = document.createElement('div');
+            qDiv.className = 'question-card';
+            qDiv.id = `q-card-${index}`;
+
+            const diffClass = `diff-${qObj.difficulty}`;
+            
+            let html = `
+                <div class="question-header">
+                    <h3 class="question-title">Question ${index + 1} / 10</h3>
+                    <span class="difficulty ${diffClass}">${qObj.difficulty}</span>
+                </div>
+                <p style="font-size: 1.1em; font-weight: 500; margin-bottom: 15px;">${qObj.q}</p>
+                <div class="options">
+            `;
+
+            qObj.options.forEach((opt, optIndex) => {
+                html += `
+                    <label class="option-label" id="label-${index}-${optIndex}">
+                        <input type="radio" name="q${index}" value="${optIndex}">
+                        ${opt}
+                    </label>
+                `;
+            });
+
+            html += `</div>
+                <div class="feedback" id="feedback-${index}"></div>
+            `;
+
+            qDiv.innerHTML = html;
+            container.appendChild(qDiv);
+        });
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function checkAnswers() {
+        let score = 0;
+        let allAnswered = true;
+
+        currentQuestions.forEach((_, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (!selected) {
+                allAnswered = false;
+            }
+        });
+
+        if (!allAnswered) {
+            alert("Tu dois répondre à toutes les questions avant de valider !");
+            return;
+        }
+
+        currentQuestions.forEach((qObj, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const selectedValue = parseInt(selected.value);
+            const feedbackDiv = document.getElementById(`feedback-${index}`);
+            
+            const radios = document.querySelectorAll(`input[name="q${index}"]`);
+            radios.forEach(r => r.disabled = true);
+
+            if (selectedValue === qObj.answer) {
+                score++;
+                document.getElementById(`label-${index}-${selectedValue}`).style.backgroundColor = '#d5f5e3';
+                document.getElementById(`label-${index}-${selectedValue}`).style.borderColor = '#2ecc71';
+                feedbackDiv.innerHTML = `<strong>✔️ Bravo, c'est juste !</strong> ${qObj.explanation}`;
+                feedbackDiv.className = 'feedback correct';
+            } else {
+                document.getElementById(`label-${index}-${selectedValue}`).style.backgroundColor = '#fadbd8';
+                document.getElementById(`label-${index}-${selectedValue}`).style.borderColor = '#e74c3c';
+                document.getElementById(`label-${index}-${qObj.answer}`).style.backgroundColor = '#d5f5e3';
+                
+                feedbackDiv.innerHTML = `<strong>❌ Faux.</strong> La bonne réponse était : <em>${qObj.options[qObj.answer]}</em>.<br><br>💡 <strong>Explication :</strong> ${qObj.explanation}`;
+                feedbackDiv.className = 'feedback incorrect';
+            }
+            feedbackDiv.style.display = 'block';
+        });
+
+        const scoreContainer = document.getElementById('score-container');
+        let message = "";
+        if(score === 10) message = "🎉 Excellent ! Tu maîtrises parfaitement le cours !";
+        else if(score >= 7) message = "👍 Très bien ! Bonnes connaissances.";
+        else if(score >= 5) message = "🧐 Pas mal, mais il faut encore réviser certaines notions.";
+        else message = "📚 Il faut relire ton cours et réessayer !";
+
+        scoreContainer.innerHTML = `Ton score : <span style="color: var(--secondary-color); font-size: 1.2em;">${score} / 10</span><br><span style="font-size: 0.8em; font-weight: normal;">${message}</span>`;
+        scoreContainer.style.display = 'block';
+
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('restart-btn').style.display = 'block';
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.onload = startQuiz;
+
+</script>
+</body>
+</html>
