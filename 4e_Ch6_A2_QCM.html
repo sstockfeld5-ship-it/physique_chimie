@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Évaluation : Transformation chimique</title>
+    <style>
+        body { font-family: sans-serif; background: #f1f5f9; padding: 20px; display: flex; justify-content: center; }
+        .qcm-container { background: white; width: 100%; max-width: 700px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
+        .screen { display: none; padding: 30px; }
+        .screen.active { display: block; }
+        .option-item { border: 2px solid #e2e8f0; padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .option-item:hover { border-color: #94a3b8; background: #f8fafc; }
+        .option-item.selected { border-color: #2563eb; background: #eff6ff; }
+        .btn { background: #16a34a; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 1.1em; font-weight: bold; margin-top: 10px;}
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div class="qcm-container">
+    <div class="header"><h1>Évaluation</h1></div>
+
+    <div class="screen active" id="screen-start">
+        <p>Veuillez remplir vos informations :</p>
+        <input type="text" id="stu-nom" placeholder="Nom" required>
+        <input type="text" id="stu-prenom" placeholder="Prénom" required>
+        <input type="text" id="stu-classe" placeholder="Classe (ex: 4A)" required>
+        <button class="btn" onclick="startQCM()">Démarrer le QCM</button>
+    </div>
+
+    <div class="screen" id="screen-question">
+        <div id="q-number" style="color: #64748b; margin-bottom: 10px;"></div>
+        <div id="q-text" style="font-size: 1.2em; font-weight: bold; margin-bottom: 20px;"></div>
+        <div id="options-container"></div>
+        <button class="btn" id="btn-next" onclick="submitAnswer()" disabled>Valider</button>
+    </div>
+
+    <div class="screen" id="screen-result">
+        <h2>Score : <span id="score-val">0</span> / 10</h2>
+        <h3 id="status-msg">Enregistrement de la note...</h3>
+    </div>
+</div>
+
+<script>
+    const questionPool = [
+        // 1 à 5
+        { q: "Pourquoi la conservation des atomes est-elle indispensable lors de l'ajustement d'une équation chimique ?", options: ["Pour que le nombre d'atomes soit identique de chaque côté", "Pour changer les molécules", "Pour respecter la loi de la pesanteur", "C'est facultatif"], correct: 0 },
+        { q: "Quel est le symbole du Carbone ?", options: ["C", "Ca", "Co", "O"], correct: 0 },
+        { q: "Quel est le symbole de l'Hydrogène ?", options: ["H", "Hy", "O", "N"], correct: 0 },
+        { q: "Par quelle lettre symbolise-t-on l'atome d'oxygène dans une équation ?", options: ["O", "Ox", "C", "H"], correct: 0 },
+        { q: "Symbole de l'Azote ?", options: ["N", "A", "Az", "Ni"], correct: 0 },
+        
+        // 6, 7, 8 Remplacées
+        { q: "Quelle est la principale différence entre un atome et une molécule ?", options: ["Une molécule est un assemblage de plusieurs atomes liés", "Un atome est un assemblage de molécules", "C'est la même chose", "Un atome est visible à l'œil nu, pas une molécule"], correct: 0 },
+        { q: "Dans l'écriture « 3 H₂O », que nous indique le chiffre 3 placé devant ?", options: ["Qu'il y a 3 molécules d'eau en tout", "Qu'il y a 3 atomes d'hydrogène", "Qu'il y a 3 atomes d'oxygène", "Que la molécule est composée de 3 atomes au total"], correct: 0 },
+        { q: "Dans une équation de réaction chimique, où écrit-on toujours les réactifs ?", options: ["À gauche de la flèche", "À droite de la flèche", "En dessous de la flèche", "L'ordre n'a aucune importance"], correct: 0 },
+        
+        // 9 à 34
+        { q: "Dans le modèle moléculaire, quelle est la couleur conventionnelle de l'atome de carbone ?", options: ["Noir", "Rouge", "Blanc", "Bleu"], correct: 0 },
+        { q: "Couleur atome Oxygène ?", options: ["Rouge", "Blanc", "Noir", "Bleu"], correct: 0 },
+        { q: "Couleur atome Hydrogène ?", options: ["Blanc", "Rouge", "Noir", "Bleu"], correct: 0 },
+        { q: "Couleur atome Azote ?", options: ["Bleu", "Blanc", "Rouge", "Noir"], correct: 0 },
+        { q: "Formule de l'eau ?", options: ["H2O", "HO2", "CO2", "H2"], correct: 0 },
+        { q: "Formule dioxyde de carbone ?", options: ["CO2", "C2O", "CO", "H2"], correct: 0 },
+        { q: "Formule dioxygène ?", options: ["O2", "O", "CO2", "H2"], correct: 0 },
+        { q: "Formule dihydrogène ?", options: ["H2", "H", "H2O", "CH4"], correct: 0 },
+        { q: "Dans 2 H2O, combien d'atomes d'H ?", options: ["4", "2", "3", "6"], correct: 0 },
+        { q: "Dans 2 CO2, combien d'atomes d'O ?", options: ["4", "2", "1", "3"], correct: 0 },
+        { q: "Une molécule est constituée de :", options: ["D'atomes liés", "D'un atome", "De gaz", "De liquide"], correct: 0 },
+        { q: "Transformation chimique :", options: ["Réarrangement d'atomes", "Changement d'état", "Mélange", "Disparition"], correct: 0 },
+        { q: "La masse lors d'une réaction :", options: ["Se conserve", "Diminue", "Augmente", "Disparaît"], correct: 0 },
+        { q: "Pourquoi est-il strictement interdit de modifier les indices ?", options: ["Cela transformerait la molécule en une autre espèce chimique", "C'est trop complexe", "C'est interdit par le prof", "Cela rendrait la conservation impossible"], correct: 0 },
+        { q: "Dans '3 H2O', combien d'oxygène ?", options: ["3", "1", "6", "2"], correct: 0 },
+        { q: "Dans '2 CO2', combien d'atomes en tout ?", options: ["6", "3", "4", "2"], correct: 0 },
+        { q: "Réactifs de combustion carbone ?", options: ["C et O2", "CO2", "CH4 et O2", "C et H2O"], correct: 0 },
+        { q: "Produits de combustion carbone ?", options: ["CO2", "C et O2", "Eau", "CO"], correct: 0 },
+        { q: "L'équation C + O2 -> CO2 est :", options: ["Équilibrée", "Non équilibrée", "Incomplète", "Fausse"], correct: 0 },
+        { q: "Combustion complète du méthane produit :", options: ["CO2 et H2O", "C et H2O", "O2 et H2O", "Seulement CO2"], correct: 0 },
+        { q: "Propane : C3H8 + 5 O2 -> ... CO2 + 4 H2O. Quel coefficient devant CO2 ?", options: ["3", "2", "4", "5"], correct: 0 },
+        { q: "Ammoniac : N2 + 3 H2 -> ... NH3. Quel coefficient devant NH3 ?", options: ["2", "1", "3", "4"], correct: 0 },
+        { q: "Combien d'atomes d'O pour 1 propane ?", options: ["5", "3", "4", "8"], correct: 0 },
+        { q: "Dans l'équation ajustée du propane, combien de H2O ?", options: ["4", "8", "2", "3"], correct: 0 },
+        { q: "C2H6 + ... O2 -> 2 CO2 + 3 H2O. Quel coefficient pour O2 ?", options: ["3.5 (soit 7/2)", "3", "4", "2"], correct: 0 },
+        { q: "Pourquoi équilibrer ? Pour respecter :", options: ["La conservation des atomes", "Le poids du professeur", "La loi de la gravité", "La taille des atomes"], correct: 0 },
+        
+        // 35 Remplacée
+        { q: "Observez l'équation : 2 C + O₂ → 2 CO. Combien d'atomes de carbone (C) participent à la réaction côté réactifs ?", options: ["2", "1", "3", "4"], correct: 0 },
+        
+        // 36 à 38
+        { q: "Lors d'une réaction, les atomes sont-ils détruits ?", options: ["Non, ils sont réarrangés", "Oui", "Ils changent de type", "Ils ne bougent pas"], correct: 0 },
+        { q: "Quel est le rôle du dioxygène ?", options: ["C'est le comburant", "C'est un produit", "C'est un catalyseur", "Il ne sert à rien"], correct: 0 },
+        { q: "Quelle est la différence entre réactif et produit ?", options: ["Réactif consommé, produit formé", "C'est pareil", "Réactif formé, produit consommé", "Uniquement le nom"], correct: 0 },
+        
+        // 39 et 40 Remplacées
+        { q: "L'équation « N₂ + H₂ → NH₃ » est fausse car elle n'est pas ajustée. Quel est le problème ?", options: ["Il n'y a pas le même nombre d'atomes de chaque sorte à gauche et à droite", "Les formules des molécules sont mal écrites", "Il manque du dioxygène", "La flèche devrait être remplacée par un signe égal"], correct: 0 },
+        { q: "Lequel de ces phénomènes est une transformation chimique (et non une simple transformation physique) ?", options: ["La combustion d'un morceau de bois", "La fonte d'un glaçon", "Le sel qui se dissout dans un verre d'eau", "L'eau qui bout dans une casserole"], correct: 0 }
+    ];
+
+    let userData = { nom: "", prenom: "", classe: "" };
+    let selectedQuestions = [];
+    let currentIdx = 0, score = 0, currentOpt = null;
+
+    function startQCM() {
+        const nom = document.getElementById('stu-nom').value;
+        const prenom = document.getElementById('stu-prenom').value;
+        const classe = document.getElementById('stu-classe').value;
+        if(!nom || !prenom || !classe) { alert("Veuillez remplir tous les champs."); return; }
+        
+        userData = { nom, prenom, classe };
+        
+        window.addEventListener('beforeunload', (e) => { e.preventDefault(); e.returnValue = ""; });
+        selectedQuestions = questionPool.sort(() => 0.5 - Math.random()).slice(0, 10);
+        
+        document.getElementById('screen-start').classList.remove('active');
+        document.getElementById('screen-question').classList.add('active');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        currentOpt = null;
+        document.getElementById('btn-next').disabled = true;
+        const q = selectedQuestions[currentIdx];
+        document.getElementById('q-number').innerText = `Question ${currentIdx + 1} / 10`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const cont = document.getElementById('options-container');
+        cont.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const div = document.createElement('div');
+            div.className = 'option-item';
+            div.innerText = opt;
+            div.onclick = () => {
+                document.querySelectorAll('.option-item').forEach(el => el.classList.remove('selected'));
+                div.classList.add('selected');
+                currentOpt = i;
+                document.getElementById('btn-next').disabled = false;
+            };
+            cont.appendChild(div);
+        });
+    }
+
+    function submitAnswer() {
+        if(currentOpt === selectedQuestions[currentIdx].correct) score++;
+        currentIdx++;
+        if(currentIdx < 10) loadQuestion();
+        else endQCM();
+    }
+
+    function endQCM() {
+        window.removeEventListener('beforeunload', null);
+        document.getElementById('screen-question').classList.remove('active');
+        document.getElementById('screen-result').classList.add('active');
+        document.getElementById('score-val').innerText = score;
+        saveNote();
+    }
+
+    function saveNote() {
+        const data = { ...userData, note: score };
+        const url = "https://script.google.com/macros/s/AKfycbxCWCHJQaApH9CF-kCz0EJ_XyhkdfyBmcWgouQ6Sd3QMBrfATLC3ANuQi0af1QRSaCn/exec";
+
+        fetch(url, {
+            method: 'POST', mode: 'no-cors',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }).then(() => {
+            document.getElementById('status-msg').innerText = "✅ Note enregistrée avec succès !";
+        }).catch(err => {
+            document.getElementById('status-msg').innerText = "❌ Erreur lors de l'enregistrement.";
+        });
+    }
+</script>
+</body>
+</html>
