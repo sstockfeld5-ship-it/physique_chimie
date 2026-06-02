@@ -31,8 +31,7 @@
         <input type="text" id="stu-classe" placeholder="Classe (ex: 4A)" required>
         
         <p style="color: #dc2626; font-size: 0.9em; font-weight: bold; margin-top: 20px;">
-            ⚠️ ATTENTION : Le mode Anti-Triche est activé.<br>
-            Quitter la page, changer d'onglet ou réduire la fenêtre mettra fin au QCM immédiatement.
+            ⚠️ ATTENTION : Quitter la page, changer d'onglet ou réduire la fenêtre mettra fin au QCM immédiatement.
         </p>
         <button class="btn" onclick="startQCM()">Démarrer le QCM</button>
     </div>
@@ -109,15 +108,15 @@
     let userData = { nom: "", prenom: "", classe: "" };
     let selectedQuestions = [];
     let currentIdx = 0, score = 0, currentOpt = null;
-    let isTestRunning = false; // Variable pour savoir si le test est en cours
+    let isTestRunning = false;
 
-    // Bloquer le clic droit (Anti-triche)
+    // Bloquer le clic droit
     document.addEventListener('contextmenu', event => event.preventDefault());
 
-    // Détection de perte de focus (Anti-triche: changement d'onglet)
+    // Détection de perte de focus
     document.addEventListener("visibilitychange", () => {
         if (document.hidden && isTestRunning) {
-            alert("⚠️ TRICHE DÉTECTÉE : Vous avez quitté la page du QCM. Le test est terminé et la note envoyée.");
+            alert("⚠️ ATTENTION : Vous avez quitté la page du QCM. Le test est terminé et la note envoyée.");
             document.getElementById('warning-msg').style.display = 'block';
             endQCM(); // Force la fin du QCM
         }
