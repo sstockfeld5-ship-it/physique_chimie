@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>Évaluation : Transformation chimique</title>
     <style>
-        body { font-family: sans-serif; background: #f1f5f9; padding: 20px; display: flex; justify-content: center; }
+        /* user-select: none; empêche la sélection du texte (anti copier-coller) */
+        body { font-family: sans-serif; background: #f1f5f9; padding: 20px; display: flex; justify-content: center; user-select: none; -webkit-user-select: none; }
         .qcm-container { background: white; width: 100%; max-width: 700px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
         .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
         .screen { display: none; padding: 30px; }
@@ -15,6 +16,7 @@
         .btn { background: #16a34a; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 1.1em; font-weight: bold; margin-top: 10px;}
         .btn:disabled { background: #94a3b8; cursor: not-allowed; }
         input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        #warning-msg { color: #dc2626; font-weight: bold; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
@@ -27,6 +29,11 @@
         <input type="text" id="stu-nom" placeholder="Nom" required>
         <input type="text" id="stu-prenom" placeholder="Prénom" required>
         <input type="text" id="stu-classe" placeholder="Classe (ex: 4A)" required>
+        
+        <p style="color: #dc2626; font-size: 0.9em; font-weight: bold; margin-top: 20px;">
+            ⚠️ ATTENTION : Le mode Anti-Triche est activé.<br>
+            Quitter la page, changer d'onglet ou réduire la fenêtre mettra fin au QCM immédiatement.
+        </p>
         <button class="btn" onclick="startQCM()">Démarrer le QCM</button>
     </div>
 
@@ -40,6 +47,7 @@
     <div class="screen" id="screen-result">
         <h2>Score : <span id="score-val">0</span> / 10</h2>
         <h3 id="status-msg">Enregistrement de la note...</h3>
+        <p id="warning-msg">Le test a été interrompu car vous avez quitté la page.</p>
     </div>
 </div>
 
@@ -101,6 +109,27 @@
     let userData = { nom: "", prenom: "", classe: "" };
     let selectedQuestions = [];
     let currentIdx = 0, score = 0, currentOpt = null;
+    let isTestRunning = false; // Variable pour savoir si le test est en cours
+
+    // Bloquer le clic droit (Anti-triche)
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // Détection de perte de focus (Anti-triche: changement d'onglet)
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden && isTestRunning) {
+            alert("⚠️ TRICHE DÉTECTÉE : Vous avez quitté la page du QCM. Le test est terminé et la note envoyée.");
+            document.getElementById('warning-msg').style.display = 'block';
+            endQCM(); // Force la fin du QCM
+        }
+    });
+
+    // Fonction pour forcer le plein écran
+    function openFullscreen() {
+        let elem = document.documentElement;
+        if (elem.requestFullscreen) { elem.requestFullscreen(); } 
+        else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } 
+        else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
+    }
 
     function startQCM() {
         const nom = document.getElementById('stu-nom').value;
@@ -109,13 +138,23 @@
         if(!nom || !prenom || !classe) { alert("Veuillez remplir tous les champs."); return; }
         
         userData = { nom, prenom, classe };
+        isTestRunning = true;
         
-        window.addEventListener('beforeunload', (e) => { e.preventDefault(); e.returnValue = ""; });
+        // Lance le plein écran et le blocage de fermeture
+        openFullscreen();
+        window.addEventListener('beforeunload', preventClose);
+
         selectedQuestions = questionPool.sort(() => 0.5 - Math.random()).slice(0, 10);
         
         document.getElementById('screen-start').classList.remove('active');
         document.getElementById('screen-question').classList.add('active');
         loadQuestion();
+    }
+
+    // Fonction pour l'alerte de fermeture de page
+    function preventClose(e) {
+        e.preventDefault();
+        e.returnValue = "";
     }
 
     function loadQuestion() {
@@ -143,12 +182,20 @@
     function submitAnswer() {
         if(currentOpt === selectedQuestions[currentIdx].correct) score++;
         currentIdx++;
-        if(currentIdx < 10) loadQuestion();
-        else endQCM();
+        if(currentIdx < 10 && isTestRunning) {
+            loadQuestion();
+        } else {
+            endQCM();
+        }
     }
 
     function endQCM() {
-        window.removeEventListener('beforeunload', null);
+        isTestRunning = false; // Le test est fini
+        window.removeEventListener('beforeunload', preventClose); // Enlève l'alerte de fermeture
+        
+        // Quitter le plein écran (facultatif, mais plus propre)
+        if (document.exitFullscreen) { document.exitFullscreen().catch(err => console.log(err)); }
+
         document.getElementById('screen-question').classList.remove('active');
         document.getElementById('screen-result').classList.add('active');
         document.getElementById('score-val').innerText = score;
