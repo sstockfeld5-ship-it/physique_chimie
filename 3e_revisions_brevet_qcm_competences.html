@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physique-Chimie 3ème - Révisions DNB</title>
+    <style>
+        :root {
+            --primary: #2b6cb0;
+            --primary-dark: #2c5282;
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --correct: #48bb78;
+            --wrong: #f56565;
+            --text-main: #2d3748;
+            --dnb-blue: #3182ce;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        /* ----- NAVIGATION TABS ----- */
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background-color: #edf2f7;
+            color: var(--text-main);
+            border: 2px solid transparent;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(43, 108, 176, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ----- ELEMENTS COMMUNS ----- */
+        .selection-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+            background-color: #edf2f7;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        select, .action-btn {
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #cbd5e0;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .action-btn.secondary {
+            background-color: #4a5568;
+        }
+        .action-btn.secondary:hover {
+            background-color: #2d3748;
+        }
+
+        /* ----- QCM STYLES ----- */
+        .quiz-area { display: none; }
+        .question-block { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+        .question-text { font-size: 18px; font-weight: 600; margin-bottom: 15px; }
+        .svg-container { margin-bottom: 15px; text-align: center; background-color: #edf2f7; padding: 15px; border-radius: 8px; overflow-x: auto; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .option-btn { background-color: #edf2f7; color: var(--text-main); border: 2px solid transparent; text-align: left; padding: 12px 15px; font-size: 15px; border-radius: 5px; cursor: pointer; transition: all 0.2s; }
+        .option-btn:hover:not(:disabled) { background-color: #e2e8f0; }
+        .option-btn.selected { border-color: var(--primary); background-color: #ebf8ff; }
+        .option-btn.correct { background-color: var(--correct); color: white; border-color: var(--correct); }
+        .option-btn.wrong { background-color: var(--wrong); color: white; border-color: var(--wrong); }
+        .controls { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; flex-wrap: wrap; }
+        .score-display { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-top: 25px; display: none; padding: 15px; background-color: #ebf8ff; border-radius: 8px; }
+
+        /* ----- SKILLS (COMPÉTENCES) STYLES ----- */
+        #skillDisplayArea {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .skill-title {
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-dark);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .box {
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .box-header {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .example-box {
+            background-color: #fff;
+            border-left: 5px solid #ecc94b;
+            border: 1px solid #e2e8f0;
+            border-left-width: 5px;
+            border-left-color: #ecc94b;
+        }
+        .example-header { color: #b7791f; }
+        
+        .dnb-box {
+            background-color: #ebf8ff;
+            border: 1px solid #bee3f8;
+            border-left-width: 5px;
+            border-left-color: var(--dnb-blue);
+        }
+        .dnb-header { color: var(--primary-dark); }
+        .dnb-source {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .dnb-correction-area {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 2px dashed var(--correct);
+            border-radius: 5px;
+        }
+        
+        .math-block {
+            background: #f7fafc;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .data-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #cbd5e0;
+            padding: 8px;
+        }
+        .data-table th { background-color: #edf2f7; }
+
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <h1>Physique-Chimie 3ème - Révisions DNB</h1>
+    
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('tab-qcm', this)">Entraînement QCM</button>
+        <button class="tab-btn" onclick="switchTab('tab-skills', this)">Méthode & Sujets DNB</button>
+    </div>
+
+    <div id="tab-qcm" class="tab-content active">
+        <div class="selection-area" id="setupArea">
+            <label for="chapterSelect"><strong>Choisissez un chapitre pour l'évaluation :</strong></label>
+            <select id="chapterSelect"></select>
+            <button class="action-btn" onclick="startQuiz()">Générer un test aléatoire (10 questions)</button>
+        </div>
+
+        <div class="quiz-area" id="quizArea">
+            <h2 id="quizTitle" style="color: var(--primary); border-bottom: 2px solid; padding-bottom: 10px;"></h2>
+            <div id="questionsContainer"></div>
+            
+            <div class="controls">
+                <button class="action-btn" onclick="validateQuiz()" id="valBtn">Valider mes réponses</button>
+                <button class="action-btn secondary" onclick="resetApp()">Retour au menu QCM</button>
+            </div>
+            
+            <div class="score-display" id="scoreArea"></div>
+        </div>
+    </div>
+
+    <div id="tab-skills" class="tab-content">
+        
+        <div class="selection-area">
+            <label for="skillSelect"><strong>Quelle compétence souhaitez-vous travailler ?</strong></label>
+            <select id="skillSelect">
+                <option value="formule">1. Appliquer une formule mathématique</option>
+                <option value="vitesse">2. Conversion de vitesse (km/h vers m/s)</option>
+                <option value="conversion">3. Conversions diverses (Énergie & Distances)</option>
+                <option value="equation">4. Équilibrer une équation de réaction</option>
+                <option value="chimie">5. Identifier les réactifs et les produits</option>
+                <option value="vecteur">6. Modéliser une force (Tracer un vecteur)</option>
+                <option value="doi">7. Construire un Diagramme Objets-Interactions (DOI)</option>
+                <option value="energie">8. Réaliser une chaîne d'énergie (Éolienne)</option>
+                <option value="ohm">9. Loi d'Ohm (Lecture graphique U=f(I))</option>
+                <option value="frequence">10. Fréquence et Période (Lecture graphique)</option>
+                <option value="schema_elec">11. Réaliser un schéma électrique</option>
+                <option value="tableau">12. Exploiter le tableau périodique (Atomes)</option>
+                <option value="ions">13. Déterminer la formule d'un ion (Schéma)</option>
+                <option value="chronophotographie">14. Analyser une chronophotographie</option>
+                <option value="proportion">15. Calculer une proportion ou un pourcentage</option>
+            </select>
+            <button class="action-btn" onclick="loadSkill()">S'entraîner sur cette compétence</button>
+        </div>
+
+        <div id="skillDisplayArea">
+            <h2 id="skillTitle" class="skill-title">Titre de la compétence</h2>
+            <div id="skillContentArea"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // ----- LOGIQUE DES ONGLETS -----
+    function switchTab(tabId, btnElement) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btnElement.classList.add('active');
+    }
+
+    // ----- DONNÉES DES COMPÉTENCES (ONGLET 2) -----
+    const skillsData = {
+        "formule": {
+            title: "1. Appliquer une formule mathématique",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Métropole - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">Le rover Curiosity, de masse <strong>m = 899 kg</strong>, se trouve sur la planète Mars.<br>L'intensité de la pesanteur sur Mars est <strong>g<sub>Mars</sub> = 3,7 N/kg</strong>.<br><br><strong>Question :</strong> Calculer le poids <i>P</i> du rover Curiosity sur Mars. <i>(Rédiger le calcul complet)</i>.</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;"><strong>1. Formule :</strong> Je sais que <i>P = m × g</i><br><strong>2. Calcul :</strong> Je remplace par les valeurs : P = 899 × 3,7<br><strong>3. Résultat :</strong> <strong>P = 3 326,3 N</strong><br><br><i>Astuce Brevet : Pensez toujours à vérifier que la masse est bien en kilogrammes (kg) avant de faire le calcul, et n'oubliez pas l'unité Newton (N) !</i></div>
+                </div>
+            </div>`
+        },
+        "vitesse": {
+            title: "2. Conversion de vitesse (km/h vers m/s)",
+            html: `
+            <div class="box example-box">
+                <div class="box-header example-header"><span>📖 Leçon et Méthode</span></div>
+                <div style="line-height: 1.5;">Pour passer des <strong>km/h</strong> aux <strong>m/s</strong>, on utilise le facteur de conversion <strong>3,6</strong>.<br>Pourquoi ? Parce que 1 heure = 3600 secondes et 1 km = 1000 mètres. (3600 / 1000 = 3,6).<br><br>👉 <strong>km/h → m/s</strong> : on <strong>divise</strong> par 3,6.<br>👉 <strong>m/s → km/h</strong> : on <strong>multiplie</strong> par 3,6.</div>
+            </div>
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Asie - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">Un guépard repère une proie. Lors de son sprint, il atteint une vitesse maximale de <strong>v = 108 km/h</strong>.<br>Pour calculer son énergie cinétique (Ec = ½ × m × v²), la vitesse doit obligatoirement être exprimée en <strong>mètres par seconde (m/s)</strong>.<br><br><strong>Question :</strong> Convertir la vitesse du guépard de km/h en m/s en détaillant la démarche.</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;">Le calcul direct consiste à <strong>diviser par 3,6</strong>.<br>v = 108 / 3,6 = <strong>30 m/s</strong>.<br><br><i>Phrase réponse : Lors de son sprint, le guépard parcourt 30 mètres chaque seconde.</i></div>
+                </div>
+            </div>`
+        },
+        "conversion": {
+            title: "3. Conversions diverses (Énergie & Distances)",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Asie - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;"><strong>A. L'énergie :</strong> Un radiateur électrique a consommé une énergie <strong>E = 4500 Wh</strong>.<br>Exprimer cette énergie en <strong>kWh</strong> (kilowattheure), puis en <strong>Joules (J)</strong> sachant que 1 Wh = 3600 J.<br><br><strong>B. L'espace :</strong> La Terre est située à environ <strong>150 000 000 km</strong> du Soleil. L'étoile Proxima du Centaure est située à environ <strong>40 000 000 000 000 km</strong> de la Terre.<br>Convertir la distance Terre-Soleil en <strong>Unité Astronomique (ua)</strong> (1 ua = 150 millions de km), puis la distance Terre-Proxima en <strong>Année-Lumière (a.l.)</strong> (1 a.l. = 9,5 × 10<sup>12</sup> km).</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;"><strong>A. Énergie :</strong><br>- En kWh (on divise par 1000) : E = 4500 / 1000 = <strong>4,5 kWh</strong>.<br>- En Joules (on multiplie par 3600) : E = 4500 × 3600 = <strong>16 200 000 J</strong>.<br><br><strong>B. Distances astronomiques :</strong><br>- Terre-Soleil : 150 000 000 / 150 000 000 = <strong>1 ua</strong>.<br>- Terre-Proxima : 40 000 000 000 000 / 9 500 000 000 000 ≈ <strong>4,2 a.l.</strong></div>
+                </div>
+            </div>`
+        },
+        "equation": {
+            title: "4. Équilibrer une équation de réaction",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Centres Étrangers - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">Lorsqu'on utilise un réchaud de camping, on réalise la combustion du gaz propane (C<sub>3</sub>H<sub>8</sub>) dans le dioxygène de l'air (O<sub>2</sub>). Cette transformation produit du dioxyde de carbone (CO<sub>2</sub>) et de l'eau (H<sub>2</sub>O).<br><br><strong>Question :</strong> Recopier et équilibrer l'équation de cette réaction :<br><div class='math-block'>... C<sub>3</sub>H<sub>8</sub> + ... O<sub>2</sub> &rarr; ... CO<sub>2</sub> + ... H<sub>2</sub>O</div></div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;">On équilibre atome par atome (Carbone, puis Hydrogène, puis Oxygène) sans toucher aux petits chiffres (indices) :<br>- Il y a <strong>3</strong> atomes de Carbone à gauche &rarr; je mets <strong>3</strong> devant CO<sub>2</sub>.<br>- Il y a <strong>8</strong> atomes d'Hydrogène à gauche &rarr; je mets <strong>4</strong> devant H<sub>2</sub>O (car 4×2=8).<br>- Comptons les Oxygènes à droite : (3×2) + (4×1) = 6 + 4 = 10. Il m'en faut 10 à gauche, je mets <strong>5</strong> devant O<sub>2</sub>.<br><br>L'équation finale est : <strong>1 C<sub>3</sub>H<sub>8</sub> + 5 O<sub>2</sub> &rarr; 3 CO<sub>2</sub> + 4 H<sub>2</sub>O</strong></div>
+                </div>
+            </div>`
+        },
+        "chimie": {
+            title: "5. Identifier les réactifs et les produits",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Antilles - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">L'équation bilan de la combustion du méthane s'écrit de la façon suivante :<br><div class='math-block'>CH<sub>4</sub> + 2 O<sub>2</sub> &rarr; CO<sub>2</sub> + 2 H<sub>2</sub>O</div><br><strong>Question :</strong> À partir de cette équation, donner la formule chimique de tous les réactifs et de tous les produits.</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;">Dans une équation, la flèche remplace le verbe "se transforment en".<br><br>Ce qui est <strong>avant la flèche</strong> (à gauche) disparaît : ce sont <strong>les réactifs</strong>.<br>Ce qui est <strong>après la flèche</strong> (à droite) apparaît : ce sont <strong>les produits</strong>.<br><br><strong>Les réactifs sont :</strong> CH<sub>4</sub> et O<sub>2</sub>.<br><strong>Les produits sont :</strong> CO<sub>2</sub> et H<sub>2</sub>O.</div>
+                </div>
+            </div>`
+        },
+        "vecteur": {
+            title: "6. Modéliser une force (Tracer un vecteur)",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Polynésie - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">Un parachutiste a une masse de <strong>m = 90 kg</strong>. On prendra <strong>g = 10 N/kg</strong>.<br><div class='svg-container'><svg width='150' height='150'><path d='M 50 20 Q 75 0 100 20 L 85 80 L 65 80 Z' fill='none' stroke='#2b6cb0' stroke-width='2'/><circle cx='75' cy='90' r='10' fill='#ecc94b'/><rect x='70' y='100' width='10' height='20' fill='#2d3748'/></svg></div><br><strong>Question 1 :</strong> Calculer la valeur du poids <i>P</i> du parachutiste.<br><strong>Question 2 :</strong> Représenter le vecteur poids sur le schéma ci-dessus en utilisant l'échelle : <strong>1 cm pour 300 N</strong>.</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;"><strong>1. Calcul du poids :</strong><br>P = m × g = 90 × 10 = <strong>900 N</strong>.<br><br><strong>2. Tracé du vecteur :</strong><br>Je calcule la longueur de la flèche : 900 / 300 = <strong>3 cm</strong>.<br><i>Sur la copie, on part du centre de gravité (nombril), on trace verticalement vers le bas un segment de 3 cm. On ajoute la pointe de la flèche et la lettre P.</i><br><div class='svg-container'><svg width='150' height='150'><path d='M 50 20 Q 75 0 100 20 L 85 80 L 65 80 Z' fill='none' stroke='#2b6cb0' stroke-width='2'/><circle cx='75' cy='90' r='10' fill='#ecc94b'/><rect x='70' y='100' width='10' height='20' fill='#2d3748'/><circle cx='75' cy='100' r='3' fill='red'/><line x1='75' y1='100' x2='75' y2='140' stroke='red' stroke-width='3' marker-end='url(#arrowRed)'/><text x='85' y='125' fill='red' font-weight='bold'>P</text><defs><marker id='arrowRed' viewBox='0 0 10 10' refX='5' refY='5' markerWidth='5' markerHeight='5' orient='auto'><path d='M 0 0 L 10 5 L 0 10 z' fill='red'/></marker></defs></svg></div></div>
+                </div>
+            </div>`
+        },
+        "doi": {
+            title: "7. Construire un Diagramme Objets-Interactions (DOI)",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Métropole - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">Un voilier participe à une course en mer. Il est propulsé par le vent et flotte sur l'eau de mer.<br><br><strong>Question :</strong> Construire le diagramme objets-interactions (DOI) du système {voilier}.</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;">On place le {Voilier} dans une bulle centrale. On représente les actions de contact par des flèches pleines, et les actions à distance par des pointillés.<br><div class='svg-container'><svg width='350' height='220'><defs><marker id='arrowhead' markerWidth='6' markerHeight='6' refX='3' refY='3' orient='auto'><polygon points='0 0, 6 3, 0 6' fill='#2d3748'/></marker><marker id='arrowheadRev' markerWidth='6' markerHeight='6' refX='3' refY='3' orient='auto'><polygon points='6 0, 0 3, 6 6' fill='#2d3748'/></marker></defs><ellipse cx='175' cy='110' rx='50' ry='25' fill='none' stroke='#2b6cb0' stroke-width='2'/><text x='175' y='115' font-size='14' text-anchor='middle' font-weight='bold' fill='#2b6cb0'>Voilier</text><ellipse cx='175' cy='30' rx='35' ry='15' fill='none' stroke='#4a5568'/><text x='175' y='35' font-size='12' text-anchor='middle'>Vent</text><ellipse cx='50' cy='110' rx='35' ry='15' fill='none' stroke='#4a5568'/><text x='50' y='115' font-size='12' text-anchor='middle'>Eau</text><ellipse cx='175' cy='190' rx='35' ry='15' fill='none' stroke='#4a5568'/><text x='175' y='195' font-size='12' text-anchor='middle'>Terre</text><line x1='175' y1='45' x2='175' y2='85' stroke='#2d3748' stroke-width='2' marker-start='url(#arrowheadRev)' marker-end='url(#arrowhead)'/><line x1='85' y1='110' x2='125' y2='110' stroke='#2d3748' stroke-width='2' marker-start='url(#arrowheadRev)' marker-end='url(#arrowhead)'/><line x1='175' y1='135' x2='175' y2='175' stroke='#2d3748' stroke-width='2' stroke-dasharray='5,5' marker-start='url(#arrowheadRev)' marker-end='url(#arrowhead)'/></svg></div><br><i>L'eau et le vent touchent le voilier = trait plein.<br>La gravité de la Terre s'exerce sans le toucher = trait en pointillés.</i></div>
+                </div>
+            </div>`
+        },
+        "energie": {
+            title: "8. Réaliser une chaîne d'énergie (Éolienne)",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Métropole - Série Pro</div>
+                <div style="font-size: 16px; line-height: 1.5;">Dans une éolienne, la force du vent fait tourner des pales géantes. Ces pales entraînent un alternateur situé dans la nacelle, qui va générer du courant électrique envoyé sur le réseau. Le fonctionnement de l'alternateur s'accompagne obligatoirement d'un échauffement.<br><br><strong>Question :</strong> Compléter le schéma de la chaîne d'énergie de l'éolienne en remplaçant les cases vides pointillées par les mots : <i>Énergie électrique, Alternateur, Énergie cinétique, Énergie thermique</i>.
+                <div class='svg-container'><svg width='500' height='150'><defs><marker id='arrowEnd' viewBox='0 0 10 10' refX='5' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M 0 0 L 10 5 L 0 10 z' fill='#2b6cb0'/></marker></defs><text x='50' y='75' font-size='14' text-anchor='middle'>Vent</text><line x1='80' y1='70' x2='190' y2='70' stroke='#2b6cb0' stroke-width='3' marker-end='url(#arrowEnd)'/><rect x='100' y='45' width='80' height='20' fill='#f7fafc' stroke='#cbd5e0' stroke-dasharray='4'/><rect x='200' y='40' width='120' height='60' fill='white' stroke='black' stroke-width='2' stroke-dasharray='4'/><line x1='330' y1='70' x2='440' y2='70' stroke='#2b6cb0' stroke-width='3' marker-end='url(#arrowEnd)'/><rect x='340' y='45' width='80' height='20' fill='#f7fafc' stroke='#cbd5e0' stroke-dasharray='4'/><text x='470' y='75' font-size='14' text-anchor='middle'>Réseau</text><line x1='260' y1='100' x2='260' y2='130' stroke='#2b6cb0' stroke-width='3' marker-end='url(#arrowEnd)'/><rect x='220' y='135' width='80' height='20' fill='#f7fafc' stroke='#cbd5e0' stroke-dasharray='4'/></svg></div>
+                </div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;">L'énergie entre par la gauche, passe dans le convertisseur (le bloc central), et ressort divisée en énergie utile et en perte.<br><div class='svg-container'><svg width='500' height='150'><defs><marker id='arrowEnd2' viewBox='0 0 10 10' refX='5' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M 0 0 L 10 5 L 0 10 z' fill='#2b6cb0'/></marker></defs><text x='50' y='75' font-size='14' text-anchor='middle'>Vent</text><line x1='80' y1='70' x2='190' y2='70' stroke='#2b6cb0' stroke-width='3' marker-end='url(#arrowEnd2)'/><text x='135' y='60' font-size='12' text-anchor='middle' font-weight='bold' fill='#e53e3e'>Énergie cinétique</text><rect x='200' y='40' width='120' height='60' fill='white' stroke='black' stroke-width='2'/><text x='260' y='75' font-size='14' text-anchor='middle' font-weight='bold'>Alternateur</text><line x1='330' y1='70' x2='440' y2='70' stroke='#2b6cb0' stroke-width='3' marker-end='url(#arrowEnd2)'/><text x='385' y='60' font-size='12' text-anchor='middle' font-weight='bold' fill='#48bb78'>Énergie électrique</text><text x='470' y='75' font-size='14' text-anchor='middle'>Réseau</text><line x1='260' y1='100' x2='260' y2='130' stroke='#2b6cb0' stroke-width='3' marker-end='url(#arrowEnd2)'/><text x='260' y='145' font-size='12' text-anchor='middle' font-weight='bold' fill='#d69e2e'>Énergie thermique</text></svg></div></div>
+                </div>
+            </div>`
+        },
+        "ohm": {
+            title: "9. Loi d'Ohm (Lecture graphique U=f(I))",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Métropole - Série Pro</div>
+                <div style="font-size: 16px; line-height: 1.5;">La loi d'Ohm indique que la tension U est proportionnelle à l'intensité I pour un conducteur ohmique. Le graphique ci-dessous représente cette relation.<br>
+                <div class='svg-container'><svg width='250' height='200'><line x1='30' y1='170' x2='230' y2='170' stroke='black'/><line x1='30' y1='170' x2='30' y2='10' stroke='black'/><text x='130' y='195' font-size='12'>Intensité I (A)</text><text x='15' y='80' font-size='12' transform='rotate(-90 15,80)'>Tension U (V)</text><path d='M 30 170 L 200 30' fill='none' stroke='blue' stroke-width='2'/><line x1='30' y1='135' x2='230' y2='135' stroke='#e2e8f0' stroke-dasharray='2'/><line x1='30' y1='100' x2='230' y2='100' stroke='#e2e8f0' stroke-dasharray='2'/><line x1='30' y1='65' x2='230' y2='65' stroke='#e2e8f0' stroke-dasharray='2'/><line x1='72' y1='170' x2='72' y2='10' stroke='#e2e8f0' stroke-dasharray='2'/><line x1='115' y1='170' x2='115' y2='10' stroke='#e2e8f0' stroke-dasharray='2'/><line x1='157' y1='170' x2='157' y2='10' stroke='#e2e8f0' stroke-dasharray='2'/><text x='115' y='185' font-size='10'>0,2</text><text x='10' y='105' font-size='10'>10</text></svg></div>
+                <br><strong>Question :</strong> Par lecture graphique, déterminer la valeur de la tension U lorsque l'intensité du courant est de 0,2 A. Justifier par des tracés sur le graphique.</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;">Pour réaliser une lecture graphique au Brevet, il faut tracer des pointillés :<br>1. On part de la valeur <strong>0,2 A</strong> sur l'axe horizontal (abscisses).<br>2. On monte verticalement jusqu'à croiser la droite bleue.<br>3. On rejoint horizontalement l'axe vertical (ordonnées) pour lire la tension.<br><strong>Résultat : On lit U = 10 V.</strong><br><div class='svg-container'><svg width='250' height='200'><line x1='30' y1='170' x2='230' y2='170' stroke='black'/><line x1='30' y1='170' x2='30' y2='10' stroke='black'/><text x='130' y='195' font-size='12'>Intensité I (A)</text><text x='15' y='80' font-size='12' transform='rotate(-90 15,80)'>Tension U (V)</text><path d='M 30 170 L 200 30' fill='none' stroke='blue' stroke-width='2'/><line x1='115' y1='170' x2='115' y2='100' stroke='red' stroke-width='2' stroke-dasharray='4'/><line x1='115' y1='100' x2='30' y2='100' stroke='red' stroke-width='2' stroke-dasharray='4' marker-end='url(#arrowRed)'/><text x='115' y='185' font-size='10' font-weight='bold' fill='red'>0,2</text><text x='10' y='105' font-size='10' font-weight='bold' fill='red'>10</text><defs><marker id='arrowRed' viewBox='0 0 10 10' refX='5' refY='5' markerWidth='4' markerHeight='4' orient='auto-start-reverse'><path d='M 0 0 L 10 5 L 0 10 z' fill='red'/></marker></defs></svg></div></div>
+                </div>
+            </div>`
+        },
+        "frequence": {
+            title: "10. Fréquence et Période (Lecture graphique)",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Polynésie - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">Un diapason émet un son pur dont le signal électrique correspondant est visualisé sur l'oscillogramme ci-dessous. L'axe horizontal représente le temps en secondes (s).<br>
+                <div class='svg-container'><svg width='300' height='120'><path d='M0 60 Q 30 10 60 60 T 120 60 T 180 60 T 240 60 T 300 60' fill='none' stroke='#2b6cb0' stroke-width='2'/><line x1='0' y1='60' x2='300' y2='60' stroke='black'/><line x1='60' y1='60' x2='60' y2='110' stroke='gray' stroke-dasharray='2'/><line x1='120' y1='60' x2='120' y2='110' stroke='gray' stroke-dasharray='2'/><text x='60' y='115' font-size='10'>0,01</text><text x='120' y='115' font-size='10'>0,02</text><text x='250' y='115' font-size='10'>Temps (s)</text></svg></div>
+                <br><strong>Question :</strong> Déterminer graphiquement la période T de ce signal en secondes. En déduire la valeur de sa fréquence <i>f</i> en Hertz.</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;"><strong>1. Lecture de la période T :</strong><br>La période T est la durée d'un motif élémentaire (la distance horizontale entre deux sommets ou deux passages à zéro dans le même sens).<br>Sur le graphique, un motif complet s'étend de 0 à 0,01 s. <br>Donc, <strong>T = 0,01 s</strong>.<br><br><strong>2. Calcul de la fréquence f :</strong><br>La formule est f = 1 / T.<br>f = 1 / 0,01 = <strong>100 Hz</strong>.<br><i>Le signal se répète 100 fois par seconde.</i></div>
+                </div>
+            </div>`
+        },
+        "schema_elec": {
+            title: "11. Réaliser un schéma électrique",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Métropole - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">Un élève souhaite vérifier la loi d'Ohm pour une résistance (conducteur ohmique). Il dispose du matériel suivant : un générateur de tension réglable, une résistance, un ampèremètre, un voltmètre et des fils de connexion.<br><br><strong>Question :</strong> Dessiner le schéma normalisé du montage permettant à l'élève de mesurer simultanément la tension aux bornes de la résistance et l'intensité du courant qui la traverse.</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;">Pour tracer ce schéma, il faut respecter les règles suivantes :<br>1. Tracer un grand rectangle à la règle.<br>2. Insérer le générateur (G) et la résistance (rectangle).<br>3. Placer l'ampèremètre (A) sur le trait principal du circuit (en série).<br>4. Ajouter une boucle (dérivation) autour de la résistance pour y placer le voltmètre (V).<br><br><div class='svg-container'><svg width='300' height='200'><rect x='50' y='50' width='200' height='100' fill='none' stroke='#2d3748' stroke-width='2'/><circle cx='50' cy='100' r='15' fill='#fff' stroke='#2d3748' stroke-width='2'/><text x='50' y='105' font-size='14' text-anchor='middle'>G</text><circle cx='150' cy='50' r='15' fill='#fff' stroke='#2d3748' stroke-width='2'/><text x='150' y='55' font-size='14' text-anchor='middle'>A</text><rect x='230' y='80' width='40' height='40' fill='#fff' stroke='#2d3748' stroke-width='2'/><text x='250' y='105' font-size='14' text-anchor='middle'>R</text><path d='M 250 80 L 250 20 L 300 20 L 300 100 L 270 100' fill='none' stroke='#2d3748' stroke-width='2'/><circle cx='300' cy='60' r='15' fill='#fff' stroke='#2d3748' stroke-width='2'/><text x='300' y='65' font-size='14' text-anchor='middle'>V</text></svg></div></div>
+                </div>
+            </div>`
+        },
+        "tableau": {
+            title: "12. Exploiter le tableau périodique (Atomes)",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Métropole - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">Un clou est constitué principalement d'atomes de Fer. <br>L'extrait de la classification périodique donne les informations suivantes pour le fer :<br>
+                <div class='svg-container' style='display:inline-block; border:2px solid black; padding: 10px; margin: 10px;'><div style='font-size:20px; font-weight:bold;'>26</div><div style='font-size:24px; color:var(--primary); font-weight:bold;'>Fe</div><div style='font-size:14px;'>Fer</div><div style='font-size:16px;'>56</div></div>
+                <br><strong>Question :</strong> Donner la composition précise d'un atome de fer (nombre de protons, d'électrons et de neutrons) en justifiant votre démarche.</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;"><strong>1. Les protons :</strong> Le numéro atomique (le petit nombre en haut) est Z = 26. Le noyau contient donc <strong>26 protons</strong>.<br><br><strong>2. Les électrons :</strong> Un atome est électriquement neutre. Il y a donc exactement le même nombre d'électrons (négatifs) que de protons (positifs) : <strong>26 électrons</strong>.<br><br><strong>3. Les neutrons :</strong> Le nombre de masse (le grand nombre en bas) A = 56 représente la totalité des particules dans le noyau (protons + neutrons). Pour trouver les neutrons, on fait la soustraction : A - Z.<br>Calcul : 56 - 26 = <strong>30 neutrons</strong>.</div>
+                </div>
+            </div>`
+        },
+        "ions": {
+            title: "13. Déterminer la formule d'un ion (Schéma)",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Asie - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">Dans la nature, pour acquérir une structure stable, l'atome de chlore (Z=17) <strong>gagne 1 électron</strong> pour se transformer en ion chlorure.<br>
+                <div class='svg-container'><svg width='350' height='100'><circle cx='60' cy='50' r='25' fill='#e2e8f0' stroke='#4a5568'/><text x='60' y='55' text-anchor='middle' font-weight='bold'>Cl</text><text x='140' y='55' text-anchor='middle'>+ 1 électron (-)</text><text x='190' y='55' text-anchor='middle'>&rarr;</text><circle cx='250' cy='50' r='25' fill='#c6f6d5' stroke='#38a169'/><text x='250' y='55' text-anchor='middle' font-weight='bold'>Ion</text></svg></div><br>
+                <strong>Question :</strong> Déterminer le nombre de protons et d'électrons de l'ion formé, puis en déduire sa formule chimique.</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;"><strong>1. Bilan des particules de l'ion :</strong><br>- Les protons sont dans le noyau, ils ne bougent jamais lors d'une réaction chimique ! Il y a donc toujours <strong>17 protons (+)</strong>.<br>- L'atome neutre de départ avait 17 électrons. Puisqu'il gagne 1 électron, l'ion possède 17 + 1 = <strong>18 électrons (-)</strong>.<br><br><strong>2. Formule de l'ion :</strong><br>Le bilan des charges est : 17(+) et 18(-). L'ion a globalement une charge négative en trop.<br>Il s'écrit donc avec un signe 'moins' en exposant : <strong>Cl<sup>-</sup></strong>.</div>
+                </div>
+            </div>`
+        },
+        "chronophotographie": {
+            title: "14. Analyser une chronophotographie",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Centres Étrangers - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">On lâche une bille d'acier sans vitesse initiale. Une chronophotographie de la chute de la bille est réalisée. L'intervalle de temps entre deux positions successives de la bille est constant (40 ms).<br><div class='svg-container'><svg width='100' height='200'><circle cx='50' cy='20' r='5' fill='#2d3748'/><text x='65' y='25' font-size='10'>t=0</text><circle cx='50' cy='40' r='5' fill='#2d3748'/><circle cx='50' cy='80' r='5' fill='#2d3748'/><circle cx='50' cy='140' r='5' fill='#2d3748'/><circle cx='50' cy='220' r='5' fill='#2d3748'/><line x1='50' y1='20' x2='50' y2='220' stroke='gray' stroke-dasharray='2' style='z-index:-1'/></svg></div><br><strong>Question :</strong> En justifiant votre réponse à l'aide de l'image, caractériser le mouvement de la bille (trajectoire et vitesse).</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;">Pour caractériser un mouvement, il faut donner deux informations :<br><br><strong>1. La trajectoire :</strong> Les positions de la bille sont alignées sur une droite verticale. Le mouvement est donc <strong>rectiligne</strong>.<br><br><strong>2. La variation de vitesse :</strong> L'intervalle de temps entre chaque prise de vue est constant (40 ms). On observe que la distance entre les positions de la bille est de plus en plus grande. La bille parcourt donc une plus grande distance pendant la même durée : sa vitesse augmente. Le mouvement est donc <strong>accéléré</strong>.<br><br><strong>Conclusion :</strong> Le mouvement est <strong>rectiligne accéléré</strong>.</div>
+                </div>
+            </div>`
+        },
+        "proportion": {
+            title: "15. Calculer une proportion ou un pourcentage",
+            html: `
+            <div class="box dnb-box">
+                <div class="box-header dnb-header"><span>🎓 Extrait d'un sujet du Brevet (DNB)</span></div>
+                <div class="dnb-source">Source : DNB Asie - Série Générale</div>
+                <div style="font-size: 16px; line-height: 1.5;">L'air que nous respirons est un mélange de gaz. Un volume de 1000 Litres d'air sec contient environ :<br>- 780 Litres de diazote<br>- 210 Litres de dioxygène<br>- 10 Litres d'autres gaz (argon, dioxyde de carbone...).<br><br><strong>Question :</strong> Calculer le pourcentage de volume occupé par le dioxygène dans l'air. Ce résultat est-il cohérent avec les connaissances du cours ?</div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="action-btn btn-correction" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">Dévoiler la correction type Brevet</button>
+                    <div class="dnb-correction-area" style="line-height: 1.5; text-align: left;"><strong>1. Calcul du pourcentage :</strong><br>Le pourcentage est : (Valeur partielle / Valeur Totale) × 100.<br>Volume de dioxygène = 210 L.<br>Volume total d'air = 1000 L.<br>Pourcentage = (210 / 1000) × 100 = 0,21 × 100 = <strong>21 %</strong>.<br><br><strong>2. Cohérence :</strong><br>Oui, ce résultat est parfaitement cohérent. Le cours nous apprend que l'air est composé à environ <strong>21% de dioxygène (O<sub>2</sub>)</strong> et 78% de diazote (N<sub>2</sub>).</div>
+                </div>
+            </div>`
+        }
+    };
+
+    function loadSkill() {
+        const skillKey = document.getElementById('skillSelect').value;
+        const skill = skillsData[skillKey];
+        if(!skillKey) return;
+        document.getElementById('skillDisplayArea').style.display = 'block';
+        document.getElementById('skillTitle').textContent = skill.title;
+        document.getElementById('skillContentArea').innerHTML = skill.html;
+    }
+
+
+    // ----- LOGIQUE DU QCM (10 CHAPITRES INTACTS) -----
+    const quizData = {
+        "chap_univers": {
+            title: "L'Univers à grande échelle",
+            questions: [
+                { q: "Qu'est-ce qu'une galaxie ?", opts: ["Un regroupement d'étoiles, de gaz et de poussières", "Un ensemble de planètes uniquement", "Une étoile géante", "Un nuage gazeux dans l'atmosphère terrestre"], ans: 0 },
+                { q: "Dans quelle galaxie se trouve notre système solaire ?", opts: ["La galaxie d'Andromède", "La Voie Lactée", "La galaxie du Sombrero", "Le Nuage de Magellan"], ans: 1 },
+                { q: "Que vaut approximativement une unité astronomique (ua) ?", opts: ["150 millions de km", "300 000 km", "10 milliards de km", "9,5 x 10^12 km"], ans: 0 },
+                { q: "Quelle unité est la plus adaptée pour mesurer la distance entre deux galaxies ?", opts: ["Le kilomètre", "L'unité astronomique", "L'année-lumière", "Le mètre"], ans: 2 },
+                { q: "L'année-lumière (al) est une unité de...", opts: ["Temps", "Vitesse", "Distance", "Luminosité"], ans: 2 },
+                { q: "La vitesse de la lumière dans le vide est d'environ :", opts: ["300 km/s", "3 000 km/s", "300 000 km/s", "3 000 000 km/s"], ans: 2 },
+                { q: "Pourquoi pouvons-nous voir la Lune la nuit ?", opts: ["Parce qu'elle produit sa propre lumière", "Parce qu'elle diffuse la lumière du Soleil", "Parce qu'elle réfléchit la lumière de la Terre", "Parce qu'elle est une étoile"], ans: 1 },
+                { q: "Si on observe une galaxie située à 10 millions d'années-lumière, on la voit...", opts: ["Telle qu'elle est aujourd'hui", "Telle qu'elle sera dans le futur", "Telle qu'elle était il y a 10 millions d'années", "En temps réel"], ans: 2 },
+                { q: "Comment s'écrit la distance 150 000 000 en notation scientifique ?", opts: ["15 x 10^7", "1,5 x 10^8", "0,15 x 10^9", "1,5 x 10^7"], ans: 1 },
+                { q: "Quel est l'ordre de grandeur de 1,25 x 10^7 ?", opts: ["10^6", "10^7", "10^8", "10^9"], ans: 1 },
+                { q: "La lumière peut-elle se propager dans le vide ?", opts: ["Oui", "Non", "Seulement si elle est très intense", "Seulement la lumière blanche"], ans: 0 },
+                { q: "Une année-lumière correspond environ à la distance parcourue par la lumière en :", opts: ["Un an", "Un mois", "Un jour", "Une seconde"], ans: 0 }
+            ]
+        },
+        "chap_forces": {
+            title: "Forces et interactions",
+            questions: [
+                { q: "Qu'est-ce qu'une interaction mécanique ?", opts: ["L'action exercée par un objet sur un autre objet", "Le mouvement d'un objet seul", "La vitesse d'un corps", "L'énergie interne d'une molécule"], ans: 0 },
+                { q: "Quels sont les deux grands types d'interactions ?", opts: ["Interactions de contact et interactions à distance", "Interactions rapides et interactions lentes", "Interactions visibles et invisibles", "Interactions fortes et faibles uniquement"], ans: 0 },
+                { q: "Par quel outil mathématique modélise-t-on une force ?", opts: ["Un segment fléché (ou vecteur)", "Un simple nombre", "Une courbe géométrique", "Un cercle"], ans: 0 },
+                { q: "Quelle est l'unité légale de la valeur d'une force ?", opts: ["Le Joule (J)", "Le Newton (N)", "Le Kilogramme (kg)", "Le Watt (W)"], ans: 1 },
+                { q: "Avec quel appareil mesure-t-on la valeur d'une force ?", opts: ["Une balance", "Un thermomètre", "Un dynamomètre", "Un voltmètre"], ans: 2 },
+                { q: "Quelles sont les quatre caractéristiques d'une force ?", opts: ["Point d'application, direction, sens, valeur", "Masse, volume, vitesse, position", "Début, fin, trajectoire, durée", "Couleur, forme, poids, hauteur"], ans: 0 },
+                { q: "L'action d'un aimant sur une bille de fer est une interaction de type :", opts: ["De contact", "À distance", "Nulle", "Uniquement gravitationnelle"], ans: 1 },
+                { q: "L'action du pied d'un joueur qui frappe un ballon est une interaction de type :", opts: ["À distance", "Électromagnétique", "De contact", "Gravitationnelle"], ans: 2 },
+                { q: "D'après le principe des actions réciproques, si un corps A exerce une force sur un corps B, alors :", opts: ["Le corps B n'exerce aucune force en retour", "Le corps B exerce instantanément une force opposée de même valeur sur A", "Le corps B s'éloigne sans interagir", "La force s'annule immédiatement"], ans: 1 },
+                { 
+                  q: "Sur ce schéma, deux forces opposées s'exercent sur la bille. Si elle reste immobile, que peut-on dire de leurs valeurs ?", 
+                  svg: `<svg width="150" height="80" viewBox="0 0 150 80"><circle cx="75" cy="40" r="12" fill="#4a5568"/><line x1="75" y1="40" x2="25" y2="40" stroke="red" stroke-width="3" marker-end="url(#arrowLeft)"/><line x1="75" y1="40" x2="125" y2="40" stroke="red" stroke-width="3" marker-end="url(#arrowRight)"/><defs><marker id="arrowLeft" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 10 0 L 0 5 L 10 10 z" fill="red" /></marker><marker id="arrowRight" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="red" /></marker></defs><text x="20" y="30" fill="red" font-size="12">F1</text><text x="120" y="30" fill="red" font-size="12">F2</text></svg>`,
+                  opts: ["F1 est supérieure à F2", "F2 est supérieure à F1", "Leurs valeurs sont rigoureusement égales", "On ne peut pas savoir"], 
+                  ans: 2 
+                },
+                { q: "Si la trajectoire d'un objet est modifiée ou qu'il est déformé, c'est l'effet :", opts: ["D'une force (ou action mécanique)", "De sa seule masse", "Du vide", "De sa température"], ans: 0 }
+            ]
+        },
+        "chap_energie": {
+            title: "Énergie cinétique et mécanique",
+            questions: [
+                { q: "De quoi dépend l'énergie cinétique d'un objet ?", opts: ["Uniquement de sa masse", "Uniquement de sa vitesse", "De sa masse et de sa vitesse", "De son altitude"], ans: 2 },
+                { q: "Quelle est la formule mathématique de l'énergie cinétique ?", opts: ["Ec = m × v", "Ec = 1/2 × m × v²", "Ec = m × g × h", "Ec = v² / m"], ans: 1 },
+                { q: "De quoi dépend l'énergie potentielle de position d'un objet ?", opts: ["De son altitude", "De sa vitesse", "De sa température", "De sa couleur"], ans: 0 },
+                { q: "Comment se calcule l'énergie mécanique ?", opts: ["Em = Ec - Ep", "Em = Ec × Ep", "Em = Ec + Ep", "Em = Ep / Ec"], ans: 2 },
+                { q: "Lors du freinage d'une voiture, l'énergie cinétique est principalement convertie en :", opts: ["Énergie lumineuse", "Énergie chimique", "Énergie potentielle", "Énergie thermique"], ans: 3 },
+                { q: "Si la vitesse d'un véhicule est doublée, son énergie cinétique est...", opts: ["Doublée", "Triplée", "Multipliée par 4", "Divisée par 2"], ans: 2 },
+                { q: "Si la vitesse est doublée, la distance de freinage est...", opts: ["Multipliée par 4", "Doublée", "Inchangée", "Divisée par 4"], ans: 0 },
+                { q: "Dans le système international, en quelle unité s'exprime l'énergie cinétique ?", opts: ["Le Watt", "Le Newton", "Le Joule", "Le Kilogramme"], ans: 2 },
+                { q: "Lors d'un choc automobile, l'énergie cinétique est convertie en...", opts: ["Énergie thermique et de déformation", "Énergie lumineuse", "Énergie électrique", "Énergie potentielle"], ans: 0 },
+                { q: "Un objet de masse m = 1000 kg roule à une vitesse v = 10 m/s. Son énergie cinétique est :", opts: ["5 000 J", "10 000 J", "50 000 J", "100 000 J"], ans: 2 },
+                { q: "Au cours d'une chute libre (sans frottement), l'énergie mécanique de l'objet...", opts: ["Augmente", "Diminue", "Se conserve (reste constante)", "S'annule"], ans: 2 },
+                { 
+                  q: "Lors de la chute de cet objet modélisé ci-dessous, que devient son énergie de position ?", 
+                  svg: `<svg width="120" height="90" viewBox="0 0 120 90"><circle cx="20" cy="15" r="8" fill="gray"/><path d="M 20 23 Q 60 80 100 70" stroke="black" stroke-width="2" fill="none" stroke-dasharray="4"/><circle cx="60" cy="52" r="8" fill="gray" opacity="0.6"/><circle cx="100" cy="62" r="8" fill="gray" opacity="0.3"/></svg>`,
+                  opts: ["Elle diminue et se convertit en énergie cinétique", "Elle augmente", "Elle reste constante", "Elle disparaît totalement"], 
+                  ans: 0 
+                }
+            ]
+        },
+        "chap_elec": {
+            title: "Puissance et énergie électrique",
+            questions: [
+                { q: "Comment peut-on créer une tension alternative ?", opts: ["Avec une pile plate", "Avec le mouvement d'un aimant près d'une bobine", "En chauffant un fil de cuivre", "En frottant une règle en plastique"], ans: 1 },
+                { q: "Quel dispositif convertit l'énergie cinétique en énergie électrique ?", opts: ["Un moteur", "Un résistor", "Un alternateur", "Une lampe"], ans: 2 },
+                { q: "Quelle autre forme d'énergie est inévitablement produite par un alternateur ?", opts: ["Énergie chimique", "Énergie nucléaire", "Énergie lumineuse", "Énergie thermique"], ans: 3 },
+                { q: "Dans le système international, quelle est l'unité de la puissance électrique ?", opts: ["Le Volt", "L'Ampère", "Le Watt", "Le Joule"], ans: 2 },
+                { q: "Quelle est l'unité légale (SI) de l'énergie électrique ?", opts: ["Le kilowattheure (kWh)", "Le Joule (J)", "Le Watt (W)", "L'Ampère (A)"], ans: 1 },
+                { q: "Quelle est la relation mathématique liant l'énergie (E), la puissance (P) et le temps (t) ?", opts: ["E = P / t", "P = E × t", "E = P × t", "t = P × E"], ans: 2 },
+                { q: "Un appareil de puissance 2000 W fonctionne pendant 2 heures. Quelle énergie en kWh consomme-t-il ?", opts: ["1000 kWh", "4000 kWh", "4 kWh", "2 kWh"], ans: 2 },
+                { q: "Un nœud est un point de connexion relié à au moins :", opts: ["1 fil", "2 fils", "3 fils", "4 fils"], ans: 1 },
+                { 
+                  q: "Comment doit-on brancher cet appareil de mesure dans un circuit pour relever l'intensité ?", 
+                  svg: `<svg width="160" height="80" viewBox="0 0 160 80"><line x1="10" y1="40" x2="50" y2="40" stroke="black" stroke-width="2"/><circle cx="80" cy="40" r="25" fill="white" stroke="black" stroke-width="2"/><text x="80" y="48" font-family="Arial" font-size="20" text-anchor="middle">A</text><text x="40" y="25" font-family="Arial" font-size="12" fill="red">10 A</text><text x="115" y="25" font-family="Arial" font-size="15">-</text><line x1="110" y1="40" x2="150" y2="40" stroke="black" stroke-width="2"/></svg>`,
+                  opts: ["En parallèle (dérivation)", "En série", "À l'extérieur du circuit", "Peu importe"], 
+                  ans: 1 
+                },
+                { q: "Une éolienne utilise quelle source d'énergie primaire ?", opts: ["L'énergie rayonnante du Soleil", "L'énergie thermique de la Terre", "L'énergie cinétique du vent", "L'énergie potentielle de l'eau"], ans: 2 },
+                { q: "Quel est le symbole normalisé de l'alternateur ?", opts: ["Un cercle avec une croix", "Un cercle avec un 'G' ou une vague", "Un rectangle", "Un triangle"], ans: 1 }
+            ]
+        },
+        "chap_ions": {
+            title: "Les ions",
+            questions: [
+                { q: "Qu'est-ce qu'un ion monoatomique ?", opts: ["Un ion formé de plusieurs atomes", "Un ion formé à partir d'un seul atome", "Un ion qui n'a pas de charge", "Un ion neutre"], ans: 1 },
+                { q: "Si un atome gagne un ou plusieurs électrons, il devient :", opts: ["Un ion positif", "Un ion négatif", "Un nouvel atome", "Une molécule"], ans: 1 },
+                { q: "L'ion sodium (Na+) provient d'un atome qui a...", opts: ["Gagné 1 électron", "Perdu 1 électron", "Gagné 1 proton", "Perdu 1 proton"], ans: 1 },
+                { q: "L'atome d'aluminium a 13 protons. L'ion aluminium Al3+ possède :", opts: ["10 électrons", "13 électrons", "16 électrons", "10 protons"], ans: 0 },
+                { q: "L'ion sulfate est considéré comme un ion...", opts: ["Monoatomique", "Polyatomique", "Gazeux", "Neutre"], ans: 1 },
+                { q: "Une solution aqueuse est conductrice de l'électricité si :", opts: ["Elle contient du sucre", "Elle contient uniquement des molécules", "Elle contient des ions", "Elle est très froide"], ans: 2 },
+                { q: "Quel est l'autre nom souvent donné à l'hydroxyde de sodium ?", opts: ["L'acide chlorhydrique", "La soude", "L'eau de Javel", "Le vinaigre"], ans: 1 },
+                { q: "Quelle précaution faut-il prendre avec les solutions ioniques concentrées (comme la soude) ?", opts: ["Aucune", "Elles sont corrosives, il faut porter gants et lunettes", "Il faut les chauffer", "Il faut les agiter fortement"], ans: 1 },
+                { q: "Quelle est la particularité d'une solution contenant des ions cuivre II ?", opts: ["Elle est incolore", "Elle est verte", "Elle est bleue", "Elle est rouge"], ans: 2 },
+                { q: "Le symbole de l'ion fluorure est F-. C'est un ion :", opts: ["Monoatomique négatif", "Monoatomique positif", "Polyatomique négatif", "Polyatomique positif"], ans: 0 },
+                { q: "Si la charge globale d'un ion est -2, cela signifie que l'atome ou groupe d'atomes a :", opts: ["Perdu 2 électrons", "Perdu 2 protons", "Gagné 2 électrons", "Gagné 2 protons"], ans: 2 }
+            ]
+        },
+        "chap_ph": {
+            title: "Les acides et les bases",
+            questions: [
+                { q: "Entre quelles valeurs est généralement compris le pH d'une solution aqueuse ?", opts: ["0 et 7", "1 et 100", "0 et 14", "-14 et 14"], ans: 2 },
+                { q: "Quel appareil permet d'obtenir la mesure la plus précise du pH ?", opts: ["Le papier-pH", "Le voltmètre", "Le pH-mètre", "Le thermomètre"], ans: 2 },
+                { q: "Une solution dont le pH est inférieur à 7 est :", opts: ["Neutre", "Basique", "Acide", "Sucrée"], ans: 2 },
+                { q: "Une solution acide contient en majorité quel type d'ions ?", opts: ["Ions hydroxyde (HO-)", "Ions chlorure (Cl-)", "Ions sodium (Na+)", "Ions hydrogène (H+)"], ans: 3 },
+                { q: "Une solution basique contient en majorité quel type d'ions ?", opts: ["Ions hydrogène (H+)", "Ions hydroxyde (HO-)", "Ions fer II (Fe2+)", "Ions cuivre II (Cu2+)"], ans: 1 },
+                { q: "Que se passe-t-il si on ajoute de l'eau à une solution acide (dilution) ?", opts: ["Son pH diminue", "Son pH reste identique", "Son pH augmente (se rapproche de 7)", "La solution devient basique"], ans: 2 },
+                { q: "Quel gaz est produit lors de la réaction entre l'acide chlorhydrique et le fer ?", opts: ["Le dioxyde de carbone", "Le dihydrogène", "Le dioxygène", "Le dichlore"], ans: 1 },
+                { q: "Que donnent un ion hydrogène (H+) et un ion hydroxyde (HO-) qui réagissent ensemble ?", opts: ["Une molécule d'eau (H2O)", "Un atome de fer", "Du gaz toxique", "Rien"], ans: 0 },
+                { 
+                  q: "Sur cette échelle de pH, à quel type de solution correspond la zone colorée en bleu (à droite) ?", 
+                  svg: `<svg width="250" height="50" viewBox="0 0 250 50"><rect x="10" y="10" width="230" height="20" fill="url(#gradpH)"/><defs><linearGradient id="gradpH" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#f56565;stop-opacity:1" /><stop offset="50%" style="stop-color:#48bb78;stop-opacity:1" /><stop offset="100%" style="stop-color:#4299e1;stop-opacity:1" /></linearGradient></defs><text x="10" y="45" font-size="14">0</text><text x="120" y="45" font-size="14" text-anchor="middle">7</text><text x="240" y="45" font-size="14" text-anchor="end">14</text></svg>`,
+                  opts: ["Aux solutions acides", "Aux solutions neutres", "Aux solutions basiques", "Aux solutions gazeuses"], 
+                  ans: 2 
+                },
+                { q: "Pourquoi est-il dangereux de mélanger certains produits acides et basiques concentrés ?", opts: ["Ils peuvent geler", "Ils peuvent produire des gaz toxiques ou des projections", "Ils annulent la gravité", "Ils deviennent radioactifs"], ans: 1 },
+                { q: "Lors de la réaction entre le fer et l'acide, le fer et l'acide sont appelés :", opts: ["Les produits", "Les réactifs", "Les spectateurs", "Les catalyseurs"], ans: 1 }
+            ]
+        },
+        "chap_atome": {
+            title: "La structure de l'atome",
+            questions: [
+                { q: "De quoi est constitué le noyau d'un atome ?", opts: ["D'électrons", "De nucléons (protons et neutrons)", "De molécules", "De vide"], ans: 1 },
+                { q: "Quelle est la charge électrique d'un électron ?", opts: ["Positive", "Neutre", "Négative", "Variable"], ans: 2 },
+                { q: "Quelle est la charge électrique globale d'un atome isolé ?", opts: ["Positive", "Négative", "Totalement neutre", "Dépend de sa taille"], ans: 2 },
+                { q: "Par rapport à la taille de l'atome, la taille de son noyau est environ :", opts: ["100 000 fois plus petite", "100 fois plus petite", "De la même taille", "100 fois plus grande"], ans: 0 },
+                { q: "Comment qualifie-t-on la structure de l'atome puisqu'elle est constituée essentiellement de vide ?", opts: ["Compacte", "Dense", "Lacunaire", "Pleine"], ans: 2 },
+                { q: "Où est concentrée la quasi-totalité de la masse d'un atome ?", opts: ["Dans les électrons", "Dans le noyau", "Dans le vide qui l'entoure", "Répartie uniformément"], ans: 1 },
+                { q: "Que représente le numéro atomique (Z) d'un atome ?", opts: ["Son nombre de neutrons", "Son nombre d'électrons de valence", "Son nombre de protons", "Sa masse totale"], ans: 2 },
+                { 
+                  q: "Sur ce schéma simplifié de l'atome, que représentent les particules bleues situées au centre ?", 
+                  svg: `<svg width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="60" fill="none" stroke="#cbd5e0" stroke-dasharray="4"/><circle cx="75" cy="75" r="15" fill="#4299e1"/><circle cx="15" cy="75" r="4" fill="#f56565"/><circle cx="135" cy="75" r="4" fill="#f56565"/><circle cx="75" cy="15" r="4" fill="#f56565"/><circle cx="75" cy="135" r="4" fill="#f56565"/></svg>`,
+                  opts: ["Les électrons", "Le noyau (protons/neutrons)", "Des atomes plus petits", "Des molécules"], 
+                  ans: 1 
+                },
+                { q: "Quel est le symbole de l'atome de Carbone ?", opts: ["Ca", "Co", "C", "Cr"], ans: 2 },
+                { q: "Un atome de Fer possède 26 protons. Combien d'électrons possède-t-il ?", opts: ["0", "26", "52", "Dépend du nombre de neutrons"], ans: 1 },
+                { q: "Les protons et les neutrons sont regroupés sous le nom de :", opts: ["Électrons", "Nucléons", "Ions", "Molécules"], ans: 1 }
+            ]
+        },
+        "chap_poids": {
+            title: "Poids et gravitation",
+            questions: [
+                { q: "Avec quel appareil mesure-t-on la masse d'un objet ?", opts: ["Un dynamomètre", "Un voltmètre", "Une balance", "Une éprouvette"], ans: 2 },
+                { q: "Avec quel appareil mesure-t-on le poids d'un objet ?", opts: ["Un dynamomètre", "Une balance", "Un mètre", "Un chronomètre"], ans: 0 },
+                { q: "Quelle est l'unité légale (SI) de la masse ?", opts: ["Le Newton (N)", "Le Kilogramme (kg)", "Le Joule (J)", "Le Gramme (g)"], ans: 1 },
+                { q: "Quelle est l'unité légale (SI) du poids ?", opts: ["Le Gramme (g)", "Le Kilogramme (kg)", "Le Newton (N)", "Le Watt (W)"], ans: 2 },
+                { q: "Quelle relation mathématique relie le poids (P) et la masse (m) ?", opts: ["P = m + g", "P = m / g", "m = P × g", "P = m × g"], ans: 3 },
+                { q: "Sur Terre, l'intensité de la pesanteur (g) vaut environ :", opts: ["1,6 N/kg", "9,8 N/kg", "100 N/kg", "0 N/kg"], ans: 1 },
+                { q: "Si un astronaute va sur la Lune, sa masse va-t-elle changer ?", opts: ["Oui, elle sera plus petite", "Oui, elle sera plus grande", "Non, la masse est invariable", "Elle devient nulle"], ans: 2 },
+                { q: "Si un astronaute va sur la Lune, son poids va-t-il changer ?", opts: ["Non, le poids est invariable", "Oui, il sera divisé par environ 6", "Oui, il sera multiplié par 6", "Il devient nul"], ans: 1 },
+                { 
+                  q: "Comment représente-t-on correctement le vecteur poids de cet objet ?", 
+                  svg: `<svg width="120" height="120" viewBox="0 0 120 120"><rect x="40" y="40" width="40" height="40" fill="#a0aec0"/><circle cx="60" cy="60" r="3" fill="red"/><line x1="60" y1="60" x2="60" y2="100" stroke="red" stroke-width="3" marker-end="url(#arrow)"/><defs><marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="red" /></marker></defs></svg>`,
+                  opts: ["Par une flèche verticale dirigée vers le haut", "Par une flèche horizontale", "Par une flèche verticale dirigée vers le bas", "Par un cercle"], 
+                  ans: 2 
+                },
+                { q: "L'interaction gravitationnelle entre deux objets massiques est toujours :", opts: ["Répulsive", "Attractive", "Nulle s'ils ne se touchent pas", "Dépend de leur charge électrique"], ans: 1 },
+                { q: "Le poids d'un objet sur Terre est en réalité dû à :", opts: ["L'attraction gravitationnelle exercée par la Terre sur l'objet", "La pression de l'air", "Le champ magnétique terrestre", "La rotation de la Terre"], ans: 0 }
+            ]
+        },
+        "chap_mouvement": {
+            title: "Description du mouvement",
+            questions: [
+                { q: "Quelle est la formule permettant de calculer une vitesse ?", opts: ["v = d × t", "v = d / t", "v = t / d", "v = d + t"], ans: 1 },
+                { q: "Dans le système international, en quelle unité s'exprime la vitesse ?", opts: ["En kilomètre par heure (km/h)", "En mètre par seconde (m/s)", "En kilomètre par seconde (km/s)", "En seconde par mètre (s/m)"], ans: 1 },
+                { q: "Comment passe-t-on d'une vitesse en m/s à une vitesse en km/h ?", opts: ["On divise par 3,6", "On multiplie par 1000", "On multiplie par 3,6", "On divise par 10"], ans: 2 },
+                { q: "Si la trajectoire d'un objet est une droite, son mouvement est dit :", opts: ["Circulaire", "Curviligne", "Rectiligne", "Uniforme"], ans: 2 },
+                { q: "Si la valeur de la vitesse d'un objet reste constante, son mouvement est qualifié de :", opts: ["Uniforme", "Accéléré", "Ralenti", "Immobile"], ans: 0 },
+                { q: "Si un objet parcourt des distances de plus en plus grandes pendant des durées égales, son mouvement est :", opts: ["Ralenti", "Uniforme", "Accéléré", "Constant"], ans: 2 },
+                { q: "Pourquoi dit-on que le mouvement est relatif ?", opts: ["Car il dépend de la vitesse de la lumière", "Car il dépend du référentiel choisi pour l'étudier", "Car on ne peut jamais être sûr d'avancer", "Car il dépend de la masse de l'objet"], ans: 1 },
+                { q: "Un passager assis dans un train qui roule est :", opts: ["En mouvement par rapport au sol, immobile par rapport au train", "Immobile par rapport au sol et au train", "En mouvement par rapport au train", "Toujours immobile"], ans: 0 },
+                { 
+                  q: "D'après cette chronophotographie (intervalles de temps égaux), comment est le mouvement ?", 
+                  svg: `<svg width="200" height="50" viewBox="0 0 200 50"><circle cx="20" cy="25" r="5" fill="#4a5568"/><circle cx="50" cy="25" r="5" fill="#4a5568"/><circle cx="80" cy="25" r="5" fill="#4a5568"/><circle cx="110" cy="25" r="5" fill="#4a5568"/><circle cx="140" cy="25" r="5" fill="#4a5568"/></svg>`,
+                  opts: ["Uniforme", "Accéléré", "Ralenti (ou décéléré)", "Circulaire"], 
+                  ans: 0 
+                },
+                { 
+                  q: "D'après cette chronophotographie (intervalles de temps égaux), comment est le mouvement ?", 
+                  svg: `<svg width="200" height="50" viewBox="0 0 200 50"><circle cx="20" cy="25" r="5" fill="#4a5568"/><circle cx="35" cy="25" r="5" fill="#4a5568"/><circle cx="65" cy="25" r="5" fill="#4a5568"/><circle cx="110" cy="25" r="5" fill="#4a5568"/><circle cx="170" cy="25" r="5" fill="#4a5568"/></svg>`,
+                  opts: ["Uniforme", "Ralenti", "Accéléré", "Rectiligne immobile"], 
+                  ans: 2 
+                },
+                { q: "Le référentiel géocentrique est le plus adapté pour étudier le mouvement :", opts: ["D'une voiture sur autoroute", "De la Lune autour de la Terre", "De la Terre autour du Soleil", "D'un ascenseur"], ans: 1 }
+            ]
+        },
+        "chap_signaux": {
+            title: "Les signaux sonores et lumineux",
+            questions: [
+                { q: "Quelle est la valeur de la vitesse de la lumière dans le vide (et dans l'air) ?", opts: ["340 m/s", "300 000 km/h", "300 000 km/s", "150 000 000 km"], ans: 2 },
+                { q: "Quelle est la valeur approximative de la vitesse du son dans l'air ?", opts: ["340 m/s", "3 000 km/s", "300 000 km/s", "1 500 m/s"], ans: 0 },
+                { q: "Le son peut-il se propager dans le vide ?", opts: ["Oui, comme la lumière", "Non, il a besoin d'un milieu matériel (air, eau, solide)", "Seulement si le son est très fort", "Seulement dans l'espace"], ans: 1 },
+                { q: "En quelle unité s'exprime la fréquence d'un signal sonore ?", opts: ["En Décibel (dB)", "En Seconde (s)", "En Hertz (Hz)", "En Mètre (m)"], ans: 2 },
+                { q: "Quel est le domaine des fréquences audibles par l'être humain ?", opts: ["De 0 à 20 Hz", "De 20 Hz à 20 000 Hz", "Au-delà de 20 000 Hz", "Il n'y a pas de limite"], ans: 1 },
+                { q: "Comment appelle-t-on un son dont la fréquence est supérieure à 20 000 Hz ?", opts: ["Un infrason", "Un son grave", "Un ultrason", "Un bruit parasite"], ans: 2 },
+                { q: "Quelle unité utilise-t-on couramment pour évaluer le niveau d'intensité sonore (le \"volume\" ou le danger) ?", opts: ["Le Hertz (Hz)", "Le Décibel (dB)", "Le Watt (W)", "Le Volt (V)"], ans: 1 },
+                { 
+                  q: "Sur cet oscillogramme, quelle grandeur correspond à l'écartement mesuré par la double flèche rouge ?", 
+                  svg: `<svg width="200" height="100" viewBox="0 0 200 100"><path d="M 0 50 Q 25 0 50 50 T 100 50 T 150 50 T 200 50" fill="none" stroke="#2b6cb0" stroke-width="2"/><line x1="25" y1="20" x2="125" y2="20" stroke="red" stroke-width="2" marker-start="url(#arrowRedRev)" marker-end="url(#arrowRed)"/><defs><marker id="arrowRed" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="red" /></marker><marker id="arrowRedRev" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 10 0 L 0 5 L 10 10 z" fill="red" /></marker></defs></svg>`,
+                  opts: ["La fréquence", "La période", "L'amplitude", "La vitesse"], 
+                  ans: 1 
+                },
+                { q: "Lors d'un orage, on perçoit l'éclair avant d'entendre le tonnerre. Pourquoi ?", opts: ["Le son est émis après la lumière", "La lumière voyage beaucoup plus vite que le son", "Le son est ralenti par la pluie", "Nos yeux réagissent plus vite que nos oreilles"], ans: 1 },
+                { q: "Un signal périodique est un signal qui :", opts: ["Varie au hasard", "Ne dure qu'un instant", "Se reproduit identique à lui-même à intervalles de temps réguliers", "S'atténue avec la distance"], ans: 2 },
+                { q: "Le sonar d'un sous-marin utilise quel principe pour repérer les obstacles ?", opts: ["L'émission de lumière", "L'émission d'ondes radio", "L'émission et la réflexion (écho) d'un signal sonore", "Le champ magnétique"], ans: 2 }
+            ]
+        }
+    };
+
+    let currentQuestions = [];
+    let userAnswers = {};
+
+    window.onload = () => {
+        const select = document.getElementById('chapterSelect');
+        select.innerHTML = '<option value="">-- Choisir un chapitre --</option>';
+        for (const [key, chap] of Object.entries(quizData)) {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = chap.title;
+            select.appendChild(option);
+        }
+    };
+
+    function shuffleArray(array) {
+        let arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function startQuiz() {
+        const chapterKey = document.getElementById('chapterSelect').value;
+        if (!chapterKey) return;
+        const chapter = quizData[chapterKey];
+        
+        document.getElementById('setupArea').style.display = 'none';
+        document.getElementById('quizArea').style.display = 'block';
+        document.getElementById('quizTitle').textContent = chapter.title;
+        document.getElementById('scoreArea').style.display = 'none';
+        document.getElementById('valBtn').style.display = 'inline-block';
+        
+        let allQuestions = shuffleArray(chapter.questions);
+        currentQuestions = allQuestions.slice(0, 10);
+        userAnswers = {};
+
+        renderQuestions();
+    }
+
+    function renderQuestions() {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = '';
+
+        currentQuestions.forEach((qObj, qIndex) => {
+            const block = document.createElement('div');
+            block.className = 'question-block';
+            
+            const title = document.createElement('div');
+            title.className = 'question-text';
+            title.textContent = `Q${qIndex + 1}. ${qObj.q}`;
+            block.appendChild(title);
+
+            if (qObj.svg) {
+                const svgContainer = document.createElement('div');
+                svgContainer.className = 'svg-container';
+                svgContainer.innerHTML = qObj.svg;
+                block.appendChild(svgContainer);
+            }
+
+            const optionsGrid = document.createElement('div');
+            optionsGrid.className = 'options-grid';
+            
+            let optionsWithIndex = qObj.opts.map((opt, i) => ({ text: opt, originalIndex: i }));
+            optionsWithIndex = shuffleArray(optionsWithIndex);
+
+            optionsWithIndex.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt.text;
+                // Add unique ID for easier targeting during validation
+                btn.id = `btn_${qIndex}_${opt.originalIndex}`;
+                btn.onclick = () => selectOption(qIndex, opt.originalIndex, btn);
+                
+                optionsGrid.appendChild(btn);
+            });
+
+            block.appendChild(optionsGrid);
+            container.appendChild(block);
+        });
+    }
+
+    function selectOption(qIndex, originalIndex, btnElement) {
+        userAnswers[qIndex] = originalIndex;
+        const siblings = btnElement.parentElement.children;
+        for(let btn of siblings) {
+            btn.classList.remove('selected');
+        }
+        btnElement.classList.add('selected');
+    }
+
+    function validateQuiz() {
+        if (Object.keys(userAnswers).length < currentQuestions.length) {
+            alert("Veuillez répondre à toutes les questions avant de valider l'exercice.");
+            return;
+        }
+
+        let score = 0;
+        
+        currentQuestions.forEach((q, index) => {
+            const correctIndex = q.ans;
+            const chosenIndex = userAnswers[index];
+            
+            // On désactive tous les boutons et on applique les couleurs
+            for(let i=0; i<4; i++) {
+                let btn = document.getElementById(`btn_${index}_${i}`);
+                if(btn) {
+                    btn.disabled = true;
+                    if(i === correctIndex) {
+                        btn.classList.add('correct');
+                    } else if(i === chosenIndex && chosenIndex !== correctIndex) {
+                        btn.classList.add('wrong');
+                    }
+                }
+            }
+
+            if (chosenIndex === correctIndex) score++;
+        });
+
+        document.getElementById('valBtn').style.display = 'none';
+        const scoreArea = document.getElementById('scoreArea');
+        scoreArea.style.display = 'block';
+        scoreArea.textContent = `Évaluation terminée — Score : ${score} / ${currentQuestions.length}`;
+    }
+
+    function resetApp() {
+        document.getElementById('setupArea').style.display = 'flex';
+        document.getElementById('quizArea').style.display = 'none';
+        document.getElementById('chapterSelect').value = '';
+    }
+</script>
+
+</body>
+</html>
