@@ -15,9 +15,6 @@
             --method-bg: #feebc8;
             --correct: #38a169;
             --correct-bg: #f0fff4;
-            --mission: #e6fffa;
-            --mission-border: #319795;
-            --mission-text: #234e52;
         }
 
         * { box-sizing: border-box; }
@@ -107,7 +104,6 @@
 
         .doc-title { font-weight: bold; color: var(--primary); margin-bottom: 10px; font-size: 15px;}
 
-        /* NOUVEAU BLOC MISSION (LA QUESTION) */
         .mission-box {
             background: #ebf8ff;
             border: 2px solid #90cdf4;
@@ -195,16 +191,21 @@
         <label for="taskSelect" style="font-size: 15px;"><strong>Sélectionnez un sujet :</strong></label>
         <select id="taskSelect" onchange="loadTask()">
             <option value="">-- Parcourir les sujets --</option>
-            <option value="t1">1. Sécurité Routière (Distance d'arrêt)</option>
-            <option value="t2">2. Électricité (Installation d'un radiateur)</option>
-            <option value="t3">3. Chimie (Le mystère de l'eau polluée)</option>
-            <option value="t4">4. Signaux (Le sonar du sous-marin)</option>
-            <option value="t5">5. Mécanique (Le saut en parachute)</option>
-            <option value="t6">6. Énergie (Chute et conservation de l'énergie)</option>
-            <option value="t7">7. Chimie (Gestion du pH d'une piscine)</option>
-            <option value="t8">8. Électricité (Protection par une résistance)</option>
-            <option value="t9">9. Signaux (Communication Terre-Mars)</option>
-            <option value="t10">10. Chimie (Bilan carbone d'un chauffage)</option>
+            <option value="t1">1. Mécanique : L'obstacle inattendu sur la route</option>
+            <option value="t2">2. Électricité : L'installation du radiateur (Disjoncteur)</option>
+            <option value="t3">3. Chimie : L'enquête sur l'eau polluée (Ions)</option>
+            <option value="t4">4. Signaux : Le sonar du navire (Profondeur)</option>
+            <option value="t5">5. Mécanique : Le saut en parachute (Forces)</option>
+            <option value="t6">6. Énergie : Le plongeon et l'énergie mécanique</option>
+            <option value="t7">7. Chimie : L'entretien du pH d'une piscine</option>
+            <option value="t8">8. Électricité : La résistance de protection d'une DEL</option>
+            <option value="t9">9. Signaux : Le temps de communication avec Mars</option>
+            <option value="t10">10. Chimie : Le chauffage écologique au biogaz (Équation)</option>
+            <option value="t11">11. Chimie : L'énigme de l'iceberg de sel (Masse Volumique)</option>
+            <option value="t12">12. Mécanique : L'haltérophile sur la Lune (Poids)</option>
+            <option value="t13">13. Énergie : Le coût de la console en veille (Facture)</option>
+            <option value="t14">14. Signaux : L'orage approche-t-il ? (Vitesse du son)</option>
+            <option value="t15">15. Mécanique : Le danger de la vitesse (Énergie cinétique)</option>
         </select>
     </div>
 
@@ -216,89 +217,84 @@
     const tasksData = {
         "t1": {
             title: "Sécurité Routière : L'obstacle inattendu",
-            source: "DNB Métropole - Thème : Mouvements et Interactions",
+            source: "DNB Métropole - Mouvements et Interactions",
             context: "Un conducteur roule sur une route sèche à <strong>90 km/h</strong>. Soudain, un cerf traverse la route à <strong>80 mètres</strong> devant lui. Le conducteur a des réflexes normaux (temps de réaction = 1 seconde).",
             docs: `
                 <div class="doc-box">
                     <div class="doc-title">Document 1 : La distance d'arrêt</div>
                     La distance d'arrêt (D<sub>A</sub>) est la somme de la distance de réaction (D<sub>R</sub>) et de la distance de freinage (D<sub>F</sub>) : <br><br>
                     <span class="math">D<sub>A</sub> = D<sub>R</sub> + D<sub>F</sub></span><br><br>
-                    La distance de réaction se calcule avec la formule : <span class="math">d = v &times; t</span> (attention aux unités !).
+                    La distance de réaction se calcule avec la formule : <span class="math">d = v &times; t</span>.
                 </div>
                 <div class="doc-box">
                     <div class="doc-title">Document 2 : Distance de freinage (route sèche)</div>
                     <div class="table-wrapper">
                         <table>
                             <tr><th>Vitesse (km/h)</th><td>50</td><td>90</td><td>110</td><td>130</td></tr>
-                            <tr><th>Distance de freinage D<sub>F</sub> (m)</th><td>16</td><td>52</td><td>78</td><td>109</td></tr>
+                            <tr><th>Freinage D<sub>F</sub> (m)</th><td>16</td><td>52</td><td>78</td><td>109</td></tr>
                         </table>
                     </div>
                 </div>
             `,
             question: "À l'aide des documents et de vos calculs, déterminez si la voiture percutera l'animal ou si elle s'arrêtera à temps.",
-            method: "Dans une tâche complexe, ne foncez pas sur les calculs. <strong>Structurez votre réponse :</strong><br>1. Énoncez votre objectif : <i>'Je dois calculer la distance d'arrêt totale pour la comparer à 80 m.'</i><br>2. Calculez D<sub>R</sub> : Attention, la vitesse est en km/h et le temps en secondes. Il faut la convertir !<br>3. Trouvez D<sub>F</sub> dans le tableau.<br>4. Calculez D<sub>A</sub> et concluez clairement.",
+            method: "<strong>Structurez votre réponse :</strong><br>1. Énoncez votre objectif : <i>'Je dois calculer la distance d'arrêt totale pour la comparer à 80 m.'</i><br>2. Calculez D<sub>R</sub> : Attention, la vitesse est en km/h et le temps en secondes. Il faut convertir la vitesse !<br>3. Trouvez D<sub>F</sub> dans le tableau.<br>4. Calculez D<sub>A</sub> et concluez.",
             correction: `
                 <strong>1. Analyse du problème :</strong><br>
-                Pour savoir si le véhicule percute le cerf, il faut calculer la Distance d'Arrêt totale (D<sub>A</sub>) et vérifier si elle est inférieure ou supérieure à 80 m.<br><br>
+                Il faut calculer la Distance d'Arrêt totale (D<sub>A</sub>) et vérifier si elle est inférieure ou supérieure à 80 m.<br><br>
                 <strong>2. Calcul de la distance de réaction (D<sub>R</sub>) :</strong><br>
                 On sait que la vitesse est de 90 km/h. Il faut la convertir en m/s :<br>
                 v = 90 / 3,6 = <strong>25 m/s</strong>.<br>
-                Pendant le temps de réaction (t = 1 s), la voiture parcourt :<br>
-                D<sub>R</sub> = v &times; t = 25 &times; 1 = 25 mètres.<br><br>
+                Pendant le temps de réaction (t = 1 s) : D<sub>R</sub> = v &times; t = 25 &times; 1 = 25 mètres.<br><br>
                 <strong>3. Détermination de la distance de freinage (D<sub>F</sub>) :</strong><br>
-                D'après le Document 2, pour une vitesse de 90 km/h sur route sèche, la distance de freinage est D<sub>F</sub> = 52 mètres.<br><br>
+                D'après le Document 2, pour 90 km/h, la distance de freinage est D<sub>F</sub> = 52 mètres.<br><br>
                 <strong>4. Calcul de la distance d'arrêt (D<sub>A</sub>) :</strong><br>
-                D<sub>A</sub> = D<sub>R</sub> + D<sub>F</sub><br>
-                D<sub>A</sub> = 25 + 52 = 77 mètres.<br><br>
+                D<sub>A</sub> = D<sub>R</sub> + D<sub>F</sub> = 25 + 52 = 77 mètres.<br><br>
                 <strong>5. Conclusion :</strong><br>
-                La voiture aura besoin de 77 mètres pour s'arrêter totalement. L'animal se trouvant à 80 mètres, <strong>la voiture s'arrêtera à temps, 3 mètres avant de toucher l'animal.</strong>
+                La voiture aura besoin de 77 mètres pour s'arrêter. L'animal se trouvant à 80 mètres, <strong>la voiture s'arrêtera à temps, 3 mètres avant l'animal.</strong>
             `
         },
         "t2": {
             title: "L'installation du radiateur",
-            source: "DNB Asie - Thème : Énergie et Électricité",
-            context: "Monsieur Dupont souhaite installer un radiateur électrique d'appoint dans son garage. Son disjoncteur principal est calibré pour supporter une intensité maximale de <strong>16 Ampères</strong> avant de couper le courant pour raison de sécurité. <br><br>L'installation électrique actuelle de la pièce comprend déjà un ballon d'eau chaude (2000 W) et un congélateur (1000 W) qui fonctionnent en même temps.",
+            source: "DNB Asie - Énergie et Électricité",
+            context: "Monsieur Dupont souhaite installer un radiateur d'appoint dans son garage. Son disjoncteur principal est calibré pour supporter une intensité maximale de <strong>16 Ampères</strong>. L'installation actuelle comprend déjà un ballon d'eau chaude (2000 W) et un congélateur (1000 W) fonctionnant simultanément.",
             docs: `
                 <div class="doc-box">
                     <div class="doc-title">Document 1 : Relation Puissance / Intensité</div>
-                    La puissance électrique P (en Watts) d'un appareil dépend de la tension U (en Volts) et de l'intensité I (en Ampères) selon la formule :<br><br>
                     <span class="math">P = U &times; I</span>
                 </div>
                 <div class="doc-box">
                     <div class="doc-title">Document 2 : Tension du secteur</div>
-                    En France, la tension efficace délivrée par les prises de courant du secteur est de <strong>U = 230 V</strong>.
+                    En France, la tension délivrée par les prises est de <strong>U = 230 V</strong>.
                 </div>
             `,
             question: "Monsieur Dupont peut-il allumer son nouveau radiateur d'une puissance de <strong>1500 W</strong> sans faire disjoncter toute son installation ?",
-            method: "<strong>Démarche attendue :</strong><br>1. Identifiez la limite de l'installation : Le disjoncteur coupe si I<sub>totale</sub> dépasse 16 A.<br>2. Deux méthodes de calcul sont possibles :<br> &nbsp;&nbsp;&nbsp;- Soit vous calculez la Puissance Totale de tous les appareils additionnés, puis vous en déduisez l'Intensité totale (pour la comparer à 16 A).<br>&nbsp;&nbsp;&nbsp;- Soit vous calculez la Puissance Maximale autorisée par le disjoncteur (P<sub>max</sub> = 230 &times; 16) et vous la comparez à la puissance totale demandée.<br>3. Choisissez une méthode, rédigez le calcul et concluez.",
+            method: "<strong>Démarche :</strong><br>1. Identifiez la limite : Le disjoncteur coupe si I<sub>totale</sub> dépasse 16 A.<br>2. Calculez la Puissance Maximale autorisée par le disjoncteur (P<sub>max</sub> = 230 &times; 16).<br>3. Calculez la Puissance Totale demandée par tous les appareils et comparez avec le maximum autorisé.",
             correction: `
-                <strong>Méthode choisie : Calcul de la puissance totale</strong><br><br>
                 <strong>1. Calcul de la puissance totale si tous les appareils fonctionnent :</strong><br>
                 P<sub>totale</sub> = P<sub>ballon</sub> + P<sub>congélateur</sub> + P<sub>radiateur</sub><br>
                 P<sub>totale</sub> = 2000 + 1000 + 1500 = <strong>4500 W</strong>.<br><br>
-                <strong>2. Calcul de la puissance maximale que le disjoncteur peut supporter :</strong><br>
-                D'après le Document 1, on utilise la formule P = U &times; I<br>
+                <strong>2. Calcul de la puissance maximale supportée par le disjoncteur :</strong><br>
+                D'après le Document 1, P = U &times; I<br>
                 P<sub>max</sub> = 230 &times; 16 = <strong>3680 W</strong>.<br><br>
                 <strong>3. Conclusion :</strong><br>
-                La puissance demandée par les trois appareils (4500 W) est largement supérieure à la puissance maximale que l'installation peut fournir en sécurité (3680 W). <br><strong>Monsieur Dupont ne peut pas allumer son radiateur en même temps que les autres appareils, sinon le disjoncteur sautera.</strong>
+                La puissance demandée par les trois appareils (4500 W) est supérieure à la puissance maximale que l'installation peut fournir en sécurité (3680 W). <br><strong>Monsieur Dupont ne peut pas allumer son radiateur, le disjoncteur sautera.</strong>
             `
         },
         "t3": {
             title: "Le mystère de l'eau polluée",
-            source: "DNB Antilles - Thème : Des signaux pour observer (Ions)",
-            context: "Une usine métallurgique est accusée de déverser illégalement des déchets dans la rivière voisine. Les scientifiques soupçonnent que les rejets de l'usine contiennent du <strong>Chlorure de Fer III</strong> (composé d'ions Fe<sup>3+</sup> et d'ions Cl<sup>-</sup>). Un inspecteur prélève de l'eau de la rivière et réalise des tests chimiques pour vérifier cette hypothèse.",
+            source: "DNB Antilles - Des signaux pour observer (Ions)",
+            context: "Une usine métallurgique est accusée de déverser illégalement du <strong>Chlorure de Fer III</strong> (composé d'ions Fe<sup>3+</sup> et d'ions Cl<sup>-</sup>) dans la rivière. Un inspecteur prélève de l'eau et réalise des tests.",
             docs: `
                 <div class="doc-box">
-                    <div class="doc-title">Document 1 : Résultats des tests sur l'eau de la rivière</div>
-                    - Test à la soude : Il observe la formation d'un <strong>précipité rouille</strong>.<br>
-                    - Test au nitrate d'argent : Il observe la formation d'un <strong>précipité blanc qui noircit à la lumière</strong>.
+                    <div class="doc-title">Document 1 : Résultats des tests sur l'eau</div>
+                    - Test à la soude : Il observe un <strong>précipité rouille</strong>.<br>
+                    - Test au nitrate d'argent : Il observe un <strong>précipité blanc qui noircit à la lumière</strong>.
                 </div>
                 <div class="doc-box">
                     <div class="doc-title">Document 2 : Tableau d'identification des ions</div>
                     <div class="table-wrapper">
                         <table>
-                            <tr><th>Réactif détecteur</th><th>Ion testé</th><th>Couleur du précipité</th></tr>
-                            <tr><td>Soude</td><td>Ion Cuivre II (Cu<sup>2+</sup>)</td><td>Bleu</td></tr>
+                            <tr><th>Réactif</th><th>Ion testé</th><th>Couleur du précipité</th></tr>
                             <tr><td>Soude</td><td>Ion Fer II (Fe<sup>2+</sup>)</td><td>Vert</td></tr>
                             <tr><td>Soude</td><td>Ion Fer III (Fe<sup>3+</sup>)</td><td>Rouille</td></tr>
                             <tr><td>Nitrate d'argent</td><td>Ion Chlorure (Cl<sup>-</sup>)</td><td>Blanc (noircit)</td></tr>
@@ -306,268 +302,359 @@
                     </div>
                 </div>
             `,
-            question: "En exploitant les résultats des tests et les documents fournis, rédigez un rapport prouvant si l'usine métallurgique est bien responsable de cette pollution.",
-            method: "<strong>Comment rédiger une analyse chimique :</strong><br>Ne donnez pas directement la conclusion. Construisez votre argumentation étape par étape.<br>- Décrivez ce que fait le 1er test : 'Le test à la soude donne...' <strong>donc</strong> 'l'eau contient l'ion...' (utilisez le tableau).<br>- Faites de même pour le 2ème test : 'Le test au nitrate d'argent donne...' <strong>donc</strong> 'l'eau contient l'ion...'<br>- Rédigez une conclusion finale en comparant les ions que vous venez de trouver avec la composition chimique des rejets supposés de l'usine.",
+            question: "En exploitant les résultats des tests, rédigez un rapport prouvant si l'usine est bien responsable de la pollution.",
+            method: "Construisez votre argumentation étape par étape.<br>- 'Le test à la soude donne...' <strong>donc</strong> 'l'eau contient l'ion...' (utilisez le tableau).<br>- Faites de même pour le 2ème test.<br>- Concluez en comparant les ions trouvés avec la composition des rejets de l'usine.",
             correction: `
-                <strong>1. Analyse du premier test (Recherche de l'ion métallique) :</strong><br>
-                L'inspecteur verse de la soude dans l'échantillon d'eau et observe l'apparition d'un précipité rouille. D'après le document de référence (Doc 2), la soude forme un précipité rouille uniquement en présence d'ions Fer III (Fe<sup>3+</sup>). <strong>On prouve donc que l'eau de la rivière contient des ions Fe<sup>3+</sup>.</strong><br><br>
-                <strong>2. Analyse du deuxième test (Recherche de l'halogénure) :</strong><br>
-                L'inspecteur verse ensuite du nitrate d'argent et observe un précipité blanc qui noircit à la lumière. D'après le document 2, c'est le test caractéristique permettant de détecter les ions Chlorure (Cl<sup>-</sup>). <strong>On prouve donc que l'eau contient des ions Cl<sup>-</sup>.</strong><br><br>
-                <strong>3. Conclusion de l'enquête :</strong><br>
-                L'eau de la rivière contient à la fois des ions Fe<sup>3+</sup> et des ions Cl<sup>-</sup>. Cela correspond exactement à la composition chimique du Chlorure de Fer III, qui est le déchet industriel suspecté. <strong>L'usine métallurgique est donc bien coupable de la pollution de la rivière.</strong>
+                <strong>1. Analyse du test à la soude :</strong><br>
+                L'inspecteur observe l'apparition d'un précipité rouille. D'après le document de référence (Doc 2), cela se produit uniquement en présence d'ions Fer III (Fe<sup>3+</sup>). <strong>L'eau contient donc des ions Fe<sup>3+</sup>.</strong><br><br>
+                <strong>2. Analyse du test au nitrate d'argent :</strong><br>
+                L'inspecteur observe un précipité blanc qui noircit. D'après le document 2, c'est le test caractéristique des ions Chlorure (Cl<sup>-</sup>). <strong>L'eau contient des ions Cl<sup>-</sup>.</strong><br><br>
+                <strong>3. Conclusion :</strong><br>
+                L'eau contient des ions Fe<sup>3+</sup> et Cl<sup>-</sup>. Cela correspond exactement à la composition du Chlorure de Fer III, le déchet de l'usine. <strong>L'usine métallurgique est bien coupable.</strong>
             `
         },
         "t4": {
-            title: "Le sonar du sous-marin",
-            source: "DNB Polynésie - Thème : Signaux sonores",
-            context: "Un navire océanographique cartographie les fonds marins à l'aide d'un sonar. Le sonar émet un signal ultra-sonore verticalement vers le fond de l'océan. Ce signal rebondit sur le fond marin et revient au navire sous forme d'écho. L'oscilloscope à bord indique que le signal a mis <strong>4 secondes</strong> pour revenir au navire après son émission initiale.",
+            title: "Le sonar du navire",
+            source: "DNB Polynésie - Signaux sonores",
+            context: "Un navire cartographie les fonds marins. Le sonar émet un signal ultra-sonore verticalement vers le fond de l'océan. Le signal rebondit sur le fond et revient. L'oscilloscope indique que le signal a mis <strong>4 secondes</strong> pour revenir au navire après son émission.",
             docs: `
                 <div class="doc-box">
-                    <div class="doc-title">Document 1 : Principe de l'écho (Sonar)</div>
-                    <div class="svg-center">
-                        <svg viewBox="0 0 200 150" width="100%" style="max-width: 200px;">
-                            <rect x="70" y="10" width="60" height="20" fill="gray"/>
-                            <text x="100" y="25" text-anchor="middle" fill="white" font-size="10">Navire</text>
-                            <path d="M 0 130 Q 50 110 100 130 T 200 130" fill="none" stroke="brown" stroke-width="4"/>
-                            <text x="100" y="145" text-anchor="middle" font-size="12">Fond Marin</text>
-                            <line x1="90" y1="35" x2="90" y2="120" stroke="blue" stroke-dasharray="4" marker-end="url(#arrowBlue)"/>
-                            <line x1="110" y1="120" x2="110" y2="35" stroke="red" stroke-dasharray="4" marker-end="url(#arrowRed)"/>
-                            <defs>
-                                <marker id="arrowBlue" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="blue"/></marker>
-                                <marker id="arrowRed" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="red"/></marker>
-                            </defs>
-                        </svg>
-                    </div>
-                    Attention : Le signal parcourt deux fois la distance (le trajet aller + le trajet retour).
-                </div>
-                <div class="doc-box">
-                    <div class="doc-title">Document 2 : Vitesse de l'onde</div>
-                    La vitesse de propagation du son (et des ultrasons) dans l'eau de mer est d'environ <strong>v = 1500 m/s</strong>.
+                    <div class="doc-title">Document 1 : Vitesse de l'onde</div>
+                    La vitesse du son dans l'eau de mer est d'environ <strong>v = 1500 m/s</strong>.
                 </div>
             `,
-            question: "En détaillant vos calculs, déterminez à quelle profondeur réelle (en mètres) se trouve le fond marin sous le navire océanographique.",
-            method: "<strong>Attention au piège classique des exercices sur le Sonar !</strong><br>1. Rappelez la formule de base de la mécanique : v = d / t (que l'on transforme en d = v &times; t).<br>2. Calculez la distance <i>d</i> avec la vitesse et le temps fournis.<br>3. Demandez-vous : à quoi correspond cette distance calculée ? Puisque le temps <i>t</i> = 4s est le temps mis pour faire l'ALLER-RETOUR, la distance calculée est la distance totale parcourue par le son.<br>4. Divisez cette distance totale par 2 pour trouver la profondeur exacte !",
+            question: "Calculez à quelle profondeur réelle (en mètres) se trouve le fond marin sous le navire.",
+            method: "<strong>Attention au piège du Sonar !</strong><br>1. Calculez la distance totale avec la formule d = v &times; t.<br>2. Le temps t = 4s est le temps de l'ALLER-RETOUR. La distance calculée est donc celle de l'aller-retour.<br>3. Divisez cette distance totale par 2 pour trouver la profondeur !",
             correction: `
-                <strong>1. Analyse et rassemblement des données :</strong><br>
-                - Vitesse de l'onde sonore dans l'eau : v = 1500 m/s.<br>
-                - Durée totale de l'aller-retour : t = 4 s.<br><br>
-                <strong>2. Calcul de la distance totale parcourue par l'onde :</strong><br>
+                <strong>1. Calcul de la distance totale parcourue par l'onde :</strong><br>
                 On utilise la relation : d<sub>totale</sub> = v &times; t<br>
                 d<sub>totale</sub> = 1500 &times; 4 = <strong>6000 mètres</strong>.<br><br>
-                <strong>3. Déduction de la profondeur :</strong><br>
-                La distance de 6000 m correspond au trajet effectué par l'onde pour descendre jusqu'au fond PUIS pour remonter jusqu'au navire (Document 1).<br>
-                La profondeur réelle est donc exactement la moitié de cette distance parcourue :<br>
+                <strong>2. Déduction de la profondeur :</strong><br>
+                La distance de 6000 m correspond au trajet pour descendre PUIS pour remonter.<br>
+                La profondeur réelle est donc exactement la moitié de cette distance :<br>
                 Profondeur = 6000 / 2 = <strong>3000 mètres</strong>.<br><br>
-                <i>Conclusion : Le fond marin se trouve à une profondeur de 3000 mètres (ou 3 kilomètres) sous le navire.</i>
+                <i>Le fond marin se trouve à une profondeur de 3000 mètres sous le navire.</i>
             `
         },
         "t5": {
             title: "Le saut en parachute",
-            source: "DNB Centres Étrangers - Thème : Mouvements et Interactions",
-            context: "Un parachutiste s'élance d'un avion à haute altitude. Sa masse totale, en incluant son équipement et sa combinaison, est de <strong>m = 80 kg</strong>. Après quelques secondes de chute libre, il ouvre son parachute. Le frottement de l'air augmente drastiquement et il finit par descendre à une vitesse parfaitement constante (c'est un mouvement rectiligne uniforme) jusqu'au sol.",
+            source: "DNB Centres Étrangers - Mouvements et Forces",
+            context: "Un parachutiste s'élance d'un avion. Sa masse totale est de <strong>m = 80 kg</strong>. Après quelques secondes, il ouvre son parachute. Le frottement de l'air augmente et il finit par descendre à une vitesse parfaitement constante (mouvement rectiligne uniforme) jusqu'au sol.",
             docs: `
                 <div class="doc-box">
-                    <div class="doc-title">Document 1 : Le principe d'inertie (1ère loi de Newton)</div>
-                    Lorsqu'un objet est immobile ou qu'il se déplace en mouvement rectiligne uniforme, les forces mécaniques qui s'exercent sur lui se compensent parfaitement (elles s'annulent : c'est-à-dire qu'elles ont la même direction, la même valeur, mais des sens opposés).
+                    <div class="doc-title">Document 1 : Le principe d'inertie</div>
+                    Lorsqu'un objet se déplace en mouvement rectiligne uniforme, les forces mécaniques qui s'exercent sur lui se compensent parfaitement.
                 </div>
                 <div class="doc-box">
                     <div class="doc-title">Document 2 : Le Poids d'un corps</div>
-                    Le poids d'un objet (la force de gravité terrestre) se calcule avec la formule : <br><span class="math">P = m &times; g</span><br>
-                    Pour cet exercice, on prendra l'intensité de la pesanteur <strong>g = 10 N/kg</strong>.
+                    <span class="math">P = m &times; g</span> (On prendra <strong>g = 10 N/kg</strong>)
                 </div>
             `,
-            question: "À l'aide de vos calculs et du principe d'inertie, déterminez la valeur en Newton de la force de frottement exercée par l'air sur le parachute lors de la descente à vitesse constante.",
-            method: "<strong>C'est un exercice de raisonnement pur :</strong><br>1. Faites l'inventaire des deux forces principales qui agissent sur le parachutiste lors de sa descente (La Terre qui le tire vers le bas, et l'air qui le retient vers le haut).<br>2. Calculez mathématiquement la valeur de la force que vous pouvez connaître : le poids P.<br>3. Utilisez la phrase clé du Document 1 (le principe d'inertie) pour expliquer que, puisque le mouvement est uniforme, l'autre force est forcément égale au poids.",
+            question: "À l'aide de vos calculs et du principe d'inertie, déterminez la valeur de la force de frottement exercée par l'air sur le parachute lors de la descente à vitesse constante.",
+            method: "1. Calculez la valeur du poids P.<br>2. Listez les deux forces qui agissent sur le parachutiste.<br>3. Utilisez le Document 1 pour expliquer que, puisque le mouvement est uniforme, la force de l'air est forcément égale au poids.",
             correction: `
                 <strong>1. Calcul du poids du parachutiste :</strong><br>
-                On utilise la formule du Document 2 : P = m &times; g<br>
+                P = m &times; g<br>
                 P = 80 &times; 10 = <strong>800 N</strong>.<br>
-                La Terre attire le parachutiste verticalement vers le bas avec une force de 800 Newtons.<br><br>
-                <strong>2. Inventaire des forces en présence :</strong><br>
-                Le parachutiste en pleine descente est soumis à deux actions mécaniques :<br>
-                - Son poids (P), dirigé vers le bas.<br>
-                - La force de frottement de l'air sur la toile du parachute (F<sub>air</sub>), dirigée vers le haut.<br><br>
-                <strong>3. Déduction avec le principe d'inertie :</strong><br>
-                L'énoncé indique clairement que le parachutiste descend en 'mouvement rectiligne uniforme' (vitesse constante). <br>
-                D'après le principe d'inertie (Document 1), cela signifie que les forces qui s'exercent sur lui se compensent parfaitement pour s'annuler.<br>
-                La force de frottement de l'air doit donc avoir exactement la même intensité que le poids pour le retenir :<br>
+                La Terre attire le parachutiste vers le bas avec une force de 800 N.<br><br>
+                <strong>2. Inventaire des forces :</strong><br>
+                Le parachutiste est soumis à son poids (vers le bas) et à la force de frottement de l'air sur la toile (vers le haut).<br><br>
+                <strong>3. Application du principe d'inertie :</strong><br>
+                L'énoncé indique que le parachutiste descend en 'mouvement rectiligne uniforme' (vitesse constante). <br>
+                D'après le principe d'inertie, les forces se compensent. La force de l'air a donc la même intensité que le poids :<br>
                 <strong>F<sub>air</sub> = P = 800 N.</strong>
             `
         },
         "t6": {
-            title: "Le grand saut (Conservation de l'énergie)",
-            source: "DNB Métropole - Thème : L'énergie",
-            context: "Un plongeur de haut vol, de masse <strong>m = 70 kg</strong>, s'apprête à sauter d'une falaise située à une hauteur <strong>h = 20 m</strong> au-dessus du niveau de la mer. Il se laisse tomber dans le vide sans impulsion initiale (sa vitesse au moment exact du départ est donc de v = 0 m/s). Pour simplifier le problème, on négligera totalement les frottements de l'air lors de la chute.",
+            title: "Le plongeon et l'énergie",
+            source: "DNB Métropole - L'énergie",
+            context: "Un plongeur de <strong>m = 70 kg</strong> saute d'une falaise de <strong>h = 20 m</strong>. Il se laisse tomber sans impulsion initiale (v = 0 m/s au départ). On négligera les frottements de l'air.",
             docs: `
                 <div class="doc-box">
                     <div class="doc-title">Document 1 : L'énergie mécanique</div>
-                    L'énergie mécanique (E<sub>m</sub>) d'un objet en mouvement est définie comme la somme de son énergie cinétique (E<sub>c</sub>) et de son énergie potentielle de position (E<sub>p</sub>) : <br><br>
-                    <span class="math">E<sub>m</sub> = E<sub>c</sub> + E<sub>p</sub></span><br><br>
-                    <strong>Loi fondamentale :</strong> En l'absence de frottements de l'air, l'énergie mécanique d'un corps en chute libre se conserve (elle reste identique du début à la fin).
+                    <span class="math">E<sub>m</sub> = E<sub>c</sub> + E<sub>p</sub></span><br>
+                    Sans frottements, l'énergie mécanique d'un corps en chute libre se conserve.
                 </div>
                 <div class="doc-box">
-                    <div class="doc-title">Document 2 : Formules de l'énergie</div>
-                    - Énergie potentielle (liée à l'altitude) : <span class="math">E<sub>p</sub> = m &times; g &times; h</span><br><br>
-                    - Énergie cinétique (liée à la vitesse) : <span class="math">E<sub>c</sub> = 1/2 &times; m &times; v<sup>2</sup></span><br><br>
-                    <i>On utilisera l'intensité de la pesanteur g = 10 N/kg</i>
+                    <div class="doc-title">Document 2 : Formules</div>
+                    E<sub>p</sub> = m &times; g &times; h (avec g = 10 N/kg)<br>
+                    E<sub>c</sub> = 1/2 &times; m &times; v<sup>2</sup>
                 </div>
             `,
-            question: "En appliquant le principe de conservation de l'énergie mécanique, déterminez quelle sera la valeur de l'énergie cinétique (E<sub>c</sub>) du plongeur à l'instant précis où il touche l'eau.",
-            method: "<strong>C'est LE raisonnement classique du Brevet sur l'énergie ! Suivez ces 3 étapes :</strong><br>1. <strong>En haut de la falaise :</strong> Calculez l'énergie potentielle (E<sub>p</sub>). Puisque sa vitesse est nulle au départ, E<sub>c</sub> vaut 0. Déduisez-en son énergie mécanique totale (E<sub>m</sub>) en haut.<br>2. <strong>Pendant la chute :</strong> Rédigez une phrase pour expliquer que cette E<sub>m</sub> ne va pas changer, grâce au Document 1.<br>3. <strong>Au niveau de l'eau :</strong> Son altitude h devient 0, donc son énergie potentielle disparaît (E<sub>p</sub> = 0). Puisque l'E<sub>m</sub> totale est restée la même, toute l'énergie du départ s'est transformée en E<sub>c</sub>. Vous avez votre réponse !",
+            question: "En appliquant la conservation de l'énergie, déterminez la valeur de l'énergie cinétique (E<sub>c</sub>) du plongeur à l'instant où il touche l'eau.",
+            method: "1. <strong>En haut :</strong> Calculez E<sub>p</sub>. Puisque sa vitesse est nulle, E<sub>c</sub> = 0. Déduisez E<sub>m</sub>.<br>2. <strong>Pendant la chute :</strong> Dites que l'E<sub>m</sub> ne change pas.<br>3. <strong>En bas :</strong> Son altitude devient 0, donc E<sub>p</sub> = 0. L'E<sub>m</sub> s'est totalement transformée en E<sub>c</sub> !",
             correction: `
-                <strong>Étape 1 : Analyse de l'énergie au point de départ (en haut de la falaise à h = 20 m) :</strong><br>
-                - Le plongeur n'a pas de vitesse au départ, donc son énergie cinétique est nulle : E<sub>c</sub> = 0 J.<br>
-                - Calculons son énergie potentielle de position : E<sub>p</sub> = m &times; g &times; h = 70 &times; 10 &times; 20 = <strong>14 000 J</strong>.<br>
-                - L'énergie mécanique totale accumulée au départ est donc : E<sub>m</sub> = E<sub>c</sub> + E<sub>p</sub> = 0 + 14000 = <strong>14 000 Joules</strong>.<br><br>
-                <strong>Étape 2 : Principe de conservation :</strong><br>
-                L'énoncé précise que l'on néglige les frottements de l'air. D'après le Document 1, l'énergie mécanique totale va donc se conserver parfaitement tout au long de la chute. L'énergie mécanique au moment de l'impact sera toujours de E<sub>m</sub> = 14 000 J.<br><br>
-                <strong>Étape 3 : Analyse à l'instant de l'impact (au niveau de l'eau, h = 0 m) :</strong><br>
-                - Le plongeur est arrivé au niveau 0, son altitude est nulle. Son énergie potentielle a totalement disparu : E<sub>p</sub> = 0 J.<br>
-                - Puisque E<sub>m</sub> = E<sub>c</sub> + E<sub>p</sub>, et que E<sub>p</sub> vaut maintenant 0, cela signifie que toute l'énergie mécanique s'est convertie en énergie cinétique due à sa grande vitesse.<br>
-                <strong>Conclusion : L'énergie cinétique (E<sub>c</sub>) du plongeur à l'impact est de 14 000 J.</strong><br><br>
-                <i>Bonus (Pour les curieux : Calcul de la vitesse d'impact) :<br>
-                E<sub>c</sub> = 0,5 &times; m &times; v<sup>2</sup><br>
-                14000 = 0,5 &times; 70 &times; v<sup>2</sup><br>
-                v = &radic;(14000 / 35) = 20 m/s (ce qui correspond à 72 km/h !)</i>
+                <strong>1. Énergie en haut de la falaise (h = 20 m) :</strong><br>
+                - Le plongeur n'a pas de vitesse au départ : E<sub>c</sub> = 0 J.<br>
+                - Énergie potentielle : E<sub>p</sub> = m &times; g &times; h = 70 &times; 10 &times; 20 = <strong>14 000 J</strong>.<br>
+                - Énergie mécanique totale : E<sub>m</sub> = E<sub>c</sub> + E<sub>p</sub> = <strong>14 000 J</strong>.<br><br>
+                <strong>2. Conservation :</strong><br>
+                Sans frottements, l'énergie mécanique se conserve. À l'impact, on a toujours E<sub>m</sub> = 14 000 J.<br><br>
+                <strong>3. Énergie à l'impact (h = 0 m) :</strong><br>
+                - L'altitude est nulle, donc E<sub>p</sub> = 0 J.<br>
+                - Puisque E<sub>m</sub> = E<sub>c</sub> + 0, toute l'énergie est devenue cinétique.<br>
+                <strong>Conclusion : L'énergie cinétique E<sub>c</sub> à l'impact est de 14 000 J.</strong>
             `
         },
         "t7": {
-            title: "La piscine de Monsieur Legrand",
-            source: "DNB Antilles - Thème : Des modifications de la matière (Acides/Bases)",
-            context: "Au début de l'été, Monsieur Legrand mesure le pH de l'eau de sa piscine avec un testeur électronique et trouve <strong>pH = 5,5</strong>. Or, le carnet d'entretien précise que pour que la baignade soit confortable (ne pique pas les yeux) et que le chlore soit efficace, l'eau d'une piscine doit avoir un pH strictement compris entre <strong>7,0 et 7,4</strong>. M. Legrand dispose de deux bidons de traitement dans son local technique : le produit 'pH Minus' (composé d'acide chlorhydrique) et le produit 'pH Plus' (composé de carbonate de sodium).",
+            title: "L'entretien du pH d'une piscine",
+            source: "DNB Antilles - Acides et Bases",
+            context: "Monsieur Legrand mesure le pH de sa piscine et trouve <strong>pH = 5,5</strong>. Or, l'eau d'une piscine doit avoir un pH strictement compris entre <strong>7,0 et 7,4</strong>. Il dispose de deux bidons : le 'pH Minus' (acide chlorhydrique) et le 'pH Plus' (carbonate de sodium).",
             docs: `
                 <div class="doc-box">
-                    <div class="doc-title">Document 1 : L'échelle de pH</div>
-                    <div class="svg-center">
-                        <svg viewBox="0 0 300 60" width="100%" style="max-width: 300px;">
-                            <rect x="0" y="10" width="300" height="20" fill="url(#gradpH)"/>
-                            <defs><linearGradient id="gradpH" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#f56565"/><stop offset="50%" style="stop-color:#48bb78"/><stop offset="100%" style="stop-color:#4299e1"/></linearGradient></defs>
-                            <text x="5" y="45" font-size="12">0 (Acide)</text>
-                            <text x="150" y="45" text-anchor="middle" font-size="12">7 (Neutre)</text>
-                            <text x="295" y="45" text-anchor="end" font-size="12">14 (Basique)</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="doc-box">
-                    <div class="doc-title">Document 2 : Action chimique des produits</div>
-                    - Ajouter une solution acide dans l'eau a pour effet de faire diminuer son pH.<br>
-                    - Ajouter une solution basique dans l'eau a pour effet de faire augmenter son pH.
+                    <div class="doc-title">Document 1 : Action chimique des produits</div>
+                    - Ajouter un acide diminue le pH de la solution.<br>
+                    - Ajouter une base augmente le pH de la solution.
                 </div>
             `,
-            question: "Lequel des deux bidons de traitement Monsieur Legrand doit-il verser dans sa piscine pour résoudre son problème ? Justifiez votre raisonnement.",
-            method: "<strong>Raisonnez avec logique, étape par étape :</strong><br>1. Qualifiez chimiquement l'eau de la piscine actuelle (Est-elle acide, neutre ou basique d'après son chiffre de 5,5 ?).<br>2. Observez l'objectif à atteindre (7,0 - 7,4) : faut-il faire monter ou faire descendre la valeur du pH ?<br>3. Déduisez du Document 2 le type de produit chimique (Acide ou Base) qu'il faut utiliser pour obtenir cet effet.<br>4. Lisez la composition des bidons dans le texte introductif pour nommer le bon produit.",
+            question: "Lequel des deux bidons Monsieur Legrand doit-il verser dans sa piscine ? Justifiez.",
+            method: "1. Qualifiez l'eau actuelle (Acide, neutre ou basique ?).<br>2. Quel est l'objectif ? (Faire monter ou descendre le pH ?).<br>3. Quel type de produit utiliser ?<br>4. Nommez le bidon adéquat.",
             correction: `
-                <strong>1. Analyse de l'état actuel de l'eau :</strong><br>
-                Monsieur Legrand a mesuré un pH de 5,5. D'après le document 1 (l'échelle de pH), un pH inférieur à 7 signifie que <strong>l'eau de sa piscine est actuellement trop acide</strong>.<br><br>
-                <strong>2. Objectif à atteindre :</strong><br>
-                Il souhaite ramener le pH dans une zone située entre 7,0 et 7,4. Son but mécanique est donc de <strong>faire augmenter la valeur du pH</strong> de son eau pour la ramener vers la neutralité.<br><br>
-                <strong>3. Choix de la famille de produit :</strong><br>
-                D'après le document 2, pour faire augmenter le pH d'une solution, il est nécessaire de lui ajouter une substance basique. <br>Si Monsieur Legrand utilisait le produit 'pH Minus' (qui est de l'acide chlorhydrique), cela rajouterait de l'acidité et ferait chuter le pH encore plus bas, aggravant le problème.<br><br>
-                <strong>4. Conclusion :</strong><br>
-                Monsieur Legrand doit choisir le produit composé de carbonate de sodium, qui est une solution basique. <strong>Il doit verser le bidon de 'pH Plus' dans sa piscine.</strong>
+                <strong>1. État actuel de l'eau :</strong><br>
+                Un pH de 5,5 est inférieur à 7. <strong>L'eau de sa piscine est trop acide</strong>.<br><br>
+                <strong>2. Objectif :</strong><br>
+                Il souhaite atteindre un pH entre 7,0 et 7,4. Il doit donc <strong>faire augmenter la valeur du pH</strong>.<br><br>
+                <strong>3. Choix du produit :</strong><br>
+                Pour faire augmenter le pH, il faut ajouter une solution basique. S'il utilisait l'acide chlorhydrique ('pH Minus'), le pH chuterait encore plus.<br>
+                Il doit choisir le carbonate de sodium (solution basique). <strong>Il doit verser le bidon 'pH Plus'.</strong>
             `
         },
         "t8": {
             title: "Protéger la diode",
-            source: "DNB Métropole - Thème : Énergie (Loi d'Ohm)",
-            context: "Un élève souhaite allumer une petite Diode Électro-Luminescente (DEL) à l'aide d'une grosse pile carrée de <strong>9 Volts</strong>. Le problème est que s'il branche la DEL directement sur la pile, elle va instantanément griller : la documentation technique indique qu'elle ne supporte qu'une tension de fonctionnement de <strong>U<sub>DEL</sub> = 2 Volts</strong>. <br>Pour absorber le surplus d'énergie de la pile, l'élève doit obligatoirement ajouter une résistance de protection (R) branchée en série avec la DEL. Le circuit doit être parcouru par une intensité de <strong>I = 0,02 A</strong> pour que la DEL brille correctement.",
+            source: "DNB Métropole - Loi d'Ohm",
+            context: "Un élève souhaite allumer une Diode (DEL) avec une pile de <strong>9 Volts</strong>. La DEL ne supporte qu'une tension de <strong>U<sub>DEL</sub> = 2 Volts</strong>. Il doit ajouter une résistance R en série. L'intensité dans le circuit sera de <strong>I = 0,02 A</strong>.",
             docs: `
                 <div class="doc-box">
-                    <div class="doc-title">Document 1 : Loi d'additivité des tensions (Loi des mailles)</div>
-                    Dans un circuit où les composants sont branchés en série (une seule boucle), la tension fournie par le générateur est égale à la somme des tensions utilisées par les différents récepteurs :<br><br>
-                    <span class="math">U<sub>Pile</sub> = U<sub>Résistance</sub> + U<sub>DEL</sub></span>
+                    <div class="doc-title">Document 1 : Loi des tensions en série</div>
+                    <span class="math">U<sub>Pile</sub> = U<sub>R</sub> + U<sub>DEL</sub></span>
                 </div>
                 <div class="doc-box">
                     <div class="doc-title">Document 2 : La loi d'Ohm</div>
-                    La tension U (en Volts) mesurée aux bornes d'une résistance se calcule avec la formule : <br><br>
-                    <span class="math">U = R &times; I</span> (où R est en Ohms &Omega; et I en Ampères A)
+                    <span class="math">U = R &times; I</span>
                 </div>
             `,
-            question: "Déterminez par le calcul la valeur exacte de la résistance R (en Ohms &Omega;) que l'élève doit acheter au magasin pour protéger sa DEL.",
-            method: "<strong>C'est un exercice classique de réflexion en cascade (en 2 étapes) :</strong><br>1. L'objectif final est de trouver R. D'après le Doc 2, il vous faut U et I. L'intensité I est connue (0,02 A), mais quelle est la tension U<sub>R</sub> <i>aux bornes de la résistance</i> ?<br>2. Utilisez la loi d'additivité du Doc 1 : Vous avez 9V à la source, la DEL a besoin de 2V. Combien de Volts la résistance doit-elle 'absorber' (U<sub>R</sub>) pour que la somme fasse 9 ?<br>3. Une fois cette tension U<sub>R</sub> trouvée, utilisez la loi d'Ohm inversée (R = U / I) pour conclure.",
+            question: "Déterminez par le calcul la valeur exacte de la résistance R (en Ohms) pour protéger sa DEL.",
+            method: "1. Trouvez combien de Volts la Résistance doit 'absorber' (U<sub>R</sub>) pour que la pile de 9V ne détruise pas la DEL de 2V (Utilisez Doc 1).<br>2. Utilisez la loi d'Ohm inversée (R = U / I) pour trouver R.",
             correction: `
-                <strong>Étape 1 : Calcul de la tension que doit absorber la résistance (U<sub>R</sub>) :</strong><br>
-                D'après la loi d'additivité des tensions (Doc 1) pour ce circuit en série, la pile distribue sa tension entre la résistance et la DEL :<br>
-                U<sub>Pile</sub> = U<sub>R</sub> + U<sub>DEL</sub><br>
+                <strong>1. Tension aux bornes de la résistance (U<sub>R</sub>) :</strong><br>
+                D'après la loi d'additivité (Doc 1) : U<sub>Pile</sub> = U<sub>R</sub> + U<sub>DEL</sub><br>
                 9 = U<sub>R</sub> + 2<br>
-                La résistance doit donc prendre à sa charge le surplus de tension fourni par la pile :<br>
-                U<sub>R</sub> = 9 - 2 = <strong>7 Volts</strong>.<br><br>
-                <strong>Étape 2 : Calcul de la valeur de la résistance (R) :</strong><br>
-                Nous savons désormais que la tension aux bornes de la résistance est de U<sub>R</sub> = 7 V et que l'intensité qui doit la traverser est I = 0,02 A.<br>
-                En appliquant la loi d'Ohm (Doc 2) : U<sub>R</sub> = R &times; I<br>
-                On manipule la formule pour isoler R : R = U<sub>R</sub> / I<br>
-                R = 7 / 0,02<br>
-                R = <strong>350 &Omega;</strong><br><br>
-                <strong>Conclusion :</strong> L'élève doit installer une résistance de protection d'une valeur de 350 Ohms (&Omega;).
+                La résistance doit absorber le surplus : U<sub>R</sub> = 9 - 2 = <strong>7 Volts</strong>.<br><br>
+                <strong>2. Calcul de la résistance (R) :</strong><br>
+                On a U<sub>R</sub> = 7 V et I = 0,02 A.<br>
+                Loi d'Ohm (Doc 2) : U<sub>R</sub> = R &times; I &rarr; R = U<sub>R</sub> / I<br>
+                R = 7 / 0,02 = <strong>350 &Omega;</strong><br><br>
+                <strong>Conclusion :</strong> Il faut une résistance de 350 Ohms.
             `
         },
         "t9": {
             title: "Communication avec Mars",
-            source: "DNB Asie - Thème : Des signaux pour observer",
-            context: "Le rover Perseverance explore actuellement la surface de la planète Mars. Il capture de nombreuses photographies qu'il envoie vers les antennes de la NASA sur Terre à l'aide d'ondes électromagnétiques (des ondes radio). Le jour de l'envoi de la fameuse photo panoramique, les ingénieurs estiment que la distance séparant la Terre de Mars est de <strong>d = 78 millions de kilomètres</strong>.",
+            source: "DNB Asie - Signaux",
+            context: "Le rover Perseverance envoie une photo vers la Terre. La distance entre la Terre et Mars est de <strong>d = 78 millions de km</strong>.",
             docs: `
                 <div class="doc-box">
-                    <div class="doc-title">Document 1 : Vitesse de propagation</div>
-                    Les ondes électromagnétiques (que ce soit la lumière visible, les ondes radio, ou la Wi-Fi) se propagent extrêmement vite dans le vide de l'espace. Leur vitesse est une constante universelle :<br><br>
-                    <span class="math">c = 300 000 km/s</span>
+                    <div class="doc-title">Document 1 : Vitesse des ondes</div>
+                    La vitesse des ondes radio est : <span class="math">v = 300 000 km/s</span>
                 </div>
                 <div class="doc-box">
-                    <div class="doc-title">Document 2 : Formule mathématique de la vitesse</div>
+                    <div class="doc-title">Document 2 : Formule de la vitesse</div>
                     <span class="math">v = d / t</span>
                 </div>
             `,
-            question: "Calculez le temps (en secondes, puis converti en minutes et secondes) que mettra la photographie de Perseverance pour traverser l'espace et s'afficher sur les écrans de la Terre.",
-            method: "<strong>Méthode de résolution :</strong><br>1. Identifiez l'inconnue : on cherche le temps <i>t</i>.<br>2. Manipulez la formule du Document 2 pour isoler <i>t</i>. (Astuce : on échange t et v, ce qui donne t = d / v).<br>3. Remplacez les lettres par les chiffres. Attention aux zéros : écrivez 78 millions en entier (78 000 000) pour ne pas vous tromper.<br>4. Vérifiez vos unités de tête : on divise des [km] par des [km/s], le résultat mathématique sortira donc directement en secondes.<br>5. Divisez le grand nombre de secondes obtenu par 60 pour faire une phrase de conclusion élégante en minutes.",
+            question: "Calculez le temps (en secondes, puis en minutes et secondes) que mettra la photo pour arriver sur Terre.",
+            method: "1. Isolez le temps <i>t</i> dans la formule.<br>2. Remplacez par les chiffres (écrivez 78 000 000).<br>3. Divisez le résultat par 60 pour les minutes.",
             correction: `
-                <strong>1. Rassemblement des données :</strong><br>
-                - La distance à parcourir est d = 78 000 000 km.<br>
-                - La vitesse de l'onde radio est v = 300 000 km/s.<br><br>
-                <strong>2. Calcul du temps de parcours en secondes :</strong><br>
-                D'après la définition de la vitesse (v = d / t), on isole le temps :<br>
-                t = d / v<br>
+                <strong>1. Calcul du temps en secondes :</strong><br>
+                D'après la formule v = d / t, on isole le temps : t = d / v<br>
                 t = 78 000 000 / 300 000<br>
-                <i>(Pour faciliter le calcul de tête ou sur brouillon, on peut barrer 5 zéros en haut et en bas)</i> : t = 780 / 3<br>
-                <strong>t = 260 secondes.</strong><br><br>
-                <strong>3. Conversion pour la phrase réponse :</strong><br>
-                Il y a 60 secondes dans 1 minute.<br>
-                260 / 60 = 4 (car 4 &times; 60 = 240). Il reste donc 20 secondes.<br><br>
-                <strong>Conclusion :</strong> Les données numériques contenant la photographie mettront <strong>4 minutes et 20 secondes</strong> pour voyager depuis la surface de Mars jusqu'à la Terre.
+                t = 780 / 3 = <strong>260 secondes.</strong><br><br>
+                <strong>2. Conversion en minutes :</strong><br>
+                260 / 60 = 4 (car 4 &times; 60 = 240). Il reste 20 secondes.<br><br>
+                <strong>Conclusion :</strong> La photo mettra <strong>4 minutes et 20 secondes</strong> pour arriver.
             `
         },
         "t10": {
-            title: "Le bilan carbone d'un réchaud",
-            source: "DNB Métropole - Thème : Transformations de la matière",
-            context: "Lors d'une randonnée en montagne, un groupe d'amis utilise un réchaud portatif pour faire bouillir de l'eau. La cartouche du réchaud contient du gaz Butane (dont la formule chimique est C<sub>4</sub>H<sub>10</sub>). La combustion de ce gaz avec le dioxygène (O<sub>2</sub>) naturellement présent dans l'air dégage la chaleur nécessaire, mais produit malheureusement un gaz à puissant effet de serre : le dioxyde de carbone (CO<sub>2</sub>), ainsi que de la vapeur d'eau (H<sub>2</sub>O).",
+            title: "Le chauffage écologique au biogaz",
+            source: "DNB Adapté - Transformations de la matière",
+            context: "Un agriculteur a installé un méthaniseur qui transforme les déchets de sa ferme en 'biogaz'. Ce gaz est principalement composé de méthane (de formule <strong>CH<sub>4</sub></strong>). Pour chauffer ses serres, il fait brûler ce méthane avec le dioxygène (<strong>O<sub>2</sub></strong>) de l'air. Cela produit du dioxyde de carbone (<strong>CO<sub>2</sub></strong>) et de la vapeur d'eau (<strong>H<sub>2</sub>O</strong>).",
             docs: `
                 <div class="doc-box">
-                    <div class="doc-title">Document 1 : Équation bilan de la combustion</div>
-                    L'équation squelette (non-équilibrée) de cette transformation chimique s'écrit :<br><br>
-                    <span class="math">... C<sub>4</sub>H<sub>10</sub> + ... O<sub>2</sub> &rarr; ... CO<sub>2</sub> + ... H<sub>2</sub>O</span>
+                    <div class="doc-title">Document 1 : Équation de la réaction</div>
+                    L'équation squelette non-équilibrée s'écrit :<br><br>
+                    <span class="math">... CH<sub>4</sub> + ... O<sub>2</sub> &rarr; ... CO<sub>2</sub> + ... H<sub>2</sub>O</span>
                 </div>
                 <div class="doc-box">
-                    <div class="doc-title">Document 2 : Principe de conservation de la matière</div>
-                    Au cours d'une transformation chimique, la masse totale se conserve. À l'échelle microscopique, cela signifie que tous les atomes présents au départ dans les molécules des réactifs vont se séparer et se réarranger pour former les molécules des produits (Loi de Lavoisier). Il doit donc y avoir exactement le même nombre d'atomes de chaque sorte de part et d'autre de la flèche.
+                    <div class="doc-title">Document 2 : Le principe de Lavoisier</div>
+                    Au cours d'une réaction, la masse se conserve. Il doit y avoir le même nombre d'atomes de chaque sorte des deux côtés de la flèche.
                 </div>
             `,
-            question: "En respectant le principe de conservation de la matière, recopiez l'équation bilan de cette combustion et trouvez les bons coefficients stoechiométriques pour l'équilibrer.",
-            method: "<strong>Ce n'est pas qu'une question mathématique, c'est de la logique !</strong><br>1. Ne touchez <strong>jamais</strong> aux petits indices en bas des lettres (cela changerait la nature du gaz !). Vous ne pouvez écrire que des grands nombres multiplicateurs (coefficients) devant les molécules entières.<br>2. Ajustez l'équation en suivant la méthode 'CHO' : commencez par équilibrer les Carbones (C), puis équilibrez les Hydrogènes (H), et comptez les Oxygènes (O) en tout dernier.<br>3. Le piège final : une fois C et H équilibrés, vous allez compter un nombre IMPAIR d'oxygènes à droite (13). Or, à gauche, l'oxygène avance par paire (O<sub>2</sub>). Pour éviter de mettre '6,5' (ce qui est interdit en chimie), vous devez multiplier absolument tous vos coefficients par 2 !",
+            question: "En respectant le principe de conservation de la matière (Document 2), recopiez l'équation de la combustion du méthane et trouvez les bons coefficients pour l'équilibrer.",
+            method: "Rappelez-vous la règle d'or : on ne modifie <strong>jamais</strong> les petits chiffres en bas, on ajoute des grands nombres multiplicateurs devant les molécules.<br>Utilisez l'ordre 'C.H.O' :<br>1. Comptez les Carbones (C).<br>2. Comptez les Hydrogènes (H) à gauche, et ajustez l'eau à droite.<br>3. Comptez le total des Oxygènes (O) à droite, et ajustez le O<sub>2</sub> à gauche.",
             correction: `
-                <strong>Démarche d'équilibrage étape par étape :</strong><br><br>
-                <strong>Étape 1 : Le Carbone (C)</strong><br>
-                Il y a 4 atomes de Carbone dans la molécule de butane à gauche. Pour en avoir 4 à droite, on place un <strong>4</strong> devant la molécule de CO<sub>2</sub>.<br>
-                (Bilan provisoir : C<sub>4</sub>H<sub>10</sub> + ... O<sub>2</sub> &rarr; <strong>4</strong> CO<sub>2</sub> + ... H<sub>2</sub>O)<br><br>
-                <strong>Étape 2 : L'Hydrogène (H)</strong><br>
-                Il y a 10 atomes d'Hydrogène dans le butane à gauche. Puisque l'eau (H<sub>2</sub>O) en contient déjà 2 par molécule, on place un <strong>5</strong> devant l'eau (car 5 &times; 2 = 10).<br>
-                (Bilan provisoir : C<sub>4</sub>H<sub>10</sub> + ... O<sub>2</sub> &rarr; 4 CO<sub>2</sub> + <strong>5</strong> H<sub>2</sub>O)<br><br>
-                <strong>Étape 3 : L'Oxygène (O)</strong><br>
-                Comptons tous les atomes d'Oxygène créés à droite de la flèche :<br>
-                (4 molécules de CO<sub>2</sub> &times; 2) + (5 molécules de H<sub>2</sub>O &times; 1) = 8 + 5 = 13 atomes d'Oxygène au total.<br>
-                Pour avoir 13 atomes d'oxygène à gauche avec des molécules de O<sub>2</sub> (qui vont par paires), il faudrait le coefficient 6,5 (car 6,5 &times; 2 = 13).<br><br>
-                <strong>Étape 4 : La règle des nombres entiers</strong><br>
-                En chimie, on ne peut pas utiliser de demi-molécule. Pour retirer la virgule, il suffit de multiplier l'intégralité de l'équation par 2.<br>
-                Les coefficients '1, 6.5, 4, 5' deviennent donc '2, 13, 8, 10'.<br><br>
-                <strong>Résultat final : L'équation équilibrée de la combustion du butane est :</strong><br>
-                <div class='math-block' style='margin-top:10px; background:#c6f6d5; border:1px solid #38a169;'>2 C<sub>4</sub>H<sub>10</sub> + 13 O<sub>2</sub> &rarr; 8 CO<sub>2</sub> + 10 H<sub>2</sub>O</div>
+                <strong>1. Le Carbone (C) :</strong><br>
+                - À gauche : 1 atome de C dans CH<sub>4</sub>.<br>
+                - À droite : 1 atome de C dans CO<sub>2</sub>.<br>
+                Le carbone est déjà équilibré.<br><br>
+                <strong>2. L'Hydrogène (H) :</strong><br>
+                - À gauche : 4 atomes de H.<br>
+                - À droite : 2 atomes de H (dans H<sub>2</sub>O).<br>
+                Pour équilibrer, on place un <strong>2</strong> devant H<sub>2</sub>O (2 &times; 2 = 4).<br><br>
+                <strong>3. L'Oxygène (O) :</strong><br>
+                - À droite : 2 atomes (dans CO<sub>2</sub>) + 2 atomes (dans les 2 H<sub>2</sub>O) = 4 atomes d'oxygène au total.<br>
+                - À gauche : Il faut placer un <strong>2</strong> devant O<sub>2</sub> (2 &times; 2 = 4).<br><br>
+                <strong>Résultat final :</strong><br>
+                L'équation équilibrée est : <strong>CH<sub>4</sub> + 2 O<sub>2</sub> &rarr; CO<sub>2</sub> + 2 H<sub>2</sub>O</strong>
+            `
+        },
+        "t11": {
+            title: "L'énigme de l'iceberg de sel",
+            source: "DNB Adapté - Propriétés de la matière",
+            context: "Léa a rempli un bécher avec <strong>V = 500 mL</strong> d'eau pure. Elle a versé du sel fin dans cette eau. Elle constate qu'au bout d'un certain temps, le sel ne se dissout plus et s'accumule au fond. Elle a dissous exactement <strong>m = 180 g</strong> de sel. <br>Elle affirme : <i>'Puisque l'eau salée est plus dense que l'eau douce, je pourrais faire flotter un objet en plastique très dense dans mon mélange !'</i>",
+            docs: `
+                <div class="doc-box">
+                    <div class="doc-title">Document 1 : Masse volumique de l'eau salée</div>
+                    La masse volumique (&rho;) se calcule par : <span class="math">&rho; = (masse totale) / Volume</span>.<br>
+                    <i>(Rappel : La masse de 500 mL d'eau pure est de 500 g).</i>
+                </div>
+                <div class="doc-box">
+                    <div class="doc-title">Document 2 : Solubilité et Flottaison</div>
+                    - <strong>Solubilité :</strong> Pour le sel dans l'eau, la solubilité maximale est de <strong>S = 360 g/L</strong>.<br>
+                    - <strong>Flottaison :</strong> Un objet flotte si sa masse volumique est inférieure à celle du liquide. L'objet en plastique de Léa a une masse volumique de <strong>1,25 g/mL</strong>.
+                </div>
+            `,
+            question: "En utilisant vos calculs sur la masse volumique et en vérifiant la solubilité, prouvez si l'affirmation de Léa concernant la flottaison du plastique est vraie ou fausse.",
+            method: "Cette tâche se résout en 3 étapes :<br>1. <strong>Solubilité :</strong> Léa a-t-elle vraiment dissous tout son sel ? Vérifiez par un produit en croix si 180g peuvent se dissoudre dans 500 mL (0,5 L).<br>2. <strong>Masse volumique :</strong> Calculez la masse totale (eau + sel). Divisez cette masse par le volume (500 mL) pour trouver &rho; en g/mL.<br>3. <strong>Flottaison :</strong> Comparez votre résultat avec le plastique (1,25 g/mL).",
+            correction: `
+                <strong>1. Vérification de la solubilité :</strong><br>
+                On peut dissoudre au maximum 360 g de sel dans 1 L d'eau.<br>
+                Léa a 500 mL (la moitié de 1 L). Elle peut donc dissoudre au maximum : 360 / 2 = 180 g de sel.<br>
+                Les 180 g sont bien totalement dissous (saturation atteinte).<br><br>
+                <strong>2. Calcul de la masse volumique de l'eau salée :</strong><br>
+                Masse totale = Masse de l'eau (500 g) + Masse du sel (180 g) = 680 g.<br>
+                Volume = 500 mL.<br>
+                &rho; = m / V = 680 / 500 = <strong>1,36 g/mL</strong>.<br><br>
+                <strong>3. Étude de la flottaison :</strong><br>
+                Le plastique a une masse volumique de 1,25 g/mL.<br>
+                Puisque 1,25 (plastique) < 1,36 (eau salée), l'objet flottera.<br>
+                <strong>Conclusion : L'affirmation de Léa est vraie.</strong>
+            `
+        },
+        "t12": {
+            title: "L'haltérophile sur la Lune",
+            source: "DNB Polynésie - Mouvements et Interactions",
+            context: "Sur Terre, un champion parvient à soulever une barre d'une masse de <strong>150 kg</strong>. Il se demande quelle masse il pourrait soulever sur la Lune, en fournissant exactement le même effort musculaire (c'est-à-dire en soulevant le même <strong>Poids en Newton</strong>).",
+            docs: `
+                <div class="doc-box">
+                    <div class="doc-title">Document 1 : Le Poids</div>
+                    La relation entre le Poids (P) en Newton et la masse (m) en kg est : <span class="math">P = m &times; g</span>
+                </div>
+                <div class="doc-box">
+                    <div class="doc-title">Document 2 : L'intensité de la pesanteur</div>
+                    - Sur Terre : <strong>g<sub>Terre</sub> = 10 N/kg</strong><br>
+                    - Sur la Lune : <strong>g<sub>Lune</sub> = 1,6 N/kg</strong>
+                </div>
+            `,
+            question: "Déterminez quelle masse (en kg) l'haltérophile pourrait soulever sur la Lune en fournissant le même effort que sur Terre.",
+            method: "1. Calculez d'abord la valeur de l'effort fourni sur Terre (le Poids P de la barre de 150 kg).<br>2. Conservez ce Poids P pour la Lune.<br>3. Réutilisez la formule P = m &times; g avec le 'g' de la Lune, en inversant la formule pour trouver la masse 'm'.",
+            correction: `
+                <strong>1. Effort fourni sur Terre :</strong><br>
+                Calculons le poids de la barre soulevée sur Terre :<br>
+                P<sub>Terre</sub> = m &times; g<sub>Terre</sub> = 150 &times; 10 = <strong>1500 N</strong>.<br>
+                Le champion est capable de vaincre une force de 1500 Newtons.<br><br>
+                <strong>2. Masse correspondante sur la Lune :</strong><br>
+                Sur la Lune, il peut toujours fournir un effort de 1500 N. <br>
+                D'après P = m &times; g, on isole la masse : m = P / g<sub>Lune</sub><br>
+                m = 1500 / 1,6 = <strong>937,5 kg</strong>.<br><br>
+                <strong>Conclusion :</strong> Sur la Lune, grâce à la faible gravité, le champion soulèverait 937,5 kg avec la même difficulté qu'un haltère de 150 kg sur Terre.
+            `
+        },
+        "t13": {
+            title: "Le coût de la console en veille",
+            source: "DNB Métropole - L'énergie",
+            context: "Un élève laisse sa console en veille en permanence. La puissance consommée est de <strong>15 W</strong>. Elle reste branchée ainsi toute l'année, soit <strong>8760 heures</strong>.",
+            docs: `
+                <div class="doc-box">
+                    <div class="doc-title">Document 1 : Énergie et Facturation</div>
+                    L'énergie se calcule avec : <span class="math">E = P &times; t</span><br>
+                    Pour avoir l'énergie en <strong>kWh</strong>, il faut que la puissance soit en kilowatts (kW) et le temps en heures (h).<br>
+                    <i>Rappel : 1 kW = 1000 W.</i>
+                </div>
+                <div class="doc-box">
+                    <div class="doc-title">Document 2 : Tarifs de l'électricité</div>
+                    Le prix d'un kilowattheure (1 kWh) est de <strong>0,25 &euro;</strong>.
+                </div>
+            `,
+            question: "Calculez le coût financier annuel occasionné uniquement par le mode veille de cette console.",
+            method: "1. Convertissez la puissance de la console (Watts en kW).<br>2. Calculez l'énergie E consommée sur l'année.<br>3. Multipliez l'énergie totale trouvée par le prix unitaire.",
+            correction: `
+                <strong>1. Conversion de la puissance :</strong><br>
+                La console consomme 15 W. Il faut diviser par 1000 :<br>
+                P = 15 / 1000 = <strong>0,015 kW</strong>.<br><br>
+                <strong>2. Calcul de l'énergie électrique consommée :</strong><br>
+                E = P &times; t<br>
+                E = 0,015 &times; 8760 = <strong>131,4 kWh</strong>.<br><br>
+                <strong>3. Calcul du coût :</strong><br>
+                Coût = Énergie &times; Prix unitaire<br>
+                Coût = 131,4 &times; 0,25 = <strong>32,85 &euro;</strong>.<br><br>
+                <strong>Conclusion :</strong> Laisser cette console en veille coûte environ 33 euros par an à la famille, pour rien.
+            `
+        },
+        "t14": {
+            title: "L'orage approche-t-il ?",
+            source: "DNB Antilles - Les signaux",
+            context: "Lors d'une randonnée, Léo voit l'éclair d'un orage illuminer le ciel. Il entend le grondement du tonnerre exactement <strong>6 secondes</strong> après avoir vu l'éclair.",
+            docs: `
+                <div class="doc-box">
+                    <div class="doc-title">Document 1 : Les vitesses de propagation</div>
+                    - Vitesse de la lumière dans l'air : <strong>300 000 km/s</strong> (C'est instantané à notre échelle).<br>
+                    - Vitesse du son dans l'air : <strong>340 m/s</strong>.
+                </div>
+                <div class="doc-box">
+                    <div class="doc-title">Document 2 : Mouvement</div>
+                    <span class="math">v = d / t</span>
+                </div>
+            `,
+            question: "En considérant que la lumière arrive instantanément aux yeux de Léo, calculez à quelle distance (en kilomètres) se trouve l'orage.",
+            method: "1. Léo voit l'éclair tout de suite. Le temps (6s) est donc le temps que le SON a mis pour voyager.<br>2. Utilisez d = v &times; t avec la vitesse du son.<br>3. Convertissez la distance obtenue (mètres) en kilomètres.",
+            correction: `
+                <strong>1. Analyse :</strong><br>
+                La lumière étant très rapide, l'éclair est vu instantanément. Les 6 secondes correspondent au trajet du SON.<br><br>
+                <strong>2. Calcul de la distance :</strong><br>
+                d = v &times; t<br>
+                La vitesse du son est v = 340 m/s.<br>
+                d = 340 &times; 6 = <strong>2040 mètres</strong>.<br><br>
+                <strong>3. Conversion :</strong><br>
+                2040 mètres = <strong>2,04 kilomètres</strong>.<br><br>
+                <strong>Conclusion :</strong> L'orage éclate à environ 2 km du randonneur.
+            `
+        },
+        "t15": {
+            title: "Le danger de la vitesse",
+            source: "DNB Centres Étrangers - Énergie cinétique",
+            context: "On étudie l'énergie qu'un véhicule doit dissiper en cas de crash. On prend une voiture de <strong>m = 1200 kg</strong> roulant à <strong>50 km/h</strong>, puis à <strong>100 km/h</strong>.",
+            docs: `
+                <div class="doc-box">
+                    <div class="doc-title">Document 1 : L'énergie cinétique</div>
+                    <span class="math">E<sub>c</sub> = 1/2 &times; m &times; v<sup>2</sup></span><br>
+                    La vitesse 'v' doit obligatoirement être en <strong>m/s</strong>.
+                </div>
+                <div class="doc-box">
+                    <div class="doc-title">Document 2 : Idée reçue</div>
+                    Certains pensent que 'si on roule 2 fois plus vite, le choc sera 2 fois plus violent'.
+                </div>
+            `,
+            question: "En calculant l'énergie cinétique à 50 km/h puis à 100 km/h, prouvez que l'idée reçue du Document 2 est fausse.",
+            method: "1. Convertissez d'abord les deux vitesses en m/s (en divisant par 3,6).<br>2. Calculez E<sub>c1</sub> (50 km/h) et E<sub>c2</sub> (100 km/h).<br>3. Comparez les résultats (E<sub>c2</sub> / E<sub>c1</sub>).",
+            correction: `
+                <strong>1. Conversions en m/s :</strong><br>
+                v<sub>1</sub> = 50 / 3,6 &asymp; 13,9 m/s.<br>
+                v<sub>2</sub> = 100 / 3,6 &asymp; 27,8 m/s.<br><br>
+                <strong>2. Calculs de l'énergie cinétique :</strong><br>
+                - À 50 km/h : E<sub>c1</sub> = 0,5 &times; 1200 &times; (13,9)<sup>2</sup> &asymp; <strong>115 926 Joules</strong>.<br>
+                - À 100 km/h : E<sub>c2</sub> = 0,5 &times; 1200 &times; (27,8)<sup>2</sup> &asymp; <strong>463 704 Joules</strong>.<br><br>
+                <strong>3. Comparaison :</strong><br>
+                Ratio : 463 704 / 115 926 = <strong>4</strong>.<br><br>
+                <strong>Conclusion :</strong> L'idée reçue est fausse. Si la vitesse double, l'énergie cinétique du choc <strong>est multipliée par 4</strong> à cause du carré (v<sup>2</sup>).
             `
         }
     };
