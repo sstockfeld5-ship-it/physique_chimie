@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activité : Les Combustions et leurs Dangers</title>
+    <style>
+        :root {
+            --bg-page: #f4f7f6;
+            --primary-color: #2c3e50;
+            --accent-blue: #0984e3;
+            --accent-orange: #f39c12;
+            --danger-red: #d63031;
+            --success-green: #00b894;
+            --water-cold: #0984e3;
+            --water-cold-light: #74b9ff;
+            --water-hot: #d63031;
+            --water-hot-light: #ff7675;
+            --gas-color: #e17055;
+            --gas-light: #fab1a0;
+            --metal-light: #dfe6e9;
+            --metal-mid: #b2bec3;
+            --metal-dark: #636e72;
+            --metal-border: #2d3436;
+
+            /* Couleurs dynamiques du cerveau (Animation Sang) */
+            --brain-main: #fdcb6e;
+            --brain-cerebellum: #f39c12;
+            --brain-stem: #e67e22;
+            --brain-stroke: #e17055;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.6;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            max-width: 950px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 { color: var(--primary-color); text-align: center; border-bottom: 3px solid var(--accent-blue); padding-bottom: 10px; font-size: 1.6rem; }
+        h2 { color: var(--accent-blue); font-size: 1.3rem; margin-top: 30px; border-left: 4px solid var(--accent-blue); padding-left: 10px; }
+        h3 { font-size: 1.1rem; color: #444; margin-bottom: 5px; display: inline-block;}
+
+        .card { background: #f8f9fa; border: 1px solid #e1e8ed; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        .card.warning { border-left: 4px solid var(--accent-orange); }
+        .card.danger { border-left: 4px solid var(--danger-red); }
+
+        .info-box { background: #e8f4f8; border-left: 4px solid #3498db; padding: 15px; border-radius: 4px; margin: 15px 0; font-size: 0.95rem; }
+
+        /* --- STYLES ANIMATION CHAUDIERE --- */
+        .interactive-section { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; margin-bottom:20px; }
+        .controls { flex: 1; min-width: 300px; background: var(--metal-light); padding: 20px; border-radius: 8px; border: 1px solid #b2bec3; display: flex; flex-direction: column; justify-content: center; box-shadow: inset 0 2px 5px rgba(255,255,255,0.5); }
+        .slider-container { margin-bottom: 25px; }
+        .slider-container label { font-weight: bold; font-size: 1.1rem; display: block; margin-bottom: 10px; }
+        input[type="range"] { width: 100%; height: 8px; border-radius: 4px; background: var(--metal-mid); outline: none; -webkit-appearance: none; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 50%; background: var(--primary-color); cursor: pointer; border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.4); transition: transform 0.1s; }
+        input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.1); }
+        .status-panel { background: white; padding: 15px; border-radius: 6px; border-left: 5px solid var(--accent-blue); transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .status-panel.warning { border-left-color: var(--danger-red); background: #fff5f5; }
+        .status-panel h3 { margin: 0 0 10px 0; font-size: 1.1rem; }
+        .status-panel p { margin: 5px 0; font-size: 0.95rem; }
+        .svg-wrapper { flex: 1.5; min-width: 300px; background: #ffffff; border: 3px solid var(--metal-dark); border-radius: 12px; position: relative; overflow: hidden; box-shadow: inset 0 0 40px rgba(0,0,0,0.05), 0 5px 15px rgba(0,0,0,0.1); width: 100%; }
+        svg { display: block; width: 100%; height: auto; }
+        .water-flow { stroke-dasharray: 8 16; animation: flow 1s linear infinite; }
+        .water-flow-reverse { stroke-dasharray: 8 16; animation: flowReverse 1.5s linear infinite; }
+        @keyframes flow { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+        @keyframes flowReverse { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 24; } }
+        .fume-bubble { animation: rise 2.5s ease-in infinite; opacity: 0; transform-origin: center; }
+        @keyframes rise { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { opacity: 0.5; } 80% { opacity: 0.3; } 100% { transform: translateY(-120px) scale(1.5); opacity: 0; } }
+        .flame-wrapper { will-change: transform, opacity; }
+        .flame-main { transform-origin: center bottom; animation: flicker-main 0.1s infinite alternate ease-in-out; }
+        .flame-core { transform-origin: center bottom; animation: flicker-core 0.12s infinite alternate ease-in-out; }
+        @keyframes flicker-main { 0% { transform: scale(0.95, 0.95) skewX(-2deg); } 50% { transform: scale(1.02, 1.05) skewX(1deg); } 100% { transform: scale(0.98, 1.02) skewX(3deg); } }
+        @keyframes flicker-core { 0% { transform: scale(0.9, 0.9) translateY(1px); } 100% { transform: scale(1.1, 1.1) translateY(-1px); } }
+        .soot-particle { position: absolute; background: #1a1a1a; width: 5px; height: 5px; border-radius: 50%; pointer-events: none; z-index: 10; box-shadow: 0 0 3px rgba(0,0,0,0.8); }
+        .svg-label { font-size: 13px; font-weight: bold; fill: #2d3436; pointer-events: none; }
+        .svg-label-light { font-size: 12px; fill: #636e72; font-style: italic; }
+
+        /* --- BULLES D'AIDES (TOOLTIPS/MODALS) --- */
+        .tooltip-btn {
+            display: inline-block; background: var(--accent-blue); color: white; border-radius: 50%; 
+            width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 0.9rem; 
+            font-weight: bold; cursor: pointer; margin-left: 8px; vertical-align: middle;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.2s;
+        }
+        .tooltip-btn:hover { background: #076aba; transform: scale(1.1); }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 10px; max-width: 400px; width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative; animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .close-modal { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 1.5rem; font-weight: bold; color: #888; }
+        .close-modal:hover { color: #333; }
+
+        /* --- Formulaires --- */
+        select, input[type="number"], input[type="text"] { padding: 8px; margin: 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; max-width: 100%; box-sizing: border-box;}
+        input[type="number"] { width: 55px; text-align: center; font-weight: bold; }
+        
+        .action-btns { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        button.btn-primary { background-color: var(--accent-blue); color: white; font-weight: bold; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; transition: 0.3s; flex-grow: 1; }
+        button.btn-primary:hover { background-color: #076aba; }
+        button.corr-btn { background-color: #d63031; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; display: none; font-weight: bold;}
+
+        .equation-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 1.1rem; margin: 10px 0; background: #fff; padding: 12px; border-radius: 6px; border: 1px dashed #ccc; }
+        .math-sign { font-size: 1.5rem; font-weight: 900; color: var(--primary-color); }
+        
+        .feedback { padding: 12px; border-radius: 6px; margin-top: 10px; font-weight: bold; display: none; line-height: 1.4; }
+        .correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin: 10px 0;}
+        .checkbox-group label { display: flex; align-items: center; cursor: pointer; background: #fff; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+        .checkbox-group input { margin-right: 15px; transform: scale(1.4); }
+
+        /* QCM */
+        .qcm-q { margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e1e8ed;}
+        .qcm-q h4 { margin-top: 0; color: #333; }
+        .qcm-options label { display: block; padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 8px; cursor: pointer; background: #fafafa; }
+        .qcm-options input { margin-right: 10px; transform: scale(1.2); }
+        .qcm-options label:hover { background: #eef2f5; }
+
+        /* --- Animations CSS Sang --- */
+        @keyframes flowBlood {
+            0% { transform: translateX(-60px); }
+            100% { transform: translateX(900px); }
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.03); opacity: 1; }
+        }
+        @keyframes pulseBrain {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(253, 203, 110, 0.5)); }
+            50% { filter: drop-shadow(0 0 25px rgba(253, 203, 110, 0.8)); }
+        }
+        .lung-anim {
+            transform-origin: 100px 150px;
+            animation: breathe 3s ease-in-out infinite;
+        }
+        .brain-healthy {
+            animation: pulseBrain 2s infinite;
+        }
+        .brain-sick {
+            --brain-main: #b2bec3;
+            --brain-cerebellum: #95a5a6;
+            --brain-stem: #7f8c8d;
+            --brain-stroke: #636e72;
+            filter: drop-shadow(0 0 0px rgba(0,0,0,0)) !important;
+            animation: none !important;
+        }
+        .brain-part-main { fill: var(--brain-main, #fdcb6e); stroke: var(--brain-stroke, #e17055); transition: fill 1.5s ease, stroke 1.5s ease; }
+        .brain-part-cerebellum { fill: var(--brain-cerebellum, #f39c12); stroke: var(--brain-stroke, #e17055); transition: fill 1.5s ease, stroke 1.5s ease; }
+        .brain-part-stem { fill: var(--brain-stem, #e67e22); stroke: var(--brain-stroke, #e17055); transition: fill 1.5s ease, stroke 1.5s ease; }
+        .brain-part-sulci { stroke: var(--brain-stroke, #e17055); transition: stroke 1.5s ease; }
+
+        .status-bar {
+            background: #dfe6e9;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 20px;
+            color: #0984e3;
+            transition: color 0.5s, background 0.5s;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .status-danger {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+        .rbc-shape { transition: fill 0.8s, stroke 0.8s; }
+        .mol-shape { transition: opacity 0.5s; }
+
+        /* Impression A4 */
+        @media print {
+            body { background: white; padding: 0; font-size: 10pt; }
+            .container { box-shadow: none; max-width: 100%; padding: 0; }
+            .controls, button, .action-btns, .tooltip-btn { display: none; }
+            .svg-wrapper { border: 1px solid #000; break-inside: avoid; box-shadow: none; }
+            select, input { border: 1px solid black; -webkit-appearance: none; background: transparent; }
+            .card { break-inside: avoid; border: 1px solid #ccc; }
+            .feedback, .help-box { display: block; border: 1px dashed #ccc; color: black; background: transparent; }
+            .equation-row { overflow-x: visible; white-space: normal; flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="modal-overlay" id="helpModal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3 id="modalTitle" style="color: var(--accent-blue); margin-top: 0; border-bottom: 2px solid var(--metal-light); padding-bottom: 5px;">Titre</h3>
+        <p id="modalBody" style="font-size: 1.05rem; line-height: 1.5; color: #333;"></p>
+    </div>
+</div>
+
+<div class="container">
+    <h1>L'Énergie et ses Dangers : La Chaudière</h1>
+
+    <div class="info-box">
+        <strong>📝 Définitions à retenir :</strong><br>
+        • Un <strong>combustible</strong> est la matière qui brûle (ex: méthane, fioul, bois).<br>
+        • Un <strong>comburant</strong> est la substance qui permet au combustible de brûler. Sur Terre, c'est presque toujours le <strong>dioxygène</strong> présent dans l'air.<br>
+        • Une <strong>fumée</strong> est un nuage visible composé d'un gaz chaud transportant des milliers de minuscules <strong>particules solides</strong> en suspension (comme la poudre de carbone ou de la cendre).
+    </div>
+
+    <div class="interactive-section">
+        <div class="controls">
+            <div class="slider-container">
+                <label for="airSlider">Grille d'aération du local : <span id="airPercent">100</span>%</label>
+                <input type="range" id="airSlider" min="0" max="100" value="100">
+            </div>
+
+            <div class="status-panel" id="statusPanel">
+                <h3 id="combType" style="color: var(--accent-blue); margin-top:0;">Combustion Complète</h3>
+                <p><strong>Arrivée d'air (O₂) :</strong> <span id="o2Status">Suffisante</span></p>
+                <p><strong>Flamme :</strong> <span id="flameStatus">Bleue (Très chaude)</span></p>
+                <p><strong>Gaz évacués :</strong> <br> <span id="exhaustStatus" style="font-weight:bold;">Dioxyde de carbone (CO₂) + Vapeur d'eau (H₂O)</span></p>
+                <p id="dangerAlert" style="color: var(--danger-red); font-weight: bold; display: none; margin-top: 10px;">
+                    ⚠️ DANGER : Formation de Monoxyde de carbone (CO) toxique et de Carbone (suie) !
+                </p>
+            </div>
+        </div>
+
+        <div class="svg-wrapper" id="svgContainer">
+            <svg viewBox="0 0 600 700">
+                <defs>
+                    <filter id="glow-strong" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="6" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                    
+                    <filter id="glow-soft" x="-30%" y="-30%" width="160%" height="160%">
+                        <feGaussianBlur stdDeviation="2.5" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+
+                    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+                        <feDropShadow dx="3" dy="5" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
+                    </filter>
+
+                    <linearGradient id="metalPipe" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#636e72"/>
+                        <stop offset="25%" stop-color="#dfe6e9"/>
+                        <stop offset="75%" stop-color="#b2bec3"/>
+                        <stop offset="100%" stop-color="#2d3436"/>
+                    </linearGradient>
+
+                    <linearGradient id="blueBase" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" stop-color="#0984e3"/>
+                        <stop offset="100%" stop-color="#00cec9"/>
+                    </linearGradient>
+                    <linearGradient id="blueCore" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" stop-color="#81ecec"/>
+                        <stop offset="100%" stop-color="#ffffff"/>
+                    </linearGradient>
+
+                    <linearGradient id="yellowMain" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" stop-color="#0984e3"/>
+                        <stop offset="15%" stop-color="#f1c40f"/>
+                        <stop offset="50%" stop-color="#ffff00"/>
+                        <stop offset="100%" stop-color="#fff200"/>
+                    </linearGradient>
+                    <linearGradient id="yellowCore" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" stop-color="#ffff00"/>
+                        <stop offset="100%" stop-color="#ffffff"/>
+                    </linearGradient>
+                </defs>
+
+                <rect width="600" height="700" fill="#f8f9fa"/>
+
+                <rect x="95" y="155" width="410" height="460" rx="15" fill="#000000" opacity="0.1" filter="url(#dropShadow)"/>
+                <rect x="100" y="150" width="400" height="450" rx="15" fill="#ffffff" stroke="var(--metal-dark)" stroke-width="4"/>
+                
+                <path d="M 255 155 L 255 25 L 355 25 L 355 155" fill="none" stroke="#000" stroke-width="40" opacity="0.1"/>
+                <path d="M 250 150 L 250 20 L 350 20 L 350 150" fill="none" stroke="url(#metalPipe)" stroke-width="40"/>
+                <path d="M 220 140 L 380 140 L 350 90 L 250 90 Z" fill="url(#metalPipe)" stroke="var(--metal-border)" stroke-width="2" filter="url(#dropShadow)"/>
+                <text x="300" y="50" class="svg-label" text-anchor="middle" fill="#2d3436">Évacuation des fumées</text>
+
+                <g id="fumesGroup">
+                    <circle cx="280" cy="110" r="15" fill="#b2bec3" class="fume-bubble" style="animation-delay: 0s;"/>
+                    <circle cx="320" cy="120" r="22" fill="#b2bec3" class="fume-bubble" style="animation-delay: 1.2s;"/>
+                    <circle cx="300" cy="100" r="18" fill="#b2bec3" class="fume-bubble" style="animation-delay: 2.4s;"/>
+                </g>
+
+                <rect x="145" y="545" width="310" height="30" rx="4" fill="var(--metal-dark)" filter="url(#dropShadow)"/>
+                <rect x="150" y="550" width="300" height="20" fill="#111" stroke="#000" stroke-width="2"/>
+                <rect id="voletGauche" x="150" y="550" width="0" height="20" fill="url(#metalPipe)" stroke="#2d3436" stroke-width="1"/>
+                <rect id="voletDroite" x="450" y="550" width="0" height="20" fill="url(#metalPipe)" stroke="#2d3436" stroke-width="1"/>
+                <text x="300" y="595" class="svg-label" text-anchor="middle">Aération locale (Apport d'air / O₂)</text>
+
+                <path d="M 300 700 L 300 520" stroke="#000" stroke-width="20" fill="none" opacity="0.1" transform="translate(3,3)"/>
+                <path d="M 300 700 L 300 520" stroke="var(--gas-color)" stroke-width="20" fill="none" stroke-linecap="round"/>
+                <path d="M 295 700 L 295 520" stroke="var(--gas-light)" stroke-width="4" fill="none" opacity="0.8"/>
+                
+                <rect x="285" y="620" width="30" height="24" rx="4" fill="#fdcb6e" stroke="#d63031" stroke-width="2" filter="url(#dropShadow)"/>
+                <circle cx="300" cy="632" r="6" fill="#d63031"/>
+                <text x="325" y="640" class="svg-label">Méthane (CH₄)</text>
+
+                <rect x="175" y="490" width="250" height="25" rx="8" fill="url(#metalPipe)" stroke="var(--metal-border)" stroke-width="2" filter="url(#dropShadow)"/>
+                <circle cx="200" cy="495" r="3" fill="#111"/><circle cx="233" cy="495" r="3" fill="#111"/><circle cx="266" cy="495" r="3" fill="#111"/><circle cx="300" cy="495" r="3" fill="#111"/><circle cx="333" cy="495" r="3" fill="#111"/><circle cx="366" cy="495" r="3" fill="#111"/><circle cx="400" cy="495" r="3" fill="#111"/>
+                
+                <g id="flamesContainer" filter="url(#glow-soft)"></g>
+
+                <rect x="190" y="220" width="220" height="265" fill="rgba(223, 230, 233, 0.15)" stroke="var(--metal-mid)" stroke-width="2" stroke-dasharray="6 6"/>
+
+                <g id="waterCircuit">
+                    <path d="M 550 400 L 450 400 L 450 250" stroke="#000" stroke-width="24" fill="none" stroke-linejoin="round" opacity="0.1" transform="translate(3,3)"/>
+                    <path d="M 550 400 L 450 400 L 450 250" stroke="var(--water-cold)" stroke-width="24" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+                    <path d="M 550 394 L 444 394 L 444 250" stroke="var(--water-cold-light)" stroke-width="6" fill="none" stroke-linejoin="round" opacity="0.8"/>
+                    <path class="water-flow-reverse" d="M 550 400 L 450 400 L 450 250" stroke="#fff" stroke-width="4" fill="none" stroke-linejoin="round" opacity="0.7"/>
+
+                    <path d="M 450 250 L 150 250 L 150 300 L 450 300 L 450 350 L 150 350" stroke="var(--metal-dark)" stroke-width="20" fill="none" stroke-linejoin="round"/>
+                    <path d="M 450 250 L 150 250 L 150 300 L 450 300 L 450 350 L 150 350" stroke="var(--metal-mid)" stroke-width="12" fill="none" stroke-linejoin="round"/>
+                    <path class="water-flow" d="M 450 250 L 150 250 L 150 300 L 450 300 L 450 350 L 150 350" stroke="#fff" stroke-width="4" fill="none" stroke-linejoin="round" opacity="0.5"/>
+                    <rect x="200" y="235" width="200" height="130" fill="transparent" stroke="var(--metal-dark)" stroke-width="3" stroke-dasharray="2 12"/>
+
+                    <path d="M 150 350 L 150 450 L 50 450" stroke="#000" stroke-width="24" fill="none" stroke-linejoin="round" opacity="0.1" transform="translate(3,3)"/>
+                    <path d="M 150 350 L 150 450 L 50 450" stroke="var(--water-hot)" stroke-width="24" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+                    <path d="M 156 350 L 156 444 L 50 444" stroke="var(--water-hot-light)" stroke-width="6" fill="none" stroke-linejoin="round" opacity="0.8"/>
+                    <path class="water-flow" d="M 150 350 L 150 450 L 50 450" stroke="#fff" stroke-width="4" fill="none" stroke-linejoin="round" opacity="0.7"/>
+                </g>
+
+                <text x="470" y="425" class="svg-label">Retour Radiateurs</text>
+                <text x="470" y="440" class="svg-label-light">(Eau refroidie)</text>
+                <text x="50" y="475" class="svg-label">Départ Radiateurs</text>
+                <text x="50" y="490" class="svg-label-light">(Eau chauffée)</text>
+            </svg>
+        </div>
+    </div>
+
+    <datalist id="mol_options">
+        <option value="">- Choisir -</option>
+        <option value="methane">Méthane (CH₄)</option>
+        <option value="dioxygene">Dioxygène (O₂)</option>
+        <option value="eau">Eau (H₂O)</option>
+        <option value="co2">Dioxyde de carbone (CO₂)</option>
+        <option value="co">Monoxyde de carbone (CO)</option>
+        <option value="carbone">Carbone solide (C)</option>
+        <option value="diazote">Diazote (N₂)</option>
+    </datalist>
+
+    <h2>1. La Combustion Complète (Aération > 50%)</h2>
+    <div class="card">
+        <p>Règle l'aération sur 100%. L'apport en comburant (l'air) est idéal pour brûler le méthane.</p>
+        
+        <h3>1a. Quels sont les réactifs ?</h3>
+        <span class="tooltip-btn" onclick="showModal('Définition : Réactif', 'Un <strong>réactif</strong> est une espèce chimique présente au début de la transformation et qui est <strong>consommée</strong> (elle disparait au cours du temps).')">?</span>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <select id="q1a_1" class="mol-select"></select> et <select id="q1a_2" class="mol-select"></select>
+        </div>
+        
+        <h3>1b. Quels sont les produits ?</h3>
+        <span class="tooltip-btn" onclick="showModal('Définition : Produit', 'Un <strong>produit</strong> est une espèce chimique qui n\'existait pas au début et qui est <strong>formée</strong> (fabriquée) lors de la transformation.')">?</span>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <select id="q1b_1" class="mol-select"></select> et <select id="q1b_2" class="mol-select"></select>
+        </div>
+
+        <h3>1c. Complète le bilan de la réaction en toutes lettres :</h3>
+        <div class="equation-row">
+            <select id="bilan1_r1" class="mol-select"></select> <span class="math-sign">+</span> <select id="bilan1_r2" class="mol-select"></select> 
+            <span class="math-sign">➔</span> 
+            <select id="bilan1_p1" class="mol-select"></select> <span class="math-sign">+</span> <select id="bilan1_p2" class="mol-select"></select>
+        </div>
+
+        <h3>1d. Équilibre l'équation-bilan (Laisse vide si le coefficient vaut 1) :</h3>
+        <span class="tooltip-btn" onclick="showModal('Méthode : Équilibrer', 'Il doit y avoir le <strong>même nombre d\'atomes</strong> de chaque sorte du côté des réactifs (gauche) et des produits (droite).<br><br>⚠️ <strong>Règle d\'or :</strong> On ne modifie JAMAIS les petits nombres en bas (indices) des molécules ! On ne peut qu\'ajouter de grands nombres devant (les coefficients).')">?</span>
+        <div class="equation-row">
+            <input type="number" id="eq1_1" placeholder="1"> CH<sub>4</sub> 
+            <span class="math-sign">+</span> 
+            <input type="number" id="eq1_2" placeholder="?"> O<sub>2</sub> 
+            <span class="math-sign">➔</span> 
+            <input type="number" id="eq1_3" placeholder="1"> CO<sub>2</sub> 
+            <span class="math-sign">+</span> 
+            <input type="number" id="eq1_4" placeholder="?"> H<sub>2</sub>O
+        </div>
+        
+        <div class="action-btns">
+            <button class="btn-primary" onclick="checkPart1()">Valider</button>
+            <button id="corr1" class="corr-btn" onclick="applyCorrection1()">Afficher la Correction</button>
+        </div>
+        <div id="fb1" class="feedback"></div>
+    </div>
+
+    <h2>2. La Combustion Incomplète (Aération < 50%)</h2>
+    <div class="card warning">
+        <h3>2a. Baisse l'aération <strong style="color:var(--danger-red);">dans l'animation de la chaudière</strong>, le dioxygène manque. Que devient la flamme ?</h3>
+        <select id="q2a" style="max-width:400px;">
+            <option value="">- Choisir -</option>
+            <option value="bleue">Elle reste parfaitement bleue.</option>
+            <option value="jaune">Elle s'allonge, devient jaune et forme un dépôt noir.</option>
+            <option value="eteint">Elle s'éteint immédiatement.</option>
+        </select>
+
+        <h3>2b. Quels sont les réactifs de départ ?</h3>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <select id="q2b_1" class="mol-select"></select> et <select id="q2b_2" class="mol-select"></select>
+        </div>
+
+        <h3>2c. La réaction est incomplète. Quels sont les 4 produits formés ?</h3>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <select id="q2c_1" class="mol-select"></select> , <select id="q2c_2" class="mol-select"></select> ,
+            <select id="q2c_3" class="mol-select"></select> et <select id="q2c_4" class="mol-select"></select>
+        </div>
+
+        <h3>2d. Complète le bilan en toutes lettres :</h3>
+        <div class="equation-row" style="flex-wrap: wrap;">
+            <select id="bilan2_r1" class="mol-select"></select> <span class="math-sign">+</span> <select id="bilan2_r2" class="mol-select"></select> 
+            <span class="math-sign">➔</span> 
+            <select id="bilan2_p1" class="mol-select"></select> <span class="math-sign">+</span> <select id="bilan2_p2" class="mol-select"></select> 
+            <span class="math-sign">+</span> <select id="bilan2_p3" class="mol-select"></select> <span class="math-sign">+</span> <select id="bilan2_p4" class="mol-select"></select>
+        </div>
+
+        <h3>2e. Équilibre l'équation simplifiée (pour la formation du gaz mortel) :</h3>
+        <span class="tooltip-btn" onclick="showModal('Aide : Équilibrer', 'Attention : <strong>2</strong> CH₄ apportent <strong>8 atomes d\'Hydrogène</strong> au total à gauche.<br><br>Utilise ces 8 atomes pour former tes molécules d\'eau (H₂O) à droite, puis ajuste le nombre d\'Oxygène.')">?</span>
+        <div class="equation-row">
+            <input type="number" id="eq2_1" value="2" readonly style="background:#eee;"> CH<sub>4</sub> 
+            <span class="math-sign">+</span> 
+            <input type="number" id="eq2_2" placeholder="?"> O<sub>2</sub> 
+            <span class="math-sign">➔</span> 
+            <input type="number" id="eq2_3" placeholder="?"> CO 
+            <span class="math-sign">+</span> 
+            <input type="number" id="eq2_4" placeholder="?"> H<sub>2</sub>O
+        </div>
+        
+        <div class="action-btns">
+            <button class="btn-primary" onclick="checkPart2()">Valider</button>
+            <button id="corr2" class="corr-btn" onclick="applyCorrection2()">Afficher la Correction</button>
+        </div>
+        <div id="fb2" class="feedback"></div>
+    </div>
+
+    <h2>3. L'apparition de la fumée</h2>
+    <div class="card">
+        <h3>3a. D'après les définitions, la combustion incomplète produit-elle une fumée visible ?</h3>
+        <select id="q3a_1">
+            <option value="">- Choisir -</option>
+            <option value="oui">Oui</option>
+            <option value="non">Non</option>
+        </select>
+        <p>Car parmi ses produits, il y a la présence de particules solides de :</p>
+        <select id="q3a_2" class="mol-select"></select>
+
+        <h3>3b. Que risque-t-il d'arriver au tuyau d'évacuation des fumées de la chaudière ?</h3>
+        <select id="q3b" style="width:100%; max-width:none;">
+            <option value="">- Choisir la conséquence matérielle -</option>
+            <option value="nettoie">Les gaz toxiques vont nettoyer et purifier les parois du tuyau.</option>
+            <option value="bouchon">La poudre noire solide va s'accumuler, obstruer le tuyau et refouler les gaz dans la pièce.</option>
+            <option value="geler">Le tuyau va geler car la flamme jaune ne produit aucune chaleur.</option>
+            <option value="ronger">Le monoxyde de carbone va ronger et dissoudre le métal du tuyau.</option>
+        </select>
+        <div class="action-btns">
+            <button class="btn-primary" onclick="checkPart3()">Valider</button>
+            <button id="corr3" class="corr-btn" onclick="applyCorrection3()">Afficher la Correction</button>
+        </div>
+        <div id="fb3" class="feedback"></div>
+    </div>
+
+    <h2>4. Danger mortel : L'intoxication au CO</h2>
+    
+    <div class="svg-wrapper" style="background: #2d3436; padding: 15px;">
+        <div style="text-align:center; margin-bottom: 15px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+            <button id="btnO2" style="background: linear-gradient(135deg, #0984e3, #74b9ff); color:white; border:none; padding:12px 24px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onclick="setGas('O2')">🌬️ Respirer de l'Air pur (O₂)</button>
+            <button id="btnCO" style="background: linear-gradient(135deg, #d63031, #ff7675); color:white; border:none; padding:12px 24px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onclick="setGas('CO')">⚠️ Respirer du CO (Danger mortel)</button>
+        </div>
+
+        <div class="svg-wrapper" style="border: 4px solid #636e72; border-radius: 12px; background: #ffffff; overflow: hidden; position: relative; box-shadow: inset 0 0 30px rgba(0,0,0,0.1); margin-bottom: 0;">
+            <svg viewBox="0 0 800 300">
+                <defs>
+                    <g id="molO2">
+                        <circle cx="-6" cy="0" r="8" fill="#0984e3"/>
+                        <circle cx="6" cy="0" r="8" fill="#0984e3"/>
+                        <text x="0" y="3" font-size="9" fill="white" text-anchor="middle" font-weight="bold">O₂</text>
+                    </g>
+                    <g id="molCO">
+                        <circle cx="-7" cy="0" r="8" fill="#2d3436"/>
+                        <circle cx="7" cy="0" r="8" fill="#d63031"/>
+                        <text x="0" y="3" font-size="8" fill="white" text-anchor="middle" font-weight="bold">CO</text>
+                    </g>
+                    <g id="rbcTemplate">
+                        <circle cx="0" cy="0" r="18" class="rbc-shape" stroke-width="2"/>
+                        <ellipse cx="0" cy="0" rx="8" ry="8" fill="rgba(0,0,0,0.15)"/>
+                        <path d="M -10 -8 Q 0 -14 10 -8" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="3" stroke-linecap="round"/>
+                    </g>
+                    <linearGradient id="vesselGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#3b0909" />
+                        <stop offset="10%" stop-color="#b33939" />
+                        <stop offset="30%" stop-color="#ff7675" />
+                        <stop offset="70%" stop-color="#e55039" />
+                        <stop offset="90%" stop-color="#8b0000" />
+                        <stop offset="100%" stop-color="#2d0000" />
+                    </linearGradient>
+                    <linearGradient id="vesselInnerShadow" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="rgba(0,0,0,0.7)" />
+                        <stop offset="15%" stop-color="rgba(0,0,0,0)" />
+                        <stop offset="85%" stop-color="rgba(0,0,0,0)" />
+                        <stop offset="100%" stop-color="rgba(0,0,0,0.7)" />
+                    </linearGradient>
+                </defs>
+                
+                <rect x="0" y="0" width="200" height="300" fill="#fab1a0" opacity="0.15"/>
+                <g class="lung-anim" transform="translate(10, 10)">
+                    <path d="M 100 40 L 100 130" fill="none" stroke="#dfe6e9" stroke-width="15"/>
+                    <path d="M 100 120 L 70 160 M 100 120 L 130 160" fill="none" stroke="#dfe6e9" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M 60 130 C 30 130, 20 200, 50 240 C 80 270, 120 240, 100 180 Z" fill="#ff7675" stroke="#d63031" stroke-width="2" opacity="0.9"/>
+                    <path d="M 140 130 C 170 130, 180 200, 150 240 C 120 270, 80 240, 100 180 Z" fill="#ff7675" stroke="#d63031" stroke-width="2" opacity="0.9"/>
+                    <text x="100" y="25" text-anchor="middle" font-weight="bold" fill="#d63031" font-size="16">Poumons (Alvéoles)</text>
+                </g>
+
+                <rect x="180" y="80" width="460" height="140" fill="url(#vesselGrad)" />
+                <rect x="180" y="80" width="460" height="140" fill="url(#vesselInnerShadow)" />
+                <path d="M 180 82 L 640 82" stroke="#ffb8b8" stroke-width="2" opacity="0.6"/>
+                <path d="M 180 218 L 640 218" stroke="#ffb8b8" stroke-width="2" opacity="0.4"/>
+                <text x="410" y="70" text-anchor="middle" font-weight="bold" fill="#ff7675" font-size="16">Artère (Circulation sanguine)</text>
+
+                <rect x="620" y="0" width="180" height="300" fill="#e17055" opacity="0.05"/>
+                
+                <g id="brainElement" class="brain-healthy" transform="translate(620, 25) scale(1.05)">
+                    <path d="M 50 120 L 60 180 C 60 190, 80 190, 80 180 L 70 120 Z" class="brain-part-stem" stroke-width="2"/>
+                    <path d="M 70 130 C 100 120, 130 140, 120 170 C 110 200, 60 190, 70 130 Z" class="brain-part-cerebellum" stroke-width="2"/>
+                    <path d="M 40 120 C 0 90, 0 30, 50 10 C 90 -10, 130 10, 150 50 C 170 90, 130 130, 100 130 C 70 130, 50 140, 40 120 Z" class="brain-part-main" stroke-width="3"/>
+                    <path d="M 20 60 Q 50 80 70 50 M 50 20 Q 70 50 100 30 M 120 40 Q 100 80 130 100 M 30 90 Q 60 110 80 80 M 90 70 Q 100 100 110 110" fill="none" class="brain-part-sulci" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+                </g>
+                <text x="700" y="240" text-anchor="middle" font-weight="bold" fill="#d35400" font-size="18">Cerveau</text>
+
+                <g id="rbcLayer"></g>
+            </svg>
+        </div>
+
+        <div class="status-bar" id="bloodStatus">
+            ✅ L'O₂ se fixe sur les globules rouges pour nourrir le cerveau.
+        </div>
+    </div>
+
+    <div class="card danger">
+        <h3>4a. Comment agit le monoxyde de carbone (CO) par rapport au dioxygène (O₂) ?</h3>
+        <select id="q4a" style="width:100%;">
+            <option value="">- Choisir l'explication -</option>
+            <option value="detruit">Il détruit physiquement les globules rouges et dissout l'hémoglobine.</option>
+            <option value="remplace">Il prend la place du dioxygène (O₂) sur l'hémoglobine du sang, asphyxiant les organes.</option>
+            <option value="suie">Il se transforme en suie noire qui bouche les artères du cœur.</option>
+        </select>
+
+        <h3>4b. Coche les DEUX effets de ce gaz toxique sur le corps humain :</h3>
+        <div class="checkbox-group">
+            <label><input type="checkbox" id="eff1"> Vertiges, désorientation et violents maux de tête.</label>
+            <label><input type="checkbox" id="eff2"> Amélioration exceptionnelle des capacités physiques.</label>
+            <label><input type="checkbox" id="eff3"> Nausées, perte de connaissance et coma.</label>
+            <label><input type="checkbox" id="eff4"> Sensation de faim accrue et digestion accélérée.</label>
+        </div>
+        <div class="action-btns">
+            <button class="btn-primary" onclick="checkPart4()">Valider</button>
+            <button id="corr4" class="corr-btn" onclick="applyCorrection4()">Afficher la Correction</button>
+        </div>
+        <div id="fb4" class="feedback"></div>
+    </div>
+
+    <h2>5. Comparaison : La chaudière au Fioul</h2>
+    <div class="card">
+        <p>Le fioul est modélisé par la molécule d'<strong>Hexadécane (C₁₆H₃₄)</strong>.</p>
+        
+        <h3>5a. Complète l'équation en trouvant le coefficient du dioxygène manquant :</h3>
+        <div class="equation-row">
+            <span style="font-weight:bold; color:var(--primary-color);">2</span> C<sub>16</sub>H<sub>34</sub> <span class="math-sign">+</span> 
+            <input type="number" id="eq5_o2" placeholder="?"> O<sub>2</sub> <span class="math-sign">➔</span> 
+            <span style="font-weight:bold; color:var(--primary-color);">32</span> CO<sub>2</sub> <span class="math-sign">+</span> 
+            <span style="font-weight:bold; color:var(--primary-color);">34</span> H<sub>2</sub>O
+        </div>
+        <div class="action-btns">
+            <button class="btn-primary" onclick="checkPart5a()">Valider l'équation</button>
+            <button id="corr5a" class="corr-btn" onclick="applyCorrection5a()">Afficher la Correction</button>
+        </div>
+        <div id="fb5a" class="feedback"></div>
+
+        <h3>5b. Conclusion sur le fioul</h3>
+        <select id="q5b" style="width:100%;">
+            <option value="">- Que déduire de ses besoins en air ? -</option>
+            <option value="peu">Il a besoin de très peu d'air, la flamme est presque toujours bleue.</option>
+            <option value="purifie">Il rejette de l'oxygène purifiant ainsi la pièce.</option>
+            <option value="aucun">Il brûle sans dioxygène de l'air, il n'y a aucun risque d'étouffement.</option>
+            <option value="beaucoup">Il a besoin d'une quantité colossale d'O₂. Le risque de combustion incomplète (suie et CO) est très élevé.</option>
+        </select>
+        <div class="action-btns">
+            <button class="btn-primary" onclick="checkPart5b()">Conclure</button>
+            <button id="corr5b" class="corr-btn" onclick="applyCorrection5b()">Afficher la Correction</button>
+        </div>
+        <div id="fb5b" class="feedback"></div>
+    </div>
+
+    <h2>6. Recherche & Bilan (À faire sur une feuille)</h2>
+    <div class="card">
+        <p>Fais une recherche sur une feuille libre : <strong>Comment les médecins soignent-ils une personne intoxiquée au monoxyde de carbone à l'hôpital ?</strong></p>
+        <p>Une fois ta recherche terminée, clique sur le bouton ci-dessous pour afficher le bilan officiel et <strong>recopie-le dans ton cahier</strong>.</p>
+        
+        <button class="btn-primary" onclick="document.getElementById('bilanFinal').style.display='block'" style="background-color: var(--success-green); width:100%; padding:15px; font-size:1.1rem; border-radius:8px;">Afficher le Bilan à recopier 📝</button>
+        
+        <div id="bilanFinal" class="info-box" style="display:none; font-size:1.1rem; line-height: 1.8;">
+            <strong style="color:var(--danger-red); font-size:1.2rem;">🔥 Bilan : Les combustions incomplètes et leurs dangers</strong><br>
+            Une combustion est dite <strong>incomplète</strong> lorsque le comburant (le dioxygène) vient à manquer.<br>
+            Au lieu de ne produire que du CO₂ et de l'eau, la réaction produit également :<br>
+            • De la <strong>suie (carbone solide)</strong> qui forme une fumée noire et encrasse les appareils.<br>
+            • Du <strong>monoxyde de carbone (CO)</strong>, un gaz très toxique, incolore et inodore.
+        </div>
+    </div>
+
+    <h2>7. QCM Final d'évaluation</h2>
+    <div class="card" id="qcmContainer">
+        </div>
+    <button class="btn-primary" onclick="corrigerQCM()" style="width:100%; max-width:100%; padding:15px; font-size:1.2rem;">Corriger mon QCM</button>
+    <div id="qcmResult" class="feedback" style="font-size:1.3rem; text-align:center;"></div>
+
+</div>
+
+<script>
+    // --- GESTION MODALS AIDE ---
+    function showModal(title, text) {
+        document.getElementById('modalTitle').innerHTML = title;
+        document.getElementById('modalBody').innerHTML = text;
+        document.getElementById('helpModal').style.display = 'flex';
+    }
+    function closeModal() {
+        document.getElementById('helpModal').style.display = 'none';
+    }
+
+    // --- PEUPLEMENT MENUS ---
+    document.querySelectorAll('.mol-select').forEach(sel => sel.innerHTML = document.getElementById('mol_options').innerHTML);
+
+    let attempts = { p1: 0, p2: 0, p3: 0, p4: 0, p5a: 0, p5b: 0 };
+
+    // --- CHAUDIERE ANIMATION (INTOUCHÉ) ---
+    const airSlider = document.getElementById('airSlider');
+    const airPercent = document.getElementById('airPercent');
+    const flamesContainer = document.getElementById('flamesContainer');
+    const svgContainer = document.getElementById('svgContainer');
+    let sootInterval;
+
+    const getTeardropPath = (cx, cy, w, h) => `M ${cx} ${cy} Q ${cx - w} ${cy}, ${cx - w} ${cy - h*0.3} Q ${cx - w*0.4} ${cy - h*0.7}, ${cx} ${cy - h} Q ${cx + w*0.4} ${cy - h*0.7}, ${cx + w} ${cy - h*0.3} Q ${cx + w} ${cy}, ${cx} ${cy} Z`;
+
+    function initFlames() {
+        flamesContainer.innerHTML = '';
+        for (let i = 0; i < 7; i++) {
+            let cx = 200 + (i * 33.3);
+            let delay = (Math.random() * -0.5) + "s";
+            
+            let gBlue = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            gBlue.setAttribute("class", "flame-wrapper flame-blue");
+            gBlue.innerHTML = `<path d="${getTeardropPath(cx, 492, 16.8, 66)}" fill="url(#blueBase)" opacity="0.4" filter="url(#glow-strong)"/><path d="${getTeardropPath(cx, 492, 12, 60)}" fill="url(#blueBase)" class="flame-main" style="animation-delay:${delay}"/><path d="${getTeardropPath(cx, 492, 6, 36)}" fill="url(#blueCore)" class="flame-core" style="animation-delay:${delay}"/>`;
+            flamesContainer.appendChild(gBlue);
+
+            let gYellow = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            gYellow.setAttribute("class", "flame-wrapper flame-yellow");
+            gYellow.style.transformOrigin = `${cx}px 492px`;
+            gYellow.innerHTML = `<path d="${getTeardropPath(cx, 492, 22.4, 154)}" fill="url(#yellowMain)" opacity="0.9" filter="url(#glow-strong)"/><path d="${getTeardropPath(cx, 492, 16, 140)}" fill="url(#yellowMain)" class="flame-main" style="animation-delay:${delay}"/><path d="${getTeardropPath(cx, 492, 8, 56)}" fill="url(#yellowCore)" class="flame-core" style="animation-delay:${delay}"/>`;
+            flamesContainer.appendChild(gYellow);
+        }
+    }
+
+    function createSootParticle() {
+        const p = document.createElement('div');
+        p.classList.add('soot-particle');
+        let sx = 35 + (Math.random() * 30); p.style.left = sx + '%'; p.style.bottom = '30%'; 
+        svgContainer.appendChild(p);
+        let b = 30, lo = 0, o = 1;
+        const tx = 48 + (Math.random() * 4); 
+        const anim = setInterval(() => {
+            b += 0.5; o -= 0.005; 
+            if (sx < tx) lo += 0.04; if (sx > tx) lo -= 0.04;
+            p.style.bottom = b + '%'; p.style.left = `calc(${sx}% + ${lo}%)`; p.style.opacity = o;
+            if(b >= 90 || o <= 0) { clearInterval(anim); p.remove(); }
+        }, 20);
+    }
+
+    airSlider.addEventListener('input', function() {
+        let val = parseInt(this.value); let ratio = val / 100;
+        airPercent.innerText = val;
+        
+        let vw = ((100 - val) / 100) * 150; 
+        document.getElementById('voletGauche').setAttribute('width', vw);
+        document.getElementById('voletDroite').setAttribute('width', vw);
+        document.getElementById('voletDroite').setAttribute('x', 450 - vw);
+
+        document.querySelectorAll('.flame-yellow').forEach(el => { el.style.opacity = 1 - ratio; el.style.transform = `scaleY(${0.3 + 0.7 * (1 - ratio)})`; });
+        document.querySelectorAll('.flame-blue').forEach(el => { el.style.opacity = 0.5 + 0.5 * ratio; });
+
+        if (sootInterval) { clearInterval(sootInterval); sootInterval = null; }
+        if (val < 90) sootInterval = setInterval(createSootParticle, 20 + val * 2);
+
+        const sp = document.getElementById('statusPanel');
+        if(val >= 50) {
+            sp.className = 'status-panel'; document.getElementById('combType').innerText = 'Combustion Complète'; document.getElementById('combType').style.color = 'var(--accent-blue)'; document.getElementById('o2Status').innerText = 'Suffisante (Air entrant)'; document.getElementById('dangerAlert').style.display = 'none';
+            document.getElementById('flameStatus').innerText = 'Bleue (Très chaude)'; document.getElementById('exhaustStatus').innerText = "Dioxyde de carbone (CO₂) + Vapeur d'eau (H₂O)";
+        } else {
+            sp.className = 'status-panel warning'; document.getElementById('combType').innerText = 'Combustion Incomplète'; document.getElementById('combType').style.color = 'var(--accent-orange)'; document.getElementById('o2Status').innerText = 'Insuffisante (Danger)'; document.getElementById('dangerAlert').style.display = 'block';
+            document.getElementById('flameStatus').innerText = 'Jaune (Éclairante, forme des dépôts)'; document.getElementById('exhaustStatus').innerHTML = 'CO₂ + H₂O + <strong style="color:var(--danger-red);">Monoxyde de Carbone (CO) + Carbone (suie)</strong>';
+        }
+    });
+
+    initFlames(); airSlider.dispatchEvent(new Event('input'));
+
+    // --- ANIMATION SANG (VITESSE REDUITE) ---
+    let currentGas = 'O2';
+    let brainHealth = 100;
+    const rbcLayer = document.getElementById('rbcLayer');
+    const bloodStatus = document.getElementById('bloodStatus');
+    const brainElement = document.getElementById('brainElement');
+
+    const COLOR_EMPTY = "#ffb8b8";
+    const STROKE_EMPTY = "#e55039";
+    const COLOR_O2 = "#ff4757";
+    const STROKE_O2 = "#c0392b";
+    const COLOR_CO = "#b2bec3";
+    const STROKE_CO = "#636e72";
+
+    function setGas(gas) {
+        currentGas = gas;
+        if(gas === 'O2') {
+            bloodStatus.innerText = "✅ Respiration normale : l'O₂ nourrit l'organisme.";
+            bloodStatus.className = "status-bar";
+        } else {
+            bloodStatus.innerText = "⚠️ DANGER : Le CO prend la place de l'O₂ ! Asphyxie en cours.";
+            bloodStatus.className = "status-bar status-danger";
+        }
+    }
+
+    setInterval(() => {
+        if(brainHealth > 50) {
+            brainElement.setAttribute('class', 'brain-healthy');
+        } else {
+            brainElement.setAttribute('class', 'brain-sick');
+        }
+    }, 500);
+
+    function spawnRBC() {
+        let gY = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        let y = 100 + Math.random() * 100; 
+        gY.setAttribute("transform", `translate(0, ${y})`);
+        
+        let gX = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        
+        // Vitesse d'écoulement ralentie : entre 8 et 10 secondes pour traverser
+        let duration = 8 + Math.random() * 2;
+        gX.style.animation = `flowBlood ${duration}s linear forwards`;
+        
+        let rbc = document.createElementNS("http://www.w3.org/2000/svg", "use");
+        rbc.setAttribute("href", "#rbcTemplate");
+        rbc.setAttribute("fill", COLOR_EMPTY); 
+        rbc.setAttribute("stroke", STROKE_EMPTY);
+        
+        let mol = document.createElementNS("http://www.w3.org/2000/svg", "use");
+        mol.setAttribute("class", "mol-shape");
+        mol.style.opacity = "0"; 
+
+        gX.appendChild(rbc); 
+        gX.appendChild(mol);
+        gY.appendChild(gX);
+        rbcLayer.appendChild(gY);
+
+        let carriedGas = currentGas;
+
+        // Captation du gaz (à 15% du trajet)
+        setTimeout(() => {
+            if(!gX.parentNode) return;
+            carriedGas = currentGas; 
+            mol.style.opacity = "1";
+            
+            if(carriedGas === 'O2') {
+                mol.setAttribute("href", "#molO2");
+                rbc.setAttribute("fill", COLOR_O2);
+                rbc.setAttribute("stroke", STROKE_O2);
+            } else {
+                mol.setAttribute("href", "#molCO");
+                rbc.setAttribute("fill", COLOR_CO);
+                rbc.setAttribute("stroke", STROKE_CO);
+            }
+        }, duration * 1000 * 0.15);
+
+        // Arrivée au cerveau (à 85% du trajet)
+        setTimeout(() => {
+            if(!gX.parentNode) return;
+            if(carriedGas === 'O2') {
+                mol.style.opacity = "0"; 
+                rbc.setAttribute("fill", COLOR_EMPTY); 
+                rbc.setAttribute("stroke", STROKE_EMPTY);
+                brainHealth = Math.min(100, brainHealth + 10); 
+            } else {
+                brainHealth = Math.max(0, brainHealth - 15); 
+            }
+        }, duration * 1000 * 0.85);
+
+        // Suppression de l'élément DOM
+        setTimeout(() => { 
+            if(gY.parentNode) gY.remove(); 
+        }, duration * 1000);
+    }
+
+    // Intervalle d'apparition ralenti pour éviter de surcharger l'écran (1 globule / 600ms)
+    setInterval(spawnRBC, 600);
+
+    // Initialisation
+    for(let i=0; i<12; i++) {
+        setTimeout(spawnRBC, Math.random() * 4000);
+    }
+
+    // --- VALIDATIONS ---
+    function showFeedback(id, errors, okMsg) {
+        const el = document.getElementById(id); el.style.display = 'block';
+        if(errors.length===0) { el.className = 'feedback correct'; el.innerHTML = '✔ ' + okMsg; } 
+        else { el.className = 'feedback incorrect'; el.innerHTML = '❌ <strong>Erreurs à corriger :</strong><br>' + errors.map(e=>'- '+e).join('<br>'); }
+    }
+    function getVal(id) { let v = document.getElementById(id).value.trim(); return (v==="" || v==="1") ? 1 : parseInt(v); }
+    function styleOk(ids) { ids.forEach(id => { document.getElementById(id).style.borderColor = 'var(--success-green)'; document.getElementById(id).style.backgroundColor = '#e8f8f5'; }); }
+
+    // Partie 1
+    function checkPart1() {
+        let err = [];
+        let r1 = document.getElementById('q1a_1').value, r2 = document.getElementById('q1a_2').value;
+        if(r1===''||r2==='') err.push("1a : Tu dois choisir deux réactifs.");
+        else if(r1==='eau'||r1==='co2'||r2==='eau'||r2==='co2') err.push("1a : Les réactifs sont ce qui brûle au départ, pas ce qui est fabriqué.");
+        else if(!((r1==='methane'&&r2==='dioxygene')||(r1==='dioxygene'&&r2==='methane'))) err.push("1a : Faux. Le combustible est le méthane, et le comburant est le dioxygène de l'air.");
+        
+        let p1 = document.getElementById('q1b_1').value, p2 = document.getElementById('q1b_2').value;
+        if(p1===''||p2==='') err.push("1b : Tu dois choisir deux produits.");
+        else if(!((p1==='eau'&&p2==='co2')||(p1==='co2'&&p2==='eau'))) err.push("1b : Faux. Une combustion complète et propre ne produit que de l'eau et du dioxyde de carbone.");
+        
+        let b_r1=document.getElementById('bilan1_r1').value, b_r2=document.getElementById('bilan1_r2').value, b_p1=document.getElementById('bilan1_p1').value, b_p2=document.getElementById('bilan1_p2').value;
+        if(!((b_r1==='methane'||b_r1==='dioxygene')&&(b_r2==='methane'||b_r2==='dioxygene')&&(b_p1==='eau'||b_p1==='co2')&&(b_p2==='eau'||b_p2==='co2'))) err.push("1c : Le bilan (en mots) est incomplet ou mal ordonné par rapport aux questions précédentes.");
+        
+        if(!(getVal('eq1_1')===1 && getVal('eq1_2')===2 && getVal('eq1_3')===1 && getVal('eq1_4')===2)) err.push("1d : Équation mal équilibrée. Indice : compte d'abord les H, puis les O à la fin.");
+
+        showFeedback('fb1', err, "Parfait ! Équation : CH₄ + 2 O₂ ➔ CO₂ + 2 H₂O.");
+        if(err.length > 0) { attempts.p1++; if(attempts.p1 >= 2) document.getElementById('corr1').style.display='inline-block'; }
+    }
+    function applyCorrection1() {
+        document.getElementById('q1a_1').value='methane'; document.getElementById('q1a_2').value='dioxygene'; document.getElementById('q1b_1').value='co2'; document.getElementById('q1b_2').value='eau';
+        document.getElementById('bilan1_r1').value='methane'; document.getElementById('bilan1_r2').value='dioxygene'; document.getElementById('bilan1_p1').value='co2'; document.getElementById('bilan1_p2').value='eau';
+        document.getElementById('eq1_1').value='1'; document.getElementById('eq1_2').value='2'; document.getElementById('eq1_3').value='1'; document.getElementById('eq1_4').value='2';
+        styleOk(['q1a_1','q1a_2','q1b_1','q1b_2','bilan1_r1','bilan1_r2','bilan1_p1','bilan1_p2','eq1_1','eq1_2','eq1_3','eq1_4']); document.getElementById('fb1').style.display='none';
+    }
+
+    // Partie 2
+    function checkPart2() {
+        let err = [];
+        if(document.getElementById('q2a').value !== 'jaune') err.push("2a : Faux. Ferme les grilles d'aération sur l'animation en haut et observe la couleur de la flamme.");
+        let r1 = document.getElementById('q2b_1').value, r2 = document.getElementById('q2b_2').value;
+        if(!((r1==='methane'&&r2==='dioxygene')||(r1==='dioxygene'&&r2==='methane'))) err.push("2b : Faux. Les réactifs de départ restent les mêmes qu'à la question 1 !");
+        
+        let prods = [document.getElementById('q2c_1').value, document.getElementById('q2c_2').value, document.getElementById('q2c_3').value, document.getElementById('q2c_4').value];
+        if(!(prods.includes('eau')&&prods.includes('co2')&&prods.includes('co')&&prods.includes('carbone'))) err.push("2c : Faux. Le manque d'oxygène crée deux nouveaux produits dangereux (le monoxyde et le carbone solide).");
+        
+        let b_prods = [document.getElementById('bilan2_p1').value, document.getElementById('bilan2_p2').value, document.getElementById('bilan2_p3').value, document.getElementById('bilan2_p4').value];
+        if(!(b_prods.includes('eau')&&b_prods.includes('co2')&&b_prods.includes('co')&&b_prods.includes('carbone'))) err.push("2d : Bilan en mots incomplet.");
+        
+        if(!(getVal('eq2_1')===2 && getVal('eq2_2')===3 && getVal('eq2_3')===2 && getVal('eq2_4')===4)) err.push("2e : Équation fausse. Pense qu'il y a 8 atomes d'Hydrogène au départ (2 CH₄). Il te faut donc 4 molécules d'H₂O.");
+
+        showFeedback('fb2', err, "Excellent ! 2 CH₄ + 3 O₂ ➔ 2 CO + 4 H₂O.");
+        if(err.length > 0) { attempts.p2++; if(attempts.p2 >= 2) document.getElementById('corr2').style.display='inline-block'; }
+    }
+    function applyCorrection2() {
+        document.getElementById('q2a').value='jaune'; document.getElementById('q2b_1').value='methane'; document.getElementById('q2b_2').value='dioxygene';
+        document.getElementById('q2c_1').value='co2'; document.getElementById('q2c_2').value='eau'; document.getElementById('q2c_3').value='co'; document.getElementById('q2c_4').value='carbone';
+        document.getElementById('bilan2_r1').value='methane'; document.getElementById('bilan2_r2').value='dioxygene';
+        document.getElementById('bilan2_p1').value='co2'; document.getElementById('bilan2_p2').value='eau'; document.getElementById('bilan2_p3').value='co'; document.getElementById('bilan2_p4').value='carbone';
+        document.getElementById('eq2_2').value='3'; document.getElementById('eq2_3').value='2'; document.getElementById('eq2_4').value='4';
+        styleOk(['q2a','q2b_1','q2b_2','q2c_1','q2c_2','q2c_3','q2c_4','bilan2_r1','bilan2_r2','bilan2_p1','bilan2_p2','bilan2_p3','bilan2_p4','eq2_2','eq2_3','eq2_4']); document.getElementById('fb2').style.display='none';
+    }
+
+    // Partie 3
+    function checkPart3() {
+        let err = [];
+        if(document.getElementById('q3a_1').value !== 'oui') err.push("3a : Faux, la combustion incomplète (flamme jaune) produit bien une fumée noire visible.");
+        if(document.getElementById('q3a_2').value !== 'carbone') err.push("3a : Faux. Relis la définition d'une fumée en haut de la page : c'est un solide. Quel produit de la question 2c est solide ?");
+        if(document.getElementById('q3b').value !== 'bouchon') err.push("3b : Faux. Que fait un excès de poudre solide noire dans un tuyau étroit ?");
+        showFeedback('fb3', err, "Exact, la suie (carbone solide) crée une épaisse fumée et risque de boucher l'évacuation.");
+        if(err.length>0){ attempts.p3++; if(attempts.p3>=2) document.getElementById('corr3').style.display='inline-block'; }
+    }
+    function applyCorrection3() { document.getElementById('q3a_1').value='oui'; document.getElementById('q3a_2').value='carbone'; document.getElementById('q3b').value='bouchon'; styleOk(['q3a_1','q3a_2','q3b']); document.getElementById('fb3').style.display='none'; }
+
+    // Partie 4
+    function checkPart4() {
+        let err = [];
+        if(document.getElementById('q4a').value !== 'remplace') err.push("4a : Observe l'animation sanguine : le CO se fixe à la place de l'O₂ sur les globules rouges.");
+        if(!(document.getElementById('eff1').checked && !document.getElementById('eff2').checked && document.getElementById('eff3').checked && !document.getElementById('eff4').checked)) err.push("4b : Mauvais symptômes cochés. Un organe privé d'oxygène ne peut pas fonctionner mieux.");
+        showFeedback('fb4', err, "Parfait, le cerveau s'asphyxie en premier provoquant maux de tête, vertiges et coma.");
+        if(err.length>0){ attempts.p4++; if(attempts.p4>=2) document.getElementById('corr4').style.display='inline-block'; }
+    }
+    function applyCorrection4() {
+        document.getElementById('q4a').value='remplace'; styleOk(['q4a']);
+        document.getElementById('eff1').checked=true; document.getElementById('eff2').checked=false; document.getElementById('eff3').checked=true; document.getElementById('eff4').checked=false;
+        document.getElementById('fb4').style.display='none';
+    }
+
+    // Partie 5
+    function checkPart5a() {
+        let err = []; 
+        let valO2 = getVal('eq5_o2');
+        if(valO2 === 1) err.push("5a : N'oublie pas de compléter la case !");
+        else if(valO2 !== 49) err.push("5a : Faux. Fais le calcul : (32 × 2 atomes d'O pour CO₂) + (34 × 1 atome d'O pour H₂O) = 98 atomes d'Oxygène à droite de la flèche.");
+        showFeedback('fb5a', err, "Bravo ! L'équation équilibrée nécessite bien 49 molécules d'O₂.");
+        if(err.length>0){ attempts.p5a++; if(attempts.p5a>=2) document.getElementById('corr5a').style.display='inline-block'; }
+    }
+    function applyCorrection5a() { document.getElementById('eq5_o2').value='49'; styleOk(['eq5_o2']); document.getElementById('fb5a').style.display='none'; }
+
+    function checkPart5b() {
+        let err = []; 
+        if(document.getElementById('q5b').value !== 'beaucoup') err.push("5b : Faux. Compare avec la combustion du gaz : le méthane ne nécessite que 2 O₂, alors que le fioul en demande 49 !");
+        showFeedback('fb5b', err, "Exact, le fioul demande énormément d'air, c'est pourquoi il pollue (suie) beaucoup plus vite.");
+        if(err.length>0){ attempts.p5b++; if(attempts.p5b>=2) document.getElementById('corr5b').style.display='inline-block'; }
+    }
+    function applyCorrection5b() { document.getElementById('q5b').value='beaucoup'; styleOk(['q5b']); document.getElementById('fb5b').style.display='none'; }
+
+    // --- QCM FINAL ---
+    const qcmData = [
+        { q: "1. Qu'est-ce qu'un combustible ?", o: ["La matière qui brûle.", "Le gaz qui permet de brûler.", "La chaleur dégagée."], a: 0 },
+        { q: "2. Quel est le principal comburant contenu dans l'air ?", o: ["Le diazote.", "Le dioxyde de carbone.", "Le dioxygène."], a: 2 },
+        { q: "3. Quelle est la couleur d'une flamme lorsque la combustion est complète ?", o: ["Jaune et éclairante.", "Bleue.", "Verte."], a: 1 },
+        { q: "4. Parmi ces équations de réaction, laquelle correspond à une combustion INCOMPLÈTE ?", o: ["CH₄ + 2 O₂ ➔ CO₂ + 2 H₂O", "2 CH₄ + 3 O₂ ➔ 2 CO + 4 H₂O", "C + O₂ ➔ CO₂"], a: 1 },
+        { q: "5. Quelle est la cause principale d'une combustion incomplète ?", o: ["Un manque de dioxygène.", "Un excès de dioxygène.", "Une température trop basse."], a: 0 },
+        { q: "6. Quel gaz toxique et mortel est produit lors d'une combustion incomplète ?", o: ["Le dioxyde de carbone (CO₂).", "Le monoxyde de carbone (CO).", "Le diazote (N₂)."], a: 1 },
+        { q: "7. Qu'est-ce qu'une fumée en chimie ?", o: ["Un gaz coloré.", "Un nuage chaud transportant de minuscules particules solides en suspension.", "Un mélange de plusieurs gaz invisibles."], a: 1 },
+        { q: "8. Pourquoi le fioul encrasse-t-il beaucoup plus les chaudières que le gaz ?", o: ["Parce qu'il est liquide.", "Parce que ses grosses molécules nécessitent une quantité colossale de dioxygène pour bien brûler.", "Parce qu'il brûle à très basse température."], a: 1 },
+        { q: "9. Comment agit le monoxyde de carbone (CO) sur le corps humain ?", o: ["Il dissout les poumons.", "Il prend la place du dioxygène sur l'hémoglobine des globules rouges.", "Il détruit les parois de l'estomac."], a: 1 },
+        { q: "10. Comment prévenir l'intoxication au CO à la maison ?", o: ["Fermer toutes les aérations pour garder la chaleur en hiver.", "Aérer son logement au moins 10min par jour et faire entretenir sa chaudière.", "Installer un détecteur de fumée au plafond de la cuisine."], a: 1 }
+    ];
+
+    const qcmContainer = document.getElementById('qcmContainer');
+    qcmData.forEach((item, index) => {
+        let html = `<div class="qcm-q"><h4>${item.q}</h4><div class="qcm-options">`;
+        item.o.forEach((opt, i) => { html += `<label><input type="radio" name="qcm${index}" value="${i}"> ${opt}</label>`; });
+        html += `</div></div>`;
+        qcmContainer.innerHTML += html;
+    });
+
+    function corrigerQCM() {
+        let score = 0;
+        qcmData.forEach((item, index) => {
+            const selected = document.querySelector(`input[name="qcm${index}"]:checked`);
+            const div = document.querySelectorAll('.qcm-q')[index];
+            div.style.border = "1px solid #e1e8ed"; 
+            div.style.backgroundColor = "#fff";
+            if(selected) {
+                if(parseInt(selected.value) === item.a) {
+                    score++; div.style.border = "2px solid var(--success-green)"; div.style.backgroundColor = "#e8f8f5";
+                } else { div.style.border = "2px solid var(--danger-red)"; div.style.backgroundColor = "#fff5f5"; }
+            } else { div.style.border = "2px solid var(--accent-orange)"; }
+        });
+        const res = document.getElementById('qcmResult'); res.style.display = 'block';
+        if(score >= 8) { res.className = 'feedback correct'; res.innerHTML = `🏆 Excellent ! Score : ${score}/10`; }
+        else if(score >= 5) { res.className = 'feedback correct'; res.style.backgroundColor = "#fff3cd"; res.style.color = "#856404"; res.style.borderColor = "#ffeeba"; res.innerHTML = `👍 Bien, mais tu peux revoir quelques notions. Score : ${score}/10`; }
+        else { res.className = 'feedback incorrect'; res.innerHTML = `⚠️ Score : ${score}/10. Tu dois absolument relire le bilan final.`; }
+    }
+</script>
+</body>
+</html>
