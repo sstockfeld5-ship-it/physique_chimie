@@ -61,6 +61,7 @@
         .card.danger { border-left: 4px solid var(--danger-red); }
 
         .info-box { background: #e8f4f8; border-left: 4px solid #3498db; padding: 15px; border-radius: 4px; margin: 15px 0; font-size: 0.95rem; }
+        .consigne-box { background: #fff3cd; border: 1px solid #ffeeba; border-left: 4px solid #f39c12; padding: 15px; border-radius: 4px; margin-bottom: 15px; font-size: 1rem; color: #856404; }
 
         /* --- STYLES ANIMATION CHAUDIERE --- */
         .interactive-section { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; margin-bottom:20px; }
@@ -194,7 +195,7 @@
         @media print {
             body { background: white; padding: 0; font-size: 10pt; }
             .container { box-shadow: none; max-width: 100%; padding: 0; }
-            .controls, button, .action-btns, .tooltip-btn { display: none; }
+            .controls, button, .action-btns, .tooltip-btn, .consigne-box { display: none; }
             .svg-wrapper { border: 1px solid #000; break-inside: avoid; box-shadow: none; }
             select, input { border: 1px solid black; -webkit-appearance: none; background: transparent; }
             .card { break-inside: avoid; border: 1px solid #ccc; }
@@ -275,8 +276,7 @@
                     </linearGradient>
 
                     <linearGradient id="yellowMain" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop offset="0%" stop-color="#0984e3"/>
-                        <stop offset="15%" stop-color="#f1c40f"/>
+                        <stop offset="0%" stop-color="#0984e3"/> <stop offset="15%" stop-color="#f1c40f"/>
                         <stop offset="50%" stop-color="#ffff00"/>
                         <stop offset="100%" stop-color="#fff200"/>
                     </linearGradient>
@@ -403,7 +403,7 @@
 
     <h2>2. La Combustion Incomplète (Aération < 50%)</h2>
     <div class="card warning">
-        <h3>2a. Baisse l'aération <strong style="color:var(--danger-red);">dans l'animation de la chaudière</strong>, le dioxygène manque. Que devient la flamme ?</h3>
+        <h3>2a. Baisse l'aération à moins de 50 % <strong style="color:var(--danger-red);">dans l'animation de la chaudière</strong>, le dioxygène manque. Que devient la flamme ?</h3>
         <select id="q2a" style="max-width:400px;">
             <option value="">- Choisir -</option>
             <option value="bleue">Elle reste parfaitement bleue.</option>
@@ -478,6 +478,11 @@
     <h2>4. Danger mortel : L'intoxication au CO</h2>
     
     <div class="svg-wrapper" style="background: #2d3436; padding: 15px;">
+        
+        <div class="consigne-box">
+            <strong>👉 Consigne :</strong> Clique sur les boutons ci-dessous pour modifier l'air respiré, et observe attentivement le trajet des molécules sur l'animation !
+        </div>
+
         <div style="text-align:center; margin-bottom: 15px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
             <button id="btnO2" style="background: linear-gradient(135deg, #0984e3, #74b9ff); color:white; border:none; padding:12px 24px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onclick="setGas('O2')">🌬️ Respirer de l'Air pur (O₂)</button>
             <button id="btnCO" style="background: linear-gradient(135deg, #d63031, #ff7675); color:white; border:none; padding:12px 24px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onclick="setGas('CO')">⚠️ Respirer du CO (Danger mortel)</button>
@@ -543,10 +548,11 @@
                 <text x="700" y="240" text-anchor="middle" font-weight="bold" fill="#d35400" font-size="18">Cerveau</text>
 
                 <g id="rbcLayer"></g>
+
             </svg>
         </div>
 
-        <div class="status-bar" id="bloodStatus">
+        <div class="status-bar" id="bloodStatus" style="text-align:center; font-weight:bold; color:#0984e3; margin-top:10px; font-size:1.1rem; padding: 15px; border-radius: 8px; border-left: 5px solid #0984e3; background: #fff; transition: all 0.5s;">
             ✅ L'O₂ se fixe sur les globules rouges pour nourrir le cerveau.
         </div>
     </div>
@@ -734,10 +740,14 @@
         currentGas = gas;
         if(gas === 'O2') {
             bloodStatus.innerText = "✅ Respiration normale : l'O₂ nourrit l'organisme.";
-            bloodStatus.className = "status-bar";
+            bloodStatus.style.color = "#0984e3";
+            bloodStatus.style.borderLeftColor = "#0984e3";
+            bloodStatus.style.background = "#fff";
         } else {
             bloodStatus.innerText = "⚠️ DANGER : Le CO prend la place de l'O₂ ! Asphyxie en cours.";
-            bloodStatus.className = "status-bar status-danger";
+            bloodStatus.style.color = "#d63031";
+            bloodStatus.style.borderLeftColor = "#d63031";
+            bloodStatus.style.background = "#fff5f5";
         }
     }
 
@@ -954,12 +964,24 @@
         qcmData.forEach((item, index) => {
             const selected = document.querySelector(`input[name="qcm${index}"]:checked`);
             const div = document.querySelectorAll('.qcm-q')[index];
+            const labels = div.querySelectorAll('label');
+            
             div.style.border = "1px solid #e1e8ed"; 
             div.style.backgroundColor = "#fff";
+            labels.forEach(l => { l.style.color = ""; l.style.fontWeight = "normal"; });
+            
+            // Afficher la correction (en vert)
+            labels[item.a].style.color = "var(--success-green)";
+            labels[item.a].style.fontWeight = "bold";
+
             if(selected) {
-                if(parseInt(selected.value) === item.a) {
+                let selectedVal = parseInt(selected.value);
+                if(selectedVal === item.a) {
                     score++; div.style.border = "2px solid var(--success-green)"; div.style.backgroundColor = "#e8f8f5";
-                } else { div.style.border = "2px solid var(--danger-red)"; div.style.backgroundColor = "#fff5f5"; }
+                } else { 
+                    div.style.border = "2px solid var(--danger-red)"; div.style.backgroundColor = "#fff5f5"; 
+                    labels[selectedVal].style.color = "var(--danger-red)";
+                }
             } else { div.style.border = "2px solid var(--accent-orange)"; }
         });
         const res = document.getElementById('qcmResult'); res.style.display = 'block';
