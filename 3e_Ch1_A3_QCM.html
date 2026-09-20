@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM - Énergie et Rendement</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .question-card { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .schema-container svg { max-height: 150px; width: 100%; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <main class="w-full max-w-3xl bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+        
+        <header class="bg-blue-700 text-white p-6 text-center">
+            <h1 class="text-2xl font-bold">QCM de Physique-Chimie</h1>
+            <p class="text-blue-200 mt-2">Énergie, Convertisseurs et Rendement</p>
+        </header>
+
+        <div id="intro-screen" class="p-8 text-center">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Prêt pour le test ?</h2>
+            <p class="text-slate-600 mb-6">10 questions ont été tirées au sort. Inscris ton nom et ton prénom pour commencer.</p>
+            <input type="text" id="student-name" placeholder="Nom et Prénom" class="w-full max-w-md px-4 py-3 border-2 border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 mb-6 text-center text-lg">
+            <button id="btn-start" class="block mx-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition">Commencer le QCM</button>
+            <p id="error-name" class="text-red-500 mt-3 font-semibold hidden">⚠️ Tu dois indiquer ton nom pour commencer.</p>
+        </div>
+
+        <form id="qcm-form" class="hidden p-6 md:p-8">
+            <div id="questions-container" class="space-y-8 mb-8">
+                <!-- Les questions seront injectées ici par JavaScript -->
+            </div>
+            
+            <div class="border-t border-slate-200 pt-6">
+                <button type="submit" id="btn-submit" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-md transition text-lg">
+                    Envoyer mes réponses
+                </button>
+                <div id="loading-msg" class="hidden text-center text-blue-600 font-bold mt-4">Envoi en cours vers le serveur... ⏳</div>
+            </div>
+        </form>
+
+        <div id="result-screen" class="hidden p-8 text-center">
+            <div class="text-6xl mb-4">✅</div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">C'est terminé !</h2>
+            <p class="text-slate-600 mb-4">Tes réponses ont bien été enregistrées.</p>
+            <div class="inline-block bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+                <p class="text-sm text-blue-800 uppercase tracking-wide font-bold mb-1">Ton Score</p>
+                <p id="final-score" class="text-5xl font-bold text-blue-700">--/10</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // -------------------------------------------------------------------------
+        // LIEN GOOGLE APPS SCRIPT INTÉGRÉ ET CORRIGÉ AVEC /exec
+        // -------------------------------------------------------------------------
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx76NTuiJu8rNc6A2VsQp18655YJIf-CgjgnIRAGpDexOWi4BhCd_sJgxg_XnFXMvX8bA/exec';
+        
+        // Définition de quelques schémas SVG réutilisables
+        const schemaChute = `
+            <svg viewBox="0 0 200 120">
+                <defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ef4444"/></marker></defs>
+                <line x1="50" y1="110" x2="150" y2="110" stroke="#475569" stroke-width="4"/>
+                <text x="160" y="115" font-size="12" font-weight="bold" fill="#475569">Sol (0m)</text>
+                <circle cx="100" cy="20" r="12" fill="#3b82f6"/>
+                <line x1="100" y1="40" x2="100" y2="90" stroke="#ef4444" stroke-width="3" stroke-dasharray="4" marker-end="url(#arrow)"/>
+                <text x="115" y="60" font-size="12" font-weight="bold" fill="#ef4444">Chute</text>
+            </svg>`;
+            
+        const schemaConvertisseur = `
+            <svg viewBox="0 0 300 100">
+                <defs>
+                    <marker id="a1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#3b82f6"/></marker>
+                    <marker id="a2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#eab308"/></marker>
+                    <marker id="a3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ef4444"/></marker>
+                </defs>
+                <circle cx="150" cy="50" r="30" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+                <text x="150" y="54" text-anchor="middle" font-size="10" font-weight="bold">Convertisseur</text>
+                <line x1="30" y1="50" x2="110" y2="50" stroke="#3b82f6" stroke-width="4" marker-end="url(#a1)"/>
+                <text x="70" y="40" text-anchor="middle" font-size="12" fill="#2563eb">Énergie reçue</text>
+                <line x1="185" y1="40" x2="260" y2="40" stroke="#eab308" stroke-width="4" marker-end="url(#a2)"/>
+                <text x="225" y="30" text-anchor="middle" font-size="12" fill="#ca8a04">Énergie utile</text>
+                <line x1="180" y1="65" x2="240" y2="85" stroke="#ef4444" stroke-width="4" marker-end="url(#a3)"/>
+                <text x="210" y="95" text-anchor="middle" font-size="12" fill="#dc2626">Pertes</text>
+            </svg>`;
+
+        // Banque des 40 questions (mise à jour avec "potentielle de position" et des schémas)
+        const bank = [
+            // Formes d'énergie
+            { q: "Quelle forme d'énergie possède un objet en mouvement ?", options: ["Énergie cinétique", "Énergie potentielle de position", "Énergie thermique"], a: 0 },
+            { q: "Comment s'appelle l'énergie liée à l'altitude d'un objet par rapport à la Terre ?", schema: schemaChute, options: ["Énergie chimique", "Énergie potentielle de position", "Énergie lumineuse"], a: 1 },
+            { q: "Quelle forme d'énergie est contenue dans les aliments ou une pile ?", options: ["Énergie thermique", "Énergie chimique", "Énergie cinétique"], a: 1 },
+            { q: "La chaleur dégagée par un freinage correspond à quelle forme d'énergie ?", options: ["Énergie rayonnante", "Énergie thermique", "Énergie potentielle de position"], a: 1 },
+            { q: "Dans quelle unité légale s'exprime l'énergie en physique ?", options: ["Le Watt (W)", "Le Volt (V)", "Le Joule (J)"], a: 2 },
+            { q: "L'énergie transportée par la lumière du Soleil est appelée :", options: ["Énergie thermique", "Énergie rayonnante (ou lumineuse)", "Énergie nucléaire"], a: 1 },
+            { q: "Une voiture qui accélère sur une route toute plate voit son énergie :", options: ["Cinétique augmenter", "Potentielle de position augmenter", "Thermique diminuer"], a: 0 },
+            { q: "En observant le schéma, lors d'une chute libre, l'énergie potentielle de position :", schema: schemaChute, options: ["Augmente", "Reste constante", "Diminue"], a: 2 },
+            { q: "1 kiloJoule (1 kJ) correspond à :", options: ["10 Joules", "100 Joules", "1 000 Joules"], a: 2 },
+            { q: "L'énergie ne peut ni être créée ni détruite, elle se :", options: ["Convertit", "Multiplie", "Vaporise"], a: 0 },
+            
+            // Convertisseurs
+            { q: "En observant ce diagramme, quel est le rôle d'un convertisseur d'énergie ?", schema: schemaConvertisseur, options: ["Créer de l'énergie", "Transformer une forme d'énergie en d'autres formes", "Détruire l'énergie"], a: 1 },
+            { q: "Quelle énergie entre dans un alternateur pour le faire tourner ?", options: ["Énergie cinétique (mécanique)", "Énergie électrique", "Énergie thermique"], a: 0 },
+            { q: "Quelle énergie utile (celle qu'on désire) sort d'un alternateur ?", options: ["Énergie cinétique", "Énergie thermique", "Énergie électrique"], a: 2 },
+            { q: "Un panneau solaire photovoltaïque convertit l'énergie lumineuse en :", options: ["Énergie électrique", "Énergie chimique", "Énergie cinétique"], a: 0 },
+            { q: "Quel est le convertisseur présent dans un phare de vélo ?", options: ["L'ampoule (ou la LED)", "L'alternateur", "Le pneu"], a: 0 },
+            { q: "Un moteur électrique convertit l'énergie électrique principalement en :", options: ["Énergie thermique", "Énergie cinétique", "Énergie lumineuse"], a: 1 },
+            { q: "Une pile électrique est un convertisseur qui transforme l'énergie chimique en :", options: ["Énergie thermique", "Énergie électrique", "Énergie lumineuse"], a: 1 },
+            { q: "Dans une centrale hydroélectrique, quel dispositif fait directement tourner l'alternateur ?", options: ["Le transformateur", "La turbine", "Le réseau"], a: 1 },
+            { q: "Sur le diagramme énergétique d'une ampoule, la flèche rouge des pertes correspond à quelle énergie ?", schema: schemaConvertisseur, options: ["Énergie chimique", "Énergie thermique", "Énergie lumineuse"], a: 1 },
+            { q: "Un radiateur électrique est un convertisseur dont l'énergie utile est :", options: ["L'énergie lumineuse", "L'énergie thermique", "L'énergie potentielle de position"], a: 1 },
+            
+            // Barrage et Hydroélectricité
+            { q: "L'eau retenue en altitude par le barrage Hoover possède une grande quantité d'énergie :", options: ["Électrique", "Potentielle de position", "Chimique"], a: 1 },
+            { q: "Dans la conduite forcée d'un barrage, l'énergie potentielle de position de l'eau qui descend se convertit en :", options: ["Énergie cinétique", "Énergie nucléaire", "Énergie thermique"], a: 0 },
+            { q: "La centrale hydroélectrique du barrage Hoover se situe :", options: ["Au sommet du barrage", "Sur le lac", "Au pied du barrage (en contrebas)"], a: 2 },
+            { q: "En sortie de centrale, l'eau possède encore de l'énergie potentielle de position car :", options: ["Elle coule vite", "Elle se trouve encore à 196m au-dessus du niveau de la mer", "Elle est très froide"], a: 1 },
+            { q: "L'énergie reçue par la turbine dans un barrage hydraulique est :", options: ["De l'énergie cinétique (l'eau en mouvement)", "De l'énergie électrique", "De l'énergie thermique"], a: 0 },
+            { q: "L'eau sortant d'un barrage garde de l'énergie cinétique car :", options: ["Elle a encore de la vitesse (le courant du fleuve)", "Elle est en altitude", "Elle fait tourner l'alternateur"], a: 0 },
+            { q: "Le barrage Hoover est construit sur le fleuve :", options: ["Mississippi", "Colorado", "Amazone"], a: 1 },
+            { q: "Quelle structure en béton permet d'acheminer l'eau vers les turbines d'un barrage ?", options: ["Le réseau électrique", "La conduite forcée", "Le canal d'irrigation"], a: 1 },
+            { q: "L'immense lac artificiel créé par le barrage Hoover s'appelle :", options: ["Le Lac Supérieur", "Le Lac Léman", "Le Lac Mead"], a: 2 },
+            { q: "L'alternateur et la turbine d'une centrale sont couplés par :", options: ["Un câble électrique", "Un axe mécanique rotatif", "Un tuyau d'eau"], a: 1 },
+
+            // Rendement
+            { q: "Le rendement d'un système est un nombre toujours compris entre :", options: ["0 et 1 (soit 0% et 100%)", "1 et 10", "100 et 1000%"], a: 0 },
+            { q: "Quelle est la formule mathématique du rendement énergétique ?", options: ["Énergie reçue / Énergie utile", "Énergie utile / Énergie reçue", "Énergie utile + Énergie reçue"], a: 1 },
+            { q: "Si un convertisseur reçoit 100 J et fournit 40 J utiles, son rendement est de :", schema: schemaConvertisseur, options: ["40 %", "60 %", "140 %"], a: 0 },
+            { q: "Pourquoi le rendement d'une ampoule à incandescence classique est-il très faible (environ 8%) ?", options: ["Elle produit trop de lumière", "Elle perd 92% de l'énergie sous forme de chaleur", "Le courant électrique est trop faible"], a: 1 },
+            { q: "Plus le rendement d'un système s'approche de 100%, plus ce système est :", options: ["Gourmand en énergie", "Lent à démarrer", "Efficace (performant)"], a: 2 },
+            { q: "Dans un diagramme énergétique, la somme des énergies de sortie (utile + pertes) est toujours égale à :", schema: schemaConvertisseur, options: ["0 Joule", "L'énergie totale reçue en entrée", "100 Joules"], a: 1 },
+            { q: "L'énergie perdue par frottement dans un système mécanique se dissipe sous forme :", options: ["Cinétique", "Rayonnante", "Thermique"], a: 2 },
+            { q: "Si la centrale Hoover reçoit 3600 MJ et produit 2080 MJ utiles, l'énergie thermique perdue vaut :", options: ["5680 MJ", "1520 MJ", "2080 MJ"], a: 1 },
+            { q: "Le rendement d'un gros alternateur de centrale (comme à Hoover) est généralement :", options: ["Très faible (moins de 10%)", "Moyen (autour de 50%)", "Très élevé (plus de 95%)"], a: 2 },
+            { q: "Si un convertisseur avait un rendement de 100% (impossible en réalité), cela signifierait que :", options: ["Il n'y aurait aucune perte thermique", "Il ne fonctionnerait pas", "Il produirait du froid"], a: 0 }
+        ];
+
+        let selectedQuestions = [];
+        let studentName = "";
+
+        const introScreen = document.getElementById('intro-screen');
+        const qcmForm = document.getElementById('qcm-form');
+        const resultScreen = document.getElementById('result-screen');
+        const questionsContainer = document.getElementById('questions-container');
+
+        // Initialisation : Tirage au sort de 10 questions
+        function initQCM() {
+            const shuffled = [...bank].sort(() => 0.5 - Math.random());
+            selectedQuestions = shuffled.slice(0, 10);
+            
+            selectedQuestions.forEach((qObj, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = "question-card bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm";
+                
+                // Vérifier si un schéma est présent
+                let schemaHTML = "";
+                if(qObj.schema) {
+                    schemaHTML = `<div class="schema-container mb-4 p-4 bg-white border border-slate-200 rounded-lg flex justify-center">${qObj.schema}</div>`;
+                }
+
+                let optionsHTML = "";
+                qObj.options.forEach((opt, optIndex) => {
+                    optionsHTML += `
+                        <label class="flex items-center p-3 mt-3 bg-white border border-slate-300 rounded-lg cursor-pointer hover:bg-blue-50 transition">
+                            <input type="radio" name="q${index}" value="${optIndex}" class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500" required>
+                            <span class="ml-3 text-slate-700">${opt}</span>
+                        </label>
+                    `;
+                });
+
+                questionDiv.innerHTML = `
+                    <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-blue-600 mr-2">Q${index + 1}.</span> ${qObj.q}</p>
+                    ${schemaHTML}
+                    <div class="space-y-2">
+                        ${optionsHTML}
+                    </div>
+                `;
+                questionsContainer.appendChild(questionDiv);
+            });
+        }
+
+        document.getElementById('btn-start').addEventListener('click', () => {
+            const nameInput = document.getElementById('student-name').value.trim();
+            if (nameInput === "") {
+                document.getElementById('error-name').classList.remove('hidden');
+                return;
+            }
+            studentName = nameInput;
+            introScreen.classList.add('hidden');
+            qcmForm.classList.remove('hidden');
+            initQCM();
+        });
+
+        qcmForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const btnSubmit = document.getElementById('btn-submit');
+            const loadingMsg = document.getElementById('loading-msg');
+            
+            btnSubmit.disabled = true;
+            btnSubmit.classList.add('opacity-50');
+            loadingMsg.classList.remove('hidden');
+
+            let score = 0;
+            let detailsArray = [];
+
+            // Calcul du score et création du détail
+            selectedQuestions.forEach((qObj, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                const studentAnswerIndex = parseInt(selected.value);
+                const isCorrect = (studentAnswerIndex === qObj.a);
+                
+                if (isCorrect) score++;
+
+                detailsArray.push(`Q${index + 1}: ${isCorrect ? 'V' : 'F'} (Rép: ${qObj.options[studentAnswerIndex]})`);
+            });
+
+            // Préparation des données pour Google Apps Script
+            const payload = {
+                nom: studentName,
+                score: `${score}/10`,
+                details: detailsArray.join(" | ")
+            };
+
+            // Envoi des données
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8", 
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                qcmForm.classList.add('hidden');
+                resultScreen.classList.remove('hidden');
+                document.getElementById('final-score').innerText = `${score}/10`;
+            })
+            .catch(error => {
+                console.error("Erreur d'envoi", error);
+                alert("Une erreur s'est produite lors de l'envoi. Assure-toi d'être bien connecté à internet.");
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-50');
+                loadingMsg.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
