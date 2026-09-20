@@ -60,11 +60,10 @@
 
     <script>
         // -------------------------------------------------------------------------
-        // LIEN GOOGLE APPS SCRIPT INTÉGRÉ ET CORRIGÉ AVEC /exec
+        // LIEN GOOGLE APPS SCRIPT CORRIGÉ
         // -------------------------------------------------------------------------
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx76NTuiJu8rNc6A2VsQp18655YJIf-CgjgnIRAGpDexOWi4BhCd_sJgxg_XnFXMvX8bA/exec';
         
-        // Définition de quelques schémas SVG réutilisables
         const schemaChute = `
             <svg viewBox="0 0 200 120">
                 <defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ef4444"/></marker></defs>
@@ -92,9 +91,7 @@
                 <text x="210" y="95" text-anchor="middle" font-size="12" fill="#dc2626">Pertes</text>
             </svg>`;
 
-        // Banque des 40 questions (mise à jour avec "potentielle de position" et des schémas)
         const bank = [
-            // Formes d'énergie
             { q: "Quelle forme d'énergie possède un objet en mouvement ?", options: ["Énergie cinétique", "Énergie potentielle de position", "Énergie thermique"], a: 0 },
             { q: "Comment s'appelle l'énergie liée à l'altitude d'un objet par rapport à la Terre ?", schema: schemaChute, options: ["Énergie chimique", "Énergie potentielle de position", "Énergie lumineuse"], a: 1 },
             { q: "Quelle forme d'énergie est contenue dans les aliments ou une pile ?", options: ["Énergie thermique", "Énergie chimique", "Énergie cinétique"], a: 1 },
@@ -105,8 +102,6 @@
             { q: "En observant le schéma, lors d'une chute libre, l'énergie potentielle de position :", schema: schemaChute, options: ["Augmente", "Reste constante", "Diminue"], a: 2 },
             { q: "1 kiloJoule (1 kJ) correspond à :", options: ["10 Joules", "100 Joules", "1 000 Joules"], a: 2 },
             { q: "L'énergie ne peut ni être créée ni détruite, elle se :", options: ["Convertit", "Multiplie", "Vaporise"], a: 0 },
-            
-            // Convertisseurs
             { q: "En observant ce diagramme, quel est le rôle d'un convertisseur d'énergie ?", schema: schemaConvertisseur, options: ["Créer de l'énergie", "Transformer une forme d'énergie en d'autres formes", "Détruire l'énergie"], a: 1 },
             { q: "Quelle énergie entre dans un alternateur pour le faire tourner ?", options: ["Énergie cinétique (mécanique)", "Énergie électrique", "Énergie thermique"], a: 0 },
             { q: "Quelle énergie utile (celle qu'on désire) sort d'un alternateur ?", options: ["Énergie cinétique", "Énergie thermique", "Énergie électrique"], a: 2 },
@@ -117,8 +112,6 @@
             { q: "Dans une centrale hydroélectrique, quel dispositif fait directement tourner l'alternateur ?", options: ["Le transformateur", "La turbine", "Le réseau"], a: 1 },
             { q: "Sur le diagramme énergétique d'une ampoule, la flèche rouge des pertes correspond à quelle énergie ?", schema: schemaConvertisseur, options: ["Énergie chimique", "Énergie thermique", "Énergie lumineuse"], a: 1 },
             { q: "Un radiateur électrique est un convertisseur dont l'énergie utile est :", options: ["L'énergie lumineuse", "L'énergie thermique", "L'énergie potentielle de position"], a: 1 },
-            
-            // Barrage et Hydroélectricité
             { q: "L'eau retenue en altitude par le barrage Hoover possède une grande quantité d'énergie :", options: ["Électrique", "Potentielle de position", "Chimique"], a: 1 },
             { q: "Dans la conduite forcée d'un barrage, l'énergie potentielle de position de l'eau qui descend se convertit en :", options: ["Énergie cinétique", "Énergie nucléaire", "Énergie thermique"], a: 0 },
             { q: "La centrale hydroélectrique du barrage Hoover se situe :", options: ["Au sommet du barrage", "Sur le lac", "Au pied du barrage (en contrebas)"], a: 2 },
@@ -129,8 +122,6 @@
             { q: "Quelle structure en béton permet d'acheminer l'eau vers les turbines d'un barrage ?", options: ["Le réseau électrique", "La conduite forcée", "Le canal d'irrigation"], a: 1 },
             { q: "L'immense lac artificiel créé par le barrage Hoover s'appelle :", options: ["Le Lac Supérieur", "Le Lac Léman", "Le Lac Mead"], a: 2 },
             { q: "L'alternateur et la turbine d'une centrale sont couplés par :", options: ["Un câble électrique", "Un axe mécanique rotatif", "Un tuyau d'eau"], a: 1 },
-
-            // Rendement
             { q: "Le rendement d'un système est un nombre toujours compris entre :", options: ["0 et 1 (soit 0% et 100%)", "1 et 10", "100 et 1000%"], a: 0 },
             { q: "Quelle est la formule mathématique du rendement énergétique ?", options: ["Énergie reçue / Énergie utile", "Énergie utile / Énergie reçue", "Énergie utile + Énergie reçue"], a: 1 },
             { q: "Si un convertisseur reçoit 100 J et fournit 40 J utiles, son rendement est de :", schema: schemaConvertisseur, options: ["40 %", "60 %", "140 %"], a: 0 },
@@ -151,7 +142,6 @@
         const resultScreen = document.getElementById('result-screen');
         const questionsContainer = document.getElementById('questions-container');
 
-        // Initialisation : Tirage au sort de 10 questions
         function initQCM() {
             const shuffled = [...bank].sort(() => 0.5 - Math.random());
             selectedQuestions = shuffled.slice(0, 10);
@@ -160,7 +150,6 @@
                 const questionDiv = document.createElement('div');
                 questionDiv.className = "question-card bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm";
                 
-                // Vérifier si un schéma est présent
                 let schemaHTML = "";
                 if(qObj.schema) {
                     schemaHTML = `<div class="schema-container mb-4 p-4 bg-white border border-slate-200 rounded-lg flex justify-center">${qObj.schema}</div>`;
@@ -212,7 +201,6 @@
             let score = 0;
             let detailsArray = [];
 
-            // Calcul du score et création du détail
             selectedQuestions.forEach((qObj, index) => {
                 const selected = document.querySelector(`input[name="q${index}"]:checked`);
                 const studentAnswerIndex = parseInt(selected.value);
@@ -223,30 +211,26 @@
                 detailsArray.push(`Q${index + 1}: ${isCorrect ? 'V' : 'F'} (Rép: ${qObj.options[studentAnswerIndex]})`);
             });
 
-            // Préparation des données pour Google Apps Script
-            const payload = {
+            // Format URLSearchParams requis pour contourner le blocage
+            const payload = new URLSearchParams({
                 nom: studentName,
                 score: `${score}/10`,
                 details: detailsArray.join(" | ")
-            };
+            });
 
-            // Envoi des données
             fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify(payload),
-                headers: {
-                    "Content-Type": "text/plain;charset=utf-8", 
-                }
+                mode: 'no-cors',
+                body: payload
             })
-            .then(response => response.json())
-            .then(data => {
+            .then(() => {
                 qcmForm.classList.add('hidden');
                 resultScreen.classList.remove('hidden');
                 document.getElementById('final-score').innerText = `${score}/10`;
             })
             .catch(error => {
                 console.error("Erreur d'envoi", error);
-                alert("Une erreur s'est produite lors de l'envoi. Assure-toi d'être bien connecté à internet.");
+                alert("Une erreur de connexion s'est produite.");
                 btnSubmit.disabled = false;
                 btnSubmit.classList.remove('opacity-50');
                 loadingMsg.classList.add('hidden');
