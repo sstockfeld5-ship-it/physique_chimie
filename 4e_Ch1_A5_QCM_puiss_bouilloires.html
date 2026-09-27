@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QCM — Puissance et Énergie électrique (4e)</title>
+<style>
+  :root {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --accent: #0284c7;
+    --accent-light: #e0f2fe;
+    --ok: #16a34a;
+    --ok-bg: #dcfce7;
+    --err: #dc2626;
+    --err-bg: #fee2e2;
+    --border: #cbd5e1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 820px; margin: 20px auto 40px; padding: 0 16px; }
+  header { text-align: center; margin-bottom: 20px; }
+  h1 { margin: 0 0 6px; font-size: clamp(22px, 3vw, 30px); color: #0f172a; }
+  .subtitle { color: var(--muted); font-size: 15px; margin: 0; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    margin-bottom: 16px;
+  }
+
+  /* Barre de progression */
+  .top-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px; font-weight: 600; color: #334155; font-size: 15px;
+  }
+  .progress-track {
+    height: 10px; background: #e2e8f0; border-radius: 999px;
+    overflow: hidden; margin-bottom: 20px;
+  }
+  .progress-fill {
+    height: 100%; width: 10%;
+    background: linear-gradient(90deg, #0284c7, #38bdf8);
+    transition: width 0.3s ease;
+  }
+
+  /* Question et illustration */
+  .q-title { font-size: 18px; font-weight: 700; margin: 0 0 14px; color: #0f172a; }
+  .svg-container {
+    background: #f8fafc; border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px; margin: 0 auto 16px;
+    text-align: center; max-width: 540px;
+  }
+  .svg-container svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+  /* Options de réponse */
+  .options { display: grid; gap: 10px; }
+  .opt-btn {
+    text-align: left; background: #f8fafc;
+    border: 2px solid var(--border); border-radius: 12px;
+    padding: 12px 16px; font-size: 16px; color: var(--text);
+    cursor: pointer; transition: all 0.15s; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent); background: #f0f9ff; }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct { border-color: var(--ok); background: var(--ok-bg); color: #14532d; font-weight: 700; }
+  .opt-btn.wrong { border-color: var(--err); background: var(--err-bg); color: #7f1d1d; }
+  .opt-letter {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #e2e8f0; color: #334155; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .opt-btn.correct .opt-letter { background: var(--ok); color: #fff; }
+  .opt-btn.wrong .opt-letter { background: var(--err); color: #fff; }
+
+  /* Explication */
+  .feedback {
+    display: none; margin-top: 16px; padding: 14px;
+    border-radius: 12px; background: #f0f9ff; border-left: 4px solid var(--accent);
+    color: #0c4a6e; font-size: 15px;
+  }
+  .feedback.show { display: block; }
+
+  /* Boutons de navigation */
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn-main {
+    background: var(--accent); color: #fff; border: none;
+    padding: 12px 20px; border-radius: 12px; font-size: 16px;
+    font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-main:hover { opacity: 0.9; }
+  .btn-main:disabled { background: #94a3b8; cursor: not-allowed; }
+
+  /* Écran final */
+  .score-big { font-size: 42px; font-weight: 800; color: var(--accent); text-align: center; margin: 10px 0; }
+  .recap-item {
+    border-bottom: 1px solid var(--border); padding: 12px 0; font-size: 15px;
+  }
+  .recap-item:last-child { border-bottom: none; }
+  .badge-ok { color: var(--ok); font-weight: 700; }
+  .badge-err { color: var(--err); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>QCM — Énergie et Puissance électrique</h1>
+    <p class="subtitle">10 questions tirées au sort parmi 40 • Niveau 4e</p>
+  </header>
+
+  <div class="card" id="quiz-box">
+    <div class="top-bar">
+      <span id="q-counter">Question 1 / 10</span>
+      <span id="score-live">Score : 0</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <div class="q-title" id="q-text"></div>
+    <div class="svg-container" id="q-svg" style="display:none;"></div>
+    <div class="options" id="q-options"></div>
+    <div class="feedback" id="q-feedback"></div>
+
+    <div class="actions">
+      <button class="btn-main" id="next-btn" style="display:none;">Question suivante ➔</button>
+    </div>
+  </div>
+
+  <div class="card" id="result-box" style="display:none;">
+    <h2 style="text-align:center; margin-top:0;">Résultat du QCM</h2>
+    <div class="score-big" id="final-score"></div>
+    <p id="final-msg" style="text-align:center; font-weight:600; color:#334155;"></p>
+    <div style="text-align:center; margin: 20px 0;">
+      <button class="btn-main" id="restart-btn">🔄 Nouveau tirage de 10 questions</button>
+    </div>
+    <h3>Récapitulatif de tes réponses :</h3>
+    <div id="recap-list"></div>
+  </div>
+</div>
+
+<script>
+// --- GÉNÉRATEURS DE SCHÉMAS SVG EXPLICATIFS ---
+
+function svgChain(device, inputE, outputE1, outputE2 = null) {
+  const out2Svg = outputE2 ? `
+    <line x1="310" y1="80" x2="395" y2="110" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="4" marker-end="url(#arr)"/>
+    <text x="410" y="115" fill="#dc2626" font-size="13" font-weight="bold">${outputE2}</text>
+  ` : '';
+  return `<svg viewBox="0 0 540 140">
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+        <path d="M0,1 L0,7 L8,4 z" fill="#0284c7"/>
+      </marker>
+    </defs>
+    <rect x="10" y="45" width="130" height="50" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+    <text x="75" y="75" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="bold">${inputE}</text>
+    <line x1="140" y1="70" x2="195" y2="70" stroke="#0284c7" stroke-width="3" marker-end="url(#arr)"/>
+    <ellipse cx="255" cy="70" rx="55" ry="35" fill="#ffffff" stroke="#334155" stroke-width="2.5"/>
+    <text x="255" y="75" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="bold">${device}</text>
+    <line x1="310" y1="65" x2="385" y2="50" stroke="#0284c7" stroke-width="3" marker-end="url(#arr)"/>
+    <rect x="395" y="25" width="135" height="50" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="462" y="55" text-anchor="middle" fill="#14532d" font-size="13" font-weight="bold">${outputE1}</text>
+    ${out2Svg}
+  </svg>`;
+}
+
+function svgPlaque(nom, pStr, uStr = "230 V ~ 50 Hz") {
+  return `<svg viewBox="0 0 360 120">
+    <rect x="20" y="10" width="320" height="100" rx="6" fill="#f1f5f9" stroke="#475569" stroke-width="3"/>
+    <circle cx="35" cy="25" r="4" fill="#64748b"/><circle cx="325" cy="25" r="4" fill="#64748b"/>
+    <circle cx="35" cy="95" r="4" fill="#64748b"/><circle cx="325" cy="95" r="4" fill="#64748b"/>
+    <text x="180" y="38" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="800">${nom}</text>
+    <text x="180" y="65" text-anchor="middle" fill="#334155" font-size="14" font-family="monospace">Tension : ${uStr}</text>
+    <text x="180" y="90" text-anchor="middle" fill="#0284c7" font-size="16" font-weight="bold" font-family="monospace">Puissance : ${pStr}</text>
+  </svg>`;
+}
+
+function svgTriangle(missing = "") {
+  const eTxt = missing === "E" ? "?" : "E";
+  const pTxt = missing === "P" ? "?" : "P";
+  const tTxt = missing === "t" ? "?" : "t";
+  return `<svg viewBox="0 0 260 150">
+    <polygon points="130,15 40,135 220,135" fill="#ffffff" stroke="#0284c7" stroke-width="3" stroke-linejoin="round"/>
+    <line x1="85" y1="75" x2="175" y2="75" stroke="#0284c7" stroke-width="3"/>
+    <line x1="130" y1="75" x2="130" y2="135" stroke="#0284c7" stroke-width="3"/>
+    <text x="130" y="62" text-anchor="middle" fill="#0284c7" font-size="22" font-weight="800">${eTxt}</text>
+    <text x="102" y="118" text-anchor="middle" fill="#0f172a" font-size="20" font-weight="800">${pTxt}</text>
+    <text x="158" y="118" text-anchor="middle" fill="#0f172a" font-size="20" font-weight="800">${tTxt}</text>
+  </svg>`;
+}
+
+function svgKettleComp() {
+  return `<svg viewBox="0 0 440 130">
+    <rect x="20" y="20" width="110" height="90" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+    <text x="75" y="55" text-anchor="middle" font-weight="800" font-size="16" fill="#0f172a">Bouilloire A</text>
+    <text x="75" y="80" text-anchor="middle" font-size="14" fill="#0284c7" font-weight="bold">1500 W</text>
+    <rect x="165" y="20" width="110" height="90" rx="10" fill="#f0f9ff" stroke="#0284c7" stroke-width="2"/>
+    <text x="220" y="55" text-anchor="middle" font-weight="800" font-size="16" fill="#0f172a">Bouilloire B</text>
+    <text x="220" y="80" text-anchor="middle" font-size="14" fill="#0284c7" font-weight="bold">2000 W</text>
+    <rect x="310" y="20" width="110" height="90" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+    <text x="365" y="55" text-anchor="middle" font-weight="800" font-size="16" fill="#0f172a">Bouilloire C</text>
+    <text x="365" y="80" text-anchor="middle" font-size="14" fill="#0284c7" font-weight="bold">2500 W</text>
+  </svg>`;
+}
+
+function svgFacture(index1, index2) {
+  return `<svg viewBox="0 0 420 115">
+    <rect x="10" y="5" width="400" height="105" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="25" y="30" fill="#0f172a" font-size="15" font-weight="bold">Relevé de compteur électrique</text>
+    <text x="25" y="58" fill="#475569" font-size="14">Ancien index (début du mois) : <tspan font-weight="bold" fill="#0f172a">${index1} kWh</tspan></text>
+    <text x="25" y="82" fill="#475569" font-size="14">Nouvel index (fin du mois) : <tspan font-weight="bold" fill="#0284c7">${index2} kWh</tspan></text>
+    <text x="25" y="102" fill="#64748b" font-size="12">Prix unitaire : 0,20 € / kWh</text>
+  </svg>`;
+}
+
+// --- BANQUE DE 40 QUESTIONS ---
+const allQuestions = [
+  // 1 à 8 : Bouilloire et notions de base
+  {
+    q: "Quelle conversion d'énergie est réalisée par une bouilloire électrique ?",
+    svg: svgChain("Bouilloire", "Énergie ?", "Énergie ?"),
+    opts: [
+      "Énergie électrique ➔ Énergie thermique",
+      "Énergie thermique ➔ Énergie électrique",
+      "Énergie électrique ➔ Énergie lumineuse",
+      "Énergie chimique ➔ Énergie cinétique"
+    ],
+    ans: 0,
+    exp: "La bouilloire reçoit de l'énergie électrique du réseau et la convertit en énergie thermique (chaleur) grâce à sa résistance."
+  },
+  {
+    q: "Quel composant interne de la bouilloire permet de convertir l'énergie électrique en chaleur ?",
+    svg: null,
+    opts: ["Une résistance chauffante", "Un alternateur", "Une diode électroluminescente", "Une turbine"],
+    ans: 0,
+    exp: "C'est la résistance électrique (par effet Joule) qui chauffe l'eau au fond de la bouilloire."
+  },
+  {
+    q: "À pression atmosphérique normale, à quelle température l'eau pure entre-t-elle en ébullition dans la bouilloire ?",
+    svg: null,
+    opts: ["100 °C", "80 °C", "120 °C", "50 °C"],
+    ans: 0,
+    exp: "Sous pression atmosphérique normale, l'eau pure bout à 100 °C."
+  },
+  {
+    q: "Quelle est la source d'énergie utilisée par une bouilloire branchée sur une prise secteur ?",
+    svg: null,
+    opts: ["L'électricité du réseau", "La chaleur de l'eau", "Une batterie interne", "Le gaz naturel"],
+    ans: 0,
+    exp: "La prise secteur fournit l'énergie électrique provenant du réseau électrique."
+  },
+  {
+    q: "On compare 3 bouilloires contenant 0,5 L d'eau à 20 °C. Laquelle portera l'eau à ébullition le plus rapidement ?",
+    svg: svgKettleComp(),
+    opts: ["La bouilloire C (2500 W)", "La bouilloire A (1500 W)", "La bouilloire B (2000 W)", "Elles mettent toutes le même temps"],
+    ans: 0,
+    exp: "Plus la puissance P est élevée, plus l'appareil transfère d'énergie chaque seconde, et plus la durée de chauffe est courte."
+  },
+  {
+    q: "Que signifie concrètement l'indication « 2000 W » inscrite sur la bouilloire B ?",
+    svg: svgPlaque("BOUILLOIRE B", "2000 W"),
+    opts: [
+      "Elle transfère 2000 joules par seconde (2000 J/s)",
+      "Elle consomme 2000 joules par heure",
+      "Elle met 2000 secondes à chauffer l'eau",
+      "Sa température maximale est de 2000 °C"
+    ],
+    ans: 0,
+    exp: "1 watt équivaut à 1 joule par seconde (1 W = 1 J/s). Donc 2000 W = 2000 J/s."
+  },
+  {
+    q: "On chauffe 0,5 L d'eau de 20 °C à 100 °C avec les bouilloires A (1500 W), B (2000 W) et C (2500 W). Laquelle consomme le moins d'énergie utile pour faire bouillir cette eau ?",
+    svg: svgKettleComp(),
+    opts: [
+      "Aucune : l'énergie nécessaire est pratiquement la même pour les trois",
+      "La bouilloire A car sa puissance est plus faible",
+      "La bouilloire C car elle chauffe très vite",
+      "La bouilloire B car elle est intermédiaire"
+    ],
+    ans: 0,
+    exp: "Pour chauffer la même quantité d'eau de 20 °C à 100 °C, l'énergie thermique requise est identique (environ 167 000 J). Seule la durée change !"
+  },
+  {
+    q: "Complète la phrase du cours : « Plus la puissance d'une bouilloire est grande, plus la durée de chauffe est... »",
+    svg: null,
+    opts: ["courte", "longue", "identique", "proportionnelle"],
+    ans: 0,
+    exp: "À énergie égale, si la puissance augmente, la durée de fonctionnement diminue."
+  },
+
+  // 9 à 16 : Unités et formules (E = P x t)
+  {
+    q: "Quelle est l'unité légale (du Système International) de la puissance électrique ?",
+    svg: null,
+    opts: ["Le watt (W)", "Le joule (J)", "Le volt (V)", "Le kilowattheure (kWh)"],
+    ans: 0,
+    exp: "La puissance s'exprime en watts (W). Le joule et le kilowattheure sont des unités d'énergie."
+  },
+  {
+    q: "Quelle est l'unité légale (du Système International) de l'énergie ?",
+    svg: null,
+    opts: ["Le joule (J)", "Le watt (W)", "L'ampère (A)", "L'ohm (Ω)"],
+    ans: 0,
+    exp: "L'unité internationale d'énergie est le joule (J)."
+  },
+  {
+    q: "Quelle formule mathématique relie l'énergie consommée (E), la puissance (P) et la durée d'utilisation (t) ?",
+    svg: svgTriangle("E"),
+    opts: ["E = P × t", "E = P / t", "E = t / P", "E = P + t"],
+    ans: 0,
+    exp: "L'énergie est égale au produit de la puissance par le temps : E = P × t."
+  },
+  {
+    q: "Dans la formule E = P × t, quelles unités faut-il choisir pour obtenir l'énergie E en joules (J) ?",
+    svg: svgTriangle(),
+    opts: [
+      "P en watts (W) et t en secondes (s)",
+      "P en kilowatts (kW) et t en heures (h)",
+      "P en watts (W) et t en heures (h)",
+      "P en kilowatts (kW) et t en minutes (min)"
+    ],
+    ans: 0,
+    exp: "Puisque 1 W = 1 J/s, multiplier des watts par des secondes donne des joules : W × s = J."
+  },
+  {
+    q: "Dans la formule E = P × t, quelles unités faut-il choisir pour obtenir directement l'énergie E en kilowattheures (kWh) ?",
+    svg: svgTriangle(),
+    opts: [
+      "P en kilowatts (kW) et t en heures (h)",
+      "P en watts (W) et t en secondes (s)",
+      "P en watts (W) et t en heures (h)",
+      "P en kilowatts (kW) et t en secondes (s)"
+    ],
+    ans: 0,
+    exp: "En exprimant P en kilowatts (kW) et t en heures (h), le produit P × t donne directement des kilowattheures (kWh)."
+  },
+  {
+    q: "À partir de la relation E = P × t, comment calcule-t-on la puissance P si l'on connaît l'énergie E et la durée t ?",
+    svg: svgTriangle("P"),
+    opts: ["P = E / t", "P = E × t", "P = t / E", "P = E - t"],
+    ans: 0,
+    exp: "En isolant P dans E = P × t, on obtient P = E / t."
+  },
+  {
+    q: "À partir de la relation E = P × t, comment calcule-t-on la durée t si l'on connaît l'énergie E et la puissance P ?",
+    svg: svgTriangle("t"),
+    opts: ["t = E / P", "t = E × P", "t = P / E", "t = E + P"],
+    ans: 0,
+    exp: "En isolant t dans E = P × t, on obtient t = E / P."
+  },
+  {
+    q: "Combien de joules représente 1 kilowattheure (1 kWh) ?",
+    svg: null,
+    opts: ["3 600 000 J (3,6 × 10⁶ J)", "3 600 J", "1 000 J", "60 000 J"],
+    ans: 0,
+    exp: "1 kWh = 1000 W × 3600 s = 3 600 000 J."
+  },
+
+  // 17 à 24 : Conversions d'unités (Puissance, Temps, Énergie)
+  {
+    q: "Convertis en secondes la durée d'ébullition de la bouilloire A : t = 1 min 51 s.",
+    svg: null,
+    opts: ["111 s", "151 s", "91 s", "110 s"],
+    ans: 0,
+    exp: "1 min = 60 s. On calcule donc : 60 s + 51 s = 111 s."
+  },
+  {
+    q: "Convertis la puissance P = 2500 W en kilowatts (kW).",
+    svg: svgPlaque("BOUILLOIRE C", "2500 W"),
+    opts: ["2,5 kW", "25 kW", "0,25 kW", "250 kW"],
+    ans: 0,
+    exp: "1 kW = 1000 W. On divise par 1000 : 2500 / 1000 = 2,5 kW."
+  },
+  {
+    q: "Un radiateur électrique a une puissance de 1,8 kW. Quelle est sa puissance en watts (W) ?",
+    svg: svgPlaque("RADIATEUR", "1,8 kW"),
+    opts: ["1800 W", "180 W", "18 000 W", "1,8 W"],
+    ans: 0,
+    exp: "On multiplie par 1000 : 1,8 × 1000 = 1800 W."
+  },
+  {
+    q: "Une éolienne fournit une puissance de 2 MW (mégawatts). Combien cela vaut-il en watts ?",
+    svg: null,
+    opts: ["2 000 000 W", "2 000 W", "200 000 W", "20 000 W"],
+    ans: 0,
+    exp: "Le préfixe « méga » (M) signifie un million (10⁶). Donc 2 MW = 2 000 000 W."
+  },
+  {
+    q: "Convertis une durée de 30 minutes en heures (h).",
+    svg: null,
+    opts: ["0,5 h", "0,3 h", "3 h", "50 h"],
+    ans: 0,
+    exp: "30 minutes correspondent à une demi-heure : 30 / 60 = 0,5 h."
+  },
+  {
+    q: "Combien y a-t-il de secondes dans 1 heure ?",
+    svg: null,
+    opts: ["3 600 s", "60 s", "600 s", "36 000 s"],
+    ans: 0,
+    exp: "1 h = 60 min × 60 s = 3 600 s."
+  },
+  {
+    q: "Une bouilloire consomme 180 000 J. Quelle est cette énergie exprimée en kilowattheures (kWh) ?",
+    svg: null,
+    opts: ["0,05 kWh", "0,5 kWh", "5 kWh", "180 kWh"],
+    ans: 0,
+    exp: "On divise par 3 600 000 : 180 000 / 3 600 000 = 0,05 kWh."
+  },
+  {
+    q: "Une lampe consomme une énergie de 500 Wh (wattheures). Combien cela représente-t-il en kilowattheures (kWh) ?",
+    svg: null,
+    opts: ["0,5 kWh", "5 kWh", "50 kWh", "0,05 kWh"],
+    ans: 0,
+    exp: "Pour passer des Wh aux kWh, on divise par 1000 : 500 / 1000 = 0,5 kWh."
+  },
+
+  // 25 à 32 : Calculs d'application (J et kWh)
+  {
+    q: "La bouilloire A (1500 W) chauffe l'eau en 111 s. Quelle énergie électrique a-t-elle consommée en joules ?",
+    svg: svgPlaque("BOUILLOIRE A", "1500 W"),
+    opts: ["166 500 J", "13,5 J", "1 611 J", "150 000 J"],
+    ans: 0,
+    exp: "E = P × t = 1500 W × 111 s = 166 500 J."
+  },
+  {
+    q: "La bouilloire B (2000 W) atteint l'ébullition en 1 min 23 s (soit 83 s). Quelle énergie a-t-elle consommée ?",
+    svg: svgPlaque("BOUILLOIRE B", "2000 W"),
+    opts: ["166 000 J", "2 460 J", "16 600 J", "200 000 J"],
+    ans: 0,
+    exp: "E = P × t = 2000 W × 83 s = 166 000 J."
+  },
+  {
+    q: "La bouilloire C (2500 W) bout au bout de 1 min 07 s (soit 67 s). Quel est le calcul correct de l'énergie en joules ?",
+    svg: svgPlaque("BOUILLOIRE C", "2500 W"),
+    opts: [
+      "E = 2500 × 67 = 167 500 J",
+      "E = 2500 × 1,07 = 2 675 J",
+      "E = 2500 / 67 = 37,3 J",
+      "E = 2,5 × 67 = 167,5 J"
+    ],
+    ans: 0,
+    exp: "Avec P en W (2500 W) et t en s (67 s), E = 2500 × 67 = 167 500 J."
+  },
+  {
+    q: "Un four micro-ondes de puissance 1000 W chauffe un plat pendant 2 minutes. Quelle énergie consomme-t-il en joules ?",
+    svg: svgPlaque("MICRO-ONDES", "1000 W"),
+    opts: ["120 000 J", "2 000 J", "60 000 J", "500 J"],
+    ans: 0,
+    exp: "2 minutes = 120 secondes. E = P × t = 1000 W × 120 s = 120 000 J."
+  },
+  {
+    q: "Un radiateur de 2000 W (soit 2 kW) fonctionne pendant 3 heures. Quelle énergie consomme-t-il en kWh ?",
+    svg: svgPlaque("RADIATEUR", "2000 W (2 kW)"),
+    opts: ["6 kWh", "6 000 kWh", "0,66 kWh", "5 kWh"],
+    ans: 0,
+    exp: "E = P × t = 2 kW × 3 h = 6 kWh."
+  },
+  {
+    q: "Une lampe LED de 10 W reste allumée pendant 10 heures. Quelle énergie a-t-elle consommée ?",
+    svg: svgPlaque("LAMPE LED", "10 W"),
+    opts: ["100 Wh (soit 0,1 kWh)", "100 kWh", "1 W", "1 000 Wh"],
+    ans: 0,
+    exp: "E = P × t = 10 W × 10 h = 100 Wh = 0,1 kWh."
+  },
+  {
+    q: "Un sèche-cheveux de 1500 W (1,5 kW) est utilisé pendant 20 minutes (soit 1/3 d'heure). Quelle énergie consomme-t-il en kWh ?",
+    svg: svgPlaque("SÈCHE-CHEVEUX", "1500 W"),
+    opts: ["0,5 kWh", "30 kWh", "1,5 kWh", "5 kWh"],
+    ans: 0,
+    exp: "20 min = 1/3 h. E = 1,5 kW × (1/3) h = 0,5 kWh (ou 1500 W × 1200 s = 1 800 000 J = 0,5 kWh)."
+  },
+  {
+    q: "Un appareil fonctionne pendant 100 secondes et consomme 50 000 J. Quelle est sa puissance électrique ?",
+    svg: svgTriangle("P"),
+    opts: ["500 W", "5 000 W", "50 W", "5 000 000 W"],
+    ans: 0,
+    exp: "P = E / t = 50 000 J / 100 s = 500 W."
+  },
+
+  // 33 à 40 : Facture d'électricité, chaînes d'énergie et ordres de grandeur
+  {
+    q: "Sur une facture d'électricité, quelle grandeur physique est facturée au client par le fournisseur ?",
+    svg: null,
+    opts: [
+      "L'énergie électrique consommée (en kWh)",
+      "La puissance maximale des appareils (en W)",
+      "La tension électrique du secteur (en V)",
+      "L'intensité du courant électrique (en A)"
+    ],
+    ans: 0,
+    exp: "Le compteur mesure et facture l'énergie électrique consommée, exprimée en kilowattheures (kWh)."
+  },
+  {
+    q: "Observe ce relevé de compteur électrique. Quelle est l'énergie consommée au cours du mois ?",
+    svg: svgFacture(12400, 12650),
+    opts: ["250 kWh", "12 650 kWh", "12 400 kWh", "25 050 kWh"],
+    ans: 0,
+    exp: "On soustrait l'ancien index du nouvel index : 12 650 - 12 400 = 250 kWh."
+  },
+  {
+    q: "À partir de ce relevé (250 kWh consommés) et d'un tarif de 0,20 € par kWh, quel est le montant de la consommation ?",
+    svg: svgFacture(12400, 12650),
+    opts: ["50 €", "25 €", "500 €", "5 €"],
+    ans: 0,
+    exp: "Coût = 250 kWh × 0,20 €/kWh = 50 €."
+  },
+  {
+    q: "Quelle forme d'énergie est liée au mouvement d'un objet (comme les pales d'un ventilateur ou d'une éolienne) ?",
+    svg: svgChain("Ventilateur", "Énergie électrique", "Énergie ? (mouvement)", "Énergie thermique"),
+    opts: ["L'énergie cinétique", "L'énergie chimique", "L'énergie lumineuse", "L'énergie nucléaire"],
+    ans: 0,
+    exp: "L'énergie associée au mouvement d'un corps s'appelle l'énergie cinétique."
+  },
+  {
+    q: "Quelle conversion d'énergie est réalisée par un panneau photovoltaïque (solaire) ?",
+    svg: svgChain("Panneau solaire", "Énergie ?", "Énergie ?"),
+    opts: [
+      "Énergie lumineuse (rayonnement) ➔ Énergie électrique",
+      "Énergie électrique ➔ Énergie lumineuse",
+      "Énergie cinétique ➔ Énergie électrique",
+      "Énergie chimique ➔ Énergie thermique"
+    ],
+    ans: 0,
+    exp: "Le panneau photovoltaïque capte l'énergie lumineuse du Soleil pour la convertir en énergie électrique."
+  },
+  {
+    q: "Quelle forme d'énergie est stockée dans une pile ou une batterie avant son utilisation ?",
+    svg: svgChain("Pile", "Énergie ?", "Énergie électrique", "Énergie thermique"),
+    opts: ["L'énergie chimique", "L'énergie cinétique", "L'énergie lumineuse", "L'énergie éolienne"],
+    ans: 0,
+    exp: "Une pile stocke de l'énergie chimique qu'elle convertit en énergie électrique lorsqu'elle débite un courant."
+  },
+  {
+    q: "Lorsqu'une lampe brille, elle produit de l'énergie lumineuse (utile) mais elle chauffe aussi. Comment qualifie-t-on cette énergie thermique ?",
+    svg: svgChain("Lampe", "Énergie électrique", "Énergie lumineuse", "Énergie thermique (perdue)"),
+    opts: [
+      "Une énergie perdue (dissipée dans l'environnement)",
+      "Une énergie d'entrée",
+      "Une source d'énergie primaire",
+      "Une énergie cinétique"
+    ],
+    ans: 0,
+    exp: "La chaleur produite par une lampe n'est pas le but recherché : c'est de l'énergie thermique dissipée (perdue), mais l'énergie totale se conserve."
+  },
+  {
+    q: "Parmi ces appareils domestiques, lequel possède la puissance électrique nominale la plus élevée ?",
+    svg: null,
+    opts: [
+      "Un lave-linge avec résistance chauffante (environ 2200 W)",
+      "Un chargeur de téléphone (environ 20 W)",
+      "Un téléviseur LED (environ 100 W)",
+      "Une ampoule LED (environ 9 W)"
+    ],
+    ans: 0,
+    exp: "Les appareils de chauffage et de cuisson (bouilloire, lave-linge, four, radiateur) ont des puissances bien plus élevées (souvent > 1500 W) que l'éclairage ou l'électronique."
+  }
+];
+
+// --- LOGIQUE DU QCM (TIRAGE DE 10 QUESTIONS SUR 40) ---
+let selectedQuestions = [];
+let currentIdx = 0;
+let score = 0;
+let userHistory = [];
+
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function initQuiz() {
+  // Pioche 10 questions au hasard parmi les 40
+  selectedQuestions = shuffle(allQuestions).slice(0, 10).map(qObj => {
+    // Mélange aussi l'ordre des propositions pour chaque question
+    const indexedOpts = qObj.opts.map((text, idx) => ({ text, isCorrect: idx === qObj.ans }));
+    const shuffledOpts = shuffle(indexedOpts);
+    return {
+      ...qObj,
+      shuffledOpts,
+      correctIdx: shuffledOpts.findIndex(o => o.isCorrect)
+    };
+  });
+
+  currentIdx = 0;
+  score = 0;
+  userHistory = [];
+
+  document.getElementById('result-box').style.display = 'none';
+  document.getElementById('quiz-box').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const qData = selectedQuestions[currentIdx];
+  document.getElementById('q-counter').textContent = `Question ${currentIdx + 1} / 10`;
+  document.getElementById('score-live').textContent = `Score : ${score}`;
+  document.getElementById('progress-fill').style.width = `${((currentIdx + 1) / 10) * 100}%`;
+
+  document.getElementById('q-text').textContent = qData.q;
+
+  const svgBox = document.getElementById('q-svg');
+  if (qData.svg) {
+    svgBox.innerHTML = qData.svg;
+    svgBox.style.display = 'block';
+  } else {
+    svgBox.innerHTML = '';
+    svgBox.style.display = 'none';
+  }
+
+  const optsContainer = document.getElementById('q-options');
+  optsContainer.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+
+  qData.shuffledOpts.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[idx]}</span> <span>${opt.text}</span>`;
+    btn.addEventListener('click', () => handleAnswer(idx, btn));
+    optsContainer.appendChild(btn);
+  });
+
+  const fb = document.getElementById('q-feedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.style.display = 'none';
+  nextBtn.textContent = (currentIdx === 9) ? "Voir mon résultat 🏆" : "Question suivante ➔";
+}
+
+function handleAnswer(chosenIdx, chosenBtn) {
+  const qData = selectedQuestions[currentIdx];
+  const allBtns = document.querySelectorAll('.opt-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  const isOk = (chosenIdx === qData.correctIdx);
+  if (isOk) {
+    chosenBtn.classList.add('correct');
+    score++;
+    document.getElementById('score-live').textContent = `Score : ${score}`;
+  } else {
+    chosenBtn.classList.add('wrong');
+    allBtns[qData.correctIdx].classList.add('correct');
+  }
+
+  userHistory.push({
+    q: qData.q,
+    chosenText: qData.shuffledOpts[chosenIdx].text,
+    correctText: qData.shuffledOpts[qData.correctIdx].text,
+    isOk,
+    exp: qData.exp
+  });
+
+  const fb = document.getElementById('q-feedback');
+  fb.innerHTML = `<b>${isOk ? '✅ Bonne réponse !' : '❌ Incorrect.'}</b> ${qData.exp}`;
+  fb.classList.add('show');
+
+  document.getElementById('next-btn').style.display = 'inline-block';
+}
+
+document.getElementById('next-btn').addEventListener('click', () => {
+  if (currentIdx < 9) {
+    currentIdx++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+});
+
+function showResults() {
+  document.getElementById('quiz-box').style.display = 'none';
+  const resBox = document.getElementById('result-box');
+  resBox.style.display = 'block';
+
+  document.getElementById('final-score').textContent = `${score} / 10`;
+  const msgEl = document.getElementById('final-msg');
+  if (score >= 9) msgEl.textContent = "Excellent travail ! Tu maîtrises parfaitement le chapitre sur l'énergie et la puissance.";
+  else if (score >= 7) msgEl.textContent = "Très bon score ! Les notions essentielles sont bien acquises.";
+  else if (score >= 5) msgEl.textContent = "Ensemble correct, mais pense à bien revoir la formule E = P × t et les conversions d'unités.";
+  else msgEl.textContent = "Il faut encore t'entraîner. Relis bien les explications ci-dessous et relance un nouveau tirage !";
+
+  const recapList = document.getElementById('recap-list');
+  recapList.innerHTML = '';
+  userHistory.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'recap-item';
+    div.innerHTML = `
+      <div><b>Q${i + 1}. ${item.q}</b></div>
+      <div style="margin-top:4px;">
+        Ta réponse : <span class="${item.isOk ? 'badge-ok' : 'badge-err'}">${item.chosenText} ${item.isOk ? '✔️' : '❌'}</span>
+      </div>
+      ${!item.isOk ? `<div>Bonne réponse : <b class="badge-ok">${item.correctText}</b></div>` : ''}
+      <div style="color:#475569; font-size:14px; margin-top:4px;"><i>💡 ${item.exp}</i></div>
+    `;
+    recapList.appendChild(div);
+  });
+}
+
+document.getElementById('restart-btn').addEventListener('click', initQuiz);
+
+// Démarrage initial
+initQuiz();
+</script>
+</body>
+</html>
