@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>L'Énergie Cinétique - 3e</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --accent: #f59e0b;
+      --accent-light: #fef3c7;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      padding-bottom: 30px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      padding: 14px 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    header p {
+      margin: 4px 0 0;
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: white;
+      border-bottom: 2px solid var(--border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .tab-btn {
+      border: none;
+      background: none;
+      padding: 12px 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .tab-btn span.icon {
+      font-size: 1.15rem;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background-color: #f8fafc;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.2s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e2e8f0;
+    }
+
+    .card-title {
+      margin: 0 0 10px 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .concept-box {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      margin-bottom: 12px;
+    }
+
+    .concept-box strong {
+      color: #1e3a8a;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .preset-btn {
+      background: #f8fafc;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .preset-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: #1e3a8a;
+    }
+
+    .preset-btn .emoji {
+      font-size: 1.4rem;
+    }
+
+    .control-group {
+      margin-bottom: 14px;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .badge-val {
+      background: #e2e8f0;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: #0f172a;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: #cbd5e1;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      border: 3px solid white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    }
+
+    .sim-stage {
+      background: linear-gradient(to bottom, #e0f2fe 0%, #f0f9ff 65%, #64748b 65%, #475569 100%);
+      border-radius: 12px;
+      height: 150px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #94a3b8;
+      margin-bottom: 12px;
+    }
+
+    .road-line {
+      position: absolute;
+      bottom: 24px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: repeating-linear-gradient(to right, #f8fafc 0, #f8fafc 20px, transparent 20px, transparent 40px);
+    }
+
+    .vehicle {
+      position: absolute;
+      bottom: 38px;
+      left: 14px;
+      font-size: 2.4rem;
+      transition: none;
+      z-index: 5;
+      user-select: none;
+      transform: scaleX(-1);
+    }
+
+    .obstacle-zone {
+      position: absolute;
+      right: 12px;
+      bottom: 35px;
+      display: flex;
+      align-items: flex-end;
+      z-index: 4;
+    }
+
+    .spring {
+      width: 40px;
+      height: 36px;
+      background: repeating-linear-gradient(90deg, #f59e0b 0px, #f59e0b 4px, transparent 4px, transparent 9px);
+      border-left: 4px solid #dc2626;
+      transition: width 0.2s ease-out;
+    }
+
+    .wall {
+      width: 16px;
+      height: 65px;
+      background: repeating-linear-gradient(45deg, #334155, #334155 6px, #facc15 6px, #facc15 12px);
+      border-radius: 3px;
+    }
+
+    .impact-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .sim-actions {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-accent {
+      background: var(--accent-light);
+      color: #92400e;
+      border: 1px solid #fcd34d;
+      font-size: 0.82rem;
+      padding: 9px;
+    }
+
+    .damage-meter {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .meter-bar-bg {
+      width: 100%;
+      height: 14px;
+      background: #e2e8f0;
+      border-radius: 7px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .meter-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444);
+      transition: width 0.3s ease;
+    }
+
+    .formula-card {
+      background: #1e293b;
+      color: white;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .formula-big {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin: 6px 0;
+    }
+
+    .formula-big .hl-ec { color: #38bdf8; }
+    .formula-big .hl-m { color: #4ade80; }
+    .formula-big .hl-v { color: #facc15; }
+
+    .unit-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      text-align: left;
+      margin-top: 12px;
+      font-size: 0.88rem;
+    }
+
+    .unit-item {
+      background: rgba(255,255,255,0.1);
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+
+    .converter-box {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-light);
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #fde68a;
+      margin-top: 10px;
+    }
+
+    .conv-input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      border: 2px solid #f59e0b;
+      border-radius: 8px;
+      background: white;
+    }
+
+    .conv-result {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #b45309;
+      border: 2px solid #fcd34d;
+    }
+
+    .exo-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .exo-pill {
+      padding: 8px 4px;
+      border: 2px solid var(--border);
+      background: white;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .exo-pill.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: #1e3a8a;
+    }
+
+    .exo-pill.done {
+      border-color: var(--success);
+      background: var(--success-light);
+      color: #166534;
+    }
+
+    .enonce-box {
+      background: #f8fafc;
+      border-left: 4px solid #0f172a;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      margin-bottom: 14px;
+    }
+
+    /* Étapes progressives */
+    .step-box {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #ffffff;
+      transition: all 0.25s ease;
+    }
+
+    .step-box.active-step {
+      border-color: var(--primary);
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.1);
+    }
+
+    .step-box.done-step {
+      border-color: #86efac;
+      background: #f0fdf4;
+    }
+
+    .step-box.locked {
+      opacity: 0.45;
+      pointer-events: none;
+      background: #f8fafc;
+      border-style: dashed;
+    }
+
+    .step-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 6px;
+    }
+
+    .step-title {
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: var(--primary-dark);
+    }
+
+    .step-status {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: #e2e8f0;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .step-box.active-step .step-status {
+      background: var(--primary-light);
+      color: #1e3a8a;
+    }
+
+    .step-box.done-step .step-status {
+      background: var(--success-light);
+      color: #166534;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .num-input {
+      flex: 1;
+      min-width: 100px;
+      padding: 10px 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      background: white;
+    }
+
+    .num-input:focus {
+      border-color: var(--primary);
+    }
+
+    .unit-select {
+      padding: 10px 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .btn-step-check {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-step-check:active {
+      transform: scale(0.97);
+    }
+
+    .step-recap {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .feedback {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: none;
+    }
+
+    .feedback.ok {
+      display: block;
+      background: var(--success-light);
+      color: #14532d;
+      border: 1px solid #86efac;
+    }
+
+    .feedback.err {
+      display: block;
+      background: var(--danger-light);
+      color: #7f1d1d;
+      border: 1px solid #fca5a5;
+    }
+
+    .calc-toggle {
+      width: 100%;
+      margin-bottom: 12px;
+      background: #f1f5f9;
+      border: 1px dashed #64748b;
+      color: #334155;
+      padding: 9px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .mini-calc {
+      display: none;
+      background: #1e293b;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      color: white;
+    }
+
+    .mini-calc.open {
+      display: block;
+    }
+
+    .calc-screen {
+      background: #0f172a;
+      padding: 10px 12px;
+      border-radius: 8px;
+      text-align: right;
+      font-family: monospace;
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      min-height: 42px;
+      word-break: break-all;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .calc-key {
+      padding: 12px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      background: #334155;
+      color: white;
+      cursor: pointer;
+    }
+
+    .calc-key.op { background: #2563eb; }
+    .calc-key.eq { background: #16a34a; }
+    .calc-key.clr { background: #dc2626; }
+
+    .helper-hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⚡ L'Énergie Cinétique (3e)</h1>
+    <p>Comprendre le sens de l'énergie et réussir ses calculs</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-sim', this)">
+      <span class="icon">💥</span>
+      <span>1. Comprendre</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-formule', this)">
+      <span class="icon">📐</span>
+      <span>2. La Formule</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-exo', this)">
+      <span class="icon">✏️</span>
+      <span>3. S'entraîner</span>
+    </button>
+  </nav>
+
+  <main class="container">
+
+    <!-- ================= ONGLET 1 : COMPRENDRE ================= -->
+    <section id="tab-sim" class="tab-content active">
+      <div class="card">
+        <h2 class="card-title">🤔 C'est quoi « l'énergie cinétique » ?</h2>
+        <div class="concept-box">
+          Un objet qui bouge possède une réserve d'énergie appelée <strong>énergie cinétique (E<sub>c</sub>)</strong>, mesurée en <strong>Joules (J)</strong>.<br><br>
+          👉 On ne la voit pas quand tout va bien, mais <strong>plus un objet a de Joules, plus le choc est violent</strong> s'il percute un obstacle !
+        </div>
+
+        <p style="font-size:0.85rem; font-weight:700; margin: 0 0 6px; color:var(--muted);">
+          Choisis un objet pour le tester :
+        </p>
+        <div class="preset-grid">
+          <button class="preset-btn active" onclick="setPreset('balle', 0.25, 40, '🎾', this)">
+            <span class="emoji">🎾</span>
+            <div>Balle<br><small>0,25 kg • 40 km/h</small></div>
+          </button>
+          <button class="preset-btn" onclick="setPreset('moto', 300, 90, '🏍️', this)">
+            <span class="emoji">🏍️</span>
+            <div>Moto<br><small>300 kg • 90 km/h</small></div>
+          </button>
+          <button class="preset-btn" onclick="setPreset('voiture', 1500, 130, '🚗', this)">
+            <span class="emoji">🚗</span>
+            <div>Voiture<br><small>1500 kg • 130 km/h</small></div>
+          </button>
+          <button class="preset-btn" onclick="setPreset('camion', 20000, 50, '🚛', this)">
+            <span class="emoji">🚛</span>
+            <div>Camion<br><small>20 000 kg • 50 km/h</small></div>
+          </button>
+        </div>
+
+        <!-- Réglages Masse et Vitesse -->
+        <div class="control-group">
+          <div class="control-header">
+            <span>⚖️ Masse (m)</span>
+            <span class="badge-val" id="sim-m-label">0,25 kg</span>
+          </div>
+          <input type="range" id="sim-m-slider" min="0" max="100" value="5" oninput="onSliderChange()">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>🚀 Vitesse (v)</span>
+            <span class="badge-val" id="sim-v-label">40 km/h (11,1 m/s)</span>
+          </div>
+          <input type="range" id="sim-v-slider" min="10" max="160" step="5" value="40" oninput="onSliderChange()">
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
+          <button class="btn btn-accent" onclick="multiplySpeed(2)">⚡ Doubler la vitesse (×2)</button>
+          <button class="btn btn-accent" onclick="multiplyMass(2)">⚖️ Doubler la masse (×2)</button>
+        </div>
+
+        <!-- Piste de Crash Test -->
+        <div class="sim-stage">
+          <div class="impact-badge">
+            <span id="sim-ec-display">Énergie : 15 J</span>
+            <span id="sim-shock-label" style="color:var(--success);">Choc très faible</span>
+          </div>
+          <div id="sim-vehicle" class="vehicle">🎾</div>
+          <div class="obstacle-zone">
+            <div id="sim-spring" class="spring"></div>
+            <div class="wall"></div>
+          </div>
+          <div class="road-line"></div>
+        </div>
+
+        <div class="sim-actions">
+          <button class="btn btn-primary" onclick="launchCrash()">💥 Lancer le test d'impact</button>
+          <button class="btn btn-secondary" onclick="resetCrash()">🔄 Replacer</button>
+        </div>
+
+        <div class="damage-meter">
+          <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
+            <span>Niveau de déformation à l'impact :</span>
+            <span id="sim-deform-pct">5 %</span>
+          </div>
+          <div class="meter-bar-bg">
+            <div id="sim-meter-fill" class="meter-bar-fill" style="width: 5%;"></div>
+          </div>
+          <div id="sim-takeaway" style="font-size:0.82rem; color:var(--muted);">
+            💡 Observe comment l'énergie cinétique dépend à la fois de la masse et surtout de la vitesse !
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ONGLET 2 : LA FORMULE ================= -->
+    <section id="tab-formule" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">📐 La formule à connaître</h2>
+
+        <div class="formula-card">
+          <div style="font-size:0.8rem; opacity:0.85;">FORMULE OFFICIELLE</div>
+          <div class="formula-big">
+            <span class="hl-ec">E<sub>c</sub></span> = 0,5 × <span class="hl-m">m</span> × <span class="hl-v">v²</span>
+          </div>
+          <div style="font-size:0.85rem; color:#cbd5e1; margin-top:4px;">
+            (Remarque : 1/2 est égal à <strong>0,5</strong> et <strong>v² = v × v</strong>)
+          </div>
+
+          <div class="unit-list">
+            <div class="unit-item">
+              🔵 <strong><span class="hl-ec">E<sub>c</sub></span> (Énergie cinétique)</strong> : toujours en <strong>Joules (J)</strong>
+            </div>
+            <div class="unit-item">
+              🟢 <strong><span class="hl-m">m</span> (Masse)</strong> : toujours en <strong>kilogrammes (kg)</strong>
+            </div>
+            <div class="unit-item">
+              🟡 <strong><span class="hl-v">v</span> (Vitesse)</strong> : toujours en <strong>mètres par seconde (m/s)</strong>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="card-title">⚠️ Les 3 pièges à éviter absolument</h3>
+
+        <div class="step-box" style="border-left: 4px solid #16a34a;">
+          <div class="step-title" style="color:#15803d; margin-bottom:4px;">Piège n°1 : Choisir la masse en kg</div>
+          <div style="font-size:0.88rem;">
+            Dans l'énoncé, la masse est souvent donnée de deux façons (en grammes ou en tonnes). <strong>Prends toujours le nombre en kg !</strong><br>
+            • <em>« 20 000 kg (20 tonnes) »</em> ➔ je prends <strong>20 000 kg</strong>.<br>
+            • <em>« 250 g (0,250 kg) »</em> ➔ je prends <strong>0,250 kg</strong>.
+          </div>
+        </div>
+
+        <div class="step-box" style="border-left: 4px solid #f59e0b;">
+          <div class="step-title" style="color:#b45309; margin-bottom:4px;">Piège n°2 : Convertir les km/h en m/s</div>
+          <div style="font-size:0.88rem;">
+            On n'a <strong>jamais</strong> le droit de laisser la vitesse en km/h dans la formule. Il faut <strong>diviser par 3,6</strong> :
+          </div>
+          <div class="converter-box">
+            <div>
+              <label style="font-size:0.75rem; font-weight:700; display:block; margin-bottom:3px;">Vitesse (km/h)</label>
+              <input type="text" inputmode="decimal" id="conv-kmh" class="conv-input" value="90" oninput="updateConverter()">
+            </div>
+            <div style="font-weight:800; font-size:0.9rem; text-align:center;">
+              ÷ 3,6<br>➡️
+            </div>
+            <div>
+              <label style="font-size:0.75rem; font-weight:700; display:block; margin-bottom:3px;">Vitesse (m/s)</label>
+              <div id="conv-ms" class="conv-result">25 m/s</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-box" style="border-left: 4px solid #dc2626;">
+          <div class="step-title" style="color:#b91c1c; margin-bottom:4px;">Piège n°3 : Le carré de la vitesse (v²)</div>
+          <div style="font-size:0.88rem;">
+            Attention : <strong>v²</strong> veut dire <strong>v × v</strong> (et surtout pas v × 2 !).<br>
+            Sur ta calculatrice, tape directement :<br>
+            <code style="background:#f1f5f9; padding:4px 8px; border-radius:6px; font-weight:800; display:inline-block; margin-top:4px;">
+              0,5 × masse × vitesse × vitesse
+            </code>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ONGLET 3 : S'ENTRAÎNER ================= -->
+    <section id="tab-exo" class="tab-content">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h2 class="card-title" style="margin:0;">✏️ Entraînement pas à pas</h2>
+          <span id="score-badge" class="badge-val" style="background:var(--primary-light); color:#1e3a8a; font-weight:800;">0 / 8 réussis</span>
+        </div>
+
+        <p style="font-size:0.82rem; color:var(--muted); margin:0 0 8px;">
+          Valide chaque étape l'une après l'autre pour débloquer la suivante :
+        </p>
+
+        <div class="exo-selector" id="exo-buttons"></div>
+
+        <!-- Bouton mini-calculatrice intégrée -->
+        <button class="calc-toggle" onclick="toggleCalc()">
+          🧮 Afficher / Masquer la calculatrice intégrée
+        </button>
+
+        <div id="mini-calc" class="mini-calc">
+          <div id="calc-screen" class="calc-screen">0</div>
+          <div class="calc-grid">
+            <button class="calc-key clr" onclick="calcAction('C')">C</button>
+            <button class="calc-key op" onclick="calcAction('/3.6')">÷3,6</button>
+            <button class="calc-key op" onclick="calcAction('sq')">x²</button>
+            <button class="calc-key op" onclick="calcAction('/')">÷</button>
+
+            <button class="calc-key" onclick="calcAction('7')">7</button>
+            <button class="calc-key" onclick="calcAction('8')">8</button>
+            <button class="calc-key" onclick="calcAction('9')">9</button>
+            <button class="calc-key op" onclick="calcAction('*')">×</button>
+
+            <button class="calc-key" onclick="calcAction('4')">4</button>
+            <button class="calc-key" onclick="calcAction('5')">5</button>
+            <button class="calc-key" onclick="calcAction('6')">6</button>
+            <button class="calc-key op" onclick="calcAction('-')">−</button>
+
+            <button class="calc-key" onclick="calcAction('1')">1</button>
+            <button class="calc-key" onclick="calcAction('2')">2</button>
+            <button class="calc-key" onclick="calcAction('3')">3</button>
+            <button class="calc-key op" onclick="calcAction('+')">+</button>
+
+            <button class="calc-key" onclick="calcAction('0')" style="grid-column: span 2;">0</button>
+            <button class="calc-key" onclick="calcAction('.')">,</button>
+            <button class="calc-key eq" onclick="calcAction('=')">=</button>
+          </div>
+        </div>
+
+        <!-- Énoncé de l'exercice -->
+        <div id="exo-enonce" class="enonce-box"></div>
+
+        <!-- ÉTAPE 1 : LA MASSE -->
+        <div id="box-step-1" class="step-box active-step">
+          <div class="step-header">
+            <span class="step-title">Étape 1 : Masse m en kilogrammes (kg)</span>
+            <span id="status-step-1" class="step-status">À faire</span>
+          </div>
+          <div class="helper-hint">Repère dans l'énoncé la valeur de la masse exprimée en <strong>kg</strong>.</div>
+          <div class="input-row">
+            <span><strong>m =</strong></span>
+            <input type="text" inputmode="decimal" id="inp-m" class="num-input" placeholder="Ex: 1500" onkeydown="if(event.key==='Enter') verifyStep1()">
+            <span><strong>kg</strong></span>
+            <button class="btn-step-check" onclick="verifyStep1()">Vérifier</button>
+          </div>
+          <div id="fb-m" class="feedback"></div>
+        </div>
+
+        <!-- ÉTAPE 2 : LA VITESSE -->
+        <div id="box-step-2" class="step-box locked">
+          <div class="step-header">
+            <span class="step-title">Étape 2 : Vitesse v convertie en m/s</span>
+            <span id="status-step-2" class="step-status">🔒 Verrouillé</span>
+          </div>
+          <div class="helper-hint">Divise la vitesse en km/h par <strong>3,6</strong> (tu peux arrondir à 1 ou 2 chiffres après la virgule).</div>
+          <div class="input-row">
+            <span><strong>v =</strong></span>
+            <input type="text" inputmode="decimal" id="inp-v" class="num-input" placeholder="Vitesse ÷ 3,6" onkeydown="if(event.key==='Enter') verifyStep2()">
+            <span><strong>m/s</strong></span>
+            <button class="btn-step-check" onclick="verifyStep2()">Vérifier</button>
+          </div>
+          <div id="fb-v" class="feedback"></div>
+        </div>
+
+        <!-- ÉTAPE 3 : L'ÉNERGIE CINÉTIQUE ET L'UNITÉ -->
+        <div id="box-step-3" class="step-box locked">
+          <div class="step-header">
+            <span class="step-title">Étape 3 : Calcul de E<sub>c</sub> et unité</span>
+            <span id="status-step-3" class="step-status">🔒 Verrouillé</span>
+          </div>
+          <div id="step-3-recap" class="step-recap" style="display:none;"></div>
+          <div class="helper-hint">Applique la formule : <strong>E<sub>c</sub> = 0,5 × m × v × v</strong></div>
+          <div class="input-row">
+            <span><strong>E<sub>c</sub> =</strong></span>
+            <input type="text" inputmode="decimal" id="inp-ec" class="num-input" placeholder="Résultat" onkeydown="if(event.key==='Enter') verifyStep3()">
+            <select id="inp-unit" class="unit-select">
+              <option value="">Unité ?</option>
+              <option value="J">J (Joules)</option>
+              <option value="kg">kg</option>
+              <option value="m/s">m/s</option>
+              <option value="km/h">km/h</option>
+            </select>
+            <button class="btn-step-check" onclick="verifyStep3()">Vérifier</button>
+          </div>
+          <div id="fb-ec" class="feedback"></div>
+        </div>
+
+        <!-- ÉTAPE 4 : PHRASE DE CONCLUSION -->
+        <div id="box-step-4" class="step-box locked">
+          <div class="step-header">
+            <span class="step-title">Étape 4 : Phrase de conclusion</span>
+            <span id="status-step-4" class="step-status">🔒 Verrouillé</span>
+          </div>
+          <div style="font-size:0.92rem; line-height:1.7; background:#ffffff; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
+            « L'énergie cinétique <span id="concl-objet">du camion</span> est d'environ
+            <strong id="concl-val" style="color:var(--primary);">...</strong>
+            <strong id="concl-unit" style="color:var(--primary);">...</strong>. »
+          </div>
+          <div id="next-exo-zone" style="display:none; margin-top:10px;">
+            <button class="btn btn-success" style="width:100%;" onclick="goToNextExercise()">
+              🎉 Exercice réussi ! Passer à l'exercice suivant ➡️
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; gap:8px; margin-top:6px;">
+          <button class="btn btn-secondary" style="flex:1; font-size:0.84rem;" onclick="loadExercise(currentExoIdx)">🔄 Recommencer l'exercice</button>
+          <button class="btn btn-secondary" style="flex:1; font-size:0.84rem;" onclick="unlockCurrentStepHelp()">💡 Coup de pouce sur l'étape</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ================= GESTION DES ONGLETS =================
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+      document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ================= ONGLET 1 : SIMULATEUR CRASH-TEST =================
+    const massSteps = [0.25, 0.5, 1, 5, 20, 50, 80, 150, 300, 500, 1000, 1500, 3000, 10000, 20000];
+    let simMass = 0.25;
+    let simSpeedKmh = 40;
+    let animFrame = null;
+
+    function formatNumber(n) {
+      if (n >= 100) return Math.round(n).toLocaleString('fr-FR');
+      return Number(n.toFixed(2)).toLocaleString('fr-FR');
+    }
+
+    function setPreset(type, m, v, emoji, btnEl) {
+      document.querySelectorAll('.preset-btn').forEach(function(b) { b.classList.remove('active'); });
+      if (btnEl) btnEl.classList.add('active');
+
+      simMass = m;
+      simSpeedKmh = v;
+      document.getElementById('sim-vehicle').textContent = emoji;
+
+      let idx = massSteps.indexOf(m);
+      if (idx === -1) idx = 0;
+      document.getElementById('sim-m-slider').value = Math.round((idx / (massSteps.length - 1)) * 100);
+      document.getElementById('sim-v-slider').value = v;
+
+      resetCrash();
+      updateSimDisplays();
+    }
+
+    function onSliderChange() {
+      document.querySelectorAll('.preset-btn').forEach(function(b) { b.classList.remove('active'); });
+      const sliderVal = parseInt(document.getElementById('sim-m-slider').value, 10);
+      const idx = Math.round((sliderVal / 100) * (massSteps.length - 1));
+      simMass = massSteps[idx];
+      simSpeedKmh = parseInt(document.getElementById('sim-v-slider').value, 10);
+
+      const veh = document.getElementById('sim-vehicle');
+      if (simMass <= 1) veh.textContent = '🎾';
+      else if (simMass <= 100) veh.textContent = '🚴';
+      else if (simMass <= 500) veh.textContent = '🏍️';
+      else if (simMass <= 3000) veh.textContent = '🚗';
+      else veh.textContent = '🚛';
+
+      resetCrash();
+      updateSimDisplays();
+    }
+
+    function multiplySpeed(factor) {
+      simSpeedKmh = Math.min(160, simSpeedKmh * factor);
+      document.getElementById('sim-v-slider').value = simSpeedKmh;
+      resetCrash();
+      updateSimDisplays();
+      document.getElementById('sim-takeaway').innerHTML =
+        "🔥 <strong>Observation :</strong> Quand la vitesse double (×2), l'énergie cinétique est <strong>multipliée par 4</strong> (car v² = v × v) !";
+    }
+
+    function multiplyMass(factor) {
+      simMass = Math.min(20000, simMass * factor);
+      resetCrash();
+      updateSimDisplays();
+      document.getElementById('sim-takeaway').innerHTML =
+        "⚖️ <strong>Observation :</strong> Quand la masse double (×2), l'énergie cinétique <strong>double aussi (×2)</strong>.";
+    }
+
+    function getSimEc() {
+      const vMs = simSpeedKmh / 3.6;
+      return 0.5 * simMass * vMs * vMs;
+    }
+
+    function updateSimDisplays() {
+      const vMs = simSpeedKmh / 3.6;
+      const ec = getSimEc();
+
+      document.getElementById('sim-m-label').textContent = formatNumber(simMass) + " kg";
+      document.getElementById('sim-v-label').textContent = simSpeedKmh + " km/h (" + vMs.toFixed(1).replace('.', ',') + " m/s)";
+      document.getElementById('sim-ec-display').textContent = "Énergie : " + formatNumber(ec) + " J";
+
+      const pct = Math.min(100, Math.max(4, Math.round((Math.log10(ec + 1) / Math.log10(2500000)) * 100)));
+      document.getElementById('sim-deform-pct').textContent = pct + " %";
+      document.getElementById('sim-meter-fill').style.width = pct + "%";
+
+      const shockLabel = document.getElementById('sim-shock-label');
+      if (ec < 500) {
+        shockLabel.textContent = "Choc très léger";
+        shockLabel.style.color = "#16a34a";
+      } else if (ec < 100000) {
+        shockLabel.textContent = "Choc important";
+        shockLabel.style.color = "#d97706";
+      } else {
+        shockLabel.textContent = "Impact extrême !";
+        shockLabel.style.color = "#dc2626";
+      }
+    }
+
+    function launchCrash() {
+      cancelAnimationFrame(animFrame);
+      const veh = document.getElementById('sim-vehicle');
+      const spring = document.getElementById('sim-spring');
+      const stageWidth = document.querySelector('.sim-stage').clientWidth;
+
+      const ec = getSimEc();
+      const compression = Math.min(32, Math.max(4, Math.round((Math.log10(ec + 1) / Math.log10(2500000)) * 34)));
+      const targetX = stageWidth - 100 + compression;
+
+      let posX = 14;
+      const speedPx = Math.max(4, Math.min(18, simSpeedKmh / 9));
+
+      function step() {
+        posX += speedPx;
+        if (posX >= targetX) {
+          posX = targetX;
+          veh.style.left = posX + "px";
+          spring.style.width = (40 - compression) + "px";
+        } else {
+          veh.style.left = posX + "px";
+          animFrame = requestAnimationFrame(step);
+        }
+      }
+      spring.style.width = "40px";
+      animFrame = requestAnimationFrame(step);
+    }
+
+    function resetCrash() {
+      cancelAnimationFrame(animFrame);
+      document.getElementById('sim-vehicle').style.left = "14px";
+      document.getElementById('sim-spring').style.width = "40px";
+    }
+
+    // ================= ONGLET 2 : CONVERTISSEUR =================
+    function updateConverter() {
+      const raw = document.getElementById('conv-kmh').value.replace(',', '.').trim();
+      const val = parseFloat(raw);
+      const out = document.getElementById('conv-ms');
+      if (isNaN(val) || val < 0) {
+        out.textContent = "... m/s";
+        return;
+      }
+      const ms = val / 3.6;
+      out.textContent = Number(ms.toFixed(2)).toLocaleString('fr-FR') + " m/s";
+    }
+
+    // ================= ONGLET 3 : EXERCICES PAS À PAS =================
+    const exercises = [
+      {
+        id: 1,
+        shortTitle: "1. Camion",
+        enonce: "Calculer l'énergie cinétique d'un <strong>camion de 20 000 kg (20 tonnes)</strong> roulant à la vitesse de <strong>50 km/h</strong>.",
+        mKg: 20000,
+        mTrap: 20,
+        vKmh: 50,
+        objetNom: "du camion"
+      },
+      {
+        id: 2,
+        shortTitle: "2. Voiture",
+        enonce: "Calculer l'énergie cinétique d'une <strong>voiture de 1500 kg (1,5 tonne)</strong> roulant à la vitesse de <strong>130 km/h</strong>.",
+        mKg: 1500,
+        mTrap: 1.5,
+        vKmh: 130,
+        objetNom: "de la voiture"
+      },
+      {
+        id: 3,
+        shortTitle: "3. Balle",
+        enonce: "Calculer l'énergie cinétique d'une <strong>balle de 250 g (0,250 kg)</strong> qui se déplace à la vitesse de <strong>40 km/h</strong>.",
+        mKg: 0.25,
+        mTrap: 250,
+        vKmh: 40,
+        objetNom: "de la balle"
+      },
+      {
+        id: 4,
+        shortTitle: "4. Moto",
+        enonce: "Calculer l'énergie cinétique d'une <strong>moto de 300 kg (0,300 tonne)</strong> qui se déplace à la vitesse de <strong>90 km/h</strong>.",
+        mKg: 300,
+        mTrap: 0.3,
+        vKmh: 90,
+        objetNom: "de la moto"
+      },
+      {
+        id: 5,
+        shortTitle: "5. Cycliste",
+        enonce: "Calculer l'énergie cinétique d'un <strong>cycliste de 80 kg (0,08 tonne)</strong> roulant à la vitesse de <strong>36 km/h</strong>.",
+        mKg: 80,
+        mTrap: 0.08,
+        vKmh: 36,
+        objetNom: "du cycliste"
+      },
+      {
+        id: 6,
+        shortTitle: "6. Ballon",
+        enonce: "Calculer l'énergie cinétique d'un <strong>ballon de 450 g (0,450 kg)</strong> tiré à la vitesse de <strong>72 km/h</strong>.",
+        mKg: 0.45,
+        mTrap: 450,
+        vKmh: 72,
+        objetNom: "du ballon"
+      },
+      {
+        id: 7,
+        shortTitle: "7. Scooter",
+        enonce: "Calculer l'énergie cinétique d'un <strong>scooter de 120 kg (0,12 tonne)</strong> roulant à la vitesse de <strong>45 km/h</strong>.",
+        mKg: 120,
+        mTrap: 0.12,
+        vKmh: 45,
+        objetNom: "du scooter"
+      },
+      {
+        id: 8,
+        shortTitle: "8. Bus",
+        enonce: "Calculer l'énergie cinétique d'un <strong>bus de 12 000 kg (12 tonnes)</strong> roulant à la vitesse de <strong>90 km/h</strong>.",
+        mKg: 12000,
+        mTrap: 12,
+        vKmh: 90,
+        objetNom: "du bus"
+      }
+    ];
+
+    let currentExoIdx = 0;
+    let currentStep = 1; // 1 = masse, 2 = vitesse, 3 = Ec, 4 = terminé
+    let validatedV = null;
+    const completedExos = new Set();
+
+    function renderExoButtons() {
+      const container = document.getElementById('exo-buttons');
+      container.innerHTML = '';
+      exercises.forEach(function(ex, i) {
+        const btn = document.createElement('button');
+        btn.className = 'exo-pill' + (i === currentExoIdx ? ' active' : '') + (completedExos.has(ex.id) ? ' done' : '');
+        btn.textContent = (completedExos.has(ex.id) ? '✅ ' : '') + ex.shortTitle;
+        btn.onclick = function() { loadExercise(i); };
+        container.appendChild(btn);
+      });
+      document.getElementById('score-badge').textContent = completedExos.size + " / 8 réussis";
+    }
+
+    function loadExercise(idx) {
+      currentExoIdx = idx;
+      currentStep = 1;
+      validatedV = null;
+      const ex = exercises[idx];
+
+      document.getElementById('exo-enonce').innerHTML = ex.enonce +
+        "<br><small style='color:var(--muted);'>On précisera bien les calculs ainsi que l'unité de l'énergie cinétique. Une phrase de conclusion est attendue.</small>";
+
+      document.getElementById('inp-m').value = '';
+      document.getElementById('inp-v').value = '';
+      document.getElementById('inp-ec').value = '';
+      document.getElementById('inp-unit').value = '';
+
+      ['fb-m', 'fb-v', 'fb-ec'].forEach(function(id) {
+        const el = document.getElementById(id);
+        el.className = 'feedback';
+        el.textContent = '';
+      });
+
+      // Réinitialiser l'état visuel des 4 étapes
+      document.getElementById('box-step-1').className = 'step-box active-step';
+      document.getElementById('status-step-1').textContent = 'À faire';
+
+      document.getElementById('box-step-2').className = 'step-box locked';
+      document.getElementById('status-step-2').textContent = '🔒 Verrouillé';
+
+      document.getElementById('box-step-3').className = 'step-box locked';
+      document.getElementById('status-step-3').textContent = '🔒 Verrouillé';
+      document.getElementById('step-3-recap').style.display = 'none';
+
+      document.getElementById('box-step-4').className = 'step-box locked';
+      document.getElementById('status-step-4').textContent = '🔒 Verrouillé';
+      document.getElementById('next-exo-zone').style.display = 'none';
+
+      document.getElementById('concl-objet').textContent = ex.objetNom;
+      document.getElementById('concl-val').textContent = '...';
+      document.getElementById('concl-unit').textContent = '...';
+
+      renderExoButtons();
+    }
+
+    function parseUserNum(str) {
+      if (!str) return NaN;
+      const cleaned = str.replace(/\s+/g, '').replace(',', '.');
+      return parseFloat(cleaned);
+    }
+
+    function setFeedback(id, isOk, msg) {
+      const el = document.getElementById(id);
+      el.className = 'feedback ' + (isOk ? 'ok' : 'err');
+      el.innerHTML = msg;
+    }
+
+    // --- ÉTAPE 1 : VÉRIFIER LA MASSE ---
+    function verifyStep1() {
+      const ex = exercises[currentExoIdx];
+      const userM = parseUserNum(document.getElementById('inp-m').value);
+
+      if (Math.abs(userM - ex.mKg) < 0.001) {
+        setFeedback('fb-m', true, "✅ Bravo ! La masse en kilogrammes est bien <strong>m = " + formatNumber(ex.mKg) + " kg</strong>. Passe à l'étape 2 !");
+        document.getElementById('box-step-1').className = 'step-box done-step';
+        document.getElementById('status-step-1').textContent = '✅ Validé';
+
+        // Déverrouiller l'étape 2
+        if (currentStep < 2) currentStep = 2;
+        const box2 = document.getElementById('box-step-2');
+        if (box2.classList.contains('locked')) {
+          box2.className = 'step-box active-step';
+          document.getElementById('status-step-2').textContent = 'À faire';
+          document.getElementById('inp-v').focus();
+        }
+      } else if (Math.abs(userM - ex.mTrap) < 0.001) {
+        setFeedback('fb-m', false, "⚠️ Attention au piège ! Tu as pris la valeur en tonnes ou en grammes. Il faut prendre la valeur en <strong>kg</strong> : <strong>" + formatNumber(ex.mKg) + " kg</strong>.");
+      } else {
+        setFeedback('fb-m', false, "❌ Regarde bien l'énoncé et recopie la masse qui est suivie de l'unité <strong>kg</strong>.");
+      }
+    }
+
+    // --- ÉTAPE 2 : VÉRIFIER LA VITESSE ---
+    function verifyStep2() {
+      const ex = exercises[currentExoIdx];
+      const userV = parseUserNum(document.getElementById('inp-v').value);
+      const exactV = ex.vKmh / 3.6;
+
+      if (!isNaN(userV) && Math.abs(userV - exactV) <= 0.25) {
+        validatedV = userV;
+        const vAff = Number(exactV.toFixed(2)).toLocaleString('fr-FR');
+        setFeedback('fb-v', true, "✅ Parfait ! " + ex.vKmh + " ÷ 3,6 ≈ <strong>" + vAff + " m/s</strong>. Passe maintenant à l'étape 3 !");
+        document.getElementById('box-step-2').className = 'step-box done-step';
+        document.getElementById('status-step-2').textContent = '✅ Validé';
+
+        // Déverrouiller l'étape 3 et afficher le récapitulatif des valeurs validées
+        if (currentStep < 3) currentStep = 3;
+        const box3 = document.getElementById('box-step-3');
+        box3.className = 'step-box active-step';
+        document.getElementById('status-step-3').textContent = 'À faire';
+
+        const recap = document.getElementById('step-3-recap');
+        const vUsedStr = Number(userV.toFixed(2)).toLocaleString('fr-FR');
+        recap.style.display = 'block';
+        recap.innerHTML = "📌 <strong>Tes valeurs validées :</strong> m = " + formatNumber(ex.mKg) + " kg et v = " + vUsedStr + " m/s<br>" +
+                          "👉 Tape : <strong>0,5 × " + formatNumber(ex.mKg) + " × " + vUsedStr + " × " + vUsedStr + "</strong>";
+        document.getElementById('inp-ec').focus();
+      } else if (Math.abs(userV - ex.vKmh) < 0.1) {
+        setFeedback('fb-v', false, "⚠️ Tu as gardé la vitesse en km/h ! Il faut diviser par 3,6 : tape <strong>" + ex.vKmh + " ÷ 3,6</strong>.");
+      } else if (Math.abs(userV - ex.vKmh * 3.6) < 1) {
+        setFeedback('fb-v', false, "⚠️ Tu as multiplié par 3,6 au lieu de <strong>diviser par 3,6</strong> (" + ex.vKmh + " ÷ 3,6).");
+      } else {
+        setFeedback('fb-v', false, "❌ Tape <strong>" + ex.vKmh + " ÷ 3,6</strong> sur la calculatrice.");
+      }
+    }
+
+    // --- ÉTAPE 3 : VÉRIFIER L'ÉNERGIE CINÉTIQUE ET L'UNITÉ ---
+    function verifyStep3() {
+      const ex = exercises[currentExoIdx];
+      const userEc = parseUserNum(document.getElementById('inp-ec').value);
+      const userUnit = document.getElementById('inp-unit').value;
+
+      const exactV = ex.vKmh / 3.6;
+      const vRound1 = Math.round(exactV * 10) / 10;
+      const vRound2 = Math.round(exactV * 100) / 100;
+      const vUser = validatedV || vRound2;
+
+      const ecExact = 0.5 * ex.mKg * exactV * exactV;
+      const ec1 = 0.5 * ex.mKg * vRound1 * vRound1;
+      const ec2 = 0.5 * ex.mKg * vRound2 * vRound2;
+      const ecFromUserV = 0.5 * ex.mKg * vUser * vUser;
+
+      const isEcValueGood = !isNaN(userEc) && (
+        Math.abs(userEc - ecExact) / ecExact <= 0.03 ||
+        Math.abs(userEc - ec1) / ec1 <= 0.02 ||
+        Math.abs(userEc - ec2) / ec2 <= 0.02 ||
+        Math.abs(userEc - ecFromUserV) / ecExact <= 0.025
+      );
+
+      const ecNoConv = 0.5 * ex.mKg * ex.vKmh * ex.vKmh;
+      const ecTimes2 = 0.5 * ex.mKg * (vUser * 2);
+
+      if (isEcValueGood && userUnit === 'J') {
+        setFeedback('fb-ec', true, "✅ Excellent ! Le calcul et l'unité (<strong>Joules</strong>) sont exacts.");
+        document.getElementById('box-step-3').className = 'step-box done-step';
+        document.getElementById('status-step-3').textContent = '✅ Validé';
+
+        // Déverrouiller et compléter l'étape 4 (Conclusion)
+        currentStep = 4;
+        const box4 = document.getElementById('box-step-4');
+        box4.className = 'step-box done-step';
+        document.getElementById('status-step-4').textContent = '✅ Complet';
+        document.getElementById('concl-val').textContent = formatNumber(userEc);
+        document.getElementById('concl-unit').textContent = "Joules (J)";
+        document.getElementById('next-exo-zone').style.display = 'block';
+
+        completedExos.add(ex.id);
+        renderExoButtons();
+      } else if (isEcValueGood && userUnit !== 'J') {
+        setFeedback('fb-ec', false, "👍 Ton calcul est juste ! Mais il te reste à sélectionner la bonne <strong>unité</strong> de l'énergie cinétique (<strong>J</strong>).");
+      } else if (!isNaN(userEc) && Math.abs(userEc - ecNoConv) / ecNoConv < 0.03) {
+        setFeedback('fb-ec', false, "⚠️ Tu as utilisé la vitesse en km/h dans la formule ! Utilise la vitesse en <strong>m/s</strong> validée à l'étape 2.");
+      } else if (!isNaN(userEc) && Math.abs(userEc - ecTimes2) / ecTimes2 < 0.05) {
+        setFeedback('fb-ec', false, "⚠️ Piège du carré ! Tu as fait v × 2 au lieu de faire <strong>v × v</strong>.");
+      } else {
+        const vUsedStr = Number(vUser.toFixed(2)).toLocaleString('fr-FR');
+        setFeedback('fb-ec', false, "❌ Vérifie ton calcul en tapant : <strong>0,5 × " + formatNumber(ex.mKg) + " × " + vUsedStr + " × " + vUsedStr + "</strong> et choisis l'unité <strong>J</strong>.");
+      }
+    }
+
+    // Aide ciblée uniquement sur l'étape en cours
+    function unlockCurrentStepHelp() {
+      const ex = exercises[currentExoIdx];
+      const exactV = ex.vKmh / 3.6;
+      const vRound2 = Math.round(exactV * 100) / 100;
+
+      if (currentStep === 1) {
+        document.getElementById('inp-m').value = ex.mKg.toString().replace('.', ',');
+        verifyStep1();
+      } else if (currentStep === 2) {
+        document.getElementById('inp-v').value = vRound2.toString().replace('.', ',');
+        verifyStep2();
+      } else {
+        const vUse = validatedV || vRound2;
+        const ec = 0.5 * ex.mKg * vUse * vUse;
+        document.getElementById('inp-ec').value = (Math.round(ec * 10) / 10).toString().replace('.', ',');
+        document.getElementById('inp-unit').value = 'J';
+        verifyStep3();
+      }
+    }
+
+    function goToNextExercise() {
+      const nextIdx = (currentExoIdx + 1) % exercises.length;
+      loadExercise(nextIdx);
+      document.getElementById('exo-enonce').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // ================= MINI-CALCULATRICE INTÉGRÉE =================
+    let calcExpr = "";
+
+    function toggleCalc() {
+      document.getElementById('mini-calc').classList.toggle('open');
+    }
+
+    function calcAction(key) {
+      const screen = document.getElementById('calc-screen');
+      if (key === 'C') {
+        calcExpr = "";
+        screen.textContent = "0";
+        return;
+      }
+      if (key === 'sq') {
+        try {
+          const val = Function('"use strict";return (' + (calcExpr || "0") + ')')();
+          const res = val * val;
+          calcExpr = String(Math.round(res * 1000) / 1000);
+          screen.textContent = calcExpr.replace('.', ',');
+        } catch (e) {
+          screen.textContent = "Erreur";
+          calcExpr = "";
+        }
+        return;
+      }
+      if (key === '=') {
+        try {
+          const val = Function('"use strict";return (' + (calcExpr || "0") + ')')();
+          calcExpr = String(Math.round(val * 100) / 100);
+          screen.textContent = calcExpr.replace('.', ',');
+        } catch (e) {
+          screen.textContent = "Erreur";
+          calcExpr = "";
+        }
+        return;
+      }
+      calcExpr += key;
+      screen.textContent = calcExpr.replace(/\*/g, '×').replace(/\//g, '÷').replace(/\./g, ',');
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      updateSimDisplays();
+      loadExercise(0);
+    });
+  </script>
+</body>
+</html>
