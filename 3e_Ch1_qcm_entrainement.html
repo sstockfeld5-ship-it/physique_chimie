@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM - L'énergie mécanique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .correct-answer {
+            background-color: #dcfce7; /* Vert clair */
+            border-color: #22c55e;
+            color: #166534;
+        }
+        .wrong-answer {
+            background-color: #fee2e2; /* Rouge clair */
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        .option-label {
+            display: block;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+        .option-label:hover {
+            background-color: #f3f4f6;
+        }
+        input[type="radio"] {
+            margin-right: 0.75rem;
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans p-4 md:p-8">
+
+    <div class="max-w-3xl mx-auto bg-white p-6 md:p-10 rounded-lg shadow-lg">
+        
+        <div class="border-b-2 border-blue-500 pb-4 mb-6 text-center">
+            <h1 class="text-3xl font-bold text-blue-700">QCM d'entraînement</h1>
+            <p class="text-gray-600 mt-2 font-semibold text-lg">Testez vos connaissances sur l'énergie mécanique ! 🛹</p>
+        </div>
+
+        <form id="quiz-form">
+            <!-- Question 1 -->
+            <div class="mb-8 question-block" id="block-q1">
+                <h3 class="font-bold text-lg mb-3">1. L'énergie cinétique (E<sub>c</sub>) est liée à...</h3>
+                <label class="option-label"><input type="radio" name="q1" value="A"> A) L'altitude</label>
+                <label class="option-label"><input type="radio" name="q1" value="B"> B) La vitesse</label>
+                <label class="option-label"><input type="radio" name="q1" value="C"> C) La température</label>
+                <div id="exp-q1" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-gray-700 rounded">
+                    <strong>💡 Explication :</strong> Le mot "cinétique" veut dire mouvement. Plus un objet va vite, plus son énergie cinétique est grande.
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="mb-8 question-block" id="block-q2">
+                <h3 class="font-bold text-lg mb-3">2. L'énergie potentielle de position (E<sub>p</sub>) est liée à...</h3>
+                <label class="option-label"><input type="radio" name="q2" value="A"> A) L'altitude</label>
+                <label class="option-label"><input type="radio" name="q2" value="B"> B) La vitesse</label>
+                <label class="option-label"><input type="radio" name="q2" value="C"> C) Le poids du skateur</label>
+                <div id="exp-q2" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-gray-700 rounded">
+                    <strong>💡 Explication :</strong> Plus on monte haut, plus on "stocke" de l'énergie liée à la hauteur. C'est le potentiel de tomber.
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="mb-8 question-block" id="block-q3">
+                <h3 class="font-bold text-lg mb-3">3. Quelle est la bonne formule pour l'énergie mécanique (E<sub>m</sub>) ?</h3>
+                <label class="option-label"><input type="radio" name="q3" value="A"> A) E<sub>m</sub> = E<sub>c</sub> - E<sub>p</sub></label>
+                <label class="option-label"><input type="radio" name="q3" value="B"> B) E<sub>m</sub> = E<sub>c</sub> × E<sub>p</sub></label>
+                <label class="option-label"><input type="radio" name="q3" value="C"> C) E<sub>m</sub> = E<sub>c</sub> + E<sub>p</sub></label>
+                <div id="exp-q3" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-gray-700 rounded">
+                    <strong>💡 Explication :</strong> L'énergie mécanique est le grand réservoir total. On additionne l'énergie de la vitesse et l'énergie de la hauteur.
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="mb-8 question-block" id="block-q4">
+                <h3 class="font-bold text-lg mb-3">4. Quand un skateur descend une rampe, son altitude diminue. Que fait son énergie potentielle ?</h3>
+                <label class="option-label"><input type="radio" name="q4" value="A"> A) Elle augmente</label>
+                <label class="option-label"><input type="radio" name="q4" value="B"> B) Elle diminue</label>
+                <label class="option-label"><input type="radio" name="q4" value="C"> C) Elle ne varie pas</label>
+                <div id="exp-q4" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-gray-700 rounded">
+                    <strong>💡 Explication :</strong> Puisque l'énergie potentielle dépend directement de l'altitude, si on descend, cette énergie baisse.
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="mb-8 question-block" id="block-q5">
+                <h3 class="font-bold text-lg mb-3">5. Quand le skateur descend, il prend de l'élan et sa vitesse augmente. Que fait son énergie cinétique ?</h3>
+                <label class="option-label"><input type="radio" name="q5" value="A"> A) Elle augmente</label>
+                <label class="option-label"><input type="radio" name="q5" value="B"> B) Elle diminue</label>
+                <label class="option-label"><input type="radio" name="q5" value="C"> C) Elle ne varie pas</label>
+                <div id="exp-q5" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-gray-700 rounded">
+                    <strong>💡 Explication :</strong> Puisque l'énergie cinétique dépend de la vitesse, si on accélère, cette énergie grimpe.
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="mb-8 question-block" id="block-q6">
+                <h3 class="font-bold text-lg mb-3">6. Lors d'une descente, quelle conversion d'énergie se produit ?</h3>
+                <label class="option-label"><input type="radio" name="q6" value="A"> A) L'énergie cinétique se transforme en énergie potentielle</label>
+                <label class="option-label"><input type="radio" name="q6" value="B"> B) L'énergie potentielle se transforme en énergie cinétique</label>
+                <label class="option-label"><input type="radio" name="q6" value="C"> C) L'énergie mécanique se transforme en chaleur</label>
+                <div id="exp-q6" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-gray-700 rounded">
+                    <strong>💡 Explication :</strong> Le skateur perd de la hauteur (il vide son énergie potentielle) mais gagne de la vitesse (il remplit son énergie cinétique).
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="mb-8 question-block" id="block-q7">
+                <h3 class="font-bold text-lg mb-3">7. Lors d'une montée, le skateur ralentit. Pourquoi ?</h3>
+                <label class="option-label"><input type="radio" name="q7" value="A"> A) Son énergie cinétique se transforme en énergie potentielle</label>
+                <label class="option-label"><input type="radio" name="q7" value="B"> B) Son énergie potentielle se transforme en énergie cinétique</label>
+                <label class="option-label"><input type="radio" name="q7" value="C"> C) Son énergie mécanique disparaît</label>
+                <div id="exp-q7" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-gray-700 rounded">
+                    <strong>💡 Explication :</strong> C'est l'inverse de la descente ! Le skateur perd sa vitesse (énergie cinétique) pour réussir à grimper et gagner de la hauteur (énergie potentielle).
+                </div>
+            </div>
+
+            <!-- Question 8 -->
+            <div class="mb-8 question-block" id="block-q8">
+                <h3 class="font-bold text-lg mb-3">8. Si on néglige les frottements, l'énergie totale (mécanique) du skateur...</h3>
+                <label class="option-label"><input type="radio" name="q8" value="A"> A) Augmente tout le temps</label>
+                <label class="option-label"><input type="radio" name="q8" value="B"> B) Diminue petit à petit</label>
+                <label class="option-label"><input type="radio" name="q8" value="C"> C) Reste constante (elle se conserve)</label>
+                <div id="exp-q8" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-gray-700 rounded">
+                    <strong>💡 Explication :</strong> L'énergie ne disparaît pas, elle change juste de forme. La somme des deux reste toujours la même.
+                </div>
+            </div>
+
+            <!-- Question 9 -->
+            <div class="mb-8 question-block" id="block-q9">
+                <h3 class="font-bold text-lg mb-3">9. Sur une piste en forme de "U", à quel endroit l'énergie potentielle est-elle maximale ?</h3>
+                <label class="option-label"><input type="radio" name="q9" value="A"> A) Tout en haut de la piste</label>
+                <label class="option-label"><input type="radio" name="q9" value="B"> B) Tout en bas de la piste (au milieu)</label>
+                <label class="option-label"><input type="radio" name="q9" value="C"> C) Elle est maximale partout</label>
+                <div id="exp-q9" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-gray-700 rounded">
+                    <strong>💡 Explication :</strong> L'énergie potentielle dépend de l'altitude. C'est donc au point le plus haut qu'elle est au maximum.
+                </div>
+            </div>
+
+            <!-- Question 10 -->
+            <div class="mb-8 question-block" id="block-q10">
+                <h3 class="font-bold text-lg mb-3">10. Sur cette même piste en "U", à quel endroit le skateur va-t-il le plus vite (énergie cinétique maximale) ?</h3>
+                <label class="option-label"><input type="radio" name="q10" value="A"> A) Tout en haut de la piste</label>
+                <label class="option-label"><input type="radio" name="q10" value="B"> B) Tout en bas de la piste (au point le plus bas)</label>
+                <label class="option-label"><input type="radio" name="q10" value="C"> C) Avant de démarrer</label>
+                <div id="exp-q10" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-gray-700 rounded">
+                    <strong>💡 Explication :</strong> C'est là que le skateur a pris tout son élan lors de la descente, juste avant de commencer à remonter et à ralentir.
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <button type="button" onclick="corrigerQCM()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg transition-transform transform hover:scale-105">
+                    ✅ Valider mes réponses
+                </button>
+            </div>
+
+        </form>
+
+        <!-- Zone d'affichage du résultat -->
+        <div id="result-box" class="hidden mt-8 p-6 text-center border-4 rounded-xl">
+            <h2 class="text-2xl font-bold mb-2" id="score-text"></h2>
+            <p class="text-lg" id="feedback-text"></p>
+            <button onclick="location.reload()" class="mt-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded">
+                🔄 Recommencer
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Réponses correctes
+        const bonnesReponses = {
+            q1: "B",
+            q2: "A",
+            q3: "C",
+            q4: "B",
+            q5: "A",
+            q6: "B",
+            q7: "A",
+            q8: "C",
+            q9: "A",
+            q10: "B"
+        };
+
+        function corrigerQCM() {
+            let score = 0;
+            const totalQuestions = Object.keys(bonnesReponses).length;
+
+            // Parcourir chaque question
+            for (let question in bonnesReponses) {
+                const options = document.getElementsByName(question);
+                let aRepondu = false;
+
+                // Parcourir les choix de la question
+                for (let i = 0; i < options.length; i++) {
+                    const label = options[i].parentElement;
+                    
+                    // Réinitialiser les couleurs
+                    label.classList.remove('correct-answer', 'wrong-answer');
+
+                    if (options[i].checked) {
+                        aRepondu = true;
+                        if (options[i].value === bonnesReponses[question]) {
+                            // Bonne réponse cochée
+                            label.classList.add('correct-answer');
+                            score++;
+                        } else {
+                            // Mauvaise réponse cochée
+                            label.classList.add('wrong-answer');
+                        }
+                    }
+                    
+                    // Montrer la bonne réponse quoi qu'il arrive
+                    if (options[i].value === bonnesReponses[question]) {
+                        label.classList.add('correct-answer');
+                        label.style.fontWeight = "bold";
+                    }
+                }
+
+                // Alerte si une question n'a pas été remplie
+                if (!aRepondu) {
+                    document.getElementById('block-' + question).classList.add('border-l-4', 'border-red-500', 'pl-4');
+                } else {
+                    document.getElementById('block-' + question).classList.remove('border-l-4', 'border-red-500', 'pl-4');
+                }
+                
+                // Afficher l'explication
+                document.getElementById('exp-' + question).classList.remove('hidden');
+            }
+
+            // Affichage du score
+            const resultBox = document.getElementById('result-box');
+            const scoreText = document.getElementById('score-text');
+            const feedbackText = document.getElementById('feedback-text');
+            
+            resultBox.classList.remove('hidden', 'border-green-500', 'border-yellow-500', 'border-red-500', 'bg-green-50', 'bg-yellow-50', 'bg-red-50');
+            
+            scoreText.innerHTML = `Votre score : ${score} / ${totalQuestions}`;
+
+            if (score === totalQuestions) {
+                resultBox.classList.add('border-green-500', 'bg-green-50');
+                feedbackText.innerHTML = "🏆 Parfait ! Tu maîtrises l'énergie mécanique sur le bout des doigts.";
+            } else if (score >= 6) {
+                resultBox.classList.add('border-yellow-500', 'bg-yellow-50');
+                feedbackText.innerHTML = "👍 Bon travail ! Lis bien les corrections qui viennent d'apparaître pour comprendre tes erreurs.";
+            } else {
+                resultBox.classList.add('border-red-500', 'bg-red-50');
+                feedbackText.innerHTML = "💪 Accroche-toi ! Lis les explications sous chaque question pour progresser.";
+            }
+            
+            // Faire défiler jusqu'au résultat
+            resultBox.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
