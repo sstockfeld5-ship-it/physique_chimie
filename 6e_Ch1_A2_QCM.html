@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QCM - L'Énergie et ses conversions (Bilan 2 & Activité 2)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .option-btn { transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
+        .selected { border-color: #3b82f6; background-color: #eff6ff; }
+        .correct { border-color: #22c55e !important; background-color: #f0fdf4 !important; color: #166534; }
+        .incorrect { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #991b1b; }
+        .svg-text { font-family: sans-serif; font-size: 14px; font-weight: bold; fill: #333; }
+        .svg-subtext { font-family: sans-serif; font-size: 12px; fill: #666; font-style: italic; }
+        /* Style de la scrollbar pour mobile */
+        #svg-wrapper::-webkit-scrollbar { height: 6px; }
+        #svg-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen p-3 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-5 md:p-10" id="app">
+        <!-- Écran d'accueil -->
+        <div id="start-screen" class="text-center py-6">
+            <h1 class="text-2xl md:text-3xl font-bold mb-4 text-blue-700">Contrôle de Physique-Chimie</h1>
+            <p class="text-base md:text-lg mb-8 text-gray-600">Préparation : Bilan 2 & Activité 2<br>(Les chaînes d'énergie)</p>
+            <button onclick="startQuiz()" class="w-full md:w-auto bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition active:scale-95 shadow-md">Démarrer le QCM (10 questions)</button>
+        </div>
+
+        <!-- Écran du Quiz -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <span class="text-sm font-bold bg-gray-200 px-3 py-1 rounded-full text-gray-700" id="question-counter">Question 1/10</span>
+                <span class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full" id="score-display">Score: 0</span>
+            </div>
+
+            <h2 class="text-lg md:text-xl font-bold mb-6 text-gray-800 leading-snug" id="question-text"></h2>
+            
+            <div id="svg-container" class="mb-8 w-full"></div>
+
+            <div id="options-container" class="grid grid-cols-1 gap-3 mb-6"></div>
+
+            <div id="feedback-container" class="hidden rounded-lg p-4 mb-6 text-sm font-medium"></div>
+
+            <button id="action-btn" onclick="handleAction()" class="w-full bg-blue-600 text-white px-6 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shadow-md" disabled>Valider</button>
+        </div>
+
+        <!-- Écran de Fin -->
+        <div id="end-screen" class="hidden text-center py-6">
+            <h2 class="text-3xl font-bold mb-4 text-blue-700">Terminé !</h2>
+            <p class="text-xl mb-8">Votre score final est de <span id="final-score" class="font-bold text-2xl"></span>/10.</p>
+            <button onclick="location.reload()" class="w-full md:w-auto bg-gray-800 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-900 transition active:scale-95 shadow-md">Recommencer</button>
+        </div>
+    </div>
+
+    <script>
+        function generateSVG(data) {
+            if (!data) return '';
+            const w = 600, h = 300;
+            
+            const sourceColor = data.source === "?" ? "#EF4444" : "#333";
+            const eInColor = data.eIn === "?" ? "#EF4444" : "#666";
+            const eOutColor = data.eOut === "?" ? "#EF4444" : "#666";
+            const eLostColor = data.eLost === "?" ? "#EF4444" : "#EF4444";
+
+            const svgCode = `
+            <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="min-width: 600px;" class="max-w-none">
+                <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#4B5563" />
+                    </marker>
+                    <marker id="arrow-down" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#EF4444" />
+                    </marker>
+                </defs>
+
+                <!-- Source -->
+                <rect x="20" y="80" width="120" height="60" rx="5" fill="#E5E7EB" stroke="#4B5563" stroke-width="2"/>
+                <text x="80" y="115" text-anchor="middle" class="svg-text" fill="${sourceColor}">${data.source}</text>
+
+                <!-- Transfert 1 -->
+                <line x1="140" y1="110" x2="230" y2="110" stroke="#4B5563" stroke-width="3" marker-end="url(#arrow)" />
+                <text x="185" y="100" text-anchor="middle" class="svg-subtext" fill="${eInColor}">${data.eIn}</text>
+
+                <!-- Convertisseur -->
+                <ellipse cx="300" cy="110" rx="70" ry="40" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/>
+                <text x="300" y="115" text-anchor="middle" class="svg-text">${data.converter}</text>
+
+                <!-- Transfert 2 (Utile) -->
+                <line x1="370" y1="110" x2="460" y2="110" stroke="#4B5563" stroke-width="3" marker-end="url(#arrow)" />
+                <text x="415" y="100" text-anchor="middle" class="svg-subtext" fill="${eOutColor}">${data.eOut}</text>
+
+                <!-- Destination Utile -->
+                <rect x="460" y="80" width="120" height="60" rx="5" fill="#E5E7EB" stroke="#4B5563" stroke-width="2"/>
+                <text x="520" y="115" text-anchor="middle" class="svg-text">${data.dest}</text>
+
+                <!-- Transfert 3 (Perdue) -->
+                <line x1="300" y1="150" x2="300" y2="210" stroke="#EF4444" stroke-width="3" marker-end="url(#arrow-down)" />
+                <text x="310" y="185" text-anchor="start" class="svg-subtext" fill="${eLostColor}">${data.eLost}</text>
+
+                <!-- Environnement -->
+                <rect x="240" y="210" width="120" height="40" rx="5" fill="#FEE2E2" stroke="#EF4444" stroke-width="2"/>
+                <text x="300" y="235" text-anchor="middle" class="svg-text">Environnement</text>
+            </svg>`;
+
+            return `
+            <div class="md:hidden text-xs text-blue-500 mb-2 font-bold text-center flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                Faites glisser pour voir le schéma
+            </div>
+            <div id="svg-wrapper" class="w-full overflow-x-auto overflow-y-hidden pb-2 border-b border-gray-100">
+                ${svgCode}
+            </div>`;
+        }
+
+        const questionsPool = [
+            // --- THÉORIE ET MODÉLISATION (BILAN 2) ---
+            {
+                q: "Dans une chaîne d'énergie, dans quelle forme géométrique doit-on écrire le nom du convertisseur ?",
+                options: ["Dans un rectangle", "Dans un ovale (ou cercle)", "Sans forme, juste sur la flèche", "Dans un losange"],
+                ans: 1,
+                exp: "Les convertisseurs d'énergie sont toujours placés dans des ovales ou des cercles."
+            },
+            {
+                q: "Comment représente-t-on les réservoirs (sources) et l'environnement dans un diagramme d'énergie ?",
+                options: ["Dans des rectangles", "Dans des ovales", "Par de simples flèches", "On ne les dessine pas"],
+                ans: 0,
+                exp: "Les sources, les réservoirs et l'environnement sont placés dans des rectangles."
+            },
+            {
+                q: "L'énergie peut-elle être créée à partir de rien ?",
+                options: ["Oui, par un convertisseur", "Non, elle peut seulement être convertie ou transmise", "Oui, dans la nature", "Non, elle finit toujours par disparaître"],
+                ans: 1,
+                exp: "L'énergie ne peut pas être créée ou disparaître. Elle est seulement transformée d'une forme à une autre, ou transmise."
+            },
+            {
+                q: "Qu'est-ce qu'une conversion d'énergie ?",
+                options: ["La destruction totale d'une énergie", "La création d'énergie", "La transformation d'une forme d'énergie en une autre", "Le stockage d'énergie dans un réservoir"],
+                ans: 2,
+                exp: "Une conversion d'énergie est une transformation d'une forme en une autre (par exemple électrique vers lumineuse)."
+            },
+            {
+                q: "Toute l'énergie transformée par un objet est-elle toujours 'utile' ?",
+                options: ["Oui, si l'objet est neuf", "Non, une partie est dissipée dans l'environnement", "Oui, l'énergie ne se perd jamais", "Non, l'énergie n'est jamais utile"],
+                ans: 1,
+                exp: "Lors d'une conversion, une partie de l'énergie est toujours perdue ou dissipée dans l'environnement."
+            },
+            {
+                q: "Dans un diagramme, que représente la flèche qui pointe vers le bas ?",
+                options: ["L'énergie reçue de la source", "L'énergie utile", "L'énergie perdue (ou dissipée)", "Le refroidissement de la pièce"],
+                ans: 2,
+                exp: "La flèche vers le bas indique l'énergie dissipée dans l'environnement, souvent sous forme thermique."
+            },
+
+            // --- RECHERCHE DE L'ÉLÉMENT MANQUANT : LA SOURCE ('?') ---
+            {
+                q: "Quelle est la source d'énergie manquante ('?') pour cette éolienne ?",
+                svg: { source: "?", eIn: "Énergie cinétique", converter: "Éolienne", eOut: "Énergie électrique", dest: "Réseau", eLost: "Énergie thermique" },
+                options: ["Le Soleil", "Le vent", "L'alternateur", "Le réseau"],
+                ans: 1,
+                exp: "Le vent est la source d'énergie : c'est de l'air en mouvement (énergie cinétique) qui fait tourner l'éolienne."
+            },
+            {
+                q: "Que doit-on placer dans le rectangle source '?' pour un téléviseur branché au mur ?",
+                svg: { source: "?", eIn: "Énergie électrique", converter: "Téléviseur", eOut: "Énergie lumineuse", dest: "Spectateur", eLost: "Énergie thermique" },
+                options: ["Une pile plate", "Le Soleil", "Le réseau électrique", "L'environnement"],
+                ans: 2,
+                exp: "Un appareil branché au mur utilise le réseau électrique comme source."
+            },
+            {
+                q: "Dans la chaîne d'énergie d'un cycliste, quelle est la source ('?') qui lui donne de l'énergie chimique ?",
+                svg: { source: "?", eIn: "Énergie chimique", converter: "Cycliste", eOut: "Énergie cinétique", dest: "Pédales", eLost: "Énergie thermique" },
+                options: ["Le Soleil", "Le vent", "Les aliments", "Le vélo"],
+                ans: 2,
+                exp: "L'être humain puise l'énergie nécessaire à ses mouvements dans les aliments (réservoir d'énergie chimique)."
+            },
+            {
+                q: "Dans la chaîne d'énergie d'une petite voiture télécommandée, quelle est la source d'énergie manquante ('?') ?",
+                svg: { source: "?", eIn: "Énergie électrique", converter: "Moteur", eOut: "Énergie cinétique", dest: "Roues", eLost: "Énergie thermique" },
+                options: ["Le réseau électrique", "Une pile (ou batterie)", "Le carburant", "L'environnement"],
+                ans: 1,
+                exp: "Comme le jouet se déplace librement sans fil, sa source d'énergie ne peut pas être le réseau électrique. Il utilise une pile ou une batterie."
+            },
+            {
+                q: "Pour un train TGV, que doit-on placer dans le rectangle source '?' ?",
+                svg: { source: "?", eIn: "Énergie électrique", converter: "Moteur", eOut: "Énergie cinétique", dest: "Roues", eLost: "Énergie thermique" },
+                options: ["Le charbon", "Le carburant (essence)", "Le réseau électrique", "Le Soleil"],
+                ans: 2,
+                exp: "Un TGV est un train électrique, sa source d'énergie est donc le réseau électrique (via les caténaires au-dessus des voies)."
+            },
+
+            // --- RECHERCHE DE L'ÉLÉMENT MANQUANT : L'ÉNERGIE ('?') ---
+            {
+                q: "Quelle énergie utile ('?') est produite par un moteur de ventilateur ?",
+                svg: { source: "Réseau", eIn: "Énergie électrique", converter: "Moteur", eOut: "?", dest: "Air", eLost: "Énergie thermique" },
+                options: ["Énergie lumineuse", "Énergie chimique", "Énergie thermique", "Énergie cinétique"],
+                ans: 3,
+                exp: "Le moteur convertit l'électricité en mouvement pour faire tourner les pales, c'est de l'énergie cinétique."
+            },
+            {
+                q: "Quelle est l'énergie utile ('?') produite par une résistance de bouilloire ?",
+                svg: { source: "Prise", eIn: "Énergie électrique", converter: "Résistance", eOut: "?", dest: "Eau", eLost: "Énergie lumineuse" },
+                options: ["Énergie cinétique", "Énergie électrique", "Énergie thermique", "Énergie chimique"],
+                ans: 2,
+                exp: "La résistance d'une bouilloire chauffe. Son énergie utile est donc l'énergie thermique."
+            },
+            {
+                q: "Quelle énergie est fournie en entrée ('?') à une lampe par la prise de courant ?",
+                svg: { source: "Prise", eIn: "?", converter: "Lampe", eOut: "Énergie lumineuse", dest: "Bureau", eLost: "Énergie thermique" },
+                options: ["Énergie thermique", "Énergie électrique", "Énergie lumineuse", "Énergie cinétique"],
+                ans: 1,
+                exp: "Une prise de courant fournit de l'énergie électrique."
+            },
+            {
+                q: "Que représente le '?' dissipé par le moteur d'un ventilateur vers l'environnement ?",
+                svg: { source: "Réseau", eIn: "Énergie électrique", converter: "Moteur", eOut: "Énergie cinétique", dest: "Air", eLost: "?" },
+                options: ["Énergie lumineuse", "Énergie cinétique", "Énergie chimique", "Énergie thermique"],
+                ans: 3,
+                exp: "Lorsque le moteur fonctionne, il chauffe. L'énergie dissipée est l'énergie thermique."
+            },
+            {
+                q: "Quelle énergie reçue remplace le '?' pour un four solaire ou une plante verte ?",
+                svg: { source: "Soleil", eIn: "?", converter: "Four solaire", eOut: "Énergie thermique", dest: "Aliments", eLost: "Énergie lumineuse" },
+                options: ["Énergie chimique", "Énergie cinétique", "Énergie lumineuse", "Énergie électrique"],
+                ans: 2,
+                exp: "Le Soleil transmet son énergie sous forme de lumière (rayonnement). C'est de l'énergie lumineuse."
+            },
+
+            // --- ANALYSE DE L'ACTIVITÉ 2 ---
+            {
+                q: "Que se passe-t-il au niveau de l'énergie cinétique d'une voiture de course lorsqu'elle freine ?",
+                options: ["Elle augmente", "Elle reste identique", "Elle diminue", "Elle se transforme en électricité"],
+                ans: 2,
+                exp: "Lorsque la voiture ralentit, son énergie cinétique diminue."
+            },
+            {
+                q: "Que devient l'énergie cinétique de la voiture lors du freinage ?",
+                options: ["Elle disparaît complètement", "Elle est convertie en énergie thermique (les pneus et les freins chauffent)", "Elle est convertie en énergie lumineuse", "Elle retourne dans le moteur"],
+                ans: 1,
+                exp: "Lors du freinage, l'énergie cinétique est convertie par frottement en chaleur (énergie thermique)."
+            },
+            {
+                q: "Pourquoi utiliser un ventilateur l'été dans une pièce fermée n'est pas toujours une bonne idée ?",
+                options: ["Il absorbe l'air chaud", "Son moteur dissipe de l'énergie thermique qui chauffe la pièce", "Il produit trop de lumière", "Il consomme de l'énergie chimique"],
+                ans: 1,
+                exp: "Le ventilateur brasse l'air, mais son moteur convertit aussi une partie de l'électricité en chaleur (énergie thermique), réchauffant légèrement la pièce."
+            },
+            {
+                q: "Lorsqu'une éolienne est entraînée par le vent, que provoquent les frottements mécaniques à l'intérieur ?",
+                options: ["Un échauffement (énergie thermique perdue)", "De la lumière", "La création d'un nouveau vent", "La production d'énergie chimique"],
+                ans: 0,
+                exp: "Les frottements des pièces mobiles de l'éolienne créent de la chaleur, une énergie thermique dissipée dans l'environnement."
+            },
+            {
+                q: "Parmi ces objets, lequel est un convertisseur d'énergie ?",
+                options: ["Une ligne électrique", "Une pile", "Un moteur", "L'environnement"],
+                ans: 2,
+                exp: "Le moteur transforme l'électricité en mouvement. La ligne et la pile sont des moyens de transport ou de stockage."
+            },
+
+            // --- ERREURS ET SYNTHÈSE ---
+            {
+                q: "Où doit toujours pointer la flèche représentant l'énergie perdue dans le diagramme ?",
+                options: ["Vers la source", "Vers l'environnement (vers le bas)", "Vers l'énergie utile", "Vers le convertisseur"],
+                ans: 1,
+                exp: "L'énergie dissipée par échauffement se diffuse toujours dans l'air ambiant, représenté par l'environnement en bas du schéma."
+            },
+            {
+                q: "Quelle erreur de schéma a fait l'élève ici ?",
+                svg: { source: "Pile", eIn: "Énergie électrique", converter: "Lampe", eOut: "Énergie lumineuse", dest: "Bureau", eLost: "Énergie thermique" },
+                options: ["La source devrait être dans un ovale", "L'environnement n'a pas de rectangle", "Le convertisseur 'Lampe' devrait être dans un rectangle", "Il n'y a pas d'erreur de forme, le schéma est correct"],
+                ans: 3,
+                exp: "Le schéma est correct : sources et destinations dans des rectangles, convertisseur dans un ovale, flèche de perte vers le bas."
+            },
+            {
+                q: "Un grille-pain est un appareil électrique qui chauffe le pain. Quel type d'énergie utile produit-il ?",
+                options: ["Énergie lumineuse", "Énergie chimique", "Énergie cinétique", "Énergie thermique"],
+                ans: 3,
+                exp: "Comme la résistance ou le radiateur, le grille-pain convertit l'électricité en chaleur (énergie thermique)."
+            },
+            {
+                q: "L'énergie contenue dans le bois ou le charbon est de l'énergie :",
+                options: ["Cinétique", "Électrique", "Chimique", "Lumineuse"],
+                ans: 2,
+                exp: "Comme les aliments ou la pile, le bois stocke l'énergie sous forme chimique dans la matière."
+            },
+            {
+                q: "Dans un circuit électrique simple (comme vu en classe avec le ventilateur), quel élément joue le rôle de réservoir d'énergie ?",
+                options: ["Les fils de connexion", "Le moteur", "La pile plate", "L'environnement"],
+                ans: 2,
+                exp: "La pile contient de l'énergie chimique et sert de réservoir pour fournir l'énergie électrique au circuit."
+            }
+        ];
+
+        let selectedQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+        let isAnswered = false;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            shuffleArray(questionsPool);
+            selectedQuestions = questionsPool.slice(0, 10);
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isAnswered = false;
+            selectedOption = null;
+            
+            const q = selectedQuestions[currentQuestionIndex];
+            document.getElementById('question-counter').innerText = `Question ${currentQuestionIndex + 1}/10`;
+            document.getElementById('score-display').innerText = `Score: ${score}`;
+            document.getElementById('question-text').innerText = q.q;
+            
+            const svgContainer = document.getElementById('svg-container');
+            svgContainer.innerHTML = q.svg ? generateSVG(q.svg) : '';
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left p-4 md:p-5 border-2 border-gray-200 rounded-xl font-medium hover:bg-gray-50 text-[15px] md:text-base leading-snug';
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('feedback-container').classList.add('hidden');
+            
+            const actionBtn = document.getElementById('action-btn');
+            actionBtn.innerText = 'Valider';
+            actionBtn.disabled = true;
+        }
+
+        function selectOption(index, btnElement) {
+            if (isAnswered) return;
+            
+            selectedOption = index;
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            btnElement.classList.add('selected');
+            document.getElementById('action-btn').disabled = false;
+        }
+
+        function handleAction() {
+            if (!isAnswered) {
+                checkAnswer();
+            } else {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < 10) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }
+        }
+
+        function checkAnswer() {
+            isAnswered = true;
+            const q = selectedQuestions[currentQuestionIndex];
+            const btns = document.querySelectorAll('.option-btn');
+            const feedback = document.getElementById('feedback-container');
+            const actionBtn = document.getElementById('action-btn');
+
+            btns.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-gray-50', 'selected');
+                
+                if (idx === q.ans) {
+                    btn.classList.add('correct');
+                } else if (idx === selectedOption) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            feedback.classList.remove('hidden');
+            if (selectedOption === q.ans) {
+                score++;
+                feedback.className = 'rounded-lg p-4 mb-6 text-sm font-medium bg-green-100 text-green-800 border border-green-200 shadow-sm';
+                feedback.innerHTML = `<strong>Bonne réponse !</strong> ${q.exp}`;
+            } else {
+                feedback.className = 'rounded-lg p-4 mb-6 text-sm font-medium bg-red-100 text-red-800 border border-red-200 shadow-sm';
+                feedback.innerHTML = `<strong>Mauvaise réponse.</strong> ${q.exp}`;
+            }
+
+            document.getElementById('score-display').innerText = `Score: ${score}`;
+            
+            actionBtn.innerText = currentQuestionIndex === 9 ? 'Voir les résultats' : 'Question suivante';
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+        }
+    </script>
+</body>
+</html>
