@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>L'Énergie Mécanique - 3e</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+      
+      /* Couleurs spécifiques aux énergies */
+      --color-ec: #22c55e;
+      --color-ep: #3b82f6;
+      --color-em: #f59e0b;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg); color: var(--text);
+      line-height: 1.45; padding-bottom: 30px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white; padding: 12px 16px; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    header h1 { margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px; }
+    header p { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.9; }
+
+    .tabs {
+      position: sticky; top: 0; z-index: 100;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      background: white; border-bottom: 2px solid var(--border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .tab-btn {
+      border: none; background: none; padding: 12px 4px;
+      font-size: 0.85rem; font-weight: 700; color: var(--muted);
+      cursor: pointer; border-bottom: 3px solid transparent;
+      transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    }
+    .tab-btn span.icon { font-size: 1.15rem; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background-color: #f8fafc; }
+
+    .container { max-width: 680px; margin: 0 auto; padding: 10px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.2s ease-in; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06); border: 1px solid #e2e8f0;
+    }
+    .card-title { margin: 0 0 10px 0; font-size: 1.05rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+
+    .concept-box {
+      background: var(--primary-light); border-left: 4px solid var(--primary);
+      padding: 10px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 12px;
+    }
+
+    /* Contrôles Mode Simulation */
+    .mode-selector { display: flex; gap: 6px; margin-bottom: 12px; justify-content: center; }
+    .btn-mode { 
+      flex: 1; border: 2px solid var(--border); background: white; padding: 8px 4px; 
+      border-radius: 8px; font-weight: 700; color: var(--muted); cursor: pointer; transition: 0.2s;
+      font-size: 0.85rem;
+    }
+    .btn-mode.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+
+    /* Simulateur Canvas */
+    .sim-stage {
+      background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 60%, #a3a3a3 80%, #6b7280 100%);
+      border-radius: 12px; height: 240px; position: relative; overflow: hidden;
+      border: 2px solid #94a3b8; margin-bottom: 12px;
+    }
+    canvas { width: 100%; height: 100%; display: block; }
+    
+    .sim-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .btn {
+      border: none; border-radius: 10px; padding: 10px;
+      font-size: 0.9rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: transform 0.1s, background 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: #e2e8f0; color: #1e293b; }
+
+    /* Dashboard SVG */
+    .dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+    .bar-container { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 10px 4px; text-align: center; }
+    .bar-title { font-size: 0.7rem; font-weight: 800; margin-bottom: 8px; color: var(--muted); }
+    
+    .svg-bar-container { display: flex; justify-content: center; }
+    .svg-bar rect { transition: height 0.1s linear, y 0.1s linear; }
+
+    .hl-ec { color: var(--color-ec); font-weight: bold; }
+    .hl-ep { color: var(--color-ep); font-weight: bold; }
+    .hl-em { color: var(--color-em); font-weight: bold; }
+
+    /* Formules */
+    .formula-card { background: #1e293b; color: white; border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 14px; }
+    .formula-big { font-size: 1.3rem; font-weight: 800; letter-spacing: 1px; margin: 6px 0; }
+    
+    .unit-list { display: grid; grid-template-columns: 1fr; gap: 6px; text-align: left; margin-top: 12px; font-size: 0.85rem; }
+    .unit-item { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; }
+
+    /* Exercices */
+    .exo-selector { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+    .exo-pill {
+      flex: 1 1 calc(33% - 8px); min-width: 80px;
+      padding: 6px 2px; border: 2px solid var(--border); background: white;
+      border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; text-align: center;
+    }
+    .exo-pill.active { border-color: var(--primary); background: var(--primary-light); color: #1e3a8a; }
+    .exo-pill.done { border-color: var(--success); background: var(--success-light); color: #166534; }
+
+    .enonce-box { background: #f8fafc; border-left: 4px solid #0f172a; padding: 10px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 12px; overflow: hidden; }
+    .step-box { border: 2px solid var(--border); border-radius: 12px; padding: 10px; margin-bottom: 10px; background: #ffffff; transition: all 0.25s ease; }
+    .step-box.active-step { border-color: var(--primary); box-shadow: 0 2px 10px rgba(37, 99, 235, 0.1); }
+    .step-box.done-step { border-color: #86efac; background: #f0fdf4; }
+    .step-box.locked { opacity: 0.45; pointer-events: none; background: #f8fafc; border-style: dashed; }
+    
+    .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 4px; }
+    .step-title { font-weight: 800; font-size: 0.85rem; color: var(--primary-dark); }
+    .step-status { font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 99px; background: #e2e8f0; color: #475569; white-space: nowrap; }
+    
+    /* Inputs Calcul */
+    .input-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .num-input { flex: 1; min-width: 70px; padding: 8px; font-size: 1rem; font-weight: 700; border: 2px solid var(--border); border-radius: 8px; outline: none; }
+    .num-input:focus { border-color: var(--primary); }
+    .btn-step-check { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 10px 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
+    
+    /* QCM */
+    .qcm-grid { display: grid; grid-template-columns: 1fr; gap: 6px; margin-top: 8px; }
+    .qcm-grid.diagrams { grid-template-columns: repeat(3, 1fr); } 
+    .btn-qcm {
+      background: white; border: 2px solid var(--border); border-radius: 8px;
+      padding: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-align: left;
+      transition: all 0.15s; line-height: 1.3;
+    }
+    .btn-qcm:hover { border-color: var(--primary); background: #f8fafc; }
+    .btn-qcm.selected-wrong { border-color: var(--danger); background: var(--danger-light); color: #7f1d1d; }
+    .btn-qcm.selected-correct { border-color: var(--success); background: var(--success-light); color: #14532d; }
+    .btn-qcm.has-svg { padding: 10px 2px; text-align: center; }
+
+    /* Feedbacks */
+    .feedback { margin-top: 8px; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; display: none; }
+    .feedback.ok { display: block; background: var(--success-light); color: #14532d; border: 1px solid #86efac; }
+    .feedback.err { display: block; background: var(--danger-light); color: #7f1d1d; border: 1px solid #fca5a5; }
+
+    /* ========================================================= */
+    /* RESPONSIVE DESIGN (MOBILES)                               */
+    /* ========================================================= */
+    @media (max-width: 500px) {
+      header h1 { font-size: 1.1rem; }
+      .tab-btn { padding: 8px 2px; font-size: 0.75rem; }
+      .tab-btn span.icon { font-size: 1rem; }
+      
+      .sim-stage { height: 210px; } /* Zone d'animation plus petite */
+      
+      /* Empiler les diagrammes SVG verticalement sur petit écran */
+      .qcm-grid.diagrams { grid-template-columns: 1fr; }
+      
+      /* Ajustement du graphique SVG du DS pour qu'il ne déborde pas */
+      .svg-graph-container svg { width: 100%; max-width: 280px; height: auto; }
+      
+      /* Réduire légèrement la taille des boutons des exercices */
+      .exo-pill { flex: 1 1 calc(50% - 6px); }
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🎢 L'Énergie Mécanique (3e)</h1>
+    <p>Comprendre les transferts d'énergie</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-sim', this)">
+      <span class="icon">🎮</span><span>1. Simuler</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-formule', this)">
+      <span class="icon">📐</span><span>2. La Formule</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-exo', this)">
+      <span class="icon">📝</span><span>3. S'entraîner</span>
+    </button>
+  </nav>
+
+  <main class="container">
+
+    <!-- ================= ONGLET 1 : COMPRENDRE (SIMULATEUR) ================= -->
+    <section id="tab-sim" class="tab-content active">
+      <div class="card">
+        
+        <div class="mode-selector">
+          <button class="btn-mode active" id="btnModeSkater" onclick="setSimMode('skater')">🛹 Skateur</button>
+          <button class="btn-mode" id="btnModeDiver" onclick="setSimMode('diver')">🤿 Plongeur</button>
+        </div>
+
+        <div class="concept-box" id="sim-desc">
+          Lorsqu'un skateur descend une rampe, son <strong>énergie de position</strong> se transforme en <strong>énergie cinétique</strong>. L'énergie mécanique totale se conserve !
+        </div>
+
+        <div class="sim-stage">
+          <canvas id="simCanvas"></canvas>
+        </div>
+
+        <div class="sim-actions">
+          <button id="btnPlay" class="btn btn-primary" onclick="togglePlay()">▶️ Lâcher</button>
+          <button class="btn btn-secondary" onclick="toggleSlowMo()" id="btnSlow">🐌 Ralenti : OFF</button>
+        </div>
+
+        <!-- DIAGRAMMES EN SVG -->
+        <div class="dashboard">
+          <div class="bar-container">
+            <div class="bar-title hl-ec">Cinétique (Ec)</div>
+            <div class="svg-bar-container">
+              <svg width="30" height="80" class="svg-bar">
+                <rect x="0" y="0" width="30" height="80" rx="4" fill="#e2e8f0"></rect>
+                <rect id="svg-ec" x="0" y="80" width="30" height="0" rx="4" fill="var(--color-ec)"></rect>
+              </svg>
+            </div>
+          </div>
+          <div class="bar-container">
+            <div class="bar-title hl-ep">Potentielle (Ep)</div>
+            <div class="svg-bar-container">
+              <svg width="30" height="80" class="svg-bar">
+                <rect x="0" y="0" width="30" height="80" rx="4" fill="#e2e8f0"></rect>
+                <rect id="svg-ep" x="0" y="0" width="30" height="80" rx="4" fill="var(--color-ep)"></rect>
+              </svg>
+            </div>
+          </div>
+          <div class="bar-container">
+            <div class="bar-title hl-em">Mécanique (Em)</div>
+            <div class="svg-bar-container">
+              <svg width="30" height="80" class="svg-bar">
+                <rect x="0" y="0" width="30" height="80" rx="4" fill="#e2e8f0"></rect>
+                <rect id="svg-em" x="0" y="0" width="30" height="80" rx="4" fill="var(--color-em)"></rect>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ONGLET 2 : LA FORMULE ================= -->
+    <section id="tab-formule" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">📐 L'Énergie Mécanique (Em)</h2>
+        
+        <div class="formula-card">
+          <div style="font-size:0.75rem; opacity:0.85;">LA FORMULE À CONNAÎTRE</div>
+          <div class="formula-big">
+            <span style="color:var(--color-em);">E<sub>m</sub></span> = <span style="color:var(--color-ec);">E<sub>c</sub></span> + <span style="color:var(--color-ep);">E<sub>p</sub></span>
+          </div>
+          
+          <div class="unit-list">
+            <div class="unit-item">
+              🟡 <strong><span class="hl-em">E<sub>m</sub></span> (Énergie Mécanique)</strong> : L'énergie totale de l'objet. Sans frottement, <strong>elle reste constante</strong>.
+            </div>
+            <div class="unit-item">
+              🟢 <strong><span class="hl-ec">E<sub>c</sub></span> (Énergie Cinétique)</strong> : L'énergie liée à la <strong>vitesse</strong>. Elle est nulle à l'arrêt.
+            </div>
+            <div class="unit-item">
+              🔵 <strong><span class="hl-ep">E<sub>p</sub></span> (Énergie Potentielle)</strong> : L'énergie liée à l'<strong>altitude</strong>. Elle est nulle au niveau du sol.
+            </div>
+          </div>
+        </div>
+
+        <h3 class="card-title">🔄 Les conversions</h3>
+        <div class="step-box" style="border-left: 4px solid var(--color-ep);">
+          <div class="step-title">La Descente</div>
+          <div style="font-size:0.85rem;">
+            L'altitude diminue, donc l'<strong>énergie potentielle diminue</strong>. <br>
+            La vitesse augmente, donc l'<strong>énergie cinétique augmente</strong>.<br>
+            👉 <em>L'énergie potentielle est convertie en énergie cinétique.</em>
+          </div>
+        </div>
+
+        <div class="step-box" style="border-left: 4px solid var(--color-ec);">
+          <div class="step-title">La Remontée</div>
+          <div style="font-size:0.85rem;">
+            L'altitude augmente, donc l'<strong>énergie potentielle augmente</strong>. <br>
+            La vitesse diminue, donc l'<strong>énergie cinétique diminue</strong>.<br>
+            👉 <em>L'énergie cinétique est convertie en énergie potentielle.</em>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ONGLET 3 : S'ENTRAÎNER (CALCULS + QCM) ================= -->
+    <section id="tab-exo" class="tab-content">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h2 class="card-title" style="margin:0;">📝 Entraînement</h2>
+          <span id="score-badge" style="background:var(--primary-light); color:#1e3a8a; padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.75rem;">0 / 8 réussis</span>
+        </div>
+
+        <div class="exo-selector" id="exo-buttons"></div>
+
+        <div id="exo-enonce" class="enonce-box"></div>
+
+        <!-- ÉTAPE 1 -->
+        <div id="box-step-1" class="step-box active-step">
+          <div class="step-header">
+            <span class="step-title" id="title-step-1">Étape 1</span>
+            <span id="status-step-1" class="step-status">À faire</span>
+          </div>
+          <div class="helper-hint" id="hint-step-1" style="font-size:0.8rem; color:var(--muted); margin-bottom:6px;"></div>
+          
+          <div id="calc-container-1" class="input-row" style="display:none;">
+            <span id="label-step-1"><strong>Valeur =</strong></span>
+            <input type="text" inputmode="decimal" id="inp-val-1" class="num-input" placeholder="Ex: 2500" onkeydown="if(event.key==='Enter') verifyStep(1)">
+            <span><strong>J</strong></span>
+            <button class="btn-step-check" onclick="verifyStep(1)">Vérifier</button>
+          </div>
+          
+          <div id="qcm-container-1" class="qcm-grid" style="display:none;"></div>
+          
+          <div id="fb-step-1" class="feedback"></div>
+        </div>
+
+        <!-- ÉTAPE 2 -->
+        <div id="box-step-2" class="step-box locked">
+          <div class="step-header">
+            <span class="step-title" id="title-step-2">Étape 2</span>
+            <span id="status-step-2" class="step-status">🔒 Verrouillé</span>
+          </div>
+          <div class="helper-hint" id="hint-step-2" style="font-size:0.8rem; color:var(--muted); margin-bottom:6px;"></div>
+          
+          <div id="calc-container-2" class="input-row" style="display:none;">
+            <span id="label-step-2"><strong>Valeur =</strong></span>
+            <input type="text" inputmode="decimal" id="inp-val-2" class="num-input" placeholder="Ex: 2500" onkeydown="if(event.key==='Enter') verifyStep(2)">
+            <span><strong>J</strong></span>
+            <button class="btn-step-check" onclick="verifyStep(2)">Vérifier</button>
+          </div>
+          
+          <div id="qcm-container-2" class="qcm-grid" style="display:none;"></div>
+
+          <div id="fb-step-2" class="feedback"></div>
+        </div>
+        
+        <div id="next-exo-zone" style="display:none; margin-top:10px;">
+          <button class="btn btn-success" style="width:100%;" onclick="goToNextExercise()">
+            🎉 Exercice réussi ! Suivant ➡️
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ================= GESTION DES ONGLETS =================
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // ================= ONGLET 1 : MOTEUR DE SIMULATION =================
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    let isPlaying = false;
+    let isSlowMo = false;
+    let simMode = 'skater';
+    let progress = 0;
+    let direction = 1;
+    let animFrame = null;
+
+    function setSimMode(mode) {
+      simMode = mode;
+      isPlaying = false;
+      progress = 0;
+      direction = 1;
+      
+      document.getElementById('btnModeSkater').classList.toggle('active', mode === 'skater');
+      document.getElementById('btnModeDiver').classList.toggle('active', mode === 'diver');
+      
+      if(mode === 'skater') {
+        document.getElementById('sim-desc').innerHTML = "Lorsqu'un <strong>skateur</strong> descend la rampe, son <strong>énergie de position</strong> se transforme en <strong>énergie cinétique</strong>.";
+        document.getElementById('simCanvas').parentElement.style.background = "linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 60%, #a3a3a3 80%, #6b7280 100%)";
+      } else {
+        document.getElementById('sim-desc').innerHTML = "Lors d'une <strong>chute libre</strong> (plongeon), l'<strong>énergie de position</strong> se transforme en <strong>énergie cinétique</strong> pendant toute la chute.";
+        document.getElementById('simCanvas').parentElement.style.background = "linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 60%, #0ea5e9 70%, #0284c7 100%)";
+      }
+      
+      document.getElementById('btnPlay').innerHTML = '▶️ Lâcher';
+      document.getElementById('btnPlay').classList.replace('btn-secondary', 'btn-primary');
+      drawFrame();
+    }
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+      drawFrame();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawFrame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const w = canvas.width, h = canvas.height;
+      let yNorm = 1;
+
+      if (simMode === 'skater') {
+        const groundY = h * 0.82, rampTopY = h * 0.18; // Ajusté pour petits écrans
+        
+        ctx.beginPath();
+        ctx.lineWidth = 8; ctx.strokeStyle = '#475569'; ctx.lineCap = 'round';
+        for (let i = -1; i <= 1; i += 0.05) {
+          let px = w/2 + i * (w * 0.4);
+          let py = groundY - Math.pow(i, 2) * (groundY - rampTopY);
+          if (i === -1) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = '#1e293b'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        for(let num=1; num<=9; num++) {
+            let posNorm = -1 + (num-1)*0.25;
+            let px = w/2 + posNorm * (w * 0.4);
+            let py = groundY - Math.pow(posNorm, 2) * (groundY - rampTopY);
+            ctx.beginPath(); ctx.arc(px, py + 14, 8, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'white'; ctx.fillText(num, px, py + 14); ctx.fillStyle = '#1e293b';
+        }
+
+        let xNorm = -Math.cos(progress * Math.PI); 
+        yNorm = Math.pow(xNorm, 2); 
+        let skaterX = w/2 + xNorm * (w * 0.4);
+        let skaterY = groundY - yNorm * (groundY - rampTopY);
+
+        ctx.font = '26px Arial'; // Un peu plus petit pour mobile
+        ctx.fillText('🛹', skaterX, skaterY - 10);
+      } else {
+        const waterY = h * 0.75, boardY = h * 0.15;
+        ctx.fillStyle = '#b45309'; ctx.fillRect(0, boardY, w * 0.3, 8);
+        ctx.fillStyle = '#475569'; ctx.fillRect(w * 0.2, boardY + 8, 8, h);
+
+        ctx.fillStyle = '#1e293b'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'left';
+        for(let num=1; num<=5; num++) {
+            let py = boardY + ((num-1)/4) * (waterY - boardY);
+            ctx.beginPath(); ctx.arc(w * 0.4, py, 8, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'white'; ctx.fillText(num, w * 0.4 - 3, py + 1); ctx.fillStyle = '#1e293b';
+        }
+
+        yNorm = 1 - Math.pow(progress, 2); 
+        let diverX = w * 0.25;
+        let diverY = waterY - yNorm * (waterY - boardY);
+
+        ctx.font = '26px Arial';
+        ctx.fillText('🤿', diverX, diverY - 10);
+      }
+      
+      const maxHeight = 80;
+      const epHeight = yNorm * maxHeight;
+      const ecHeight = maxHeight - epHeight;
+      
+      const svgEp = document.getElementById('svg-ep');
+      svgEp.setAttribute('height', epHeight);
+      svgEp.setAttribute('y', maxHeight - epHeight); 
+
+      const svgEc = document.getElementById('svg-ec');
+      svgEc.setAttribute('height', ecHeight);
+      svgEc.setAttribute('y', maxHeight - ecHeight);
+    }
+
+    function animateSim() {
+      if (isPlaying) {
+        const speed = isSlowMo ? 0.005 : 0.015;
+        
+        if (simMode === 'skater') {
+          progress += speed * direction;
+          if (progress >= 1 || progress <= 0) { direction *= -1; }
+        } else {
+          progress += speed * 1.5;
+          if (progress >= 1) { 
+            progress = 1; 
+            isPlaying = false;
+            document.getElementById('btnPlay').innerHTML = '🔄 Recommencer';
+            document.getElementById('btnPlay').classList.replace('btn-secondary', 'btn-primary');
+          }
+        }
+        drawFrame();
+      }
+      animFrame = requestAnimationFrame(animateSim);
+    }
+
+    function togglePlay() {
+      if(progress >= 1 && simMode === 'diver') { progress = 0; }
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('btnPlay');
+      if (isPlaying) {
+        btn.innerHTML = '⏸️ Pause';
+        btn.classList.replace('btn-primary', 'btn-secondary');
+      } else {
+        btn.innerHTML = '▶️ Reprendre';
+        btn.classList.replace('btn-secondary', 'btn-primary');
+      }
+    }
+    
+    function toggleSlowMo() {
+      isSlowMo = !isSlowMo;
+      document.getElementById('btnSlow').innerHTML = isSlowMo ? '🐌 Ralenti : ON' : '🐌 Ralenti : OFF';
+    }
+
+    resizeCanvas();
+    animateSim();
+
+    // ================= GÉNÉRATEUR DE DIAGRAMMES SVG =================
+    const getSvgBar = (title, color, pct) => `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px; pointer-events:none;">
+        <span style="font-size:0.6rem; font-weight:800; color:${color}">${title}</span>
+        <svg width="20" height="40">
+          <rect width="20" height="40" rx="3" fill="#e2e8f0"></rect>
+          <rect y="${40 - (pct/100)*40}" width="20" height="${(pct/100)*40}" rx="3" fill="${color}"></rect>
+        </svg>
+      </div>
+    `;
+    const getDiagram = (ecPct, epPct) => `
+      <div style="display:flex; gap:8px; justify-content:center; align-items:flex-end; pointer-events:none;">
+        ${getSvgBar('Ec', 'var(--color-ec)', ecPct)}
+        ${getSvgBar('Ep', 'var(--color-ep)', epPct)}
+        ${getSvgBar('Em', 'var(--color-em)', 100)}
+      </div>
+    `;
+
+    const skaterGraphSVG = `
+      <div class="svg-graph-container" style="text-align:center; margin: 10px 0;">
+        <svg width="240" height="130" viewBox="0 0 240 130" style="background:white; border:1px solid #cbd5e1; border-radius:8px;">
+          <!-- Axes -->
+          <line x1="30" y1="100" x2="220" y2="100" stroke="#1e293b" stroke-width="2"/>
+          <line x1="30" y1="100" x2="30" y2="10" stroke="#1e293b" stroke-width="2"/>
+          <!-- Courbe de vitesse (Descente puis Montée) -->
+          <path d="M 30 100 L 125 15 L 220 100" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linejoin="round"/>
+          <line x1="125" y1="15" x2="125" y2="100" stroke="#94a3b8" stroke-dasharray="4"/>
+          <!-- Labels -->
+          <text x="60" y="70" fill="var(--primary-dark)" font-weight="bold" font-size="14">Zone A</text>
+          <text x="155" y="70" fill="var(--primary-dark)" font-weight="bold" font-size="14">Zone B</text>
+          <text x="5" y="15" font-size="10" fill="#475569">Vitesse</text>
+          <text x="200" y="115" font-size="10" fill="#475569">Temps</text>
+        </svg>
+      </div>
+    `;
+
+    // ================= ONGLET 3 : MOTEUR D'EXERCICES =================
+    const exercises = [
+      {
+        id: 1, type: 'calc',
+        title: "1. Haut",
+        enonce: "Un skateur est immobile <strong>tout en haut</strong> de la rampe. Son énergie mécanique (Em) totale est de <strong>3000 J</strong>.",
+        step1Label: "Énergie Cinétique (Ec)", step1Hint: "La vitesse est nulle au sommet.", step1Ans: 0,
+        step2Label: "Énergie Potentielle (Ep)", step2Hint: "Formule : Em = Ec + Ep", step2Ans: 3000
+      },
+      {
+        id: 2, type: 'calc',
+        title: "2. Bas",
+        enonce: "Le skateur passe au <strong>point le plus bas</strong> (altitude = 0 m). Son énergie mécanique (Em) est toujours de <strong>3000 J</strong>.",
+        step1Label: "Énergie Potentielle (Ep)", step1Hint: "L'altitude est nulle (0 m).", step1Ans: 0,
+        step2Label: "Énergie Cinétique (Ec)", step2Hint: "Formule : Em = Ec + Ep", step2Ans: 3000
+      },
+      {
+        id: 3, type: 'calc',
+        title: "3. Milieu",
+        enonce: "En pleine descente, l'énergie mécanique (Em) reste de <strong>3000 J</strong>, mais l'énergie potentielle (Ep) a baissé à <strong>1200 J</strong>.",
+        step1Label: "Énergie mécanique (Em)", step1Hint: "Recopie l'énergie totale donnée dans l'énoncé.", step1Ans: 3000,
+        step2Label: "Énergie Cinétique (Ec)", step2Hint: "Applique : Ec = Em - Ep", step2Ans: 1800
+      },
+      {
+        id: 4, type: 'qcm',
+        title: "4. Plongeur",
+        enonce: "Un plongeur s'élance de 10 m. On étudie <strong>sa chute libre</strong> avant de toucher l'eau.",
+        step1Label: "L'énergie potentielle (Ep) :", step1Hint: "Elle dépend de l'altitude.",
+        step1Options: ["Augmente", "Diminue", "Constante"], step1Ans: 1,
+        step2Label: "L'énergie cinétique (Ec) :", step2Hint: "Elle dépend de la vitesse de chute.",
+        step2Options: ["Augmente", "Diminue", "Constante"], step2Ans: 0
+      },
+      {
+        id: 5, type: 'qcm',
+        title: "5. Convertir",
+        enonce: "Le plongeur est en pleine chute. On néglige les frottements : son <strong>énergie mécanique se conserve</strong>.",
+        step1Label: "Que se passe-t-il pendant la chute ?", step1Hint: "L'énergie qui diminue 'nourrit' celle qui augmente.",
+        step1Options: ["Ec est convertie en Ep.", "Ep est convertie en Ec.", "Aucune conversion."], step1Ans: 1,
+        step2Label: "L'énergie mécanique (Em) :", step2Hint: "Sans frottements, l'énergie totale (Em) ne change pas.",
+        step2Options: ["Elle augmente", "Elle diminue", "Elle reste constante"], step2Ans: 2
+      },
+      {
+        id: 6, type: 'qcm', step1Diagram: true, step2Diagram: true,
+        title: "6. Barres 1",
+        enonce: "Observe l'état du plongeur pour déduire son diagramme d'énergie.",
+        step1Label: "Le plongeur est <strong>immobile tout en haut</strong> :", step1Hint: "Vitesse nulle (Ec = 0). Altitude max.",
+        step1Options: [ getDiagram(0, 100), getDiagram(100, 0), getDiagram(100, 100) ], step1Ans: 0,
+        step2Label: "Juste <strong>avant de toucher l'eau</strong> :", step2Hint: "Altitude nulle (Ep = 0). Vitesse max.",
+        step2Options: [ getDiagram(0, 100), getDiagram(100, 0), getDiagram(50, 50) ], step2Ans: 1
+      },
+      {
+        id: 7, type: 'qcm', step1Diagram: true, step2Diagram: false,
+        title: "7. Barres 2",
+        enonce: "Le plongeur est <strong>en pleine chute</strong> (à mi-hauteur).",
+        step1Label: "Juste après avoir sauté (mi-chute) :", step1Hint: "Il a perdu un peu d'Ep et a gagné un peu d'Ec.",
+        step1Options: [ getDiagram(50, 50), getDiagram(100, 0), getDiagram(0, 100) ], step1Ans: 0,
+        step2Label: "Sur tous ces diagrammes, la barre Em :", step2Hint: "Rappelle-toi le principe de conservation.",
+        step2Options: [ "Est toujours vide.", "Est toujours pleine.", "Monte et descend." ], step2Ans: 1
+      },
+      {
+        id: 8, type: 'qcm',
+        title: "8. Graphique",
+        enonce: `Évolution de la vitesse du skateur dans la rampe.${skaterGraphSVG}`,
+        step1Label: "À quelle phase correspond la <strong>Zone A</strong> ?", step1Hint: "La vitesse augmente.",
+        step1Options: ["L'immobilité", "La descente", "La montée"], step1Ans: 1,
+        step2Label: "À quelle phase correspond la <strong>Zone B</strong> ?", step2Hint: "La vitesse diminue.",
+        step2Options: ["L'immobilité", "La descente", "La montée"], step2Ans: 2
+      }
+    ];
+
+    let currentExoIdx = 0;
+    const completedExos = new Set();
+
+    function renderExoButtons() {
+      const container = document.getElementById('exo-buttons');
+      container.innerHTML = '';
+      exercises.forEach((ex, i) => {
+        const btn = document.createElement('button');
+        btn.className = `exo-pill ${i === currentExoIdx ? 'active' : ''} ${completedExos.has(ex.id) ? 'done' : ''}`;
+        btn.textContent = `${completedExos.has(ex.id) ? '✅ ' : ''}${ex.title}`;
+        btn.onclick = () => loadExercise(i);
+        container.appendChild(btn);
+      });
+      document.getElementById('score-badge').textContent = `${completedExos.size} / 8 réussis`;
+    }
+
+    function loadExercise(idx) {
+      currentExoIdx = idx;
+      const ex = exercises[idx];
+      document.getElementById('exo-enonce').innerHTML = ex.enonce;
+      
+      document.getElementById('title-step-1').innerHTML = `Étape 1 : ${ex.step1Label}`;
+      document.getElementById('hint-step-1').innerHTML = `💡 ${ex.step1Hint}`;
+      document.getElementById('title-step-2').innerHTML = `Étape 2 : ${ex.step2Label}`;
+      document.getElementById('hint-step-2').innerHTML = `💡 ${ex.step2Hint}`;
+
+      if (ex.type === 'calc') {
+        document.getElementById('calc-container-1').style.display = 'flex';
+        document.getElementById('qcm-container-1').style.display = 'none';
+        document.getElementById('inp-val-1').value = '';
+        document.getElementById('label-step-1').innerHTML = `<strong>${ex.step1Label.split('(')[1]?.replace(')','') || 'Valeur'} =</strong>`;
+
+        document.getElementById('calc-container-2').style.display = 'flex';
+        document.getElementById('qcm-container-2').style.display = 'none';
+        document.getElementById('inp-val-2').value = '';
+        document.getElementById('label-step-2').innerHTML = `<strong>${ex.step2Label.split('(')[1]?.replace(')','') || 'Valeur'} =</strong>`;
+      } else {
+        document.getElementById('calc-container-1').style.display = 'none';
+        document.getElementById('qcm-container-1').style.display = 'grid';
+        const qcm1 = document.getElementById('qcm-container-1');
+        qcm1.innerHTML = '';
+        if(ex.step1Diagram) qcm1.classList.add('diagrams'); else qcm1.classList.remove('diagrams');
+
+        ex.step1Options.forEach((opt, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn-qcm' + (ex.step1Diagram ? ' has-svg' : ''); 
+          btn.innerHTML = opt; 
+          btn.onclick = () => verifyQCM(1, i, btn);
+          qcm1.appendChild(btn);
+        });
+
+        document.getElementById('calc-container-2').style.display = 'none';
+        document.getElementById('qcm-container-2').style.display = 'grid';
+        const qcm2 = document.getElementById('qcm-container-2');
+        qcm2.innerHTML = '';
+        if(ex.step2Diagram) qcm2.classList.add('diagrams'); else qcm2.classList.remove('diagrams');
+
+        ex.step2Options.forEach((opt, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn-qcm' + (ex.step2Diagram ? ' has-svg' : ''); 
+          btn.innerHTML = opt;
+          btn.onclick = () => verifyQCM(2, i, btn);
+          qcm2.appendChild(btn);
+        });
+      }
+      
+      document.getElementById('box-step-1').className = 'step-box active-step';
+      document.getElementById('status-step-1').textContent = 'À faire';
+      document.getElementById('fb-step-1').className = 'feedback';
+      
+      document.getElementById('box-step-2').className = 'step-box locked';
+      document.getElementById('status-step-2').textContent = '🔒 Verrouillé';
+      document.getElementById('fb-step-2').className = 'feedback';
+      
+      document.getElementById('next-exo-zone').style.display = 'none';
+      renderExoButtons();
+    }
+
+    function setFeedback(id, isOk, msg) {
+      const el = document.getElementById(id);
+      el.className = `feedback ${isOk ? 'ok' : 'err'}`;
+      el.innerHTML = msg;
+    }
+
+    function completeStep(stepNum) {
+      const ex = exercises[currentExoIdx];
+      const boxId = `box-step-${stepNum}`;
+      const statusId = `status-step-${stepNum}`;
+      
+      document.getElementById(boxId).className = 'step-box done-step';
+      document.getElementById(statusId).textContent = '✅ Validé';
+      
+      if (stepNum === 1) {
+        document.getElementById('box-step-2').className = 'step-box active-step';
+        document.getElementById('status-step-2').textContent = 'À faire';
+        if (ex.type === 'calc') document.getElementById('inp-val-2').focus();
+      } else {
+        completedExos.add(ex.id);
+        renderExoButtons();
+        document.getElementById('next-exo-zone').style.display = 'block';
+      }
+    }
+
+    function verifyStep(stepNum) {
+      const ex = exercises[currentExoIdx];
+      const val = parseFloat(document.getElementById(`inp-val-${stepNum}`).value);
+      const correctAns = stepNum === 1 ? ex.step1Ans : ex.step2Ans;
+      const fbId = `fb-step-${stepNum}`;
+      
+      if (val === correctAns) {
+        setFeedback(fbId, true, `✅ Parfait ! Valeur exacte : ${val} J.`);
+        completeStep(stepNum);
+      } else {
+        setFeedback(fbId, false, `❌ Incorrect. Relis bien le conseil 💡.`);
+      }
+    }
+
+    function verifyQCM(stepNum, selectedIdx, btnElement) {
+      const ex = exercises[currentExoIdx];
+      const correctIdx = stepNum === 1 ? ex.step1Ans : ex.step2Ans;
+      const fbId = `fb-step-${stepNum}`;
+      const containerId = `qcm-container-${stepNum}`;
+      
+      document.getElementById(containerId).querySelectorAll('.btn-qcm').forEach(b => {
+        b.classList.remove('selected-wrong', 'selected-correct');
+      });
+
+      if (selectedIdx === correctIdx) {
+        btnElement.classList.add('selected-correct');
+        setFeedback(fbId, true, `✅ Bonne réponse !`);
+        completeStep(stepNum);
+      } else {
+        btnElement.classList.add('selected-wrong');
+        setFeedback(fbId, false, `❌ Faux. Relis bien le conseil 💡.`);
+      }
+    }
+
+    function goToNextExercise() {
+      const nextIdx = (currentExoIdx + 1) % exercises.length;
+      loadExercise(nextIdx);
+      document.getElementById('exo-enonce').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadExercise(0);
+    });
+  </script>
+</body>
+</html>
