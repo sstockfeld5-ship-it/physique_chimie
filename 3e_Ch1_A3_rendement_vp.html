@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Le Rendement Énergétique - 3e</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --warning: #eab308;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+      
+      /* Couleurs Énergies */
+      --c-entree: #1e293b; /* Sombre pour contraster avec le fond clair de l'étiquette */
+      --c-utile: #0284c7;  /* Bleu */
+      --c-pertes: #dc2626; /* Rouge */
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg); color: var(--text);
+      line-height: 1.45; padding-bottom: 30px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white; padding: 12px 10px; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    header h1 { margin: 0; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.3px; }
+    header p { margin: 4px 0 0; font-size: 0.9rem; opacity: 0.9; color: #94a3b8; }
+
+    .tabs {
+      position: sticky; top: 0; z-index: 100;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      background: white; border-bottom: 2px solid var(--border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .tab-btn {
+      border: none; background: none; padding: 10px 2px;
+      font-size: 0.85rem; font-weight: 700; color: var(--muted);
+      cursor: pointer; border-bottom: 3px solid transparent;
+      transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    }
+    .tab-btn span.icon { font-size: 1.2rem; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background-color: var(--primary-light); }
+
+    .container { max-width: 680px; margin: 0 auto; padding: 12px 10px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.2s ease-in; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06); border: 1px solid #e2e8f0;
+    }
+    .card-title { margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+
+    .concept-box {
+      background: var(--primary-light); border-left: 4px solid var(--primary);
+      padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 14px; line-height: 1.5;
+    }
+    
+    .instruction-box {
+      background: #fef9c3; border-left: 4px solid var(--warning);
+      padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 14px; color: #854d0e; font-weight: 600;
+    }
+
+    /* Simulateur SVG */
+    .sim-stage {
+      background: #ffffff; border-radius: 12px; position: relative; overflow: hidden;
+      border: 1px solid #cbd5e1; margin-bottom: 14px; padding: 10px 0;
+      display: flex; justify-content: center;
+    }
+    .sim-stage svg { max-width: 100%; height: auto; }
+    
+    .sim-controls {
+      background: #f8fafc; padding: 14px; border-radius: 10px; border: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .slider-group { display: flex; flex-direction: column; gap: 6px; }
+    .slider-header { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 700; align-items: center;}
+    
+    /* Gros curseurs pour mobile */
+    input[type="range"] { width: 100%; cursor: pointer; height: 6px; border-radius: 4px; background: #cbd5e1; outline: none; -webkit-appearance: none; }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 22px; height: 22px; background: var(--primary); border-radius: 50%; cursor: pointer;
+    }
+
+    /* Pilules Énergies */
+    .pill-in { background: white; color: var(--c-entree); padding: 4px 8px; border-radius: 6px; font-weight: 800; border: 1px solid #cbd5e1; display: inline-block; text-align: center;}
+    .pill-ut { background: var(--c-utile); color: white; padding: 4px 8px; border-radius: 6px; font-weight: 800; display: inline-block; text-align: center;}
+    .pill-pe { background: var(--c-pertes); color: white; padding: 4px 8px; border-radius: 6px; font-weight: 800; display: inline-block; text-align: center;}
+
+    /* Formule */
+    .formula-card { background: #1e293b; color: white; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 14px; }
+    .formula-big { font-size: 1.2rem; font-weight: 800; margin: 16px 0; display: flex; align-items: center; justify-content: center; gap: 10px;}
+    .formula-frac { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .formula-frac .top { border-bottom: 2px solid white; padding-bottom: 8px; width: 100%; }
+    .formula-frac .bot { padding-top: 2px; }
+    
+    .unit-list { display: flex; flex-direction: column; gap: 8px; text-align: left; margin-top: 16px; font-size: 0.85rem; line-height: 1.5; }
+    .unit-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+
+    /* Exercices */
+    .exo-selector { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .exo-pill {
+      flex: 1 1 calc(50% - 6px); min-width: 100px;
+      padding: 10px 4px; border: 2px solid var(--border); background: white;
+      border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-align: center;
+    }
+    .exo-pill.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+    .exo-pill.done { border-color: var(--success); background: var(--success-light); color: #166534; }
+
+    .enonce-box { background: #f8fafc; border-left: 4px solid #0f172a; padding: 12px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 14px; line-height: 1.5; }
+    .step-box { border: 2px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; background: #ffffff; transition: all 0.25s ease; }
+    .step-box.active-step { border-color: var(--primary); box-shadow: 0 2px 10px rgba(2, 132, 199, 0.1); }
+    .step-box.done-step { border-color: #86efac; background: #f0fdf4; }
+    .step-box.locked { opacity: 0.45; pointer-events: none; background: #f8fafc; border-style: dashed; }
+    
+    .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 4px; }
+    .step-title { font-weight: 800; font-size: 0.9rem; color: #1e293b; }
+    .step-status { font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: #e2e8f0; color: #475569; white-space: nowrap; }
+    
+    /* Inputs Calcul (Flex par défaut) */
+    .input-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; width: 100%; }
+    .num-input { flex: 1; min-width: 80px; padding: 12px; font-size: 1.05rem; font-weight: 700; border: 2px solid var(--border); border-radius: 8px; outline: none; }
+    .num-input:focus { border-color: var(--primary); }
+    .btn-step-check { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 12px 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
+    
+    /* QCM */
+    .qcm-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px; }
+    .btn-qcm {
+      background: white; border: 2px solid var(--border); border-radius: 8px;
+      padding: 14px 12px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: left;
+      transition: all 0.15s; line-height: 1.3;
+    }
+    .btn-qcm:hover { border-color: var(--primary); background: #f8fafc; }
+    .btn-qcm.selected-wrong { border-color: var(--danger); background: var(--danger-light); color: #7f1d1d; }
+    .btn-qcm.selected-correct { border-color: var(--success); background: var(--success-light); color: #14532d; }
+
+    /* Feedbacks */
+    .feedback { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display: none; }
+    .feedback.ok { display: block; background: var(--success-light); color: #14532d; border: 1px solid #86efac; }
+    .feedback.err { display: block; background: var(--danger-light); color: #7f1d1d; border: 1px solid #fca5a5; }
+
+    /* ========================================= */
+    /* ADAPTATION MOBILE (TELEPHONE PORTABLE)    */
+    /* ========================================= */
+    @media (max-width: 550px) {
+      .formula-big { flex-direction: column; gap: 12px; }
+      .formula-frac .top { border-bottom: none; } /* Enlève la ligne de fraction si on empile */
+      
+      /* Empiler les éléments de saisie pour que ça prenne 100% de la largeur */
+      .input-row { flex-direction: column; align-items: stretch; gap: 8px; }
+      .input-row > span { text-align: center; display: block; }
+      .num-input { text-align: center; }
+      .btn-step-check { width: 100%; }
+
+      /* Ajustement du schéma */
+      .sim-stage svg { max-height: 220px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⚙️ Le Rendement Énergétique</h1>
+    <p>Mesurer l'efficacité d'un convertisseur</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-sim', this)">
+      <span class="icon">🎛️</span><span>1. Simuler</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-formule', this)">
+      <span class="icon">📐</span><span>2. La Formule</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-exo', this)">
+      <span class="icon">📝</span><span>3. S'entraîner</span>
+    </button>
+  </nav>
+
+  <main class="container">
+
+    <!-- ================= ONGLET 1 : COMPRENDRE (SIMULATEUR) ================= -->
+    <section id="tab-sim" class="tab-content active">
+      <div class="card">
+        <h2 class="card-title">⚙️ Le Convertisseur d'Énergie</h2>
+        
+        <div class="concept-box">
+          <strong>Qu'est-ce que l'Énergie Utile ?</strong><br>
+          C'est la part de l'énergie reçue qui sert <em>réellement</em> à accomplir la tâche souhaitée (ex: faire de la lumière pour une ampoule). Le reste de l'énergie est gaspillé : ce sont les pertes.
+        </div>
+
+        <div class="instruction-box">
+          👉 <strong>Consigne :</strong> Fais varier l'énergie reçue et le rendement de la machine avec les curseurs en bas. Observe comment l'épaisseur des flèches se modifie !
+        </div>
+
+        <div class="sim-stage" id="svg-container">
+          <svg viewBox="0 0 400 220" id="sim-svg">
+            <defs>
+              <marker id="arrowIn" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#cbd5e1" /></marker>
+              <marker id="arrowUt" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="var(--c-utile)" /></marker>
+              <marker id="arrowPe" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="var(--c-pertes)" /></marker>
+            </defs>
+
+            <!-- Flèche Entrée -->
+            <path id="path-in" d="M 10 110 L 140 110" stroke="#cbd5e1" stroke-width="20" marker-end="url(#arrowIn)"/>
+            <!-- Bulles de fond super lisibles -->
+            <rect x="20" y="68" width="100" height="20" rx="4" fill="white" stroke="#e2e8f0" stroke-width="1" />
+            <text x="70" y="82" text-anchor="middle" fill="var(--c-entree)" font-weight="bold" font-size="11">Énergie Reçue</text>
+            <rect x="30" y="96" width="80" height="26" rx="4" fill="white" stroke="#e2e8f0" stroke-width="1" />
+            <text id="txt-in" x="70" y="114" text-anchor="middle" fill="var(--c-entree)" font-weight="bold" font-size="14">1000 J</text>
+
+            <!-- Convertisseur -->
+            <rect x="150" y="60" width="100" height="100" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="3"/>
+            <text x="200" y="115" text-anchor="middle" fill="#1e293b" font-weight="bold" font-size="14">Machine</text>
+
+            <!-- Flèche Utile -->
+            <path id="path-ut" d="M 260 110 L 390 110" stroke="var(--c-utile)" stroke-width="12" marker-end="url(#arrowUt)"/>
+            <rect x="280" y="68" width="100" height="20" rx="4" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+            <text x="330" y="82" text-anchor="middle" fill="var(--c-utile)" font-weight="bold" font-size="11">Énergie Utile</text>
+            <rect x="290" y="96" width="80" height="26" rx="4" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+            <text id="txt-ut" x="330" y="114" text-anchor="middle" fill="var(--c-utile)" font-weight="bold" font-size="14">600 J</text>
+
+            <!-- Flèche Pertes -->
+            <path id="path-pe" d="M 200 170 L 200 205" stroke="var(--c-pertes)" stroke-width="8" marker-end="url(#arrowPe)"/>
+            <rect x="215" y="170" width="60" height="18" rx="4" fill="white" stroke="#e2e8f0" stroke-width="1" />
+            <text x="245" y="183" text-anchor="middle" fill="var(--c-pertes)" font-weight="bold" font-size="11">Pertes</text>
+            <rect x="215" y="190" width="60" height="20" rx="4" fill="white" stroke="#e2e8f0" stroke-width="1" />
+            <text id="txt-pe" x="245" y="205" text-anchor="middle" fill="var(--c-pertes)" font-weight="bold" font-size="13">400 J</text>
+          </svg>
+        </div>
+
+        <div class="sim-controls">
+          <div class="slider-group">
+            <div class="slider-header">
+              <span class="pill-in">Énergie Reçue (Entrée) :</span>
+              <span id="lbl-in" style="font-weight: 800;">1000 J</span>
+            </div>
+            <input type="range" id="slider-in" min="100" max="2000" step="100" value="1000" oninput="updateSim()">
+          </div>
+
+          <div class="slider-group" style="margin-top: 8px;">
+            <div class="slider-header">
+              <span style="color:#1e293b; font-weight:800;">Rendement (%) :</span>
+              <span id="lbl-rendement" style="font-weight: 800;">60 %</span>
+            </div>
+            <input type="range" id="slider-rendement" min="10" max="100" step="5" value="60" oninput="updateSim()">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ONGLET 2 : LA FORMULE ================= -->
+    <section id="tab-formule" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">📐 Calculer le Rendement</h2>
+        
+        <div class="formula-card">
+          <div style="font-size:0.8rem; opacity:0.85; margin-bottom: 8px; text-transform: uppercase;">La formule du Rendement</div>
+          <div class="formula-big">
+            <span>Rendement = </span>
+            <div class="formula-frac">
+              <span class="top"><span class="pill-ut">Énergie Utile</span></span>
+              <span class="bot"><span class="pill-in">Énergie Reçue</span></span>
+            </div>
+            <span> × 100</span>
+          </div>
+        </div>
+          
+        <div class="unit-list">
+          <div class="unit-item">
+            🟢 <span class="pill-ut">L'Énergie Utile</span> : C'est l'énergie (Sortie) qui accomplit la tâche (ex: électricité de la centrale, lumière de l'ampoule).
+          </div>
+          <div class="unit-item">
+            🔵 <span class="pill-in">L'Énergie Reçue</span> : L'énergie (Entrée) totale consommée par la machine. C'est toujours le nombre le plus grand !
+          </div>
+          <div class="unit-item">
+            🔴 <span class="pill-pe">Les Pertes</span> : Ce qui est gaspillé en cours de route (souvent de la chaleur).<br>
+            <em style="color:#94a3b8; font-size:0.85rem; margin-top:8px; display:block;">Conservation : Énergie Reçue = Énergie Utile + Pertes</em>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ONGLET 3 : S'ENTRAÎNER ================= -->
+    <section id="tab-exo" class="tab-content">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 class="card-title" style="margin:0;">📝 Entraînement</h2>
+          <span id="score-badge" style="background:var(--primary-light); color:var(--primary-dark); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem;">0 / 4 réussis</span>
+        </div>
+
+        <div class="exo-selector" id="exo-buttons"></div>
+
+        <div id="exo-enonce" class="enonce-box"></div>
+
+        <!-- ÉTAPE 1 -->
+        <div id="box-step-1" class="step-box active-step">
+          <div class="step-header">
+            <span class="step-title" id="title-step-1">Étape 1</span>
+            <span id="status-step-1" class="step-status">À faire</span>
+          </div>
+          <div class="helper-hint" id="hint-step-1" style="font-size:0.85rem; color:var(--muted); margin-bottom:10px;"></div>
+          
+          <div id="calc-container-1" class="input-row" style="display:none;">
+            <span id="label-step-1"><strong>Valeur =</strong></span>
+            <input type="text" inputmode="decimal" id="inp-val-1" class="num-input" placeholder="Ex: 250" onkeydown="if(event.key==='Enter') verifyStep(1)">
+            <span id="unit-step-1"><strong>J</strong></span>
+            <button class="btn-step-check" onclick="verifyStep(1)">Vérifier</button>
+          </div>
+          
+          <div id="qcm-container-1" class="qcm-grid" style="display:none;"></div>
+          
+          <div id="fb-step-1" class="feedback"></div>
+        </div>
+
+        <!-- ÉTAPE 2 -->
+        <div id="box-step-2" class="step-box locked">
+          <div class="step-header">
+            <span class="step-title" id="title-step-2">Étape 2</span>
+            <span id="status-step-2" class="step-status">🔒 Verrouillé</span>
+          </div>
+          <div class="helper-hint" id="hint-step-2" style="font-size:0.85rem; color:var(--muted); margin-bottom:10px;"></div>
+          
+          <div id="calc-container-2" class="input-row" style="display:none;">
+            <span id="label-step-2"><strong>Rendement =</strong></span>
+            <input type="text" inputmode="decimal" id="inp-val-2" class="num-input" placeholder="Ex: 80" onkeydown="if(event.key==='Enter') verifyStep(2)">
+            <span><strong>%</strong></span>
+            <button class="btn-step-check" onclick="verifyStep(2)">Vérifier</button>
+          </div>
+          
+          <div id="qcm-container-2" class="qcm-grid" style="display:none;"></div>
+
+          <div id="fb-step-2" class="feedback"></div>
+        </div>
+        
+        <div id="next-exo-zone" style="display:none; margin-top:12px;">
+          <button class="btn btn-success" style="width:100%; padding: 14px; font-size: 1rem; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;" onclick="goToNextExercise()">
+            🎉 Exercice réussi ! Passer au suivant ➡️
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ================= GESTION DES ONGLETS =================
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // ================= ONGLET 1 : MOTEUR DE SIMULATION =================
+    function updateSim() {
+      const eIn = parseInt(document.getElementById('slider-in').value);
+      const rend = parseInt(document.getElementById('slider-rendement').value);
+      
+      const eUt = Math.round((eIn * rend) / 100);
+      const ePe = eIn - eUt;
+
+      document.getElementById('lbl-in').innerText = `${eIn} J`;
+      document.getElementById('lbl-rendement').innerText = `${rend} %`;
+
+      document.getElementById('txt-in').innerText = `${eIn} J`;
+      document.getElementById('txt-ut').innerText = `${eUt} J`;
+      document.getElementById('txt-pe').innerText = `${ePe} J`;
+
+      const wIn = Math.max(6, (eIn / 2000) * 32);
+      const wUt = Math.max(6, (eUt / 2000) * 32);
+      const wPe = Math.max(6, (ePe / 2000) * 32);
+
+      document.getElementById('path-in').setAttribute('stroke-width', wIn);
+      document.getElementById('path-ut').setAttribute('stroke-width', wUt);
+      document.getElementById('path-pe').setAttribute('stroke-width', wPe);
+    }
+    
+    updateSim();
+
+    // Schéma SVG custom pour l'exercice 4
+    const hydroSVG = `
+      <div style="text-align:center; margin: 12px 0;">
+        <svg viewBox="0 0 400 200" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; width:100%; max-width:400px; margin:0 auto; display:block;">
+          <!-- Lac / Barrage -->
+          <path d="M 0 20 L 120 20 L 120 200 L 0 200 Z" fill="#0ea5e9" />
+          <rect x="120" y="0" width="20" height="200" fill="#64748b" />
+          <circle cx="60" cy="110" r="14" fill="white" />
+          <text x="60" y="115" fill="#1e293b" font-weight="bold" font-size="14" text-anchor="middle">A</text>
+          
+          <!-- Conduite forcée -->
+          <path d="M 120 160 L 260 160" stroke="#0ea5e9" stroke-width="12" />
+          <circle cx="190" cy="160" r="14" fill="white" stroke="#64748b" stroke-width="2" />
+          <text x="190" y="165" fill="#1e293b" font-weight="bold" font-size="14" text-anchor="middle">B</text>
+
+          <!-- Usine -->
+          <rect x="250" y="100" width="40" height="100" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2" />
+          <circle cx="270" cy="120" r="16" fill="#facc15" />
+          <text x="270" y="125" fill="#1e293b" font-weight="bold" font-size="14" text-anchor="middle">C</text>
+
+          <!-- Pylône -->
+          <path d="M 350 40 L 350 200" stroke="#334155" stroke-width="4" />
+          <path d="M 330 60 L 370 60" stroke="#334155" stroke-width="4" />
+          <path d="M 270 120 L 350 60" stroke="#1e293b" stroke-width="2" />
+          <path d="M 350 60 L 400 50" stroke="#1e293b" stroke-width="2" />
+          <circle cx="360" cy="90" r="14" fill="white" stroke="#64748b" stroke-width="2" />
+          <text x="360" y="95" fill="#1e293b" font-weight="bold" font-size="14" text-anchor="middle">D</text>
+        </svg>
+      </div>
+    `;
+
+    // ================= ONGLET 3 : MOTEUR D'EXERCICES =================
+    const exercises = [
+      {
+        id: 1, type: 'calc', unit1: 'J',
+        title: "1. L'Ampoule",
+        enonce: "Une ampoule reçoit <strong>100 J d'énergie électrique</strong>. Elle produit seulement <strong>8 J d'énergie lumineuse</strong> (le reste est perdu en chaleur).",
+        step1Label: "Énergie Utile", step1Hint: "Quelle est l'énergie qui sert vraiment à éclairer ?", step1Ans: 8,
+        step2Label: "Rendement", step2Hint: "Applique : (Utile ÷ Reçue) × 100.", step2Ans: 8
+      },
+      {
+        id: 2, type: 'calc', unit1: 'MJ',
+        title: "2. La Centrale",
+        enonce: "Une centrale hydroélectrique reçoit une énergie totale de <strong>12 000 MJ</strong> en entrée. Les pertes dissipées dans l'environnement s'élèvent à <strong>3 000 MJ</strong>.",
+        step1Label: "Énergie électrique utile", step1Hint: "Principe de conservation : Utile = Entrée - Pertes.", step1Ans: 9000,
+        step2Label: "Rendement", step2Hint: "Applique : (Utile ÷ Entrée) × 100.", step2Ans: 75
+      },
+      {
+        id: 3, type: 'calc', unit1: 'J',
+        title: "3. Le Moteur",
+        enonce: "Un moteur de grue consomme <strong>2 500 J d'électricité</strong>. En fonctionnant, il dissipe <strong>400 J en chaleur</strong> et perd <strong>100 J en frottements</strong>. Le reste sert à soulever la charge.",
+        step1Label: "Énergie mécanique utile", step1Hint: "Attention, il y a DEUX sources de pertes à soustraire de l'énergie d'entrée.", step1Ans: 2000,
+        step2Label: "Rendement", step2Hint: "Applique : (Utile ÷ Entrée) × 100.", step2Ans: 80
+      },
+      {
+        id: 4, type: 'qcm',
+        title: "4. Le Schéma",
+        enonce: `Observe le schéma de cette centrale hydroélectrique. Associe les lettres aux formes d'énergie.${hydroSVG}`,
+        step1Label: "À quelle lettre correspond l'<strong>énergie potentielle de position</strong> ?", step1Hint: "L'énergie de position est liée à l'altitude (l'eau stockée en hauteur).",
+        step1Options: ["Lettre A (Le lac)", "Lettre B (La conduite)", "Lettre C (Le générateur)"], step1Ans: 0,
+        step2Label: "Où se trouve l'<strong>énergie électrique utile</strong> produite ?", step2Hint: "C'est l'énergie qui est envoyée hors de la centrale.",
+        step2Options: ["Lettre B (La conduite)", "Lettre C (L'alternateur)", "Lettre D (Les câbles)"], step2Ans: 2
+      }
+    ];
+
+    let currentExoIdx = 0;
+    const completedExos = new Set();
+
+    function renderExoButtons() {
+      const container = document.getElementById('exo-buttons');
+      container.innerHTML = '';
+      exercises.forEach((ex, i) => {
+        const btn = document.createElement('button');
+        btn.className = `exo-pill ${i === currentExoIdx ? 'active' : ''} ${completedExos.has(ex.id) ? 'done' : ''}`;
+        btn.textContent = `${completedExos.has(ex.id) ? '✅ ' : ''}${ex.title}`;
+        btn.onclick = () => loadExercise(i);
+        container.appendChild(btn);
+      });
+      document.getElementById('score-badge').textContent = `${completedExos.size} / 4 réussis`;
+    }
+
+    function loadExercise(idx) {
+      currentExoIdx = idx;
+      const ex = exercises[idx];
+      document.getElementById('exo-enonce').innerHTML = ex.enonce;
+      
+      document.getElementById('title-step-1').innerHTML = `Étape 1 : ${ex.step1Label}`;
+      document.getElementById('hint-step-1').innerHTML = `💡 ${ex.step1Hint}`;
+      document.getElementById('title-step-2').innerHTML = `Étape 2 : ${ex.step2Label}`;
+      document.getElementById('hint-step-2').innerHTML = `💡 ${ex.step2Hint}`;
+
+      if (ex.type === 'calc') {
+        document.getElementById('calc-container-1').style.display = 'flex';
+        document.getElementById('qcm-container-1').style.display = 'none';
+        document.getElementById('inp-val-1').value = '';
+        document.getElementById('unit-step-1').innerHTML = `<strong>${ex.unit1}</strong>`;
+        
+        document.getElementById('calc-container-2').style.display = 'flex';
+        document.getElementById('qcm-container-2').style.display = 'none';
+        document.getElementById('inp-val-2').value = '';
+      } else {
+        document.getElementById('calc-container-1').style.display = 'none';
+        document.getElementById('qcm-container-1').style.display = 'grid';
+        const qcm1 = document.getElementById('qcm-container-1');
+        qcm1.innerHTML = '';
+        ex.step1Options.forEach((opt, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn-qcm'; btn.innerHTML = opt; 
+          btn.onclick = () => verifyQCM(1, i, btn);
+          qcm1.appendChild(btn);
+        });
+
+        document.getElementById('calc-container-2').style.display = 'none';
+        document.getElementById('qcm-container-2').style.display = 'grid';
+        const qcm2 = document.getElementById('qcm-container-2');
+        qcm2.innerHTML = '';
+        ex.step2Options.forEach((opt, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn-qcm'; btn.innerHTML = opt;
+          btn.onclick = () => verifyQCM(2, i, btn);
+          qcm2.appendChild(btn);
+        });
+      }
+      
+      document.getElementById('box-step-1').className = 'step-box active-step';
+      document.getElementById('status-step-1').textContent = 'À faire';
+      document.getElementById('fb-step-1').className = 'feedback';
+      
+      document.getElementById('box-step-2').className = 'step-box locked';
+      document.getElementById('status-step-2').textContent = '🔒 Verrouillé';
+      document.getElementById('fb-step-2').className = 'feedback';
+      
+      document.getElementById('next-exo-zone').style.display = 'none';
+      renderExoButtons();
+    }
+
+    function setFeedback(id, isOk, msg) {
+      const el = document.getElementById(id);
+      el.className = `feedback ${isOk ? 'ok' : 'err'}`;
+      el.innerHTML = msg;
+    }
+
+    function completeStep(stepNum) {
+      const ex = exercises[currentExoIdx];
+      const boxId = `box-step-${stepNum}`;
+      const statusId = `status-step-${stepNum}`;
+      
+      document.getElementById(boxId).className = 'step-box done-step';
+      document.getElementById(statusId).textContent = '✅ Validé';
+      
+      if (stepNum === 1) {
+        document.getElementById('box-step-2').className = 'step-box active-step';
+        document.getElementById('status-step-2').textContent = 'À faire';
+        if (ex.type === 'calc') document.getElementById('inp-val-2').focus();
+      } else {
+        completedExos.add(ex.id);
+        renderExoButtons();
+        document.getElementById('next-exo-zone').style.display = 'block';
+      }
+    }
+
+    function verifyStep(stepNum) {
+      const ex = exercises[currentExoIdx];
+      const strVal = document.getElementById(`inp-val-${stepNum}`).value.replace(',', '.');
+      const val = parseFloat(strVal);
+      const correctAns = stepNum === 1 ? ex.step1Ans : ex.step2Ans;
+      const fbId = `fb-step-${stepNum}`;
+      
+      if (val === correctAns) {
+        let msg = stepNum === 1 ? `✅ Parfait ! La valeur est de ${val} ${ex.unit1}.` : `✅ Exact ! Le rendement est de ${val} %.`;
+        setFeedback(fbId, true, msg);
+        completeStep(stepNum);
+      } else {
+        setFeedback(fbId, false, `❌ Incorrect. Relis bien le conseil 💡.`);
+      }
+    }
+
+    function verifyQCM(stepNum, selectedIdx, btnElement) {
+      const ex = exercises[currentExoIdx];
+      const correctIdx = stepNum === 1 ? ex.step1Ans : ex.step2Ans;
+      const fbId = `fb-step-${stepNum}`;
+      const containerId = `qcm-container-${stepNum}`;
+      
+      document.getElementById(containerId).querySelectorAll('.btn-qcm').forEach(b => {
+        b.classList.remove('selected-wrong', 'selected-correct');
+      });
+
+      if (selectedIdx === correctIdx) {
+        btnElement.classList.add('selected-correct');
+        setFeedback(fbId, true, `✅ Bonne réponse !`);
+        completeStep(stepNum);
+      } else {
+        btnElement.classList.add('selected-wrong');
+        setFeedback(fbId, false, `❌ Faux. Relis bien le conseil 💡.`);
+      }
+    }
+
+    function goToNextExercise() {
+      const nextIdx = (currentExoIdx + 1) % exercises.length;
+      loadExercise(nextIdx);
+      document.getElementById('exo-enonce').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadExercise(0);
+    });
+  </script>
+</body>
+</html>
