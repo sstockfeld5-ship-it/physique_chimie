@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM : Énergie et conversions (Générateur aléatoire)</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f4f8; 
+            color: #333; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+        h1 { margin: 0; font-size: 1.8em; }
+        .subtitle { font-size: 1.1em; opacity: 0.9; margin-top: 10px; }
+        
+        .question-card { 
+            background: white; 
+            border-radius: 8px; 
+            padding: 25px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 5px solid #3498db;
+        }
+        .question-title { 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            font-size: 1.1em; 
+            color: #2c3e50; 
+        }
+        
+        .schema-box {
+            background-color: #ffffff;
+            border: 1px dashed #3498db;
+            padding: 10px;
+            text-align: center;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .options { 
+            list-style-type: none; 
+            padding: 0; 
+            margin: 0;
+        }
+        .options li { 
+            margin-bottom: 12px; 
+            background-color: #f9fbfd;
+            border: 1px solid #e1e8ed;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .options li:hover {
+            background-color: #e8f4f8;
+        }
+        label { 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            padding: 12px 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input[type="radio"] { 
+            margin-right: 15px; 
+            transform: scale(1.2); 
+            accent-color: #3498db;
+        }
+        
+        .btn-submit, .btn-retry { 
+            display: block; 
+            width: 100%; 
+            padding: 15px; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1.2em; 
+            font-weight: bold;
+            cursor: pointer; 
+            transition: transform 0.1s; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .btn-submit { background-color: #27ae60; }
+        .btn-submit:hover { background-color: #2ecc71; }
+        .btn-retry { background-color: #e67e22; display: none; margin-bottom: 40px; }
+        .btn-retry:hover { background-color: #f39c12; }
+        
+        #results { 
+            margin-top: 30px; 
+            padding: 25px; 
+            background: #fff; 
+            border-radius: 8px; 
+            display: none; 
+            font-size: 1.3em; 
+            text-align: center; 
+            border: 3px solid #27ae60; 
+            color: #27ae60; 
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .correct-answer { background-color: #d4edda !important; border-color: #c3e6cb !important; }
+        .wrong-answer { background-color: #f8d7da !important; border-color: #f5c6cb !important; }
+        .missed-answer { background-color: #fff3cd !important; border-color: #ffeeba !important; border-width: 2px !important; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>QCM : Énergie et conversions</h1>
+        <div class="subtitle">10 questions tirées au sort parmi 40 - Niveau 4ème</div>
+    </div>
+    
+    <div id="quiz-container">
+        <!-- Les questions seront générées ici par JavaScript -->
+    </div>
+    
+    <button type="button" id="btn-submit" class="btn-submit" onclick="checkAnswers()">Valider mes réponses</button>
+    <div id="results"></div>
+    <button type="button" id="btn-retry" class="btn-retry" onclick="startQuiz()">🔄 Refaire un QCM avec de nouvelles questions</button>
+
+    <script>
+        const allQuestions = [
+            // --- Concepts de base, formes et unités ---
+            { q: "Quelle est l'unité légale (du Système International) de l'énergie ?", options: ["Le Watt (W)", "Le Joule (J)", "Le Volt (V)"], correct: 1 },
+            { q: "Quelle est l'unité légale (du Système International) de la puissance ?", options: ["Le Watt (W)", "Le Joule (J)", "Le Wattheure (Wh)"], correct: 0 },
+            { q: "Quelle est l'unité usuelle de l'énergie (celle que l'on trouve sur une facture d'électricité) ?", options: ["Le Watt (W)", "Le kilowattheure (kWh)", "Le Kilogramme (kg)"], correct: 1 },
+            { q: "Quelle est la relation mathématique exacte permettant de calculer l'énergie E ?", options: ["E = P / t", "E = P + t", "E = P × t"], correct: 2 },
+            { q: "Comment s'appelle l'énergie liée à la vitesse d'un objet en mouvement ?", options: ["Énergie potentielle", "Énergie cinétique", "Énergie thermique"], correct: 1 },
+            { q: "Comment s'appelle l'énergie liée à l'altitude d'un objet (ex: l'eau d'un barrage) ?", options: ["Énergie potentielle (de position)", "Énergie cinétique", "Énergie chimique"], correct: 0 },
+            { q: "Comment s'appelle l'énergie liée à la chaleur (température) ?", options: ["Énergie lumineuse", "Énergie rayonnante", "Énergie thermique"], correct: 2 },
+            { q: "L'énergie contenue dans les aliments, les piles ou le pétrole est de l'énergie :", options: ["Thermique", "Nucléaire", "Chimique"], correct: 2 },
+            { q: "L'énergie stockée au cœur des atomes (ex: uranium) s'appelle :", options: ["L'énergie nucléaire", "L'énergie chimique", "L'énergie potentielle"], correct: 0 },
+            { q: "Quelle conversion d'unité est correcte ?", options: ["1 min = 100 s", "1 kWh = 1 000 Wh", "1 h = 60 s"], correct: 1 },
+            
+            // --- Sources d'énergie ---
+            { q: "Parmi ces sources d'énergie, laquelle est considérée comme RENOUVELABLE ?", options: ["Le charbon", "Le vent", "L'uranium"], correct: 1 },
+            { q: "Parmi ces sources d'énergie, laquelle est NON renouvelable ?", options: ["Le pétrole", "La géothermie (sous-sol)", "Le bois"], correct: 0 },
+            { q: "Pourquoi dit-on du charbon qu'il est une source d'énergie non renouvelable ?", options: ["Car son stock sur Terre est limité", "Car il ne produit pas d'électricité", "Car il coûte trop cher"], correct: 0 },
+            { q: "Quelle source d'énergie primaire est utilisée dans une centrale hydroélectrique ?", options: ["L'eau", "Le Soleil", "L'uranium"], correct: 0 },
+            
+            // --- Transferts ---
+            { q: "Un radiateur chauffe l'air de la pièce. De quel type de transfert d'énergie s'agit-il ?", options: ["Transfert thermique", "Transfert par rayonnement", "Transfert électrique"], correct: 0 },
+            { q: "Le Soleil éclaire et chauffe la Terre à travers le vide spatial. Quel est le mode de transfert ?", options: ["Transfert thermique", "Transfert par rayonnement", "Transfert mécanique"], correct: 1 },
+            { q: "Le vent pousse les voiles d'un bateau. Quel est le mode de transfert ?", options: ["Transfert électrique", "Transfert thermique", "Transfert mécanique"], correct: 2 },
+            { q: "Un chargeur est branché à un smartphone via un fil de cuivre. Il s'agit d'un :", options: ["Transfert mécanique", "Transfert électrique", "Transfert par rayonnement"], correct: 1 },
+            
+            // --- La pile ---
+            { q: "De quoi est principalement constituée une pile au citron ?", options: ["De deux métaux identiques et d'une bobine", "De deux métaux différents plongés dans une solution conductrice", "D'un aimant et d'un métal"], correct: 1 },
+            { q: "Dans une pile, l'énergie électrique est produite grâce à :", options: ["Un mouvement rotatif", "Une transformation chimique", "La chaleur du liquide"], correct: 1 },
+            { q: "Lorsqu'une pile fonctionne, elle s'échauffe. Quelle est cette énergie perdue ?", options: ["Énergie lumineuse", "Énergie cinétique", "Énergie thermique"], correct: 2 },
+            { q: "Pourquoi une pile s'arrête-t-elle de fonctionner au bout d'un moment ?", options: ["Car le fil est trop long", "Car l'un des réactifs a été totalement consommé", "Car le courant s'évapore"], correct: 1 },
+            { q: "Dans la chaîne d'énergie de la pile, l'énergie d'entrée (la source) est :", options: ["L'énergie chimique", "L'énergie électrique", "L'énergie thermique"], correct: 0 },
+            
+            // --- Alternateur & Centrales ---
+            { q: "Quels sont les deux composants principaux qui permettent à un alternateur de créer de l'électricité ?", options: ["Un aimant et une bobine de cuivre", "Deux métaux différents dans un liquide", "Des pales et de l'eau"], correct: 0 },
+            { q: "L'aimant de l'alternateur, qui est la partie mobile, est appelé :", options: ["Le stator", "Le rotor", "La turbine"], correct: 1 },
+            { q: "Dans un alternateur, quelle forme d'énergie est convertie en énergie électrique ?", options: ["L'énergie lumineuse", "L'énergie thermique", "L'énergie cinétique"], correct: 2 },
+            { q: "Dans une centrale hydroélectrique, quel élément est entrainé par la chute d'eau et fait tourner l'alternateur ?", options: ["La turbine", "Le rotor", "Le panneau solaire"], correct: 0 },
+            { q: "Laquelle de ces installations ne possède PAS d'alternateur pour produire son électricité ?", options: ["L'éolienne", "La centrale nucléaire", "Le panneau photovoltaïque"], correct: 2 },
+            
+            // --- Calculs E = P x t ---
+            { q: "Un radiateur de 1000 W fonctionne pendant 3 heures. Quelle énergie a-t-il convertie ?", options: ["3000 Wh", "333 Wh", "1000 Wh"], correct: 0 },
+            { q: "Une machine à laver a une puissance de 2 kW. Elle tourne pendant 2 h. Quelle énergie consomme-t-elle en kWh ?", options: ["1 kWh", "4 kWh", "2000 kWh"], correct: 1 },
+            
+            // --- Chaînes d'énergie (avec les schémas SVG) ---
+            { 
+                q: "Analysez la chaîne d'énergie suivante :<br><div class='schema-box'><svg viewBox='0 0 600 120' width='100%' height='80px'><rect x='10' y='20' width='100' height='40' fill='#e8f8f5' stroke='#16a085' stroke-width='2'/><text x='60' y='45' font-size='14' text-anchor='middle'>Vent</text><path d='M120,40 L180,40' stroke='black' stroke-width='2' marker-end='url(#arrow)'/><ellipse cx='250' cy='40' rx='60' ry='30' fill='#eaf2f8' stroke='#2980b9' stroke-width='2'/><text x='250' y='45' font-size='16' font-weight='bold' text-anchor='middle'>?</text><path d='M320,40 L380,40' stroke='black' stroke-width='2' marker-end='url(#arrow)'/><rect x='390' y='20' width='150' height='40' fill='#fef9e7' stroke='#f39c12' stroke-width='2'/><text x='465' y='45' font-size='12' text-anchor='middle'>Énergie électrique</text><path d='M250,75 L250,110' stroke='red' stroke-width='2' marker-end='url(#arrow)'/><text x='325' y='105' font-size='12' fill='red'>Pertes thermiques</text></svg></div>Que faut-il mettre à la place du point d'interrogation (le convertisseur) ?", 
+                options: ["Pile", "Réseau électrique", "Éolienne (pales + alternateur)"], 
+                correct: 2 
+            },
+            { 
+                q: "Dans une chaîne d'énergie, la flèche qui pointe vers le bas, en direction de l'« Environnement », correspond toujours à :", 
+                options: ["L'énergie utile", "L'énergie thermique perdue (frottements, échauffement)", "La source d'énergie"], 
+                correct: 1 
+            },
+            { 
+                q: "Identifiez le convertisseur manquant dans ce schéma de centrale nucléaire :<br><div class='schema-box'><svg viewBox='0 0 600 120' width='100%' height='80px'><rect x='10' y='20' width='120' height='40' fill='#e8f8f5' stroke='#16a085' stroke-width='2'/><text x='70' y='45' font-size='14' text-anchor='middle'>Vapeur d'eau</text><path d='M140,40 L200,40' stroke='black' stroke-width='2' marker-end='url(#arrow)'/><ellipse cx='270' cy='40' rx='60' ry='30' fill='#eaf2f8' stroke='#2980b9' stroke-width='2'/><text x='270' y='45' font-size='16' font-weight='bold' text-anchor='middle'>?</text><path d='M340,40 L400,40' stroke='black' stroke-width='2' marker-end='url(#arrow)'/><ellipse cx='470' cy='40' rx='60' ry='30' fill='#eaf2f8' stroke='#2980b9' stroke-width='2'/><text x='470' y='45' font-size='14' text-anchor='middle'>Alternateur</text></svg></div>", 
+                options: ["Turbine", "Bobine", "Panneau photovoltaïque"], 
+                correct: 0 
+            },
+            { 
+                q: "Dans le schéma de la pile :<br><div class='schema-box'><svg viewBox='0 0 600 120' width='100%' height='80px'><rect x='10' y='20' width='120' height='40' fill='#e8f8f5' stroke='#16a085' stroke-width='2'/><text x='70' y='45' font-size='12' text-anchor='middle'>Énergie chimique</text><path d='M140,40 L200,40' stroke='black' stroke-width='2' marker-end='url(#arrow)'/><ellipse cx='250' cy='40' rx='40' ry='30' fill='#eaf2f8' stroke='#2980b9' stroke-width='2'/><text x='250' y='45' font-size='14' text-anchor='middle'>Pile</text><path d='M300,40 L360,40' stroke='black' stroke-width='2' marker-end='url(#arrow)'/><rect x='370' y='20' width='130' height='40' fill='#fef9e7' stroke='#f39c12' stroke-width='2'/><text x='435' y='45' font-size='12' text-anchor='middle'>Énergie électrique</text><path d='M250,75 L250,110' stroke='red' stroke-width='2' marker-end='url(#arrow)'/><text x='260' y='105' font-size='14' font-weight='bold' fill='red'>?</text></svg></div>Quelle est l'énergie perdue vers l'environnement ?", 
+                options: ["Énergie lumineuse", "Énergie thermique", "Énergie cinétique"], 
+                correct: 1 
+            },
+            { 
+                q: "Complétez le réservoir (source d'énergie) de ce schéma de barrage :<br><div class='schema-box'><svg viewBox='0 0 600 100' width='100%' height='60px'><rect x='10' y='10' width='120' height='40' fill='#e8f8f5' stroke='#16a085' stroke-width='2'/><text x='70' y='35' font-size='16' font-weight='bold' text-anchor='middle'>?</text><path d='M140,30 L200,30' stroke='black' stroke-width='2' marker-end='url(#arrow)'/><ellipse cx='270' cy='30' rx='60' ry='30' fill='#eaf2f8' stroke='#2980b9' stroke-width='2'/><text x='270' y='35' font-size='14' text-anchor='middle'>Turbine</text></svg></div>Quelle énergie possède l'eau avant de tomber ?", 
+                options: ["Énergie cinétique", "Énergie thermique", "Énergie potentielle de position"], 
+                correct: 2 
+            },
+            { 
+                q: "Selon les conventions de schématisation, comment doit être dessiné un CONVERTISSEUR (comme un alternateur ou une lampe) ?", 
+                options: ["Dans un rectangle", "Dans un cercle parfait ou un ovale (ellipse)", "Dans un losange"], 
+                correct: 1 
+            },
+            { 
+                q: "Selon les conventions de schématisation, comment doit être dessiné un RÉSERVOIR (source) ou l'ENVIRONNEMENT ?", 
+                options: ["Dans un rectangle", "Dans un ovale", "Sans aucune forme géométrique autour"], 
+                correct: 0 
+            },
+            { 
+                q: "Complétez le schéma d'un moteur électrique :<br><div class='schema-box'><svg viewBox='0 0 600 120' width='100%' height='80px'><rect x='10' y='20' width='120' height='40' fill='#e8f8f5' stroke='#16a085' stroke-width='2'/><text x='70' y='45' font-size='16' font-weight='bold' text-anchor='middle'>?</text><path d='M140,40 L200,40' stroke='black' stroke-width='2' marker-end='url(#arrow)'/><ellipse cx='270' cy='40' rx='60' ry='30' fill='#eaf2f8' stroke='#2980b9' stroke-width='2'/><text x='270' y='45' font-size='14' text-anchor='middle'>Moteur</text><path d='M340,40 L400,40' stroke='black' stroke-width='2' marker-end='url(#arrow)'/><rect x='410' y='20' width='130' height='40' fill='#fef9e7' stroke='#f39c12' stroke-width='2'/><text x='475' y='45' font-size='12' text-anchor='middle'>Énergie cinétique</text></svg></div>Quelle forme d'énergie permet au moteur de tourner ?", 
+                options: ["Énergie lumineuse", "Énergie électrique", "Énergie chimique"], 
+                correct: 1 
+            },
+            { 
+                q: "Le convertisseur d'un panneau solaire reçoit l'énergie sous forme :", 
+                options: ["De transfert mécanique", "De transfert électrique", "De transfert par rayonnement"], 
+                correct: 2 
+            },
+            { 
+                q: "Dans un schéma d'énergie, les formes d'énergie (électrique, cinétique, thermique...) sont écrites :", 
+                options: ["À l'intérieur des ovales", "Sur (ou au-dessus) des flèches", "À l'intérieur des rectangles"], 
+                correct: 1 
+            }
+        ];
+
+        let currentQuestions = [];
+        let userAnswers = [];
+
+        function startQuiz() {
+            // S'assurer que le marqueur de flèche est défini dans le SVG de la page
+            if(!document.getElementById('svg-defs')) {
+                document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" id="svg-defs" style="position:absolute"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#333" /></marker></defs></svg>`);
+            }
+
+            // Mélanger le tableau de toutes les questions et en prendre 10
+            const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+            currentQuestions = shuffled.slice(0, 10);
+            userAnswers = new Array(10).fill(null);
+
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            // Générer le HTML
+            currentQuestions.forEach((q, index) => {
+                let html = `<div class="question-card" id="qcard-${index}">`;
+                html += `<div class="question-title">Question ${index + 1} / 10 : <br>${q.q}</div>`;
+                html += `<ul class="options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<li><label><input type="radio" name="q${index}" value="${i}"> ${opt}</label></li>`;
+                });
+                html += `</ul></div>`;
+                container.innerHTML += html;
+            });
+
+            // Gérer l'affichage des boutons
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('btn-submit').style.display = 'block';
+            document.getElementById('btn-retry').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function checkAnswers() {
+            let score = 0;
+
+            currentQuestions.forEach((q, index) => {
+                const optionsList = document.querySelectorAll(`input[name="q${index}"]`);
+                let answered = false;
+
+                optionsList.forEach(input => {
+                    input.disabled = true; // Désactiver les clics
+                    const li = input.closest('li');
+                    li.classList.remove('correct-answer', 'wrong-answer', 'missed-answer');
+
+                    if (input.checked) {
+                        answered = true;
+                        if (parseInt(input.value) === q.correct) {
+                            score++;
+                            li.classList.add('correct-answer');
+                        } else {
+                            li.classList.add('wrong-answer');
+                        }
+                    }
+                    
+                    // Surligner la bonne réponse si l'utilisateur s'est trompé ou n'a pas répondu
+                    if (parseInt(input.value) === q.correct) {
+                        if (!input.checked && answered) {
+                            li.classList.add('missed-answer'); // Il a cliqué ailleurs
+                        } else if (!answered && optionsList[optionsList.length -1] === input) {
+                            // On ajoute la classe à la bonne réponse à la fin de la boucle s'il n'a rien coché du tout
+                            document.querySelector(`input[name="q${index}"][value="${q.correct}"]`).closest('li').classList.add('missed-answer');
+                        }
+                    }
+                });
+            });
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            
+            let message = "";
+            if (score === 10) message = "Excellent ! Carton plein, tu maîtrises le chapitre sur le bout des doigts.";
+            else if (score >= 7) message = "Très bien ! Tes connaissances sont solides.";
+            else if (score >= 5) message = "C'est un bon début, mais il faut encore réviser un peu le cours pour consolider tout ça.";
+            else message = "Ne te décourage pas ! Relis ta fiche bilan et retente ta chance.";
+
+            resultsDiv.innerHTML = `Ton score est de ${score} / 10 <br><span style="font-size:0.8em; font-weight:normal;">${message}</span>`;
+            
+            document.getElementById('btn-submit').style.display = 'none';
+            document.getElementById('btn-retry').style.display = 'block';
+            
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        // Lancer le quiz au chargement de la page
+        window.onload = startQuiz;
+    </script>
+</body>
+</html>
