@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Entraînement QCM 6ème - Énergie</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+    }
+    /* S'assure que le texte des boutons retourne à la ligne correctement sur mobile */
+    .option-text {
+      word-break: break-word;
+      white-space: normal;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-blue-50 to-emerald-50 min-h-screen font-sans text-slate-800 antialiased py-4 sm:py-8 px-3 sm:px-4 flex items-center justify-center overflow-x-hidden">
+  
+  <!-- Définition globale SVG (Flèches) -->
+  <svg width="0" height="0" class="hidden">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+      </marker>
+    </defs>
+  </svg>
+
+  <div class="max-w-3xl w-full mx-auto">
+    
+    <!-- En-tête -->
+    <header class="text-center mb-6 sm:mb-8">
+      <div class="inline-flex items-center justify-center p-3 bg-blue-600 text-white rounded-2xl shadow-lg mb-3">
+        <i class="fa-solid fa-bolt text-2xl sm:text-3xl"></i>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">QCM : Énergie & Conversions</h1>
+      <p class="text-slate-600 mt-2 text-xs sm:text-base px-2">Niveau 6ème • 10 questions tirées au sort pour s'entraîner !</p>
+    </header>
+
+    <!-- Conteneur Principal -->
+    <div id="quiz-container" class="glass-card border border-slate-200/80 rounded-2xl shadow-xl overflow-hidden p-4 sm:p-8 relative w-full box-border">
+      
+      <!-- Écran d'accueil -->
+      <div id="start-screen" class="text-center py-4 sm:py-6">
+        <div class="max-w-md mx-auto space-y-4">
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-left text-sm text-blue-900 space-y-2 shadow-sm">
+            <p class="font-semibold flex items-center gap-2"><i class="fa-solid fa-graduation-cap"></i> Compétences travaillées :</p>
+            <ul class="list-disc list-inside text-slate-700 space-y-1.5 ml-1">
+              <li>Identifier sources et formes d'énergie</li>
+              <li>Compléter une chaîne d'énergie (schémas)</li>
+              <li>Extraire des informations d'un texte</li>
+              <li>Raisonner (mouvement, chaleur, isolation)</li>
+            </ul>
+          </div>
+          <button id="start-btn" class="touch-manipulation w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-lg">
+            <i class="fa-solid fa-play"></i> Démarrer l'entraînement
+          </button>
+        </div>
+      </div>
+
+      <!-- Écran du Quiz -->
+      <div id="game-screen" class="hidden">
+        
+        <!-- Barre supérieure -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3 mb-5">
+          <div class="flex items-center gap-2">
+            <span id="question-index" class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400">Q 1/10</span>
+            <span id="difficulty-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold">Facile</span>
+          </div>
+          <span id="skill-badge" class="bg-slate-100 text-slate-700 text-[10px] sm:text-xs px-2 py-1 rounded-md font-medium border border-slate-200 flex items-center gap-1.5">
+            <i class="fa-solid fa-bookmark text-blue-500"></i> <span id="skill-text">Compétence</span>
+          </span>
+        </div>
+
+        <!-- Barre de progression -->
+        <div class="w-full bg-slate-100 h-1.5 sm:h-2 rounded-full overflow-hidden mb-5">
+          <div id="progress-bar" class="bg-blue-600 h-full w-0 transition-all duration-300"></div>
+        </div>
+
+        <!-- Zone de la question -->
+        <div class="mb-5">
+          <div id="context-box" class="hidden mb-4 p-3 sm:p-4 bg-amber-50 border-l-4 border-amber-400 text-amber-900 text-xs sm:text-sm rounded-r-lg font-medium leading-relaxed"></div>
+          <h2 id="question-text" class="text-base sm:text-xl font-bold text-slate-800 leading-snug mb-4">Intitulé de la question</h2>
+          
+          <!-- Conteneur SVG -->
+          <div id="svg-box" class="hidden mb-5 bg-white border border-slate-200 rounded-xl p-2 sm:p-4 flex justify-center shadow-inner overflow-x-auto"></div>
+        </div>
+
+        <!-- Boutons d'options -->
+        <div id="options-container" class="space-y-2.5 sm:space-y-3 mb-5"></div>
+
+        <!-- Boîte de retour (Explication) -->
+        <div id="feedback-box" class="hidden p-3 sm:p-4 rounded-xl mb-5 transition-all">
+          <div class="flex items-start gap-3">
+            <div id="feedback-icon" class="text-lg sm:text-xl mt-0.5 flex-shrink-0"></div>
+            <div class="w-full">
+              <p id="feedback-title" class="font-bold text-sm sm:text-base"></p>
+              <div id="feedback-text" class="text-xs sm:text-sm mt-1.5 text-slate-700 w-full leading-relaxed"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bouton Suivant -->
+        <button id="next-btn" class="hidden touch-manipulation w-full py-3.5 px-6 bg-slate-800 hover:bg-slate-900 active:bg-black text-white font-semibold rounded-xl shadow transition flex items-center justify-center gap-2">
+          <span>Question suivante</span> <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Écran de Résultat -->
+      <div id="result-screen" class="hidden text-center py-4 sm:py-6">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl sm:text-3xl shadow-inner" id="score-icon-bg">
+          <i id="score-icon" class="fa-solid"></i>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black text-slate-800 mb-1" id="score-title">Bravo !</h2>
+        <p class="text-slate-600 text-xs sm:text-sm mb-5" id="score-comment">Tu as complété l'entraînement.</p>
+        
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-6 mb-6 max-w-sm mx-auto shadow-sm">
+          <p class="text-[10px] sm:text-xs uppercase font-bold text-slate-400 mb-1">Score final</p>
+          <div class="text-4xl sm:text-5xl font-black text-blue-600" id="final-score">0 / 10</div>
+          <div class="mt-4 pt-4 border-t border-slate-200 text-xs text-slate-500 space-y-1.5 text-left" id="skill-breakdown">
+          </div>
+        </div>
+
+        <button id="retry-btn" class="touch-manipulation w-full max-w-sm mx-auto py-3.5 px-6 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-2 text-sm sm:text-base">
+          <i class="fa-solid fa-rotate-right"></i> Relancer 10 questions
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Banque de 50 questions
+    const QUESTIONS_BANK = [
+      // --- NIVEAU 1 : FACILE ---
+      { id: 1, difficulty: "Facile", skill: "Formes & Sources d'énergie", question: "Parmi ces propositions, laquelle désigne une SOURCE d'énergie renouvelable ?", options: [ { text: "Le pétrole", correct: false, expl: "Le pétrole est une source fossile non renouvelable." }, { text: "Le vent", correct: true, expl: "Le vent est une source inépuisable à l'échelle humaine." }, { text: "L'uranium", correct: false, expl: "L'uranium est un minerai utilisé dans les centrales nucléaires, non renouvelable." }, { text: "Le gaz naturel", correct: false, expl: "Le gaz est une source d'énergie fossile." } ] },
+      { id: 2, difficulty: "Facile", skill: "Formes & Sources d'énergie", question: "Quelle forme d'énergie est contenue dans une pomme ou dans un morceau de pain ?", options: [ { text: "Énergie thermique", correct: false, expl: "L'énergie thermique est liée à la chaleur." }, { text: "Énergie chimique", correct: true, expl: "Les aliments sont des réservoirs d'énergie chimique." }, { text: "Énergie cinétique", correct: false, expl: "L'énergie cinétique est l'énergie d'un corps en mouvement." }, { text: "Énergie électrique", correct: false, expl: "Les aliments ne fournissent pas de courant électrique direct." } ] },
+      { id: 3, difficulty: "Facile", skill: "Formes & Sources d'énergie", question: "Comment appelle-t-on la forme d'énergie directement associée au mouvement d'un objet ?", options: [ { text: "L'énergie thermique", correct: false, expl: "L'énergie thermique est liée à la température." }, { text: "L'énergie de pesanteur", correct: false, expl: "L'énergie de pesanteur dépend de la hauteur." }, { text: "L'énergie cinétique", correct: true, expl: "Tout corps qui se déplace possède de l'énergie cinétique." }, { text: "L'énergie chimique", correct: false, expl: "L'énergie chimique est emmagasinée dans la matière." } ] },
+      { id: 4, difficulty: "Facile", skill: "Chaîne d'énergie", question: "Dans le schéma normalisé d'une chaîne d'énergie, où écrit-on le nom des formes d'énergie ?", options: [ { text: "Dans des rectangles", correct: false, expl: "Les rectangles contiennent les sources ou réservoirs." }, { text: "Dans des ovales", correct: false, expl: "Les ovales sont réservés aux convertisseurs." }, { text: "Au-dessus des flèches", correct: true, expl: "Les formes d'énergie sont toujours notées le long des flèches pour montrer le transfert." }, { text: "Dans des losanges", correct: false, expl: "Les losanges ne sont pas utilisés ici." } ] },
+      { id: 5, difficulty: "Facile", skill: "Formes & Sources d'énergie", question: "Quelle forme d'énergie reçoit un grille-pain branché à la prise de la cuisine ?", options: [ { text: "Énergie électrique", correct: true, expl: "La prise fournit de l'énergie électrique en entrée." }, { text: "Énergie thermique", correct: false, expl: "C'est l'énergie produite en sortie." }, { text: "Énergie chimique", correct: false, expl: "La prise ne fournit pas de réactions chimiques." }, { text: "Énergie cinétique", correct: false, expl: "Le grille-pain ne se déplace pas." } ] },
+      { id: 6, difficulty: "Facile", skill: "Raisonnement", question: "Une balle est posée sur une table à 1 m du sol. Si on la place sur une armoire à 2 m, que devient son énergie de pesanteur ?", options: [ { text: "Elle diminue", correct: false, expl: "Plus l'altitude augmente, plus l'énergie de pesanteur est forte." }, { text: "Elle augmente", correct: true, expl: "L'énergie de pesanteur dépend directement de la hauteur de l'objet par rapport au sol." }, { text: "Elle reste identique", correct: false, expl: "La hauteur a doublé, l'énergie aussi." }, { text: "Elle devient nulle", correct: false, expl: "Elle n'est pas nulle en hauteur." } ] },
+      { id: 7, difficulty: "Facile", skill: "Chaîne d'énergie", question: "Dans une chaîne d'énergie, que symbolisent les formes ovales ?", options: [ { text: "Les convertisseurs d'énergie", correct: true, expl: "Les appareils qui transforment l'énergie (comme un moteur ou une lampe) sont placés dans un ovale." }, { text: "Les sources d'énergie", correct: false, expl: "Les sources sont dans des rectangles." }, { text: "L'environnement", correct: false, expl: "L'environnement est dans un cadre rectangulaire." }, { text: "Les pertes d'énergie", correct: false, expl: "Les pertes sont le long d'une flèche." } ] },
+      { id: 8, difficulty: "Facile", skill: "Formes & Sources d'énergie", question: "Qu'est-ce qu'une énergie FOSSILE (comme le charbon, le gaz naturel ou le pétrole) ?", options: [ { text: "Une énergie qui se renouvelle naturellement à la vitesse où on la consomme", correct: false, expl: "C'est la définition d'une énergie renouvelable." }, { text: "Une énergie issue de très anciens restes enfouis, qui met des millions d'années à se créer et qui finira par s'épuiser", correct: true, expl: "Les énergies fossiles s'épuisent car on les consomme beaucoup plus vite qu'elles ne se reforment dans le sol." }, { text: "Une énergie inépuisable qui provient de la chaleur du Soleil", correct: false, expl: "Le Soleil est renouvelable." }, { text: "Une énergie fabriquée par les dinosaures encore en vie", correct: false, expl: "Faux." } ] },
+      { id: 9, difficulty: "Facile", skill: "Raisonnement", question: "L'énergie peut-elle être créée à partir de rien ou disparaître ?", options: [ { text: "Oui, les moteurs créent de l'énergie", correct: false, expl: "Un moteur convertit l'énergie, il ne la crée pas." }, { text: "Oui, l'énergie disparaît", correct: false, expl: "Elle se dissipe dans l'environnement sous forme de chaleur, mais ne disparaît jamais vraiment." }, { text: "Non, elle ne peut être que convertie ou transmise", correct: true, expl: "C'est la loi de conservation : l'énergie se conserve et change seulement de forme." }, { text: "Oui, mais seulement dans l'espace", correct: false, expl: "Cette règle s'applique partout." } ] },
+      { id: 10, difficulty: "Facile", skill: "Extraction d'information", question: "Quelle forme d'énergie une pile permet-elle de stocker ?", options: [ { text: "Énergie cinétique", correct: false, expl: "Une pile ne stocke pas de mouvement." }, { text: "Énergie chimique", correct: true, expl: "Les matériaux à l'intérieur de la pile réagissent pour stocker de l'énergie chimique." }, { text: "Énergie de pesanteur", correct: false, expl: "Cela dépend de la hauteur, pas de la pile." }, { text: "Énergie lumineuse", correct: false, expl: "La pile ne stocke pas de lumière." } ] },
+      { id: 11, difficulty: "Facile", skill: "Formes & Sources d'énergie", question: "Quand un lièvre bondit pour se déplacer, quelle forme d'énergie observe-t-on directement ?", options: [ { text: "Énergie cinétique", correct: true, expl: "Le mouvement (le déplacement) est la preuve de son énergie cinétique." }, { text: "Énergie électrique", correct: false, expl: "L'animal ne génère pas de courant électrique pour avancer." }, { text: "Énergie nucléaire", correct: false, expl: "Rien de nucléaire ici." }, { text: "Énergie solaire", correct: false, expl: "Le lièvre n'est pas un panneau solaire." } ] },
+      { id: 12, difficulty: "Facile", skill: "Chaîne d'énergie", question: "Quel composant transforme l'énergie du vent en électricité dans une éolienne ?", options: [ { text: "Le pylône", correct: false, expl: "C'est juste le support." }, { text: "L'alternateur (la génératrice)", correct: true, expl: "Entraîné par la rotation des pales, l'alternateur convertit l'énergie mécanique en électricité." }, { text: "Les pales seules", correct: false, expl: "Elles captent le vent, mais c'est l'alternateur qui fabrique réellement l'électricité." }, { text: "Le réseau de câbles", correct: false, expl: "Il transporte le courant." } ] },
+      { id: 13, difficulty: "Facile", skill: "Raisonnement", question: "Lorsqu'on frotte vigoureusement ses mains en hiver, l'énergie cinétique de nos bras est convertie en énergie...", options: [ { text: "Nucléaire", correct: false, expl: "Aucune réaction nucléaire dans tes mains." }, { text: "Thermique", correct: true, expl: "Les frottements créent un échauffement : c'est l'énergie thermique." }, { text: "Électrique", correct: false, expl: "Pas de courant généré par tes mains." }, { text: "Chimique", correct: false, expl: "C'est thermique." } ] },
+      { id: 14, difficulty: "Facile", skill: "Extraction d'information", question: "Que se passe-t-il pour l'énergie thermique de l'eau dans une bouilloire allumée ?", options: [ { text: "Elle augmente", correct: true, expl: "En chauffant, la température de l'eau monte, donc son énergie thermique augmente." }, { text: "Elle diminue", correct: false, expl: "L'eau ne refroidit pas." }, { text: "Elle reste stable", correct: false, expl: "La température monte." }, { text: "Elle disparaît", correct: false, expl: "La chaleur augmente, elle ne disparaît pas." } ] },
+      { id: 15, difficulty: "Facile", skill: "Chaîne d'énergie", question: "Pour une lampe de bureau, quelle est l'énergie UTILE qui sort à la fin de la chaîne ?", options: [ { text: "Énergie thermique", correct: false, expl: "C'est une énergie perdue, on ne veut pas que la lampe chauffe." }, { text: "Énergie lumineuse", correct: true, expl: "C'est l'objectif recherché : éclairer la pièce." }, { text: "Énergie cinétique", correct: false, expl: "La lampe ne bouge pas." }, { text: "Énergie électrique", correct: false, expl: "C'est l'énergie d'entrée." } ] },
+      { id: 16, difficulty: "Facile", skill: "Formes & Sources d'énergie", question: "Lequel de ces objets est un CONVERTISSEUR d'énergie ?", options: [ { text: "Le pétrole brut", correct: false, expl: "C'est une source d'énergie." }, { text: "Un moteur", correct: true, expl: "Le moteur convertit une énergie (ex: chimique ou électrique) en énergie de mouvement." }, { text: "Le Soleil", correct: false, expl: "C'est une source d'énergie." }, { text: "Une prise murale", correct: false, expl: "Elle ne fait que distribuer le courant." } ] },
+      { id: 17, difficulty: "Facile", skill: "Extraction d'information", question: "Lors du petit-déjeuner de Sam et Élise, quel appareil convertit de l'énergie électrique en énergie thermique (chaleur) ?", options: [ { text: "Le grille-pain", correct: true, expl: "Le grille-pain a besoin d'électricité pour faire rougir sa résistance et chauffer le pain." }, { text: "Le presse-agrumes", correct: false, expl: "Le presse-agrumes produit du mouvement (énergie cinétique)." }, { text: "La radio", correct: false, expl: "Elle produit du son." }, { text: "Le jus d'orange", correct: false, expl: "C'est une source d'énergie chimique." } ] },
+
+      // --- NIVEAU 2 : MOYEN ---
+      { id: 18, difficulty: "Moyen", skill: "Chaîne d'énergie", question: "Dans une centrale hydraulique, quel dispositif précis fabrique le courant électrique ?", options: [ { text: "La conduite forcée", correct: false, expl: "Elle transporte l'eau." }, { text: "L'alternateur", correct: true, expl: "Entraîné par la rotation de la turbine, l'alternateur produit l'électricité." }, { text: "Le barrage", correct: false, expl: "Il sert à retenir l'eau en hauteur." }, { text: "Les pylônes", correct: false, expl: "Ils soutiennent les câbles électriques." } ] },
+      { id: 19, difficulty: "Moyen", skill: "Raisonnement", question: "Lorsqu'une voiture freine très fort à un feu rouge, que devient son énergie cinétique (sa vitesse) ?", options: [ { text: "Elle est convertie en énergie thermique", correct: true, expl: "Les plaquettes de freins frottent fort contre les roues et chauffent énormément : l'énergie de mouvement se transforme en chaleur." }, { text: "Elle disparaît dans l'air", correct: false, expl: "L'énergie ne disparaît jamais de l'Univers, elle se transforme." }, { text: "Elle retourne dans le réservoir d'essence", correct: false, expl: "Ce n'est pas possible de recréer de l'essence en freinant." }, { text: "Elle se transforme en gravité", correct: false, expl: "Aucun rapport avec la pesanteur ici." } ] },
+      { id: 20, difficulty: "Moyen", skill: "Formes & Sources d'énergie", question: "Quelle forme d'énergie possède un ballon qui roule très vite sur le sol de la cour de récréation ?", options: [ { text: "De l'énergie thermique", correct: false, expl: "Le ballon ne dégage pas de chaleur notable." }, { text: "De l'énergie cinétique", correct: true, expl: "L'énergie cinétique est l'énergie que possède n'importe quel objet du fait de son mouvement." }, { text: "De l'énergie lumineuse", correct: false, expl: "Le ballon ne brille pas." }, { text: "De l'énergie chimique", correct: false, expl: "L'énergie chimique concerne plutôt les piles ou les aliments stockés." } ] },
+      { id: 21, difficulty: "Moyen", skill: "Chaîne d'énergie", question: "Comment représente-t-on la chaleur perdue (la déperdition) dans le dessin officiel d'une chaîne d'énergie ?", options: [ { text: "Par une flèche horizontale rouge", correct: false, expl: "La flèche horizontale désigne souvent l'énergie utile ou reçue." }, { text: "Par une flèche qui pointe vers le bas", correct: true, expl: "Les déperditions d'énergie, qui s'échappent dans l'environnement, pointent toujours vers le bas." }, { text: "Par un grand rond barré", correct: false, expl: "On n'utilise pas de ronds sur les flèches." }, { text: "Par un rectangle en pointillés", correct: false, expl: "Les rectangles sont réservés pour les réservoirs." } ] },
+      { id: 22, difficulty: "Moyen", skill: "Raisonnement", question: "On lâche une Bille A depuis 20 cm de haut, et une Bille B depuis 1 mètre. Que se passe-t-il quand elles percutent le sable ?", options: [ { text: "Le trou de la Bille A est plus profond", correct: false, expl: "Elle tombe de moins haut, son énergie est plus faible." }, { text: "Le trou de la Bille B est plus profond", correct: true, expl: "Tombant de plus haut, la Bille B a accumulé beaucoup plus d'énergie de pesanteur, qui s'est transformée en une grande vitesse (énergie cinétique) juste avant l'impact." }, { text: "Les trous sont exactement identiques", correct: false, expl: "L'énergie du choc dépend directement de la hauteur de chute." }, { text: "La Bille B rebondit en l'air", correct: false, expl: "Dans du sable mou, l'énergie sert à creuser un cratère." } ] },
+      { id: 23, difficulty: "Moyen", skill: "Extraction d'information", context: "Dans les anciens modèles, l'ampoule classique consommait 21,5 kWh par an et sa durée de vie était d'environ 1 000 heures. Aujourd'hui, les nouvelles ampoules LED ne consomment que 4,7 kWh par an et peuvent éclairer jusqu'à 30 000 heures sans griller.", question: "En lisant ce document, quel est le plus grand avantage de l'ampoule LED au quotidien ?", options: [ { text: "Elle chauffe beaucoup plus la pièce l'hiver", correct: false, expl: "La LED chauffe très peu, ce qui est un avantage (moins de pertes thermiques)." }, { text: "Elle consomme beaucoup moins d'énergie électrique tout en durerant très longtemps", correct: true, expl: "Le texte montre clairement qu'elle consomme presque 5 fois moins (4,7 contre 21,5) et vit 30 fois plus longtemps !" }, { text: "Elle fonctionne avec de l'énergie chimique", correct: false, expl: "Elle fonctionne avec de l'électricité." }, { text: "L'ancienne ampoule durait plus longtemps", correct: false, expl: "L'ancienne ne durait que 1000h contre 30000h pour la LED." } ] },
+      { id: 24, difficulty: "Moyen", skill: "Chaîne d'énergie", question: "Quand tu pédales sur un VTT, comment l'énergie de tes jambes parvient-elle jusqu'à la roue arrière ?", options: [ { text: "Par un petit moteur électrique caché dans le cadre", correct: false, expl: "Un VTT classique n'a pas de moteur." }, { text: "Mécaniquement, en passant par le pédalier, la chaîne et les pignons (roues dentées)", correct: true, expl: "C'est la chaîne métallique du vélo qui transmet physiquement ton mouvement (énergie mécanique) jusqu'à la roue arrière." }, { text: "Par la chaleur de ton corps", correct: false, expl: "La chaleur que tu dégages est une perte d'énergie." }, { text: "Grâce à l'air des pneus", correct: false, expl: "L'air des pneus sert à l'amorti, pas à l'avancée." } ] },
+      { id: 25, difficulty: "Moyen", skill: "Raisonnement", question: "Pourquoi un ventilateur laissé allumé pendant des heures finit-il par réchauffer légèrement une pièce complètement fermée ?", options: [ { text: "Le moteur électrique chauffe en tournant et dégage de la chaleur perdue", correct: true, expl: "Aucun convertisseur n'est parfait. En transformant l'électricité en mouvement, le moteur du ventilateur dissipe obligatoirement une partie de l'énergie sous forme de chaleur dans la pièce." }, { text: "Le ventilateur aspire de l'air chaud par la fenêtre", correct: false, expl: "La pièce est précisée 'complètement fermée'." }, { text: "L'air brassé par les pales finit par prendre feu", correct: false, expl: "L'air ne prend évidemment pas feu." }, { text: "Le ventilateur détruit l'énergie thermique", correct: false, expl: "L'énergie ne se détruit pas." } ] },
+      { id: 26, difficulty: "Moyen", skill: "Extraction d'information", context: "Consommation d'énergie dans la maison étudiée : Chauffage=66% ; Électricité spécifique (électroménager)=17% ; Eau chaude=11% ; Cuisson=6%", question: "D'après ces chiffres, à quoi sert la plus grosse partie de l'énergie dépensée dans cette maison ?", options: [ { text: "Faire à manger (Cuisson)", correct: false, expl: "La cuisson ne représente que 6%." }, { text: "Regarder la télévision et utiliser l'ordinateur", correct: false, expl: "L'électricité spécifique correspond aux 17%." }, { text: "Se chauffer l'hiver (Chauffage)", correct: true, expl: "Le chauffage est de loin le plus grand consommateur avec 66% (les deux tiers) des dépenses !" }, { text: "Prendre des douches chaudes", correct: false, expl: "L'eau chaude ne représente que 11%." } ] },
+      { id: 27, difficulty: "Moyen", skill: "Formes & Sources d'énergie", question: "À quoi servent les immenses panneaux solaires photovoltaïques accrochés à la Station Spatiale Internationale (ISS) ?", options: [ { text: "À fabriquer de l'oxygène pour les astronautes", correct: false, expl: "Ce n'est pas le rôle d'un panneau solaire." }, { text: "À utiliser l'énergie de la lumière du Soleil pour fabriquer de l'électricité", correct: true, expl: "Ces panneaux convertissent directement l'énergie lumineuse rayonnée par le Soleil en courant électrique pour faire fonctionner la station." }, { text: "À transformer la chaleur de l'espace en mouvement", correct: false, expl: "L'espace est très froid et les panneaux ne créent pas de mouvement." }, { text: "À stocker la gravité de la Terre", correct: false, expl: "Faux." } ] },
+      { id: 28, difficulty: "Moyen", skill: "Raisonnement", question: "Une voiture télécommandée roule vite puis traverse une flaque d'eau. On observe qu'elle ralentit. Pourquoi ?", options: [ { text: "L'eau a instantanément court-circuité la batterie", correct: false, expl: "Le moteur continue de forcer, la voiture ralentit seulement." }, { text: "L'eau offre une résistance et l'énergie se perd en éclaboussant (déperdition)", correct: true, expl: "Pour projeter l'eau (les éclaboussures), la voiture a dû utiliser une partie de son énergie de mouvement. C'est une perte de vitesse pour elle." }, { text: "L'énergie de pesanteur de la voiture a augmenté dans l'eau", correct: false, expl: "La hauteur de la voiture n'a pas changé." }, { text: "Le moteur est devenu plus puissant au contact de l'eau", correct: false, expl: "Dans ce cas, elle aurait accéléré, or elle ralentit." } ] },
+      { id: 29, difficulty: "Moyen", skill: "Chaîne d'énergie", question: "Au tout début de sa chaîne d'énergie, d'où vient l'énergie qui permet au cycliste de pédaler ?", options: [ { text: "De la lumière du Soleil directement captée par sa peau", correct: false, expl: "L'être humain ne fait pas de photosynthèse végétale." }, { text: "De l'énergie chimique stockée dans les aliments qu'il a mangés au petit-déjeuner", correct: true, expl: "La digestion des aliments libère de l'énergie chimique que nos muscles utilisent pour se contracter." }, { text: "Du vélo lui-même", correct: false, expl: "Le vélo ne lui donne pas d'énergie, c'est un objet inerte sans le cycliste." }, { text: "De l'air ambiant", correct: false, expl: "L'oxygène de l'air est nécessaire, mais l'énergie brute vient des nutriments (les aliments)." } ] },
+      { id: 30, difficulty: "Moyen", skill: "Extraction d'information", context: "Afin de tester les propriétés isolantes de plusieurs matériaux, des élèves ont mesuré la température d'une boîte, puis l'ont mise au réfrigérateur 1 minute. Sans rien autour, la température de la boîte a chuté à 15,7 °C. Entourée d'aluminium, elle est descendue à 17,8 °C. Entourée de papier journal, elle est restée à 18,3 °C.", question: "En observant ces résultats, quel matériau a le mieux empêché la chaleur de s'échapper (le meilleur isolant) ?", options: [ { text: "Sans aucun isolant (la boîte nue)", correct: false, expl: "La température est descendue le plus bas (15,7°C), la chaleur a donc fui très vite." }, { text: "Le papier journal", correct: true, expl: "La température est restée la plus haute (18,3 °C), ce qui prouve que la chaleur est bien restée piégée à l'intérieur !" }, { text: "L'aluminium", correct: false, expl: "C'est moins bien que le papier journal (la température est tombée à 17,8 °C)." }, { text: "Ils sont tous pareils", correct: false, expl: "Les températures relevées sont toutes différentes." } ] },
+      { id: 31, difficulty: "Moyen", skill: "Raisonnement", question: "Pourquoi conseille-t-on à un cycliste de bien nettoyer et graisser la chaîne de son vélo ?", options: [ { text: "Pour que la chaîne glisse bien et évite de perdre l'énergie musculaire en frottements et chaleur", correct: true, expl: "Une chaîne sale ou rouillée crée beaucoup de frottements. Tu forces plus, mais cette énergie supplémentaire est gaspillée sous forme de chaleur inutile." }, { text: "Pour que le vélo puisse fabriquer de l'électricité en roulant", correct: false, expl: "La graisse n'aide pas à faire du courant électrique." }, { text: "Uniquement pour que le vélo soit beau et propre", correct: false, expl: "Il y a une vraie raison scientifique liée à l'économie d'énergie (le rendement)." }, { text: "Pour que l'énergie chimique du vélo ne déborde pas", correct: false, expl: "Le vélo n'a pas d'énergie chimique." } ] },
+      { id: 32, difficulty: "Moyen", skill: "Formes & Sources d'énergie", question: "L'eau qui est bloquée et complètement immobile tout en haut d'un barrage hydraulique possède principalement :", options: [ { text: "De l'énergie cinétique", correct: false, expl: "L'eau ne coule pas encore, elle n'a donc pas d'énergie liée au mouvement." }, { text: "De l'énergie de pesanteur", correct: true, expl: "Grâce à la grande hauteur du barrage, l'eau stocke une énorme quantité d'énergie de pesanteur, prête à être libérée !" }, { text: "De l'énergie nucléaire", correct: false, expl: "L'eau des barrages n'est pas radioactive." }, { text: "De l'énergie électrique", correct: false, expl: "Elle n'a pas encore été convertie en électricité par l'alternateur, c'est encore de l'eau en haut de la montagne." } ] },
+      { id: 33, difficulty: "Moyen", skill: "Chaîne d'énergie", question: "Dans le hall de certaines gares, tu peux recharger la batterie de ton téléphone en pédalant sur un vélo fixe. Quelle est la conversion principale réalisée ?", options: [ { text: "L'énergie de tes mouvements (cinétique) est transformée en énergie électrique", correct: true, expl: "En pédalant, tu fournis de l'énergie cinétique qui fait tourner une dynamo/génératrice, laquelle produit alors du courant électrique pour ton téléphone." }, { text: "La lumière de la gare (lumineuse) se transforme en énergie chimique", correct: false, expl: "C'est bien le mouvement de tes jambes sur le vélo qui recharge le téléphone." }, { text: "La chaleur de ton corps est captée par la prise", correct: false, expl: "La chaleur que tu dégages est perdue dans la gare." }, { text: "Le téléphone utilise sa propre énergie de pesanteur", correct: false, expl: "Le téléphone est posé sur la table." } ] },
+      { id: 34, difficulty: "Moyen", skill: "Extraction d'information", question: "Dans une centrale hydraulique, que devient l'énergie de pesanteur de l'eau lorsqu'elle chute dans le grand tuyau en pente (la conduite forcée) ?", options: [ { text: "Elle est convertie en énergie cinétique car l'eau prend de plus en plus de vitesse", correct: true, expl: "En perdant de l'altitude, l'eau du barrage accélère considérablement. Son énergie de pesanteur se transforme sous nos yeux en énergie de mouvement (cinétique)." }, { text: "Elle se change en énergie chimique", correct: false, expl: "L'eau (H2O) ne change pas de nature chimique en tombant." }, { text: "Elle disparaît totalement avant de toucher la turbine", correct: false, expl: "L'énergie se transforme, elle ne disparaît jamais. Elle percutera la turbine de plein fouet." }, { text: "Elle devient directement de l'énergie lumineuse", correct: false, expl: "L'eau ne brille pas en tombant dans le tuyau." } ] },
+
+      // --- NIVEAU 3 : DIFFICILE ---
+      { id: 35, difficulty: "Difficile", skill: "Extraction d'information", context: "Lors de son arrivée sur Mars, le robot Perseverance a d'abord été soumis à des frottements très importants avec l'atmosphère martienne. Ces frottements extrêmes ont fortement ralenti sa chute à travers le ciel, tout en faisant chauffer son grand bouclier jusqu'à des températures impressionnantes.", question: "D'après ce texte, quelle grande conversion d'énergie s'est produite lors de ce freinage dans le ciel ?", options: [ { text: "L'énergie cinétique (liée à sa vitesse de chute) a été convertie en énergie thermique (chaleur)", correct: true, expl: "En freinant brutalement contre l'air, la grande vitesse du robot s'est transformée en une chaleur extrême. C'est exactement le même principe que des freins de voiture !" }, { text: "La chaleur de l'air martien s'est transformée en gravité", correct: false, expl: "La gravité de la planète ne dépend pas de la chaleur." }, { text: "L'énergie de pesanteur s'est transformée en électricité", correct: false, expl: "Il n'y a pas d'alternateur dans ce bouclier pour faire du courant." }, { text: "Le robot a brûlé l'air martien pour créer de l'énergie chimique", correct: false, expl: "Le robot ne respire pas l'air." } ] },
+      { id: 36, difficulty: "Difficile", skill: "Raisonnement", question: "L'énergie cinétique d'une voiture dépend de sa vitesse, mais aussi d'une autre chose très importante en cas de choc. Laquelle ?", options: [ { text: "La couleur de la carrosserie", correct: false, expl: "La couleur n'a aucune importance pour la physique du mouvement." }, { text: "La masse de la voiture (si elle est lourde ou légère)", correct: true, expl: "Un camion lancé à 50 km/h est beaucoup plus difficile à arrêter et fait bien plus de dégâts qu'un vélo à 50 km/h, car sa masse (son poids) énorme lui donne beaucoup plus d'énergie cinétique." }, { text: "L'altitude de la route", correct: false, expl: "L'altitude donne l'énergie de pesanteur, pas cinétique." }, { text: "Le type de phares installés", correct: false, expl: "Les phares éclairent, ils n'influencent pas le choc." } ] },
+      { id: 37, difficulty: "Difficile", skill: "Chaîne d'énergie", svg: true, question: "Observe cette chaîne d'énergie simplifiée d'une lampe de bureau. Quelle forme d'énergie doit-on écrire sur la première flèche, entrant dans la lampe ?", svgCode: "<svg viewBox='0 0 520 140' class='w-full h-auto max-w-lg mx-auto'><rect x='10' y='50' width='90' height='40' fill='#fcd34d' rx='4'/><text x='55' y='74' text-anchor='middle' font-size='13' font-family='sans-serif' font-weight='bold' fill='#78350f'>Prise murale</text><path d='M 105 70 L 175 70' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><rect x='115' y='45' width='50' height='20' fill='#fee2e2' rx='2' stroke='#f87171' stroke-width='2' stroke-dasharray='4'/><text x='140' y='59' text-anchor='middle' font-size='13' font-family='sans-serif' fill='#ef4444' font-weight='bold'>?</text><ellipse cx='235' cy='70' rx='50' ry='35' fill='#bae6fd'/><text x='235' y='74' text-anchor='middle' font-size='13' font-family='sans-serif' font-weight='bold' fill='#0c4a6e'>Lampe</text><path d='M 290 55 L 360 40' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><text x='370' y='45' font-size='13' font-family='sans-serif'>Énergie Lumineuse</text><path d='M 290 85 L 360 100' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><text x='370' y='105' font-size='13' font-family='sans-serif'>Énergie Thermique</text></svg>", options: [ { text: "L'énergie chimique", correct: false, expl: "Une prise murale ne délivre pas de produits chimiques." }, { text: "L'énergie électrique", correct: true, expl: "La prise de courant fournit de l'énergie électrique à la lampe, qui la transforme ensuite en lumière (utile) et en chaleur (perdue)." }, { text: "L'énergie cinétique", correct: false, expl: "La prise ne fournit pas de mouvement." }, { text: "L'énergie de pesanteur", correct: false, expl: "Cela dépend de l'altitude, pas de la prise." } ] },
+      { id: 38, difficulty: "Difficile", skill: "Raisonnement", question: "Un très gros camion et une petite voiture de ville roulent tous les deux à 50 km/h. Que dire de leur énergie cinétique ?", options: [ { text: "Ils ont exactement la même énergie cinétique puisqu'ils roulent à la même vitesse", correct: false, expl: "Faux, car la masse (le poids) du véhicule compte énormément dans le calcul de l'énergie !" }, { text: "Le camion a beaucoup plus d'énergie cinétique car il est beaucoup plus lourd", correct: true, expl: "À vitesse égale, l'objet le plus massif (le camion) a accumulé une énergie de mouvement beaucoup plus grande que la voiture légère." }, { text: "La petite voiture a plus d'énergie car elle rase le sol", correct: false, expl: "L'aérodynamisme ne donne pas d'énergie cinétique." }, { text: "Leur énergie cinétique est complètement nulle", correct: false, expl: "Ils sont en mouvement sur la route, donc ils ont forcément de l'énergie cinétique." } ] },
+      { id: 39, difficulty: "Difficile", skill: "Chaîne d'énergie", question: "Dans quel ordre logique se font les conversions d'énergie dans une trottinette électrique qui roule sur un trottoir ?", options: [ { text: "Batterie (Énergie Chimique) -> Moteur -> Énergie Cinétique (utile) + Énergie Thermique (chaleur perdue)", correct: true, expl: "La trottinette stocke de l'énergie chimique dans sa batterie. Elle l'envoie sous forme d'électricité au moteur, qui fabrique le mouvement des roues mais chauffe un peu." }, { text: "Moteur -> Batterie -> Énergie Solaire", correct: false, expl: "Le moteur ne donne pas d'énergie à la batterie, c'est l'inverse !" }, { text: "Prise électrique -> Roues -> Batterie", correct: false, expl: "La trottinette roule en étant débranchée du mur." }, { text: "Moteur -> Freins -> Pesanteur", correct: false, expl: "Totalement faux." } ] },
+      { id: 40, difficulty: "Difficile", skill: "Chaîne d'énergie", svg: true, question: "Observe cette chaîne d'énergie d'une éolienne. Quel est le composant (convertisseur) manquant à l'intérieur de l'ovale central ?", svgCode: "<svg viewBox='0 0 520 120' class='w-full h-auto max-w-lg mx-auto'><rect x='10' y='40' width='80' height='40' fill='#d1d5db' rx='4'/><text x='50' y='64' text-anchor='middle' font-size='13' font-family='sans-serif' font-weight='bold' fill='#374151'>Vent</text><path d='M 95 60 L 195 60' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><text x='145' y='50' text-anchor='middle' font-size='12' font-family='sans-serif'>Énergie Cinétique</text><ellipse cx='260' cy='60' rx='60' ry='30' fill='#fee2e2' stroke='#f87171' stroke-width='2' stroke-dasharray='4'/><text x='260' y='64' text-anchor='middle' font-size='13' font-family='sans-serif' fill='#ef4444' font-weight='bold'>?</text><path d='M 325 60 L 425 60' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><text x='375' y='50' text-anchor='middle' font-size='12' font-family='sans-serif'>Énergie Électrique</text><rect x='435' y='40' width='70' height='40' fill='#fcd34d' rx='4'/><text x='470' y='64' text-anchor='middle' font-size='13' font-family='sans-serif' font-weight='bold' fill='#78350f'>Réseau</text></svg>", options: [ { text: "Le pylône en métal", correct: false, expl: "Le pylône sert seulement à porter l'installation très haut." }, { text: "L'éolienne", correct: true, expl: "C'est l'éolienne (qui cache un alternateur dans sa nacelle) qui a pour rôle de transformer l'énergie cinétique du vent en énergie électrique." }, { text: "Un moteur électrique", correct: false, expl: "Un moteur fait l'inverse : il consomme de l'électricité pour faire du mouvement." }, { text: "Une batterie", correct: false, expl: "L'ovale représente un convertisseur, pas un stockage." } ] },
+      { id: 41, difficulty: "Difficile", skill: "Raisonnement", question: "Quand tu descends une très longue pente en skateboard (longboard), pourquoi les roues deviennent-elles parfois brûlantes en bas de la route ?", options: [ { text: "Parce que le Soleil a chauffé le plastique noir des roues toute la journée", correct: false, expl: "Même de nuit ou par temps gris, les roues d'un skate de descente deviennent brûlantes." }, { text: "Parce que les roues frottent fort contre le sol à grande vitesse : ces frottements mécaniques transforment une partie de l'énergie en chaleur perdue", correct: true, expl: "C'est un phénomène physique inévitable : lorsqu'un objet roule très vite ou frotte, une partie de son énergie cinétique se dissipe dans l'environnement sous forme d'énergie thermique (chaleur)." }, { text: "Parce qu'une pile cachée dans la planche a explosé sous le poids", correct: false, expl: "Il n'y a pas de pile sur un skateboard classique." }, { text: "Parce que les roues fabriquent un courant électrique statique", correct: false, expl: "Ce n'est pas de l'électricité qu'on ressent, c'est de la chaleur pure." } ] },
+      { id: 42, difficulty: "Difficile", skill: "Extraction d'information", context: "Durée de vie moyenne d'une ancienne ampoule halogène = 2 000 heures. Durée de vie d'une nouvelle ampoule LED = 30 000 heures.", question: "D'après ces chiffres, quel est le grand point fort de la technologie LED par rapport à l'ancienne ampoule pour l'environnement et le portefeuille ?", options: [ { text: "Elle dure un peu moins longtemps mais brille beaucoup plus fort", correct: false, expl: "L'énoncé montre bien qu'elle dure nettement plus longtemps." }, { text: "Elle dure 15 fois plus longtemps avant de griller et de finir à la poubelle", correct: true, expl: "En divisant 30 000 par 2 000, on trouve 15 ! On a besoin d'acheter et de jeter 15 fois moins d'ampoules avec les LED." }, { text: "Elle s'allume 15 fois plus vite le matin", correct: false, expl: "Le tableau parle de la durée de vie (avant de mourir), pas de la vitesse d'allumage." }, { text: "Elle coûte plus cher en électricité chaque année", correct: false, expl: "C'est l'inverse, elle est réputée très économe." } ] },
+      { id: 43, difficulty: "Difficile", skill: "Chaîne d'énergie", svg: true, question: "Voici la fin de la chaîne d'énergie d'un grille-pain. Quelle forme d'énergie manque sur la dernière flèche de droite (celle qui va vers la tartine) ?", svgCode: "<svg viewBox='0 0 520 120' class='w-full h-auto max-w-lg mx-auto'><ellipse cx='140' cy='60' rx='80' ry='35' fill='#bae6fd'/><text x='140' y='64' text-anchor='middle' font-size='13' font-family='sans-serif' font-weight='bold' fill='#0c4a6e'>Résistance chauffante</text><path d='M 10 60 L 50 60' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><text x='30' y='50' text-anchor='middle' font-size='12' font-family='sans-serif'>Électrique</text><path d='M 225 60 L 325 60' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><rect x='250' y='35' width='50' height='20' fill='#fee2e2' rx='2' stroke='#f87171' stroke-width='2' stroke-dasharray='4'/><text x='275' y='49' text-anchor='middle' font-size='13' font-family='sans-serif' fill='#ef4444' font-weight='bold'>?</text><rect x='340' y='40' width='80' height='40' fill='#fcd34d' rx='4'/><text x='380' y='64' text-anchor='middle' font-size='13' font-family='sans-serif' font-weight='bold' fill='#78350f'>Tartine de pain</text></svg>", options: [ { text: "L'énergie électrique de sortie", correct: false, expl: "La tartine ne mange pas de l'électricité, sinon on s'électrocuterait en la mangeant !" }, { text: "L'énergie thermique (chaleur)", correct: true, expl: "Le but de la résistance du grille-pain est de transformer l'électricité en chaleur pour dorer le pain. La tartine reçoit donc de l'énergie thermique." }, { text: "L'énergie de pesanteur", correct: false, expl: "Le grille-pain ne fait pas voler la tartine très haut." }, { text: "L'énergie lumineuse uniquement", correct: false, expl: "Même si la résistance rougit un peu, c'est bien la chaleur qui cuit le pain, pas la lumière." } ] },
+      { id: 44, difficulty: "Difficile", skill: "Chaîne d'énergie", svg: true, question: "Sur cette chaîne d'énergie du vélo d'un élève, quelle forme d'énergie est transmise des jambes de l'enfant vers le pédalier (flèche du milieu) ?", svgCode: "<svg viewBox='0 0 520 120' class='w-full h-auto max-w-lg mx-auto'><rect x='10' y='40' width='80' height='40' fill='#d1d5db' rx='4'/><text x='50' y='58' text-anchor='middle' font-size='12' font-family='sans-serif' font-weight='bold' fill='#374151'>Muscles</text><text x='50' y='72' text-anchor='middle' font-size='12' font-family='sans-serif' font-weight='bold' fill='#374151'>du cycliste</text><path d='M 100 60 L 190 60' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><rect x='115' y='35' width='60' height='20' fill='#fee2e2' rx='2' stroke='#f87171' stroke-width='2' stroke-dasharray='4'/><text x='145' y='49' text-anchor='middle' font-size='13' font-family='sans-serif' fill='#ef4444' font-weight='bold'>?</text><ellipse cx='270' cy='60' rx='70' ry='35' fill='#bae6fd'/><text x='270' y='58' text-anchor='middle' font-size='12' font-family='sans-serif' font-weight='bold' fill='#0c4a6e'>Pédalier +</text><text x='270' y='72' text-anchor='middle' font-size='12' font-family='sans-serif' font-weight='bold' fill='#0c4a6e'>Chaîne</text><path d='M 350 60 L 410 60' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><rect x='425' y='40' width='50' height='40' fill='#fcd34d' rx='4'/><text x='450' y='64' text-anchor='middle' font-size='12' font-family='sans-serif' font-weight='bold' fill='#78350f'>Roue</text></svg>", options: [ { text: "Énergie électrique", correct: false, expl: "Les jambes de l'élève ne produisent pas d'électricité." }, { text: "Énergie mécanique (Cinétique liée au mouvement)", correct: true, expl: "En appuyant sur les pédales, le cycliste donne un mouvement au pédalier : c'est de l'énergie mécanique/cinétique." }, { text: "Énergie thermique pure", correct: false, expl: "Le cycliste transpire (thermique), mais l'énergie utile envoyée au pédalier est le mouvement." }, { text: "Énergie solaire", correct: false, expl: "L'enfant n'émet pas de rayons solaires." } ] },
+      { id: 45, difficulty: "Difficile", skill: "Chaîne d'énergie", question: "Que se passe-t-il à l'intérieur du barrage si on ouvre les vannes en grand et qu'on laisse s'engouffrer beaucoup plus d'eau à la fois (le débit augmente) ?", options: [ { text: "La masse d'eau frappe la turbine beaucoup plus fort : elle tourne plus vite et l'alternateur fabrique plus de courant", correct: true, expl: "Une plus grande quantité d'eau en mouvement transporte plus d'énergie cinétique. La turbine, percutée plus fort, transmettra plus d'énergie à l'alternateur pour faire de l'électricité." }, { text: "La turbine va s'étouffer, s'arrêter de tourner et se bloquer", correct: false, expl: "Au contraire, l'eau sous forte pression pousse la turbine avec plus de force, elle ne la bloque pas." }, { text: "L'eau du barrage va se solidifier en glace", correct: false, expl: "Le mouvement de l'eau ne fabrique pas de glace." }, { text: "L'alternateur va arrêter de faire de l'électricité", correct: false, expl: "L'alternateur va au contraire produire beaucoup plus de courant électrique !" } ] },
+      { id: 46, difficulty: "Difficile", skill: "Raisonnement", question: "Pourquoi une ancienne ampoule classique (en verre avec un petit filament dedans) devient-elle très chaude quand on la laisse allumée longtemps dans sa chambre ?", options: [ { text: "Parce que le verre de l'ampoule fabrique secrètement du feu", correct: false, expl: "Il n'y a heureusement pas de flamme à l'intérieur de l'ampoule." }, { text: "Parce qu'une grande partie de l'électricité qu'elle utilise est bêtement perdue et gaspillée sous forme de chaleur", correct: true, expl: "Dans les anciennes ampoules à incandescence, le petit fil chauffait tellement pour faire de la lumière que presque 90 % de l'énergie électrique était gâchée en énergie thermique dans la pièce." }, { text: "Parce qu'elle absorbe la chaleur des radiateurs de la maison", correct: false, expl: "C'est bien le courant électrique qui la chauffe de l'intérieur." }, { text: "C'est normal, c'est son énergie chimique qui déborde", correct: false, expl: "Une ampoule ne fonctionne pas du tout avec de l'énergie chimique." } ] },
+      { id: 47, difficulty: "Difficile", skill: "Extraction d'information", context: "Certaines usines utilisent l'électricité produite en trop la nuit par les éoliennes pour pomper l'eau de la rivière et l'envoyer remplir un très grand lac artificiel construit haut dans la montagne.", question: "Sous quelle forme de physique cette eau emprisonnée en montagne stocke-t-elle l'énergie pour pouvoir resservir plus tard ?", options: [ { text: "Sous forme d'énergie chimique dissoute dans l'eau", correct: false, expl: "L'eau ne stocke pas de réactifs chimiques comme l'intérieur d'une pile." }, { text: "Sous forme d'énergie électrique, l'eau devient foudroyante", correct: false, expl: "L'eau elle-même n'est pas un réservoir d'électricité (sinon on s'électrocuterait en nageant)." }, { text: "Sous forme d'énergie de pesanteur (liée à son immense altitude)", correct: true, expl: "L'eau est stockée à une grande hauteur. Grâce à cette altitude, elle possède une immense 'énergie de pesanteur'. Quand on en aura besoin le jour, on la laissera retomber dans le tuyau pour faire tourner des turbines !" }, { text: "Sous forme d'énergie lumineuse", correct: false, expl: "L'eau en haut de la montagne ne stocke pas de lumière solaire." } ] },
+      { id: 48, difficulty: "Difficile", skill: "Raisonnement", question: "Un parachutiste de l'extrême saute de l'avion et chute librement (avant d'ouvrir sa voile). Il perd de l'altitude très vite et fonce vers le sol de plus en plus vite. Que font ses énergies ?", options: [ { text: "Son énergie de pesanteur diminue mais son énergie cinétique (sa vitesse) augmente fortement", correct: true, expl: "C'est une grande conversion de la nature : l'altitude qu'il perd (énergie de pesanteur qui baisse) se transforme petit à petit en une très grande vitesse de chute (énergie cinétique qui monte)." }, { text: "Ses deux énergies augmentent en même temps vers le ciel", correct: false, expl: "Son énergie de pesanteur diminue obligatoirement car il se rapproche du sol." }, { text: "Son énergie de pesanteur augmente et sa vitesse ralentit", correct: false, expl: "C'est totalement l'inverse : il tombe." }, { text: "Toutes ses énergies restent exactement au même niveau", correct: false, expl: "Faux, une chute est justement une grosse transformation d'énergie en direct." } ] },
+      { id: 49, difficulty: "Difficile", skill: "Chaîne d'énergie", svg: true, question: "Voici la chaîne d'énergie d'un grand barrage hydraulique dans la montagne. Quelle source d'énergie entre en premier dans le système tout à gauche (dans le rectangle pointillé) ?", svgCode: "<svg viewBox='0 0 520 120' class='w-full h-auto max-w-lg mx-auto'><rect x='10' y='40' width='90' height='40' fill='#fee2e2' rx='4' stroke='#f87171' stroke-width='2' stroke-dasharray='4'/><text x='55' y='64' text-anchor='middle' font-size='13' font-family='sans-serif' font-weight='bold' fill='#ef4444'>?</text><path d='M 110 60 L 200 60' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><text x='155' y='50' text-anchor='middle' font-size='12' font-family='sans-serif'>Énergie cinétique</text><ellipse cx='290' cy='60' rx='75' ry='35' fill='#bae6fd'/><text x='290' y='58' text-anchor='middle' font-size='12' font-family='sans-serif' font-weight='bold' fill='#0c4a6e'>Turbine +</text><text x='290' y='72' text-anchor='middle' font-size='12' font-family='sans-serif' font-weight='bold' fill='#0c4a6e'>Alternateur</text><path d='M 375 60 L 465 60' stroke='#64748b' stroke-width='3' marker-end='url(#arrowhead)'/><text x='420' y='50' text-anchor='middle' font-size='12' font-family='sans-serif'>Énergie Électrique</text></svg>", options: [ { text: "Le vent de la montagne", correct: false, expl: "Le vent fait tourner les éoliennes, pas les turbines des barrages au fond des tuyaux." }, { text: "L'eau stockée en hauteur dans le lac du barrage", correct: true, expl: "C'est bien la masse d'eau retenue en hauteur par le barrage qui sert de source/réservoir d'énergie de départ. En dévalant, elle entraînera la turbine." }, { text: "Le Soleil", correct: false, expl: "Le barrage n'utilise pas la lumière pour fabriquer son courant, il utilise la force de l'eau." }, { text: "Le charbon de la mine", correct: false, expl: "Un barrage n'a besoin d'aucun combustible fossile." } ] },
+      { id: 50, difficulty: "Difficile", skill: "Raisonnement", question: "Pourquoi les freins d'une grosse voiture familiale risquent-ils beaucoup plus de surchauffer dans une descente de montagne que ceux d'une petite voiture très légère ?", options: [ { text: "Parce que l'air manque d'oxygène en haute altitude pour refroidir les roues", correct: false, expl: "Le vrai problème vient du poids du véhicule, pas de l'oxygène." }, { text: "Parce que la voiture familiale est plus lourde, donc elle accumule beaucoup plus d'énergie cinétique qu'il faut dissiper en chaleur", correct: true, expl: "Plus un objet est lourd, plus il accumule d'énergie avec la vitesse. Les freins vont donc devoir frotter énormément pour dissiper toute cette énergie supplémentaire sous forme de chaleur brûlante." }, { text: "Parce que le moteur de la familiale chauffe directement les roues arrière", correct: false, expl: "Le moteur ne souffle pas d'air chaud sur les étriers de frein." }, { text: "Parce que le goudron de la route fabrique de l'électricité dans la descente", correct: false, expl: "Faux." } ] }
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let hasAnswered = false;
+    let skillStats = {};
+
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function pick10Questions() {
+      const easy = QUESTIONS_BANK.filter(q => q.difficulty === 'Facile');
+      const med = QUESTIONS_BANK.filter(q => q.difficulty === 'Moyen');
+      const hard = QUESTIONS_BANK.filter(q => q.difficulty === 'Difficile');
+      const shuffledEasy = shuffleArray(easy).slice(0, 4);
+      const shuffledMed = shuffleArray(med).slice(0, 3);
+      const shuffledHard = shuffleArray(hard).slice(0, 3);
+      return shuffleArray([...shuffledEasy, ...shuffledMed, ...shuffledHard]);
+    }
+
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const startBtn = document.getElementById('start-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const questionIndexEl = document.getElementById('question-index');
+    const difficultyBadgeEl = document.getElementById('difficulty-badge');
+    const skillBadgeEl = document.getElementById('skill-badge');
+    const skillTextEl = document.getElementById('skill-text');
+    const progressBarEl = document.getElementById('progress-bar');
+    const contextBoxEl = document.getElementById('context-box');
+    const questionTextEl = document.getElementById('question-text');
+    const svgBoxEl = document.getElementById('svg-box');
+    const optionsContainerEl = document.getElementById('options-container');
+    const feedbackBoxEl = document.getElementById('feedback-box');
+    const feedbackIconEl = document.getElementById('feedback-icon');
+    const feedbackTitleEl = document.getElementById('feedback-title');
+    const feedbackTextEl = document.getElementById('feedback-text');
+    const finalScoreEl = document.getElementById('final-score');
+    const scoreTitleEl = document.getElementById('score-title');
+    const scoreCommentEl = document.getElementById('score-comment');
+    const scoreIconEl = document.getElementById('score-icon');
+    const scoreIconBgEl = document.getElementById('score-icon-bg');
+    const skillBreakdownEl = document.getElementById('skill-breakdown');
+
+    function startQuiz() {
+      currentQuestions = pick10Questions();
+      currentIndex = 0;
+      score = 0;
+      skillStats = {};
+      startScreen.classList.add('hidden');
+      resultScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      hasAnswered = false;
+      const q = currentQuestions[currentIndex];
+
+      questionIndexEl.textContent = `Q ${currentIndex + 1}/10`;
+      progressBarEl.style.width = `${((currentIndex) / 10) * 100}%`;
+
+      difficultyBadgeEl.textContent = q.difficulty;
+      if (q.difficulty === 'Facile') {
+        difficultyBadgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200';
+      } else if (q.difficulty === 'Moyen') {
+        difficultyBadgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200';
+      } else {
+        difficultyBadgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-200';
+      }
+
+      skillTextEl.textContent = q.skill;
+
+      if (q.context) {
+        contextBoxEl.innerHTML = `<i class="fa-regular fa-file-lines mr-1.5 text-amber-700"></i> ${q.context}`;
+        contextBoxEl.classList.remove('hidden');
+      } else {
+        contextBoxEl.classList.add('hidden');
+      }
+
+      if (q.svg && q.svgCode) {
+        svgBoxEl.innerHTML = q.svgCode;
+        svgBoxEl.classList.remove('hidden');
+      } else {
+        svgBoxEl.innerHTML = '';
+        svgBoxEl.classList.add('hidden');
+      }
+
+      questionTextEl.textContent = q.question;
+      optionsContainerEl.innerHTML = '';
+      
+      const shuffledOptions = shuffleArray(q.options);
+      shuffledOptions.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'touch-manipulation w-full text-left p-3.5 sm:p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 active:bg-slate-100 transition font-medium text-slate-800 text-sm sm:text-base flex items-center justify-between group shadow-sm';
+        btn.innerHTML = `
+          <div class="flex items-center gap-3 w-full pr-2">
+            <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-xs sm:text-sm group-hover:bg-blue-100 group-hover:text-blue-700 transition flex-shrink-0">${String.fromCharCode(65 + idx)}</span>
+            <span class="option-text">${opt.text}</span>
+          </div>
+          <i class="fa-regular fa-circle text-slate-300 text-lg sm:text-xl group-hover:text-blue-400 flex-shrink-0 ml-1"></i>
+        `;
+        btn.onclick = () => handleAnswer(opt, btn, shuffledOptions);
+        optionsContainerEl.appendChild(btn);
+      });
+
+      feedbackBoxEl.classList.add('hidden');
+      nextBtn.classList.add('hidden');
+    }
+
+    function handleAnswer(selectedOpt, selectedBtn, allOpts) {
+      if (hasAnswered) return;
+      hasAnswered = true;
+
+      const q = currentQuestions[currentIndex];
+      const isCorrect = selectedOpt.correct;
+
+      if (!skillStats[q.skill]) skillStats[q.skill] = { total: 0, correct: 0 };
+      skillStats[q.skill].total += 1;
+
+      if (isCorrect) {
+        score++;
+        skillStats[q.skill].correct += 1;
+      }
+
+      Array.from(optionsContainerEl.children).forEach((button, idx) => {
+        const opt = allOpts[idx];
+        button.disabled = true;
+        button.classList.remove('hover:bg-slate-50', 'active:bg-slate-100', 'bg-white');
+
+        if (opt.correct) {
+          button.className = 'w-full text-left p-3.5 sm:p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-950 font-medium flex items-center justify-between shadow-sm text-sm sm:text-base';
+          button.querySelector('i').className = 'fa-solid fa-circle-check text-emerald-600 text-lg sm:text-xl flex-shrink-0 ml-1';
+        } else if (button === selectedBtn && !isCorrect) {
+          button.className = 'w-full text-left p-3.5 sm:p-4 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-950 font-medium flex items-center justify-between shadow-sm text-sm sm:text-base';
+          button.querySelector('i').className = 'fa-solid fa-circle-xmark text-rose-600 text-lg sm:text-xl flex-shrink-0 ml-1';
+        } else {
+          button.className = 'w-full text-left p-3.5 sm:p-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-between opacity-60 text-sm sm:text-base';
+        }
+      });
+
+      feedbackBoxEl.classList.remove('hidden');
+      if (isCorrect) {
+        feedbackBoxEl.className = 'p-3 sm:p-4 rounded-xl mb-5 border border-emerald-200 bg-emerald-50/90 text-emerald-900';
+        feedbackIconEl.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i>';
+        feedbackTitleEl.textContent = 'Excellente réponse !';
+        feedbackTextEl.innerHTML = selectedOpt.expl;
+      } else {
+        feedbackBoxEl.className = 'p-3 sm:p-4 rounded-xl mb-5 border border-rose-200 bg-rose-50/90 text-rose-900';
+        feedbackIconEl.innerHTML = '<i class="fa-solid fa-circle-exmark text-rose-600"></i>';
+        feedbackTitleEl.textContent = 'Ce n\'est pas tout à fait ça.';
+        feedbackTextEl.innerHTML = selectedOpt.expl;
+      }
+
+      if (currentIndex < 9) {
+        nextBtn.innerHTML = '<span>Question suivante</span> <i class="fa-solid fa-arrow-right"></i>';
+      } else {
+        nextBtn.innerHTML = '<span>Voir mon bilan final</span> <i class="fa-solid fa-flag-checkered"></i>';
+      }
+      nextBtn.classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      if (currentIndex < 10) {
+        loadQuestion();
+        document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        showResults();
+        document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function showResults() {
+      gameScreen.classList.add('hidden');
+      resultScreen.classList.remove('hidden');
+      finalScoreEl.textContent = `${score} / 10`;
+
+      if (score >= 8) {
+        scoreTitleEl.textContent = 'Prêt(e) pour le contrôle !';
+        scoreCommentEl.textContent = 'Excellent travail ! Tu maîtrises les concepts d\'énergie, des déperditions et les diagrammes !';
+        scoreIconEl.className = 'fa-solid fa-trophy text-amber-500';
+        scoreIconBgEl.className = 'w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl sm:text-3xl shadow-inner bg-amber-100 text-amber-600';
+      } else if (score >= 5) {
+        scoreTitleEl.textContent = 'Bon travail d\'entraînement !';
+        scoreCommentEl.textContent = 'C\'est bien parti, mais relis bien le cours sur les sources et les chaînes d\'énergie.';
+        scoreIconEl.className = 'fa-solid fa-award text-blue-500';
+        scoreIconBgEl.className = 'w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl sm:text-3xl shadow-inner bg-blue-100 text-blue-600';
+      } else {
+        scoreTitleEl.textContent = 'Encore un petit effort !';
+        scoreCommentEl.textContent = 'Revois le bilan de fin de chapitre et réessaye une série pour progresser !';
+        scoreIconEl.className = 'fa-solid fa-book-open-reader text-purple-500';
+        scoreIconBgEl.className = 'w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl sm:text-3xl shadow-inner bg-purple-100 text-purple-600';
+      }
+
+      skillBreakdownEl.innerHTML = '<p class="font-bold text-slate-700 mb-2">Bilan par compétence :</p>';
+      for (const [skill, stats] of Object.entries(skillStats)) {
+        const percent = Math.round((stats.correct / stats.total) * 100);
+        const row = document.createElement('div');
+        row.className = 'flex justify-between items-center py-1.5 border-b border-slate-100 last:border-0';
+        row.innerHTML = `
+          <span class="pr-2">${skill}</span>
+          <span class="font-bold whitespace-nowrap ${percent >= 70 ? 'text-emerald-600' : (percent >= 50 ? 'text-amber-600' : 'text-rose-600')}">${stats.correct}/${stats.total} (${percent}%)</span>
+        `;
+        skillBreakdownEl.appendChild(row);
+      }
+    }
+
+    startBtn.addEventListener('click', startQuiz);
+    nextBtn.addEventListener('click', nextQuestion);
+    retryBtn.addEventListener('click', startQuiz);
+  </script>
+</body>
+</html>
