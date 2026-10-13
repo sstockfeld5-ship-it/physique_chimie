@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>L'Énergie Électrique - 4e</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #f59e0b;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 40px; }
+    
+    header { background: linear-gradient(135deg, #0369a1, #0ea5e9); color: white; padding: 16px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    header h1 { margin: 0; font-size: 1.3rem; font-weight: 800; }
+    header p { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.9; }
+
+    .tabs { position: sticky; top: 0; z-index: 100; display: grid; grid-template-columns: repeat(3, 1fr); background: white; border-bottom: 2px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .tab-btn { border: none; background: none; padding: 12px 4px; font-size: 0.8rem; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f0f9ff; }
+    .tab-btn span.icon { font-size: 1.2rem; }
+
+    .container { max-width: 600px; margin: 0 auto; padding: 12px; }
+    .tab-content { display: none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+    .card-title { margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px;}
+
+    .concept-box { background: var(--primary-light); border-left: 4px solid var(--primary); padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; }
+    
+    .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .preset-btn { background: #f8fafc; border: 2px solid var(--border); border-radius: 12px; padding: 10px 4px; text-align: center; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .preset-btn.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+    .preset-btn .emoji { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+
+    .control-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; }
+    .badge-val { background: #e2e8f0; padding: 4px 8px; border-radius: 8px; font-size: 0.85rem; }
+    input[type="range"] { width: 100%; height: 8px; border-radius: 5px; background: #cbd5e1; outline: none; -webkit-appearance: none; margin-bottom: 16px; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); cursor: pointer; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+    .meter-box { background: #1e293b; color: white; padding: 20px; border-radius: 16px; text-align: center; position: relative; overflow: hidden; border: 4px solid #334155; }
+    .meter-value { font-family: 'Courier New', Courier, monospace; font-size: 2.5rem; font-weight: 900; color: #38bdf8; letter-spacing: 2px; background: #0f172a; padding: 10px; border-radius: 8px; display: inline-block; border: 2px inset #475569; }
+    .meter-label { font-size: 0.9rem; color: #94a3b8; margin-top: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+    .formula-box { background: #fffbeb; border: 2px dashed #f59e0b; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 16px; }
+    .formula-big { font-size: 1.8rem; font-weight: 900; color: #b45309; margin: 8px 0; }
+    
+    .unit-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; text-align: left; }
+    .unit-table th, .unit-table td { padding: 8px; border: 1px solid var(--border); }
+    .unit-table th { background: #f1f5f9; }
+    .unit-system-1 { background: #f0fdf4; }
+    .unit-system-2 { background: #eff6ff; }
+
+    .step-box { border: 2px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; background: white; transition: 0.2s; }
+    .step-box.active-step { border-color: var(--primary); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15); }
+    .step-box.done-step { border-color: #86efac; background: #f0fdf4; }
+    .step-box.locked { opacity: 0.5; pointer-events: none; background: #f8fafc; }
+    
+    .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .step-title { font-weight: 800; font-size: 0.95rem; color: var(--primary-dark); }
+    .step-status { font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 12px; background: #e2e8f0; }
+    .active-step .step-status { background: var(--primary-light); color: var(--primary-dark); }
+    .done-step .step-status { background: var(--success-light); color: #166534; }
+
+    .input-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .num-input { flex: 1; min-width: 80px; padding: 10px; font-size: 1rem; font-weight: 700; border: 2px solid var(--border); border-radius: 8px; text-align: center; }
+    .unit-select { padding: 10px; font-size: 0.9rem; font-weight: 700; border: 2px solid var(--border); border-radius: 8px; background: white; }
+    .btn-check { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: 700; cursor: pointer; }
+    
+    .feedback { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display: none; }
+    .feedback.ok { display: block; background: var(--success-light); color: #14532d; border: 1px solid #86efac; }
+    .feedback.err { display: block; background: var(--danger-light); color: #7f1d1d; border: 1px solid #fca5a5; }
+
+    .exo-selector { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+    .exo-pill { padding: 8px 12px; border: 2px solid var(--border); background: white; border-radius: 20px; font-size: 0.85rem; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .exo-pill.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+    .exo-pill.done { border-color: var(--success); background: var(--success-light); color: #166534; }
+
+    .hint-text { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⚡ Énergie & Puissance (4e)</h1>
+    <p>Maîtriser la formule E = P × t</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-sim', this)">
+      <span class="icon">🔍</span><span>Comprendre</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-form', this)">
+      <span class="icon">📐</span><span>La Formule</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-exo', this)">
+      <span class="icon">✏️</span><span>S'entraîner</span>
+    </button>
+  </nav>
+
+  <main class="container">
+
+    <!-- ONGLET 1 : COMPRENDRE -->
+    <section id="tab-sim" class="tab-content active">
+      
+      <div class="card">
+        <h2 class="card-title">💡 1. C'est quoi la puissance (P) ?</h2>
+        <div class="concept-box">
+          <p style="margin-top:0;">La <strong>puissance (P)</strong> s'exprime en <strong>watts (W)</strong>. Elle représente l'énergie convertie par l'appareil chaque seconde.</p>
+          <p style="margin-bottom:0;">👉 Plus un appareil est puissant, plus il chauffe ou fonctionne vite (la durée nécessaire est réduite) !</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">🔌 2. Le Compteur Électrique</h2>
+        
+        <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+          <strong style="font-size: 0.9rem;">📝 Consignes :</strong>
+          <ul style="font-size: 0.85rem; margin-top: 6px; margin-bottom: 0; padding-left: 20px; color: var(--text);">
+            <li>Sélectionne un appareil ci-dessous pour voir l'impact de sa puissance.</li>
+            <li>Fais glisser le curseur pour simuler sa <strong>durée d'utilisation</strong>.</li>
+            <li>Observe comment le compteur d'énergie tourne plus ou moins vite !</li>
+          </ul>
+        </div>
+        
+        <div class="preset-grid">
+          <button class="preset-btn active" onclick="setAppliance(15, '📱')">
+            <span class="emoji">📱</span>Smartphone<br><small>15 W</small>
+          </button>
+          <button class="preset-btn" onclick="setAppliance(100, '📺')">
+            <span class="emoji">📺</span>Télévision<br><small>100 W</small>
+          </button>
+          <button class="preset-btn" onclick="setAppliance(2000, '🍕')">
+            <span class="emoji">🍕</span>Four<br><small>2000 W</small>
+          </button>
+        </div>
+
+        <div class="control-header">
+          <span>⏱️ Durée d'utilisation (t)</span>
+          <span class="badge-val" id="sim-t-label">1 h</span>
+        </div>
+        <input type="range" id="sim-t-slider" min="1" max="24" value="1" oninput="updateSim()">
+
+        <div class="meter-box">
+          <div class="meter-value" id="sim-meter">00015</div>
+          <div class="meter-label">Énergie Consommée (Wattheures)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET 2 : LA FORMULE -->
+    <section id="tab-form" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">🧠 L'Essentiel du Cours</h2>
+        
+        <div class="formula-box">
+          <div>L'Énergie consommée se calcule avec :</div>
+          <div class="formula-big">E = P × t</div>
+          <div style="font-size: 0.85rem; color: #92400e;">(Énergie = Puissance × temps)</div>
+        </div>
+
+        <h3 style="font-size: 1rem; margin-top: 20px;">⚠️ Le piège des unités</h3>
+        <p style="font-size: 0.85rem;">Il existe deux grands systèmes d'unités à ne jamais mélanger :</p>
+        
+        <table class="unit-table">
+          <thead>
+            <tr>
+              <th>Système</th>
+              <th>Puissance (P)</th>
+              <th>Durée (t)</th>
+              <th>Énergie (E)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="unit-system-1">
+              <td><strong>International</strong><br><small>(Sciences)</small></td>
+              <td>Watt (W)</td>
+              <td>Seconde (s)</td>
+              <td><strong>Joule (J)</strong></td>
+            </tr>
+            <tr class="unit-system-2">
+              <td><strong>Usuel</strong><br><small>(Facture EDF)</small></td>
+              <td>Watt (W)<br>Kilowatt (kW)</td>
+              <td>Heure (h)</td>
+              <td><strong>Wattheure (Wh)</strong><br>Kilowattheure (kWh)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="background: var(--danger-light); border-left: 4px solid var(--danger); padding: 12px; margin-top: 16px; font-size: 0.85rem;">
+          <strong>Astuces de conversion :</strong><br>
+          • 1 minute = 60 secondes.<br>
+          • 1 kW = 1000 W. Divise par 1000 pour passer de Wh à kWh.
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET 3 : S'ENTRAÎNER -->
+    <section id="tab-exo" class="tab-content">
+      <div class="card">
+        <div class="exo-selector" id="exo-tabs">
+          <!-- Injecté en JS -->
+        </div>
+
+        <div id="exo-text" style="background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 16px; border-left: 4px solid var(--primary);">
+          <!-- Énoncé injecté -->
+        </div>
+
+        <!-- ÉTAPE 1 : PUISSANCE -->
+        <div id="step1" class="step-box active-step">
+          <div class="step-header">
+            <span class="step-title">Étape 1 : La Puissance (P)</span>
+            <span class="step-status" id="status1">À faire</span>
+          </div>
+          <div class="hint-text">Relève la puissance dans la bonne unité demandée.</div>
+          <div class="input-row">
+            <strong>P = </strong>
+            <input type="number" id="inp-p" class="num-input" placeholder="Valeur">
+            <select id="unit-p" class="unit-select">
+              <option value="">Unité ?</option><option value="W">W</option><option value="kW">kW</option>
+            </select>
+            <button class="btn-check" onclick="checkStep1()">Vérifier</button>
+          </div>
+          <div id="fb1" class="feedback"></div>
+        </div>
+
+        <!-- ÉTAPE 2 : TEMPS -->
+        <div id="step2" class="step-box locked">
+          <div class="step-header">
+            <span class="step-title">Étape 2 : La Durée (t)</span>
+            <span class="step-status" id="status2">🔒 Bloqué</span>
+          </div>
+          <div class="hint-text" id="hint-t">Convertis si besoin la durée dans la bonne unité.</div>
+          <div class="input-row">
+            <strong>t = </strong>
+            <input type="number" id="inp-t" class="num-input" placeholder="Valeur">
+            <select id="unit-t" class="unit-select">
+              <option value="">Unité ?</option><option value="s">s</option><option value="h">h</option>
+            </select>
+            <button class="btn-check" onclick="checkStep2()">Vérifier</button>
+          </div>
+          <div id="fb2" class="feedback"></div>
+        </div>
+
+        <!-- ÉTAPE 3 : CALCUL -->
+        <div id="step3" class="step-box locked">
+          <div class="step-header">
+            <span class="step-title">Étape 3 : Calcul de l'Énergie (E)</span>
+            <span class="step-status" id="status3">🔒 Bloqué</span>
+          </div>
+          <div class="hint-text">Applique la formule E = P × t avec tes valeurs trouvées.</div>
+          <div class="input-row">
+            <strong>E = </strong>
+            <input type="number" id="inp-e" class="num-input" placeholder="P × t">
+            <select id="unit-e" class="unit-select">
+              <option value="">Unité ?</option><option value="J">J</option><option value="Wh">Wh</option><option value="kWh">kWh</option>
+            </select>
+            <button class="btn-check" onclick="checkStep3()">Vérifier</button>
+          </div>
+          <div id="fb3" class="feedback"></div>
+        </div>
+
+        <!-- ÉTAPE 4 : COÛT (Optionnelle) -->
+        <div id="step4" class="step-box" style="display: none;">
+          <div class="step-header">
+            <span class="step-title">Étape 4 : Le Coût sur la facture</span>
+            <span class="step-status" id="status4">🔒 Bloqué</span>
+          </div>
+          <div class="hint-text">Multiplie l'énergie en kWh par le prix d'un kilowattheure (0,20 €).</div>
+          <div class="input-row">
+            <strong>Coût = </strong>
+            <input type="number" id="inp-c" class="num-input" placeholder="Prix final">
+            <select id="unit-c" class="unit-select">
+              <option value="">Unité ?</option><option value="€">€</option><option value="$">$</option>
+            </select>
+            <button class="btn-check" onclick="checkStep4()">Vérifier</button>
+          </div>
+          <div id="fb4" class="feedback"></div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // --- ONGLET NAVIGATION ---
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // --- ONGLET 1 : SIMULATEUR ---
+    let currentPower = 15;
+    function setAppliance(power, emoji) {
+      currentPower = power;
+      document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      updateSim();
+    }
+    function updateSim() {
+      let t = document.getElementById('sim-t-slider').value;
+      document.getElementById('sim-t-label').innerText = t + " h";
+      let energy = currentPower * t;
+      document.getElementById('sim-meter').innerText = String(energy).padStart(5, '0');
+    }
+
+    // --- ONGLET 3 : EXERCICES PAS À PAS ---
+    const exercises = [
+      {
+        title: "Exo 1 (Joules)",
+        text: "Un <strong>grille-pain de 800 W</strong> fonctionne pendant <strong>2 minutes</strong>. Calcule l'énergie transférée en <strong>Joules (J)</strong>.",
+        p: 800, uP: "W",
+        t: 120, uT: "s", hintT: "Rappel : Pour avoir des Joules, le temps doit être en secondes (1 min = 60 s).",
+        e: 96000, uE: "J",
+        hasCost: false
+      },
+      {
+        title: "Exo 2 (Wh)",
+        text: "Un <strong>ordinateur de 50 W</strong> est utilisé pendant <strong>3 heures</strong>. Calcule l'énergie consommée en <strong>Wattheures (Wh)</strong>.",
+        p: 50, uP: "W",
+        t: 3, uT: "h", hintT: "Rappel : Pour des Wattheures, le temps reste en heures.",
+        e: 150, uE: "Wh",
+        hasCost: false
+      },
+      {
+        title: "Exo 3 (kWh)",
+        text: "Un <strong>radiateur électrique de 2000 W</strong> chauffe pendant <strong>4 heures</strong>. Calcule l'énergie consommée directement en <strong>Kilowattheures (kWh)</strong>.",
+        p: 2, uP: "kW", hintP: "Attention, on demande des kWh à la fin. Convertis d'abord la puissance en kW (divise par 1000).",
+        t: 4, uT: "h", hintT: "Le temps doit rester en heures.",
+        e: 8, uE: "kWh",
+        hasCost: false
+      },
+      {
+        title: "Exo 4 (Le Coût)",
+        text: "Un <strong>four de 2500 W</strong> fonctionne pendant <strong>2 heures</strong>. Sachant qu'un kilowattheure (kWh) coûte <strong>0,20 €</strong>, calcule son énergie en kWh puis son coût d'utilisation.",
+        p: 2.5, uP: "kW", hintP: "Pour obtenir des kWh et un coût, convertis d'abord la puissance en kW.",
+        t: 2, uT: "h", hintT: "Le temps reste en heures.",
+        e: 5, uE: "kWh",
+        hasCost: true, cost: 1, uC: "€"
+      }
+    ];
+
+    let currentExo = 0;
+    let completedExos = [];
+
+    function initExercises() {
+      let tabsHtml = "";
+      exercises.forEach((ex, i) => {
+        let isDone = completedExos.includes(i) ? "done" : "";
+        let isActive = i === currentExo ? "active" : "";
+        tabsHtml += `<div class="exo-pill ${isActive} ${isDone}" onclick="loadExo(${i})">${ex.title}</div>`;
+      });
+      document.getElementById('exo-tabs').innerHTML = tabsHtml;
+      loadExo(currentExo);
+    }
+
+    function loadExo(index) {
+      currentExo = index;
+      let ex = exercises[currentExo];
+      
+      // Update UI Tabs
+      document.querySelectorAll('.exo-pill').forEach((el, i) => {
+        el.classList.toggle('active', i === currentExo);
+      });
+
+      // Reset Form
+      document.getElementById('exo-text').innerHTML = ex.text;
+      document.getElementById('hint-t').innerText = ex.hintT;
+      
+      ['p', 't', 'e', 'c'].forEach(id => {
+        let inp = document.getElementById(`inp-${id}`);
+        let unit = document.getElementById(`unit-${id}`);
+        if(inp) inp.value = '';
+        if(unit) unit.value = '';
+      });
+
+      resetStep(1, true);
+      resetStep(2, false);
+      resetStep(3, false);
+      
+      let step4 = document.getElementById('step4');
+      if(ex.hasCost) {
+        step4.style.display = "block";
+        resetStep(4, false);
+      } else {
+        step4.style.display = "none";
+      }
+    }
+
+    function resetStep(num, isActive) {
+      let box = document.getElementById(`step${num}`);
+      let status = document.getElementById(`status${num}`);
+      let fb = document.getElementById(`fb${num}`);
+      
+      fb.className = "feedback"; fb.style.display = "none";
+      
+      if(isActive) {
+        box.className = "step-box active-step";
+        status.innerText = "À faire";
+      } else {
+        box.className = "step-box locked";
+        status.innerText = "🔒 Bloqué";
+      }
+    }
+
+    function validateStep(num, msg) {
+      let box = document.getElementById(`step${num}`);
+      let status = document.getElementById(`status${num}`);
+      let fb = document.getElementById(`fb${num}`);
+      
+      box.className = "step-box done-step";
+      status.innerText = "✅ Validé";
+      fb.className = "feedback ok";
+      fb.innerHTML = `✅ ${msg}`;
+      fb.style.display = "block";
+    }
+
+    function errorStep(num, msg) {
+      let fb = document.getElementById(`fb${num}`);
+      fb.className = "feedback err";
+      fb.innerHTML = `❌ ${msg}`;
+      fb.style.display = "block";
+    }
+
+    function checkStep1() {
+      let ex = exercises[currentExo];
+      let val = Number(document.getElementById('inp-p').value);
+      let unit = document.getElementById('unit-p').value;
+
+      if(val === ex.p && unit === ex.uP) {
+        validateStep(1, `Parfait ! P = ${val} ${unit}.`);
+        resetStep(2, true); // Unlock step 2
+      } else {
+        if(val === 2500 && ex.uP === "kW") errorStep(1, "Presque ! On demande de calculer en kWh, donc P doit être mise en Kilowatts (kW). 2500 W = ? kW");
+        else if(val === 2000 && ex.uP === "kW") errorStep(1, "Presque ! On demande de calculer en kWh, donc P doit être mise en Kilowatts (kW). 2000 W = ? kW");
+        else if (unit !== ex.uP) errorStep(1, "Mauvaise unité choisie !");
+        else errorStep(1, "Relis bien la puissance dans l'énoncé et regarde le conseil (Aide).");
+      }
+    }
+
+    function checkStep2() {
+      let ex = exercises[currentExo];
+      let val = Number(document.getElementById('inp-t').value);
+      let unit = document.getElementById('unit-t').value;
+
+      if(val === ex.t && unit === ex.uT) {
+        validateStep(2, `Bien joué ! t = ${val} ${unit}.`);
+        resetStep(3, true); // Unlock step 3
+      } else {
+        if(ex.uT === "s" && val === 2) errorStep(2, "Attention, pour obtenir des Joules, le temps doit être en secondes (1 min = 60 s).");
+        else if (unit !== ex.uT) errorStep(2, "L'unité ne correspond pas à ce qu'il faut pour ce calcul.");
+        else errorStep(2, "Mauvaise valeur de temps.");
+      }
+    }
+
+    function checkStep3() {
+      let ex = exercises[currentExo];
+      let val = Number(document.getElementById('inp-e').value);
+      let unit = document.getElementById('unit-e').value;
+
+      if(val === ex.e && unit === ex.uE) {
+        validateStep(3, `Félicitations ! ${ex.p} × ${ex.t} = ${val} ${unit}.`);
+        
+        if (ex.hasCost) {
+            resetStep(4, true); // Unlock step 4 for cost calculation
+        } else {
+            if(!completedExos.includes(currentExo)) completedExos.push(currentExo);
+            initExercises(); // Rafraîchit les badges "✅"
+        }
+      } else {
+        if(val === ex.e && unit !== ex.uE) errorStep(3, "Le calcul est bon, mais l'unité finale est fausse !");
+        else errorStep(3, "Erreur de calcul. Multiplie la Puissance (P) par la Durée (t) validées aux étapes 1 et 2.");
+      }
+    }
+
+    function checkStep4() {
+      let ex = exercises[currentExo];
+      let val = Number(document.getElementById('inp-c').value.replace(',', '.'));
+      let unit = document.getElementById('unit-c').value;
+
+      if(val === ex.cost && unit === ex.uC) {
+        validateStep(4, `Excellent ! ${ex.e} kWh × 0,20 € = ${val} ${unit}.`);
+        if(!completedExos.includes(currentExo)) completedExos.push(currentExo);
+        initExercises();
+      } else {
+        if (unit !== ex.uC) errorStep(4, "N'oublie pas la bonne unité (l'euro).");
+        else errorStep(4, "Multiplie l'énergie en kWh par le prix d'un kWh (0,20 €).");
+      }
+    }
+
+    // Init au chargement
+    initExercises();
+  </script>
+</body>
+</html>
