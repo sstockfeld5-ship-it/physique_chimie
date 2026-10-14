@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Fonctionnement de l'Alternateur</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f4f9; color: #333; text-align: center; 
+            margin: 0; padding: 15px;
+        }
+        h2 { color: #2c3e50; margin-top: 0; margin-bottom: 15px; }
+        .tabs { margin-bottom: 15px; }
+        .tab-btn {
+            background: #e0e0e0; color: #333; border: 1px solid #ccc;
+            padding: 10px 20px; font-size: 15px; cursor: pointer;
+            border-radius: 6px; margin: 0 5px; transition: 0.3s;
+        }
+        .tab-btn:hover { background: #d0d0d0; }
+        .tab-btn.active { background: #3498db; color: white; border-color: #2980b9; font-weight: bold; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px; }
+        .control-panel {
+            background: #fff; padding: 15px 25px; border-radius: 10px;
+            border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        input[type=range] { width: 250px; vertical-align: middle; accent-color: #3498db; }
+        .label-value { font-weight: bold; color: #3498db; display: inline-block; width: 45px;}
+        #zoomBtn {
+            background: #2ecc71; color: white; border: none; padding: 15px 25px;
+            font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; display: none;
+        }
+        #zoomBtn:hover { transform: scale(1.05); }
+        canvas { background: #ffffff; border: 2px solid #bdc3c7; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <h2>L'Alternateur : De l'expérience à la centrale</h2>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="setTab(0)">1. Principe Physique</button>
+        <button class="tab-btn" onclick="setTab(1)">2. Alternateur de Vélo</button>
+        <button class="tab-btn" onclick="setTab(2)">3. Centrale Électrique</button>
+    </div>
+
+    <div class="controls">
+        <div class="control-panel">
+            <label id="speedLabel" for="speed">Vitesse de rotation : </label>
+            <input type="range" id="speed" min="0" max="100" value="0" oninput="document.getElementById('speedVal').innerText = this.value + '%'">
+            <span class="label-value" id="speedVal">0%</span>
+        </div>
+        <button id="zoomBtn" onclick="toggleZoom()">🔍 Voir l'intérieur</button>
+    </div>
+
+    <canvas id="simCanvas" width="950" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const speedSlider = document.getElementById('speed');
+        const speedLabel = document.getElementById('speedLabel');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const zoomBtn = document.getElementById('zoomBtn');
+        
+        let currentTab = 0;
+        let isZoomed = false; 
+        let angle = 0;
+        let history = [];
+
+        const labels = ["Vitesse de l'aimant : ", "Vitesse du vélo : ", "Débit de vapeur HP : "];
+
+        function setTab(index) {
+            currentTab = index; history = []; speedLabel.textContent = labels[index];
+            tabBtns.forEach((btn, i) => {
+                if (i === index) btn.classList.add('active'); else btn.classList.remove('active');
+            });
+            if (index === 0) { zoomBtn.style.display = 'none'; isZoomed = false; } 
+            else { zoomBtn.style.display = 'block'; isZoomed = false; updateZoomButtonText(); }
+        }
+
+        function toggleZoom() { isZoomed = !isZoomed; history = []; updateZoomButtonText(); }
+        function updateZoomButtonText() {
+            if (isZoomed) { zoomBtn.innerHTML = "🌍 Retour à la Vue Globale"; zoomBtn.style.background = "#e74c3c"; } 
+            else { zoomBtn.innerHTML = "🔍 Voir l'intérieur de l'Alternateur"; zoomBtn.style.background = "#2ecc71"; }
+        }
+
+        function drawWirePath(path, color) {
+            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+            ctx.beginPath(); ctx.moveTo(path[0].x, path[0].y);
+            for(let i=1; i<path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+            ctx.stroke();
+        }
+
+        function drawBulb(x, y, voltage, speed) {
+            let brightness = Math.abs(voltage); 
+            if (speed > 30) brightness = (speed/100) * 0.7 + Math.abs(voltage) * 0.3; 
+            if (speed === 0) brightness = 0;
+            
+            ctx.fillStyle = '#7f8c8d'; ctx.fillRect(x-12, y+15, 24, 20);
+            ctx.fillStyle = '#333'; ctx.fillRect(x-8, y+35, 16, 8);
+            
+            ctx.fillStyle = (brightness > 0.1) ? '#fff' : '#ecf0f1'; 
+            ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#bdc3c7'; ctx.lineWidth = 2; ctx.stroke();
+            
+            if(brightness > 0.1) {
+                let beam = ctx.createRadialGradient(x, y, 20, x, y, 80);
+                beam.addColorStop(0, `rgba(241, 196, 15, ${brightness})`);
+                beam.addColorStop(1, 'rgba(241, 196, 15, 0)');
+                ctx.fillStyle = beam;
+                ctx.beginPath(); ctx.arc(x, y, 80, 0, Math.PI*2); ctx.fill();
+            }
+        }
+
+        function drawOscilloscope(voltage, ox = 680, oy = 280) {
+            const w = 240, h = 160;
+            ctx.fillStyle = '#f9f9f9'; ctx.fillRect(ox-10, oy-110, w+20, h+50);
+            ctx.strokeStyle = '#bdc3c7'; ctx.lineWidth = 2; ctx.strokeRect(ox-10, oy-110, w+20, h+50);
+            ctx.fillStyle = '#2c3e50'; ctx.fillRect(ox, oy-80, w, h);
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let i=0; i<=w; i+=24) { ctx.moveTo(ox+i, oy-80); ctx.lineTo(ox+i, oy+80); }
+            for(let i=0; i<=h; i+=16) { ctx.moveTo(ox, oy-80+i); ctx.lineTo(ox+w, oy-80+i); }
+            ctx.stroke();
+            
+            history.push(voltage);
+            if (history.length > w/2) history.shift(); 
+            
+            ctx.beginPath(); ctx.strokeStyle = '#2ecc71'; ctx.lineWidth = 2;
+            for (let i = 0; i < history.length; i++) {
+                const x = ox + i * 2;
+                const y = oy - history[i] * 60;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.fillStyle = '#333'; ctx.font = '14px Arial'; ctx.fillText('Oscilloscope (Tension V)', ox+40, oy-90);
+        }
+
+        // --- ONGLET 1 : PRINCIPE PHYSIQUE ---
+        function drawSimplePrinciple(speed, voltage) {
+            const cx = 180, cy = 250;
+            
+            ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle);
+            ctx.fillStyle = '#c0392b'; ctx.fillRect(-60, -20, 60, 40);
+            ctx.fillStyle = '#2980b9'; ctx.fillRect(0, -20, 60, 40); 
+            ctx.fillStyle = 'white'; ctx.font = 'bold 20px Arial';
+            ctx.fillText('N', -40, 7); ctx.fillText('S', 25, 7);
+            ctx.restore();
+            ctx.fillStyle = '#7f8c8d'; ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI*2); ctx.fill();
+
+            const coilX = cx + 120, coilY = cy;
+            ctx.fillStyle = '#d35400'; ctx.fillRect(coilX, coilY - 40, 60, 80);
+            ctx.strokeStyle = '#e67e22'; ctx.lineWidth = 4;
+            for(let i=-35; i<=35; i+=10) { ctx.beginPath(); ctx.moveTo(coilX, coilY + i); ctx.lineTo(coilX + 60, coilY + i); ctx.stroke(); }
+            
+            ctx.fillStyle = '#333'; ctx.font = '16px Arial';
+            ctx.fillText('Bobine de cuivre', coilX - 10, coilY + 60); ctx.fillText('Aimant (Rotor)', cx - 40, cy + 60);
+
+            const bulbX = 520, bulbY = 230;
+            drawBulb(bulbX, bulbY, voltage, speed); 
+            ctx.fillStyle = '#333'; ctx.fillText('Lampe', bulbX - 25, bulbY + 65);
+
+            drawWirePath([{x: coilX+30, y: coilY-40}, {x: coilX+30, y: coilY-120}, {x: bulbX-10, y: coilY-120}, {x: bulbX-10, y: bulbY+15}], '#c0392b');
+            drawWirePath([{x: coilX+30, y: coilY+40}, {x: coilX+30, y: cy+120}, {x: bulbX+10, y: cy+120}, {x: bulbX+10, y: bulbY+35}], '#2980b9');
+            drawWirePath([{x: bulbX-10, y: coilY-120}, {x: 700, y: coilY-120}, {x: 700, y: 170}], '#c0392b');
+            drawWirePath([{x: bulbX+10, y: cy+120}, {x: 700, y: cy+120}, {x: 700, y: 440}], '#2980b9');
+            
+            drawOscilloscope(voltage);
+        }
+
+        // --- ONGLET 2 : VELO ---
+        function drawBikeGlobal(speed, voltage) {
+            const wheelAngle = angle * 0.2;
+            
+            ctx.save(); ctx.translate(350, 400); ctx.rotate(wheelAngle);
+            ctx.lineWidth = 35; ctx.strokeStyle = '#222';
+            ctx.beginPath(); ctx.arc(0, 0, 200, 0, Math.PI*2); ctx.stroke(); 
+            ctx.lineWidth = 2; ctx.strokeStyle = '#999';
+            for(let i=0; i<16; i++) {
+                ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(180*Math.cos(i*Math.PI/8), 180*Math.sin(i*Math.PI/8)); ctx.stroke();
+            }
+            ctx.restore();
+
+            ctx.lineWidth = 25; ctx.strokeStyle = '#d32f2f'; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(250, 50); ctx.lineTo(130, 400); ctx.stroke();
+
+            const galetX = 175;
+            const galetY = 280;
+
+            ctx.save(); ctx.translate(galetX - 10, galetY + 45); ctx.rotate(-0.5); 
+            ctx.fillStyle = '#95a5a6'; ctx.fillRect(-20, -40, 40, 90);
+            ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.strokeRect(-20, -40, 40, 90);
+            ctx.restore();
+
+            ctx.fillStyle = '#7f8c8d'; ctx.fillRect(145, 290, 30, 20);
+
+            ctx.save(); ctx.translate(galetX, galetY); ctx.rotate(-angle * 1.5);
+            ctx.fillStyle = '#555'; ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI*2); ctx.fill();
+            for(let i=0; i<8; i++) { ctx.rotate(Math.PI/4); ctx.fillStyle = '#333'; ctx.fillRect(10, -2, 5, 4); }
+            ctx.restore();
+
+            ctx.fillStyle = '#bdc3c7'; ctx.beginPath(); ctx.moveTo(210, 120); ctx.lineTo(280, 80); ctx.lineTo(290, 150); ctx.lineTo(210, 150); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.moveTo(280, 80); ctx.lineTo(295, 85); ctx.lineTo(305, 145); ctx.lineTo(290, 150); ctx.fill(); ctx.stroke();
+
+            let brightness = (speed > 5) ? (speed/100) : 0;
+            if(brightness > 0) {
+                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(260, 120, 10, 0, Math.PI*2); ctx.fill();
+                let beam = ctx.createLinearGradient(300, 115, 700, 115);
+                beam.addColorStop(0, `rgba(241, 196, 15, ${brightness})`); beam.addColorStop(1, 'rgba(241, 196, 15, 0)');
+                ctx.fillStyle = beam; ctx.beginPath(); ctx.moveTo(300, 80); ctx.lineTo(800, -50); ctx.lineTo(800, 300); ctx.lineTo(300, 150); ctx.fill();
+            }
+
+            drawWirePath([{x:galetX-15, y:galetY+85}, {x:galetX-20, y:galetY+60}, {x:185, y:200}, {x:205, y:170}, {x:195, y:140}, {x:220, y:120}, {x:240, y:120}], '#2980b9');
+            
+            ctx.fillStyle = '#333'; ctx.font = 'bold 18px Arial'; ctx.fillText("Vue Globale : La roue entraîne le galet en frottant contre lui.", 50, 40);
+        }
+
+        function drawBikeInternal(speed, voltage) {
+            const centerX = 200, centerY = 250;
+            
+            ctx.fillStyle = '#333'; ctx.font = '16px Arial';
+            ctx.fillText('Galet', centerX + 60, centerY - 130);
+            ctx.fillText('Aimant cylindrique', centerX + 110, centerY);
+            ctx.fillText('Bobine', centerX + 110, centerY + 80);
+
+            ctx.save(); ctx.translate(centerX, centerY - 140); ctx.rotate(-angle * 1.5);
+            ctx.fillStyle = '#555'; ctx.beginPath(); ctx.arc(0, 0, 35, 0, Math.PI*2); ctx.fill();
+            for(let i=0; i<12; i++) { ctx.rotate(Math.PI/6); ctx.fillStyle = '#222'; ctx.fillRect(25, -3, 12, 6); }
+            ctx.restore();
+            
+            ctx.fillStyle = '#7f8c8d'; ctx.fillRect(centerX - 8, centerY - 120, 16, 90);
+
+            ctx.save(); ctx.translate(centerX, centerY);
+            ctx.fillStyle = '#666'; ctx.fillRect(-70, -30, 140, 60);
+            let split = Math.sin(angle * 1.5); 
+            let nWidth = 70 + (split * 70); let sWidth = 140 - nWidth;
+            
+            if (Math.cos(angle * 1.5) > 0) {
+                ctx.fillStyle = '#2980b9'; ctx.fillRect(-70, -30, nWidth, 60);
+                ctx.fillStyle = '#c0392b'; ctx.fillRect(-70 + nWidth, -30, sWidth, 60);
+                ctx.fillStyle = 'white'; ctx.font = 'bold 20px Arial'; 
+                if(nWidth > 30) ctx.fillText('N', -70 + nWidth/2 - 10, 5); if(sWidth > 30) ctx.fillText('S', -70 + nWidth + sWidth/2 - 10, 5);
+            } else {
+                ctx.fillStyle = '#c0392b'; ctx.fillRect(-70, -30, sWidth, 60);
+                ctx.fillStyle = '#2980b9'; ctx.fillRect(-70 + sWidth, -30, nWidth, 60);
+                ctx.fillStyle = 'white'; ctx.font = 'bold 20px Arial'; 
+                if(sWidth > 30) ctx.fillText('S', -70 + sWidth/2 - 10, 5); if(nWidth > 30) ctx.fillText('N', -70 + sWidth + nWidth/2 - 10, 5);
+            }
+            ctx.restore();
+
+            ctx.strokeStyle = '#d35400'; ctx.lineWidth = 4;
+            for(let i=0; i<6; i++) { ctx.beginPath(); ctx.moveTo(centerX - 60, centerY + 40 + i*12); ctx.lineTo(centerX + 60, centerY + 45 + i*12); ctx.stroke(); }
+            ctx.strokeStyle = '#bdc3c7'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.strokeRect(centerX - 90, centerY - 120, 180, 240); ctx.setLineDash([]);
+            
+            const bulbX = 480, bulbY = 320;
+            drawBulb(bulbX, bulbY, voltage, speed); 
+            ctx.fillStyle = '#333'; ctx.fillText('Phare', bulbX - 20, bulbY + 60);
+
+            drawWirePath([{x: centerX-60, y: centerY+40}, {x: centerX-60, y: centerY+160}, {x: bulbX-10, y: centerY+160}, {x: bulbX-10, y: bulbY+15}], '#c0392b');
+            drawWirePath([{x: centerX+60, y: centerY+100}, {x: centerX+60, y: centerY+190}, {x: bulbX+10, y: centerY+190}, {x: bulbX+10, y: bulbY+35}], '#2980b9');
+
+            drawOscilloscope(voltage);
+            ctx.fillStyle = '#333'; ctx.font = 'bold 18px Arial'; ctx.fillText("Vue Intérieure : Galet → Aimant → Bobine → Lampe.", 50, 40);
+        }
+
+        // --- ONGLET 3 : CENTRALE ---
+        function drawPowerPlantGlobal(speed, voltage) {
+            const startX = 100, startY = 250;
+            ctx.fillStyle = '#7f8c8d'; ctx.fillRect(startX, startY, 480, 16);
+
+            ctx.fillStyle = '#c0392b'; ctx.fillRect(startX - 80, startY - 90, 80, 16);
+            ctx.beginPath(); ctx.moveTo(startX, startY - 90); ctx.lineTo(startX, startY - 60); ctx.lineTo(startX + 30, startY - 60); ctx.lineTo(startX + 30, startY - 30); ctx.lineWidth = 16; ctx.strokeStyle = '#c0392b'; ctx.stroke();
+            ctx.fillStyle = '#333'; ctx.font = '14px Arial'; ctx.fillText('Vapeur HP', startX - 80, startY - 100);
+
+            ctx.fillStyle = '#95a5a6';
+            for(let i=0; i<5; i++) {
+                let w = 25, h = 50 + i*25;
+                let tx = startX + 30 + i*w; let ty = startY - h/2 + 8;
+                ctx.fillRect(tx, ty, w, h); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 2;
+                let offset = (angle * 20) % h;
+                for(let j=0; j<h; j+=15) { let yPos = (j + offset) % h; ctx.beginPath(); ctx.moveTo(tx, ty + yPos); ctx.lineTo(tx + w, ty + yPos + 10); ctx.stroke(); }
+            }
+            ctx.fillStyle = '#333'; ctx.fillText('Turbine', startX + 70, startY - 110);
+
+            ctx.fillStyle = '#bdc3c7'; ctx.fillRect(startX + 120, startY + 90, 40, 50);
+            ctx.beginPath(); ctx.moveTo(startX + 140, startY + 70); ctx.lineTo(startX + 140, startY + 90); ctx.lineWidth = 16; ctx.strokeStyle = '#7f8c8d'; ctx.stroke();
+            ctx.fillStyle = '#333'; ctx.fillText('Condenseur', startX + 165, startY + 120);
+
+            ctx.fillStyle = '#7f8c8d'; ctx.fillRect(startX + 220, startY - 50, 140, 116);
+            ctx.strokeStyle = '#34495e'; ctx.lineWidth = 2;
+            let altOffset = (angle * 15) % 30;
+            for(let i=0; i<116; i+=20) { let yPos = (i + altOffset) % 116; ctx.beginPath(); ctx.moveTo(startX + 220, startY - 50 + yPos); ctx.lineTo(startX + 360, startY - 50 + yPos); ctx.stroke(); }
+            ctx.fillStyle = '#333'; ctx.fillText('Alternateur', startX + 250, startY - 60);
+
+            ctx.fillStyle = '#95a5a6'; ctx.beginPath(); ctx.ellipse(startX + 380, startY + 8, 12, 25, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#333'; ctx.fillText('Excitatrice', startX + 350, startY - 40);
+
+            drawWirePath([{x: startX + 392, y: startY + 8}, {x: startX + 460, y: startY + 8}], '#333');
+            ctx.fillStyle = (speed > 5) ? '#f1c40f' : '#ccc'; ctx.beginPath(); ctx.arc(startX + 500, startY + 8, 35, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = '#000'; ctx.font = 'bold 40px Arial'; ctx.fillText('⚡', startX + 485, startY + 23);
+            ctx.fillStyle = '#333'; ctx.font = '12px Arial'; ctx.fillText('Vers réseau', startX + 545, startY);
+            
+            drawOscilloscope(voltage);
+            ctx.fillStyle = '#333'; ctx.font = 'bold 18px Arial'; ctx.fillText("Vue de profil : Schéma industriel d'une centrale.", 50, 40);
+        }
+
+        function drawPowerPlantInternal(speed, voltage) {
+            const cx = 300, cy = 250;
+            
+            // Axe central
+            ctx.fillStyle = '#7f8c8d'; ctx.fillRect(cx - 200, cy - 10, 400, 20);
+            
+            // Rotor tournant
+            let split = Math.sin(angle * 1.2); 
+            let nHeight = 60 + (split * 60); let sHeight = 120 - nHeight;
+            
+            ctx.save();
+            ctx.translate(cx, cy);
+            if (Math.cos(angle * 1.2) > 0) {
+                ctx.fillStyle = '#2980b9'; ctx.fillRect(-70, -60, 140, nHeight);
+                ctx.fillStyle = '#c0392b'; ctx.fillRect(-70, -60 + nHeight, 140, sHeight);
+            } else {
+                ctx.fillStyle = '#c0392b'; ctx.fillRect(-70, -60, 140, sHeight);
+                ctx.fillStyle = '#2980b9'; ctx.fillRect(-70, -60 + sHeight, 140, nHeight);
+            }
+            ctx.strokeStyle = '#e67e22'; ctx.lineWidth = 4;
+            for(let i=-60; i<=60; i+=15) { ctx.beginPath(); ctx.moveTo(i, -60); ctx.lineTo(i, 60); ctx.stroke(); }
+            ctx.restore();
+
+            // Stator Haut 
+            ctx.fillStyle = '#bdc3c7'; ctx.fillRect(cx - 100, cy - 110, 200, 40);
+            ctx.fillStyle = '#d35400'; ctx.fillRect(cx - 90, cy - 115, 180, 50);
+            ctx.strokeStyle = '#e67e22'; ctx.lineWidth = 4;
+            for(let i=-80; i<=80; i+=10) { ctx.beginPath(); ctx.moveTo(cx + i, cy - 115); ctx.lineTo(cx + i, cy - 65); ctx.stroke(); }
+
+            // Stator Bas 
+            ctx.fillStyle = '#bdc3c7'; ctx.fillRect(cx - 100, cy + 70, 200, 40);
+            ctx.fillStyle = '#d35400'; ctx.fillRect(cx - 90, cy + 65, 180, 50);
+            ctx.strokeStyle = '#e67e22'; ctx.lineWidth = 4;
+            for(let i=-80; i<=80; i+=10) { ctx.beginPath(); ctx.moveTo(cx + i, cy + 65); ctx.lineTo(cx + i, cy + 115); ctx.stroke(); }
+
+            // Câblage
+            drawWirePath([{x: cx+90, y: cy-90}, {x: cx+130, y: cy-90}, {x: cx+130, y: cy-180}, {x: 700, y: cy-180}, {x: 700, y: 170}], '#c0392b');
+            drawWirePath([{x: cx+90, y: cy+90}, {x: cx+150, y: cy+90}, {x: cx+150, y: cy+200}, {x: 730, y: cy+200}, {x: 730, y: 440}], '#2980b9');
+
+            // -----------------------------------------------------
+            // Textes tracés EN DERNIER pour être au premier plan
+            // -----------------------------------------------------
+            ctx.fillStyle = '#333'; ctx.font = '16px Arial';
+            
+            // Stator haut
+            ctx.fillText('Stator (Bobines fixes) haut', cx - 110, cy - 140);
+            ctx.beginPath(); ctx.moveTo(cx - 40, cy - 135); ctx.lineTo(cx - 20, cy - 110); ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.stroke();
+            
+            // Stator bas
+            ctx.fillText('Stator (Bobines fixes) bas', cx - 110, cy + 155);
+            ctx.beginPath(); ctx.moveTo(cx - 40, cy + 145); ctx.lineTo(cx - 20, cy + 110); ctx.stroke();
+            
+            // Rotor - Déplacé vers la gauche (cx+100 au lieu de cx+180) pour ne pas croiser l'oscilloscope
+            ctx.fillText("Rotor (Électroaimant) lié à l'axe", cx + 100, cy - 30);
+            ctx.beginPath(); ctx.moveTo(cx + 90, cy - 35); ctx.lineTo(cx + 40, cy - 10); ctx.stroke();
+
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText("Vue de profil interne : Le rotor magnétique tourne au centre du stator.", 50, 40);
+
+            drawOscilloscope(voltage);
+        }
+
+        // --- BOUCLE PRINCIPALE ---
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const speed = parseInt(speedSlider.value);
+            
+            angle += speed * 0.008; 
+            const voltage = (speed > 0) ? Math.sin(angle * 2) * (speed / 100) : 0;
+
+            if (currentTab === 0) { drawSimplePrinciple(speed, voltage); } 
+            else if (currentTab === 1) { if (!isZoomed) drawBikeGlobal(speed, voltage); else drawBikeInternal(speed, voltage); } 
+            else if (currentTab === 2) { if (!isZoomed) drawPowerPlantGlobal(speed, voltage); else drawPowerPlantInternal(speed, voltage); }
+
+            requestAnimationFrame(draw);
+        }
+        
+        draw();
+    </script>
+</body>
+</html>
