@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM - La production d'énergie électrique</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f7;
+            color: #2c3e50;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 { text-align: center; color: #3498db; }
+        .identite { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        .question-block { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .question-title { font-weight: bold; font-size: 1.1em; margin-bottom: 15px; }
+        .options-list { list-style: none; padding: 0; }
+        .option-item { margin-bottom: 10px; }
+        .option-label {
+            display: flex; align-items: center; padding: 12px; background: #f8f9fa;
+            border: 1px solid #ddd; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .option-label:hover { background: #e9ecef; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.2); }
+        .btn-submit {
+            background: #2ecc71; color: white; border: none; padding: 15px; font-size: 1.1em;
+            border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold;
+        }
+        .btn-submit:hover { background: #27ae60; }
+        .result-box { display: none; font-size: 1.1em; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .score-header { text-align: center; font-size: 1.3em; font-weight: bold; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid rgba(0,0,0,0.1); }
+        .correction-item { margin-bottom: 15px; padding: 15px; background: #fff; border-radius: 8px; border-left: 5px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .correction-item.correct { border-left-color: #2ecc71; }
+        .correction-item.wrong { border-left-color: #e74c3c; }
+        .correction-item p { margin: 5px 0; }
+        .text-success { color: #27ae60; font-weight: bold; }
+        .text-danger { color: #c0392b; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Évaluation : Production d'énergie</h1>
+        
+        <div class="identite" id="auth-section">
+            <label for="student-name"><strong>Nom et Prénom :</strong></label>
+            <input type="text" id="student-name" placeholder="Ex: Dupont Thomas" required>
+            <button class="btn-submit" style="background:#3498db;" onclick="startQuiz()">Commencer le QCM</button>
+        </div>
+
+        <div id="quiz-section" style="display:none;">
+            <form id="quiz-form"></form>
+            <button class="btn-submit" onclick="submitQuiz()" id="submit-btn">Valider mes réponses</button>
+            <div id="result-box" class="result-box"></div>
+        </div>
+    </div>
+
+    <script>
+        // Lien direct vers votre Google Apps Script
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxGbDYso0LoL03aWcSYsbjUQtlg6UFOfD0L5PkFaD6plfEhm0ajXPv_T6zE0SUNaENL7g/exec";
+
+        // Banque de 40 questions (incluant les nouvelles sur les chaînes d'énergie)
+        const allQuestions = [
+            { q: "Quels sont les deux principaux éléments qui composent un alternateur ?", o: ["Une pile et une lampe", "Un aimant et une bobine", "Une turbine et un engrenage", "Un interrupteur et des fils"], a: 1 },
+            { q: "Quelle forme d'énergie doit-on apporter à un alternateur pour qu'il fonctionne ?", o: ["Énergie thermique", "Énergie chimique", "Énergie cinétique", "Énergie lumineuse"], a: 2 },
+            { q: "Dans un alternateur de vélo, quelle forme prend l'énergie utile produite ?", o: ["Énergie électrique", "Énergie cinétique", "Énergie thermique", "Énergie chimique"], a: 0 },
+            { q: "Pourquoi l'énergie thermique produite par l'alternateur est-elle qualifiée de 'perdue' ?", o: ["Parce qu'elle refroidit le système", "Parce qu'elle n'est pas utilisable pour l'éclairage", "Parce qu'elle détruit la bobine", "Parce qu'elle crée un court-circuit"], a: 1 },
+            { q: "Qu'est-ce qui génère la partie 'perdue' de l'énergie dans un alternateur ?", o: ["La lumière de la lampe", "Le champ magnétique", "Les frottements et l'échauffement", "La vitesse du vélo"], a: 2 },
+            { q: "Quelle est la source d'énergie d'une centrale hydroélectrique ?", o: ["Le vent", "Le charbon", "L'eau", "L'uranium"], a: 2 },
+            { q: "Quel est le rôle de la turbine dans une centrale électrique ?", o: ["Stocker l'électricité", "Entraîner l'alternateur", "Refroidir le système", "Créer un champ magnétique"], a: 1 },
+            { q: "Quelle forme d'énergie possède l'eau retenue par un barrage ?", o: ["Énergie potentielle/cinétique", "Énergie chimique", "Énergie thermique", "Énergie électrique"], a: 0 },
+            { q: "Quelle est la source d'énergie d'une centrale thermique classique ?", o: ["Le soleil", "Un combustible fossile (charbon/gaz)", "Le vent", "L'uranium"], a: 1 },
+            { q: "Dans une centrale thermique, quelle forme d'énergie possède le charbon avant combustion ?", o: ["Énergie thermique", "Énergie cinétique", "Énergie chimique", "Énergie nucléaire"], a: 2 },
+            { q: "Quel élément convertit l'énergie chimique du charbon en énergie thermique ?", o: ["La turbine", "Le générateur de vapeur (chaudière)", "L'alternateur", "Le condenseur"], a: 1 },
+            { q: "Quel gaz à effet de serre est émis massivement par une centrale thermique classique ?", o: ["Le dioxygène", "L'azote", "Le dioxyde de carbone (CO2)", "L'hélium"], a: 2 },
+            { q: "Quel est le composant d'une éolienne qui capte l'énergie cinétique du vent ?", o: ["L'alternateur", "Les pales", "Le mât", "Le réseau"], a: 1 },
+            { q: "Comment s'appelle l'énergie du vent ?", o: ["Énergie éolienne (cinétique)", "Énergie solaire", "Énergie thermique", "Énergie potentielle"], a: 0 },
+            { q: "Quelle centrale n'utilise PAS d'alternateur pour produire de l'électricité ?", o: ["Centrale nucléaire", "Éolienne", "Panneau photovoltaïque", "Centrale hydroélectrique"], a: 2 },
+            { q: "Quelle est la formule du rendement énergétique ?", o: ["(Énergie Utile / Énergie Reçue) x 100", "Énergie Reçue / Énergie Utile", "Énergie Utile + Énergie Perdue", "Puissance x Temps"], a: 0 },
+            { q: "Pourquoi le rendement d'une centrale n'est jamais de 100% ?", o: ["À cause des pertes thermiques", "Car l'alternateur s'arrête", "Parce que l'eau s'évapore", "Parce que les câbles sont trop longs"], a: 0 },
+            { q: "Un avantage majeur de la centrale hydroélectrique est :", o: ["Elle peut être construite n'importe où", "Elle utilise une énergie renouvelable sans émission de gaz", "Elle est très facile à déplacer", "Elle fonctionne avec du charbon"], a: 1 },
+            { q: "Un inconvénient majeur de la centrale thermique classique est :", o: ["Elle est très sensible à la sécheresse", "Elle utilise une ressource épuisable et pollue", "Elle ne produit pas beaucoup d'électricité", "Ses pales font du bruit"], a: 1 },
+            { q: "Que se passe-t-il si l'on arrête de tourner la manivelle d'un alternateur de vélo ?", o: ["La lampe brille plus fort", "La lampe s'éteint", "L'alternateur explose", "L'énergie cinétique augmente"], a: 1 },
+            { q: "Dans une centrale, à quoi sert le condenseur ?", o: ["À condenser la vapeur d'eau pour la transformer en eau liquide", "À produire de l'électricité", "À faire tourner la turbine", "À brûler le charbon"], a: 0 },
+            { q: "Une éolienne offshore est implantée :", o: ["En haute montagne", "Dans le désert", "En mer, au large des côtes", "Dans les villes"], a: 2 },
+            { q: "Quel est l'avantage principal d'une centrale thermique par rapport à une éolienne ?", o: ["Elle est plus écologique", "Sa production est pilotable (à la demande)", "Son rendement est de 100%", "Elle utilise le vent"], a: 1 },
+            { q: "Sur un schéma de chaîne d'énergie, par quelle forme géométrique représente-t-on généralement un réservoir (ou source) d'énergie ?", o: ["Un rectangle", "Un ovale (ou bulle)", "Un triangle", "Un losange"], a: 0 },
+            { q: "Sur un schéma de chaîne d'énergie, par quelle forme géométrique représente-t-on le convertisseur ?", o: ["Un rectangle", "Un ovale (ou bulle)", "Un losange", "Une flèche"], a: 1 },
+            { q: "Dans la chaîne d'énergie de la centrale nucléaire, quelle est la forme d'énergie initiale stockée dans le réservoir ?", o: ["Thermique", "Cinétique", "Nucléaire", "Chimique"], a: 2 },
+            { q: "L'énergie cinétique se manifeste lorsqu'un objet :", o: ["Est chauffé", "Est en mouvement", "Est immobile", "Brûle"], a: 1 },
+            { q: "Laquelle de ces sources d'énergie est renouvelable ?", o: ["L'uranium", "Le gaz naturel", "Le soleil", "Le charbon"], a: 2 },
+            { q: "Laquelle de ces sources d'énergie est fossile (non renouvelable) ?", o: ["Le vent", "L'eau", "La géothermie", "Le charbon"], a: 3 },
+            { q: "Comment s'appelle l'appareil qui transforme l'énergie mécanique de rotation en énergie électrique ?", o: ["Le moteur", "L'alternateur", "La chaudière", "Le condenseur"], a: 1 },
+            { q: "Une centrale reçoit 1000 MJ d'énergie et produit 300 MJ d'énergie électrique. Quel est son rendement ?", o: ["30 %", "70 %", "300 %", "1300 %"], a: 0 },
+            { q: "Le rendement d'une centrale est de 80 %. Si elle reçoit 100 MJ d'énergie de l'eau, quelle énergie utile produit-elle ?", o: ["20 MJ", "80 MJ", "100 MJ", "180 MJ"], a: 1 },
+            { q: "Une éolienne d'une puissance de 2 MW (Mégawatts) tourne pendant 10 heures. Quelle énergie a-t-elle produite (E = P x t) ?", o: ["2 MWh", "5 MWh", "12 MWh", "20 MWh"], a: 3 },
+            { q: "Quel est un inconvénient majeur de la centrale hydroélectrique ?", o: ["Elle émet beaucoup de CO2", "Son implantation est limitée par le relief (montagnes, barrages)", "Son rendement est très faible", "Elle utilise une ressource très polluante"], a: 1 },
+            { q: "Quel est le principal inconvénient d'une éolienne ou d'un panneau solaire ?", o: ["Ils polluent énormément l'air", "Leur énergie n'est pas renouvelable", "Leur production dépend de la météo (intermittente)", "Ils consomment de l'uranium"], a: 2 },
+            { q: "Quel est un avantage majeur des centrales thermiques (charbon, gaz) par rapport aux éoliennes ?", o: ["Elles ne polluent pas du tout", "Leur énergie est inépuisable", "La production est pilotable à la demande", "Elles sont 100% renouvelables"], a: 2 },
+            { q: "Dans la chaîne d'énergie d'une éolienne, quel est le réservoir (source) de départ ?", o: ["L'eau", "Le vent", "Le soleil", "L'alternateur"], a: 1 },
+            { q: "Dans la chaîne d'énergie d'une centrale hydroélectrique, quelle forme d'énergie est transférée entre le réservoir d'eau et la turbine ?", o: ["Énergie cinétique", "Énergie chimique", "Énergie thermique", "Énergie lumineuse"], a: 0 },
+            { q: "Dans une chaîne d'énergie, l'énergie thermique dissipée dans l'environnement est souvent qualifiée de :", o: ["Énergie utile", "Énergie renouvelable", "Énergie perdue", "Énergie potentielle"], a: 2 },
+            { q: "Dans la chaîne d'énergie d'une centrale thermique, quelle est l'énergie utile finale envoyée au réseau ?", o: ["Énergie thermique", "Énergie électrique", "Énergie chimique", "Énergie cinétique"], a: 1 }
+        ];
+
+        let selectedQuestions = [];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            if(nameInput === "") { alert("Veuillez entrer votre nom."); return; }
+            
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('quiz-section').style.display = 'block';
+            
+            // Sélectionner 10 questions au hasard
+            selectedQuestions = shuffle([...allQuestions]).slice(0, 10);
+            renderQuestions();
+        }
+
+        function renderQuestions() {
+            const form = document.getElementById('quiz-form');
+            form.innerHTML = '';
+            
+            selectedQuestions.forEach((item, index) => {
+                const qBlock = document.createElement('div');
+                qBlock.className = 'question-block';
+                
+                let optionsHTML = '';
+                item.o.forEach((opt, optIndex) => {
+                    optionsHTML += `
+                        <li class="option-item">
+                            <label class="option-label">
+                                <input type="radio" name="q${index}" value="${optIndex}">
+                                ${opt}
+                            </label>
+                        </li>
+                    `;
+                });
+
+                qBlock.innerHTML = `
+                    <div class="question-title">${index + 1}. ${item.q}</div>
+                    <ul class="options-list">${optionsHTML}</ul>
+                `;
+                form.appendChild(qBlock);
+            });
+        }
+
+        function submitQuiz() {
+            const studentName = document.getElementById('student-name').value.trim();
+            const btn = document.getElementById('submit-btn');
+            let score = 0;
+            let answeredAll = true;
+            let correctionHTML = '';
+
+            selectedQuestions.forEach((item, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                if(!selected) { 
+                    answeredAll = false; 
+                } else {
+                    const selectedVal = parseInt(selected.value);
+                    const isCorrect = (selectedVal === item.a);
+                    
+                    if(isCorrect) score++;
+
+                    // Construction du bloc de correction pour chaque question
+                    const statusClass = isCorrect ? 'correct' : 'wrong';
+                    const icon = isCorrect ? '✅' : '❌';
+                    const userTextClass = isCorrect ? 'text-success' : 'text-danger';
+
+                    correctionHTML += `
+                        <div class="correction-item ${statusClass}">
+                            <p><strong>Question ${index + 1} :</strong> ${item.q}</p>
+                            <p>Votre réponse : <span class="${userTextClass}">${item.o[selectedVal]}</span> ${icon}</p>
+                            ${!isCorrect ? `<p><em>La bonne réponse était : <span class="text-success">${item.o[item.a]}</span></em></p>` : ''}
+                        </div>
+                    `;
+                }
+            });
+
+            if(!answeredAll) {
+                alert("Veuillez répondre à toutes les questions avant de valider.");
+                return;
+            }
+
+            btn.innerText = "Envoi en cours...";
+            btn.disabled = true;
+
+            // Préparation des paramètres pour la requête GET
+            const urlParams = `?nom=${encodeURIComponent(studentName)}&score=${score}&total=10`;
+
+            // Envoi des données via GET (sécurité anti-CORS)
+            fetch(SCRIPT_URL + urlParams, {
+                method: 'GET',
+                mode: 'no-cors'
+            })
+            .then(() => {
+                document.getElementById('quiz-form').style.display = 'none';
+                btn.style.display = 'none';
+                
+                const resBox = document.getElementById('result-box');
+                resBox.style.display = 'block';
+                
+                let bgColor = score >= 8 ? '#d5f5e3' : (score >= 5 ? '#fef9e7' : '#fadbd8');
+                
+                resBox.innerHTML = `
+                    <div class="score-header" style="background-color: ${bgColor}; padding: 20px; border-radius: 8px;">
+                        Merci ${studentName}.<br>Votre note a été envoyée au professeur.<br><br>
+                        Score final : <span style="font-size: 1.5em;">${score} / 10</span>
+                    </div>
+                    <div style="text-align: left; margin-top: 30px;">
+                        <h3 style="color: #2c3e50;">Correction détaillée :</h3>
+                        ${correctionHTML}
+                    </div>
+                `;
+            })
+            .catch(error => {
+                alert("Erreur d'envoi. Vérifiez votre connexion internet.");
+                btn.innerText = "Valider mes réponses";
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
