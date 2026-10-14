@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production d'Énergie Électrique - Bilan Final</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --success: #2ecc71;
+            --bg: #f4f6f7;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg); color: var(--primary);
+            margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center;
+        }
+        h1, h2 { color: var(--primary); text-align: center; margin-top: 0; }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .tab-btn {
+            background-color: #bdc3c7; color: var(--primary); border: none;
+            padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px;
+            cursor: pointer; transition: 0.3s;
+        }
+        .tab-btn:hover { background-color: #95a5a6; }
+        .tab-btn.active { background-color: var(--secondary); color: white; }
+        .tab-content { display: none; width: 100%; max-width: 1050px; }
+        .tab-content.active { display: block; }
+        
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        canvas {
+            background: #eef2f5; border: 3px solid #bdc3c7; border-radius: 10px;
+            width: 100%; max-width: 1000px; display: block; margin: 0 auto 20px auto;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        /* NOMENCLATURE CHAÎNES D'ÉNERGIE */
+        .energy-chain {
+            display: flex; align-items: center; justify-content: center;
+            background: #ecf0f1; padding: 20px; border-radius: 10px; flex-wrap: wrap; gap: 15px;
+        }
+        
+        .node.reservoir {
+            background: white; border: 2px solid var(--primary); padding: 10px 15px;
+            border-radius: 0px; text-align: center; font-weight: bold; min-width: 120px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .node.convertisseur {
+            background: white; border: 2px solid var(--secondary); padding: 15px 20px;
+            border-radius: 50%; text-align: center; font-weight: bold; min-width: 130px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .node.perte { border-color: var(--accent); }
+        
+        .arrow-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 110px; }
+        .energy-select {
+            font-size: 13px; font-weight: bold; color: var(--accent); border: 1px solid var(--accent);
+            border-radius: 4px; padding: 3px 5px; text-align: center; margin-bottom: -5px; width: 100%; background: white;
+            cursor: pointer;
+        }
+        .arrow { font-size: 28px; color: var(--primary); font-weight: bold; }
+
+        select.res-select { width: 100%; padding: 5px; margin-top: 5px; font-size: 14px; cursor: pointer; }
+
+        .feedback { margin-top: 15px; font-weight: bold; text-align: left; padding: 12px; border-radius: 5px; display: none; line-height: 1.4;}
+        
+        button.action-btn {
+            background-color: var(--success); color: white; border: none; padding: 10px 20px;
+            font-size: 16px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px;
+        }
+        button.action-btn:hover { background-color: #27ae60; }
+        
+        .calculator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .formula-box { background: #e8f4f8; padding: 15px; border-left: 5px solid var(--secondary); border-radius: 5px; text-align: center; font-size: 1.1em; }
+        .exercice-box { background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 15px; }
+        .input-group { margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+        .input-group label { font-weight: bold; flex: 1; }
+        .input-group input { width: 40%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; text-align: right; }
+        
+        .comparison-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .comparison-table th, .comparison-table td { border: 1px solid #ccc; padding: 15px; text-align: center; width: 33%; background: white;}
+        .comparison-table th { background-color: var(--primary); color: white; }
+        .criteria-list { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .criteria-item { background: var(--secondary); color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; user-select: none; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .criteria-item:active { transform: scale(0.95); }
+        .drop-zone { min-height: 80px; background: #f9f9f9; border: 2px dashed #ccc; border-radius: 8px; display: flex; flex-direction: column; gap: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>Bilan : La Production d'Énergie Électrique</h1>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('chaines')">1. Chaînes d'Énergie</button>
+        <button class="tab-btn" onclick="openTab('rendement')">2. Rendements</button>
+        <button class="tab-btn" onclick="openTab('comparaison')">3. Comparaison</button>
+    </div>
+
+    <!-- ONGLET 1 : CHAINES D'ENERGIE -->
+    <div id="chaines" class="tab-content active">
+        
+        <!-- CENTRALE HYDRAULIQUE -->
+        <div class="card">
+            <h2>Centrale Hydroélectrique</h2>
+            <canvas id="hydroCanvas" width="1000" height="400"></canvas>
+            
+            <div class="energy-chain">
+                <div class="node reservoir">
+                    Source/Réservoir<br>
+                    <select id="hydro-res" class="res-select">
+                        <option value="">-- Choisir --</option>
+                        <option value="Eau">Eau en altitude</option>
+                        <option value="Charbon">Charbon</option>
+                        <option value="Vent">Vent</option>
+                        <option value="Uranium">Uranium</option>
+                        <option value="Soleil">Soleil</option>
+                    </select>
+                </div>
+                
+                <div class="arrow-container">
+                    <select id="hydro-en1" class="energy-select">
+                        <option value="">Énergie...</option>
+                        <option value="Thermique">Thermique</option>
+                        <option value="Cinétique">Cinétique</option>
+                        <option value="Lumineuse">Lumineuse (Rayonnante)</option>
+                        <option value="Chimique">Chimique</option>
+                    </select>
+                    <div class="arrow">→</div>
+                </div>
+                
+                <div class="node convertisseur">
+                    Convertisseur<br>Turbine + Alternateur
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="arrow-container">
+                            <select id="hydro-en-utile" class="energy-select">
+                                <option value="">Énergie utile...</option>
+                                <option value="Cinétique">Cinétique</option>
+                                <option value="Électrique">Électrique</option>
+                                <option value="Thermique">Thermique</option>
+                                <option value="Nucléaire">Nucléaire</option>
+                            </select>
+                            <div class="arrow">→</div>
+                        </div>
+                        <div class="node reservoir">Réseau Électrique</div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="arrow-container">
+                            <select id="hydro-en-perte" class="energy-select" style="border-color: #e74c3c; color: #e74c3c;">
+                                <option value="">Énergie perdue...</option>
+                                <option value="Thermique">Thermique</option>
+                                <option value="Chimique">Chimique</option>
+                                <option value="Cinétique">Cinétique</option>
+                                <option value="Lumineuse">Lumineuse</option>
+                            </select>
+                            <div class="arrow">→</div>
+                        </div>
+                        <div class="node reservoir perte">Environnement</div>
+                    </div>
+                </div>
+            </div>
+            <button class="action-btn" onclick="checkHydro()">Vérifier la chaîne hydraulique</button>
+            <div id="hydro-feedback" class="feedback"></div>
+        </div>
+
+        <!-- CENTRALE THERMIQUE -->
+        <div class="card">
+            <h2>Centrale Thermique Classique</h2>
+            <canvas id="thermCanvas" width="1000" height="450"></canvas>
+            
+            <div class="energy-chain">
+                <div class="node reservoir">
+                    Source/Réservoir<br>
+                    <select id="therm-res" class="res-select">
+                        <option value="">-- Choisir --</option>
+                        <option value="Charbon">Combustible Fossile</option>
+                        <option value="Eau">Eau en mouvement</option>
+                        <option value="Soleil">Soleil</option>
+                        <option value="Uranium">Uranium</option>
+                    </select>
+                </div>
+                
+                <div class="arrow-container">
+                    <select id="therm-en1" class="energy-select">
+                        <option value="">Énergie...</option>
+                        <option value="Chimique">Chimique</option>
+                        <option value="Cinétique">Cinétique</option>
+                        <option value="Nucléaire">Nucléaire</option>
+                        <option value="Thermique">Thermique</option>
+                    </select>
+                    <div class="arrow">→</div>
+                </div>
+                
+                <div class="node convertisseur">
+                    Convertisseur 1<br>
+                    <select id="therm-conv1" class="res-select">
+                        <option value="">-- Choisir --</option>
+                        <option value="Moteur">Moteur thermique</option>
+                        <option value="Panneau">Panneau Solaire</option>
+                        <option value="Chaudiere">Générateur de vapeur</option>
+                        <option value="Alternateur">Alternateur seul</option>
+                    </select>
+                </div>
+                
+                <div class="arrow-container">
+                    <div class="energy-select">Thermique</div>
+                    <div class="arrow">→</div>
+                </div>
+
+                <div class="node convertisseur">
+                    Convertisseur 2<br>Turbine + Alternateur
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="arrow-container">
+                            <div class="energy-select">Électrique</div>
+                            <div class="arrow">→</div>
+                        </div>
+                        <div class="node reservoir">Réseau Électrique</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="arrow-container">
+                            <div class="energy-select" style="border-color: #e74c3c; color: #e74c3c;">Thermique</div>
+                            <div class="arrow">→</div>
+                        </div>
+                        <div class="node reservoir perte">Environnement</div>
+                    </div>
+                </div>
+            </div>
+            <button class="action-btn" onclick="checkTherm()">Vérifier la chaîne thermique</button>
+            <div id="therm-feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <!-- ONGLET 2 : RENDEMENT -->
+    <div id="rendement" class="tab-content">
+        <div class="card">
+            <h2>Calculs de Rendement Énergétique</h2>
+            <div class="formula-box" style="margin-bottom: 20px;">
+                <strong>Rendement (%) = ( Énergie Utile ÷ Énergie Reçue ) × 100</strong><br>
+                <span style="font-size: 0.9em; color: #555;">Rappel 1 : L'énergie se calcule avec la formule <strong>E = P × t</strong></span><br>
+                <span style="font-size: 0.9em; color: #555;">Rappel 2 : Si la puissance est en Mégawatts (MW) et le temps en secondes (s), l'énergie est en Mégajoules (MJ).</span>
+            </div>
+
+            <div class="calculator-grid">
+                
+                <!-- EXERCICE HYDRAULIQUE -->
+                <div class="exercice-box">
+                    <h3 style="color: var(--secondary); margin-top:0;">1. Centrale Hydroélectrique</h3>
+                    <p>L'eau d'un barrage chute et fournit à la turbine une énergie de <strong>500 000 MJ</strong> en une journée (c'est l'énergie reçue).</p>
+                    <p>L'alternateur produit une puissance électrique de <strong>5 MW</strong> pendant ces 24 heures.</p>
+                    
+                    <div class="input-group">
+                        <label>Énergie reçue (MJ) :</label>
+                        <input type="number" id="hydro-e-recue" placeholder="?">
+                    </div>
+                    <div class="input-group">
+                        <label>Énergie utile (MJ) :</label>
+                        <input type="number" id="hydro-e-utile" placeholder="P × t">
+                    </div>
+                    <div class="input-group">
+                        <label>Rendement (%) :</label>
+                        <input type="number" step="0.1" id="hydro-rend" placeholder="%">
+                    </div>
+                    <button class="action-btn" onclick="checkRendementHydro()">Vérifier (Hydro)</button>
+                    <div id="fb-rend-hydro" class="feedback"></div>
+                </div>
+
+                <!-- EXERCICE THERMIQUE -->
+                <div class="exercice-box">
+                    <h3 style="color: var(--accent); margin-top:0;">2. Centrale Thermique</h3>
+                    <p>La centrale brûle <strong>40 tonnes</strong> de charbon. La combustion d'une tonne libère <strong>30 000 MJ</strong>.</p>
+                    <p>L'alternateur fournit une puissance de <strong>100 MW</strong> au réseau électrique pendant <strong>1 heure</strong>.</p>
+                    
+                    <div class="input-group">
+                        <label>Énergie reçue (MJ) :</label>
+                        <input type="number" id="therm-e-recue" placeholder="?">
+                    </div>
+                    <div class="input-group">
+                        <label>Énergie utile (MJ) :</label>
+                        <input type="number" id="therm-e-utile" placeholder="P × t">
+                    </div>
+                    <div class="input-group">
+                        <label>Rendement (%) :</label>
+                        <input type="number" step="0.1" id="therm-rend" placeholder="%">
+                    </div>
+                    <button class="action-btn" onclick="checkRendementTherm()">Vérifier (Thermique)</button>
+                    <div id="fb-rend-therm" class="feedback"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ONGLET 3 : COMPARAISON -->
+    <div id="comparaison" class="tab-content">
+        <div class="card">
+            <h2>Avantages et Inconvénients</h2>
+            <p>Cliquez sur un argument ci-dessous, puis cliquez sur la case du tableau pour le placer.</p>
+            
+            <div class="criteria-list" id="criteria-list">
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="hydro-av">Énergie Renouvelable</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="therm-inc">Forte émission de CO2</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="therm-av">Pilotable (Production à la demande)</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="hydro-inc">Dépend des précipitations (climat)</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="hydro-av">Pas d'émission de gaz à effet de serre</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="therm-inc">Ressource fossile (épuisable)</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="therm-av">Grande capacité de production (massive)</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="hydro-inc">Implantation limitée par le relief (montagnes)</div>
+            </div>
+
+            <table class="comparison-table">
+                <tr>
+                    <th>Critères</th>
+                    <th>Centrale Hydraulique</th>
+                    <th>Centrale Thermique</th>
+                </tr>
+                <tr>
+                    <td><strong>Avantages</strong></td>
+                    <td><div class="drop-zone" id="hydro-av" onclick="placeCriteria('hydro-av')"></div></td>
+                    <td><div class="drop-zone" id="therm-av" onclick="placeCriteria('therm-av')"></div></td>
+                </tr>
+                <tr>
+                    <td><strong>Inconvénients</strong></td>
+                    <td><div class="drop-zone" id="hydro-inc" onclick="placeCriteria('hydro-inc')"></div></td>
+                    <td><div class="drop-zone" id="therm-inc" onclick="placeCriteria('therm-inc')"></div></td>
+                </tr>
+            </table>
+            <button class="action-btn" onclick="checkTable()">Vérifier le tableau</button>
+            <div id="table-feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        const hCtx = document.getElementById('hydroCanvas').getContext('2d');
+        const tCtx = document.getElementById('thermCanvas').getContext('2d');
+        
+        let globalAngle = 0;
+        let waterParticles = [];
+        let steamParticles = [];
+        let bubbles = [];
+        let smokeParticles = [];
+
+        function drawMetallicCylinder(ctx, x, y, w, h, color1, color2, color3, vertical=false) {
+            let grad = vertical ? ctx.createLinearGradient(x, y, x+w, y) : ctx.createLinearGradient(x, y, x, y+h);
+            grad.addColorStop(0, color1); grad.addColorStop(0.5, color2); grad.addColorStop(1, color3);
+            ctx.fillStyle = grad; ctx.fillRect(x, y, w, h);
+        }
+
+        function drawIndustrialAlternator(ctx, x, y, w, h, angle) {
+            ctx.save();
+            drawMetallicCylinder(ctx, x, y, w, h, '#e67e22', '#f39c12', '#d35400', false);
+            ctx.fillStyle = '#2c3e50'; ctx.fillRect(x+10, y+10, w-20, h-20);
+            let rotY = (angle * 20) % (h-20);
+            ctx.fillStyle = '#ecf0f1';
+            for(let i=-20; i<h; i+=15) {
+                let posY = y + 10 + ((i + rotY) % (h-20));
+                if(posY > y+10 && posY < y+h-10) { ctx.fillRect(x+10, posY, w-20, 6); }
+            }
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(x+5, y, 8, h); ctx.fillRect(x+w-13, y, 8, h);
+            ctx.restore();
+        }
+
+        function drawTransformer(ctx, x, y) {
+            ctx.save();
+            drawMetallicCylinder(ctx, x, y, 50, 45, '#546e7a', '#78909c', '#37474f', true);
+            ctx.fillStyle = '#263238';
+            for(let i=5; i<45; i+=8) { ctx.fillRect(x-4, y+i, 58, 3); }
+            ctx.fillStyle = '#d7ccc8';
+            ctx.beginPath(); ctx.arc(x+15, y-8, 4, 0, Math.PI*2); ctx.fill(); ctx.fillRect(x+12, y-8, 6, 12);
+            ctx.beginPath(); ctx.arc(x+35, y-8, 4, 0, Math.PI*2); ctx.fill(); ctx.fillRect(x+32, y-8, 6, 12);
+            ctx.fillStyle = '#212121'; ctx.fillRect(x-5, y+45, 60, 5);
+            ctx.fillStyle = 'black'; ctx.font = '11px Arial'; ctx.fillText("Transfo.", x+3, y+62);
+            ctx.restore();
+        }
+
+        function drawPylon(ctx, px, py) {
+            ctx.save();
+            ctx.strokeStyle = '#546e7a'; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+            ctx.beginPath(); ctx.moveTo(px-30, py); ctx.lineTo(px-10, py-160); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px+30, py); ctx.lineTo(px+10, py-160); ctx.stroke();
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(px-55, py-100); ctx.lineTo(px+55, py-100); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px-40, py-140); ctx.lineTo(px+40, py-140); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px-10, py-160); ctx.lineTo(px, py-190); ctx.lineTo(px+10, py-160); ctx.stroke();
+            ctx.lineWidth = 1;
+            for(let y=0; y<140; y+=20) {
+                let w1 = 30 - (y/160)*20; let w2 = 30 - ((y+20)/160)*20;
+                ctx.beginPath(); ctx.moveTo(px-w1, py-y); ctx.lineTo(px+w2, py-y-20); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(px+w1, py-y); ctx.lineTo(px-w2, py-y-20); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(px-w1, py-y); ctx.lineTo(px+w1, py-y); ctx.stroke();
+            }
+            ctx.fillStyle = '#8d6e63';
+            ctx.fillRect(px-50, py-100, 4, 15); ctx.fillRect(px+46, py-100, 4, 15);
+            ctx.fillRect(px-35, py-140, 4, 15); ctx.fillRect(px+31, py-140, 4, 15);
+            ctx.restore();
+        }
+
+        function drawLossLabel(ctx, x, y, text) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.fillRect(x - 5, y - 15, ctx.measureText(text).width + 25, 22);
+            ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 1;
+            ctx.strokeRect(x - 5, y - 15, ctx.measureText(text).width + 25, 22);
+            ctx.fillStyle = '#c0392b';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText("🔥 " + text, x, y);
+        }
+
+        // --- RENDER HYDRAULIQUE ---
+        function renderHydro() {
+            hCtx.clearRect(0, 0, 1000, 400);
+            let sky = hCtx.createLinearGradient(0,0,0,400);
+            sky.addColorStop(0, '#c9d6ff'); sky.addColorStop(1, '#e2e2e2');
+            hCtx.fillStyle = sky; hCtx.fillRect(0, 0, 1000, 400);
+            hCtx.fillStyle = '#a8e6cf'; hCtx.beginPath(); hCtx.moveTo(0, 250); hCtx.lineTo(250, 50); hCtx.lineTo(1000, 350); hCtx.lineTo(0, 350); hCtx.fill();
+            hCtx.fillStyle = 'rgba(52, 152, 219, 0.8)'; hCtx.fillRect(0, 80, 250, 270);
+            hCtx.fillStyle = '#7f8c8d'; hCtx.beginPath(); hCtx.moveTo(250, 80); hCtx.lineTo(310, 350); hCtx.lineTo(250, 350); hCtx.fill();
+
+            hCtx.strokeStyle = '#34495e'; hCtx.lineWidth = 24; hCtx.beginPath(); hCtx.moveTo(250, 150); hCtx.lineTo(550, 320); hCtx.stroke();
+            hCtx.strokeStyle = '#bdc3c7'; hCtx.lineWidth = 18; hCtx.beginPath(); hCtx.moveTo(250, 150); hCtx.lineTo(550, 320); hCtx.stroke();
+
+            if(Math.random() > 0.1) waterParticles.push({x: 250, y: 150 + (Math.random()*12-6)});
+            hCtx.fillStyle = '#3498db';
+            for(let i=waterParticles.length-1; i>=0; i--) {
+                let p = waterParticles[i]; p.x += 8; p.y += (8 * 170 / 300); 
+                hCtx.beginPath(); hCtx.arc(p.x, p.y, 4, 0, Math.PI*2); hCtx.fill();
+                if(p.x > 540) waterParticles.splice(i, 1);
+            }
+
+            hCtx.fillStyle = '#ecf0f1'; hCtx.fillRect(520, 250, 300, 150);
+            hCtx.strokeStyle = '#bdc3c7'; hCtx.strokeRect(520, 250, 300, 150);
+
+            hCtx.save(); hCtx.translate(560, 320); hCtx.rotate(globalAngle * 1.5);
+            hCtx.fillStyle = '#2c3e50'; hCtx.beginPath(); hCtx.arc(0, 0, 30, 0, Math.PI*2); hCtx.fill();
+            hCtx.fillStyle = '#7f8c8d';
+            for(let i=0; i<8; i++) { hCtx.rotate(Math.PI/4); hCtx.fillRect(15, -5, 20, 10); }
+            hCtx.restore();
+
+            hCtx.fillStyle = '#aaa'; hCtx.fillRect(560, 315, 80, 10);
+            drawIndustrialAlternator(hCtx, 640, 290, 70, 60, globalAngle);
+            hCtx.strokeStyle = '#333'; hCtx.lineWidth = 3;
+            hCtx.beginPath(); hCtx.moveTo(710, 320); hCtx.lineTo(750, 320); hCtx.stroke();
+            
+            drawTransformer(hCtx, 750, 295);
+
+            hCtx.strokeStyle = '#c0392b'; hCtx.lineWidth = 2; hCtx.beginPath(); hCtx.moveTo(765, 285); hCtx.quadraticCurveTo(810, 240, 875, 250); hCtx.stroke();
+            hCtx.strokeStyle = '#2980b9'; hCtx.beginPath(); hCtx.moveTo(785, 285); hCtx.quadraticCurveTo(830, 260, 925, 250); hCtx.stroke();
+            
+            drawPylon(hCtx, 900, 350);
+
+            hCtx.fillStyle = 'black'; hCtx.font = 'bold 16px Arial';
+            hCtx.fillText("Lac de retenue", 20, 120); hCtx.fillText("Conduite forcée", 300, 220);
+            hCtx.fillText("Turbine", 535, 380); hCtx.fillText("Alternateur", 635, 370); hCtx.fillText("Réseau", 870, 150);
+
+            // Indication des pertes (Hydro)
+            drawLossLabel(hCtx, 570, 235, "Pertes thermiques (frottements mécaniques)");
+        }
+
+        // --- RENDER THERMIQUE ---
+        function renderTherm() {
+            tCtx.clearRect(0, 0, 1000, 450);
+            
+            let sky = tCtx.createLinearGradient(0,0,0,450);
+            sky.addColorStop(0, '#e0f7fa'); sky.addColorStop(1, '#ffffff');
+            tCtx.fillStyle = sky; tCtx.fillRect(0, 0, 1000, 450);
+            
+            tCtx.fillStyle = '#dcedc8'; tCtx.beginPath(); tCtx.moveTo(0, 400); tCtx.lineTo(1000, 300); tCtx.lineTo(1000, 450); tCtx.lineTo(0, 450); tCtx.fill();
+
+            tCtx.fillStyle = '#b0bec5'; tCtx.fillRect(100, 140, 200, 310);
+            tCtx.fillStyle = '#cfd8dc'; tCtx.fillRect(400, 200, 180, 250);
+            tCtx.fillStyle = '#90a4ae'; tCtx.fillRect(400, 200, 420, 40); 
+
+            // CHEMINÉE
+            tCtx.fillStyle = '#eceff1'; tCtx.beginPath(); tCtx.moveTo(50, 400); tCtx.lineTo(90, 400); tCtx.lineTo(80, 100); tCtx.lineTo(60, 100); tCtx.fill();
+            tCtx.fillStyle = '#546e7a'; tCtx.fillRect(60, 120, 20, 30); tCtx.fillRect(62, 160, 18, 20);
+            tCtx.fillStyle = 'black'; tCtx.font = '14px Arial'; tCtx.fillText("cheminée", 10, 150);
+            
+            if(Math.random() > 0.2) smokeParticles.push({x: 70, y: 100, a: 0.8, s: 10});
+            for(let i=smokeParticles.length-1; i>=0; i--) {
+                let p = smokeParticles[i]; p.y -= 2; p.x += 1; p.s += 0.5; p.a -= 0.01;
+                tCtx.fillStyle = `rgba(100,100,100,${p.a})`; tCtx.beginPath(); tCtx.arc(p.x, p.y, p.s, 0, Math.PI*2); tCtx.fill();
+                if(p.a <= 0) smokeParticles.splice(i, 1);
+            }
+
+            tCtx.fillStyle = 'black';
+            tCtx.fillText("émission de dioxyde de carbone", 10, 40); 
+            tCtx.fillText("et autres gaz ou fumées", 10, 55);
+            
+            // Pertes fumées
+            drawLossLabel(tCtx, 110, 85, "Pertes thermiques (fumées chaudes)");
+
+            // GÉNÉRATEUR VAPEUR
+            tCtx.fillStyle = '#fff'; tCtx.beginPath(); tCtx.arc(200, 200, 70, Math.PI, 0); tCtx.lineTo(270, 380); tCtx.lineTo(130, 380); tCtx.fill();
+            tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 3; tCtx.stroke();
+            
+            tCtx.fillStyle = '#e67e22'; tCtx.fillRect(133, 350, 134, 30);
+            for(let i=0; i<5; i++) {
+                tCtx.fillStyle = (i%2===0) ? '#f1c40f' : '#e74c3c';
+                tCtx.beginPath(); tCtx.moveTo(145+i*22, 380); tCtx.lineTo(155+i*22, 330-Math.random()*20); tCtx.lineTo(165+i*22, 380); tCtx.fill();
+            }
+            
+            tCtx.strokeStyle = '#3498db'; tCtx.lineWidth = 8; tCtx.beginPath(); tCtx.moveTo(20, 370); tCtx.lineTo(130, 370); tCtx.stroke();
+            tCtx.fillStyle = 'black'; tCtx.fillText("entrée d'air", 20, 360);
+            tCtx.fillStyle = '#3498db'; tCtx.beginPath(); tCtx.moveTo(130, 370); tCtx.lineTo(115, 360); tCtx.lineTo(115, 380); tCtx.fill();
+
+            tCtx.fillStyle = '#0288d1'; tCtx.fillRect(133, 270, 134, 80);
+            if(Math.random() > 0.3) bubbles.push({x: 140 + Math.random()*120, y: 350, r: Math.random()*4+2});
+            tCtx.fillStyle = 'white';
+            for(let i=bubbles.length-1; i>=0; i--) {
+                let b = bubbles[i]; b.y -= 3;
+                tCtx.beginPath(); tCtx.arc(b.x, b.y, b.r, 0, Math.PI*2); tCtx.fill();
+                if(b.y < 270) bubbles.splice(i, 1);
+            }
+            
+            tCtx.fillStyle = '#b3e5fc'; tCtx.beginPath(); tCtx.arc(200, 200, 67, Math.PI, 0); tCtx.lineTo(267, 270); tCtx.lineTo(133, 270); tCtx.fill();
+            tCtx.fillStyle = 'black'; tCtx.font = 'bold 14px Arial'; tCtx.fillText("générateur", 165, 180); tCtx.fillText("de vapeur", 165, 195);
+
+            // CIRCUIT VAPEUR LARGE ET CONDENSEUR
+            tCtx.strokeStyle = '#eceff1'; tCtx.lineWidth = 22; tCtx.lineJoin = 'round';
+            tCtx.beginPath(); tCtx.moveTo(200, 130); tCtx.lineTo(200, 80); tCtx.lineTo(500, 80); tCtx.lineTo(500, 110); tCtx.stroke();
+            tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 3; tCtx.stroke();
+            
+            tCtx.fillStyle = 'rgba(255,255,255,0.7)'; tCtx.fillRect(315, 55, 95, 20); 
+            tCtx.fillStyle = '#e74c3c'; tCtx.font = '14px Arial'; tCtx.fillText("jet de vapeur", 320, 70);
+            tCtx.beginPath(); tCtx.moveTo(350, 95); tCtx.lineTo(380, 95); tCtx.lineTo(370, 85); tCtx.moveTo(380, 95); tCtx.lineTo(370, 105); tCtx.stroke(); 
+
+            tCtx.fillStyle = '#cfd8dc'; 
+            tCtx.beginPath(); 
+            tCtx.moveTo(460, 110); tCtx.lineTo(540, 110); tCtx.lineTo(540, 220); tCtx.lineTo(520, 220); tCtx.lineTo(520, 250); tCtx.lineTo(560, 250); 
+            tCtx.lineTo(560, 360); tCtx.lineTo(440, 360); tCtx.lineTo(440, 250); tCtx.lineTo(480, 250); tCtx.lineTo(480, 220); tCtx.lineTo(460, 220); tCtx.lineTo(460, 110); 
+            tCtx.fill();
+            tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 3; tCtx.stroke();
+            tCtx.fillStyle = 'rgba(179, 229, 252, 0.5)'; tCtx.fill();
+
+            tCtx.fillStyle = '#0288d1'; tCtx.fillRect(442, 310, 116, 48);
+
+            // TURBINE 
+            tCtx.fillStyle = '#7f8c8d'; tCtx.beginPath(); tCtx.moveTo(480, 150); tCtx.lineTo(540, 120); tCtx.lineTo(540, 200); tCtx.fill(); tCtx.stroke();
+            tCtx.strokeStyle = '#333'; tCtx.lineWidth = 1;
+            let tAnim = (globalAngle*20)%30;
+            for(let i=0; i<60; i+=12) { tCtx.beginPath(); tCtx.moveTo(480+i, 150 - i*0.5 + tAnim*0.2); tCtx.lineTo(480+i, 150 + i*0.5 + tAnim*0.2); tCtx.stroke(); }
+            
+            tCtx.fillStyle = 'rgba(255,255,255,0.7)'; tCtx.fillRect(465, 55, 55, 20);
+            tCtx.fillStyle = 'black'; tCtx.font = 'bold 14px Arial'; tCtx.fillText("turbine", 470, 70);
+            
+            tCtx.fillStyle = 'rgba(255,255,255,0.7)'; tCtx.fillRect(345, 255, 85, 20); 
+            tCtx.fillStyle = 'black'; tCtx.fillText("condenseur", 350, 270);
+
+            // ALTERNATEUR & TRANSFORMATEUR
+            tCtx.fillStyle = '#aaa'; tCtx.fillRect(540, 155, 40, 10); 
+            drawIndustrialAlternator(tCtx, 580, 135, 75, 50, globalAngle);
+            tCtx.fillStyle = 'rgba(255,255,255,0.7)'; tCtx.fillRect(575, 105, 80, 20);
+            tCtx.fillStyle = 'black'; tCtx.fillText("alternateur", 580, 120);
+
+            // Pertes frottements
+            drawLossLabel(tCtx, 550, 85, "Pertes par frottements mécaniques");
+
+            tCtx.strokeStyle = '#333'; tCtx.lineWidth = 3; tCtx.beginPath(); tCtx.moveTo(655, 160); tCtx.lineTo(690, 160); tCtx.stroke();
+            drawTransformer(tCtx, 690, 135);
+
+            // Retour eau liquide
+            tCtx.strokeStyle = '#3498db'; tCtx.lineWidth = 12; tCtx.lineJoin = 'round';
+            tCtx.beginPath(); tCtx.moveTo(450, 350); tCtx.lineTo(410, 350); tCtx.lineTo(410, 385); tCtx.lineTo(270, 385); tCtx.stroke();
+            tCtx.fillStyle = 'rgba(255,255,255,0.7)'; tCtx.fillRect(325, 395, 80, 20);
+            tCtx.fillStyle = 'black'; tCtx.font = '14px Arial'; tCtx.fillText("eau liquide", 330, 410);
+            tCtx.beginPath(); tCtx.moveTo(340, 385); tCtx.lineTo(350, 375); tCtx.lineTo(350, 395); tCtx.fill(); 
+
+            // RIVIÈRE
+            tCtx.save();
+            tCtx.fillStyle = '#8d6e63'; 
+            tCtx.beginPath(); tCtx.moveTo(760, 280); tCtx.quadraticCurveTo(880, 300, 1000, 280); tCtx.lineTo(1000, 265); tCtx.lineTo(760, 265); tCtx.fill();
+            tCtx.fillStyle = '#81c784'; 
+            tCtx.beginPath(); tCtx.moveTo(760, 275); tCtx.quadraticCurveTo(880, 295, 1000, 275); tCtx.lineTo(1000, 260); tCtx.lineTo(760, 260); tCtx.fill();
+            let rivGrad = tCtx.createLinearGradient(0, 280, 0, 450);
+            rivGrad.addColorStop(0, '#4fc3f7'); rivGrad.addColorStop(1, '#0277bd');
+            tCtx.fillStyle = rivGrad;
+            tCtx.beginPath(); tCtx.moveTo(760, 280); tCtx.quadraticCurveTo(880, 300, 1000, 280); tCtx.lineTo(1000, 450); tCtx.lineTo(760, 450); tCtx.fill();
+            tCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; tCtx.lineWidth = 2;
+            let waveOffset = (globalAngle * 15) % 30;
+            for(let i=0; i<6; i++) {
+                tCtx.beginPath(); tCtx.moveTo(780 + i*40 + waveOffset, 310 + i*15);
+                tCtx.quadraticCurveTo(800 + i*40 + waveOffset, 300 + i*15, 820 + i*40 + waveOffset, 310 + i*15); tCtx.stroke();
+            }
+            tCtx.restore();
+            tCtx.fillStyle = 'rgba(255,255,255,0.7)'; tCtx.fillRect(855, 365, 50, 20);
+            tCtx.fillStyle = 'black'; tCtx.font = 'bold 16px Arial'; tCtx.fillText("rivière", 860, 380);
+
+            // Circuit Eau Rivière (U-Tube dans le condenseur)
+            tCtx.strokeStyle = '#0288d1'; tCtx.lineWidth = 14; tCtx.lineJoin = 'round';
+            tCtx.beginPath(); tCtx.moveTo(850, 420); tCtx.lineTo(850, 300); tCtx.lineTo(520, 300); tCtx.stroke();
+            tCtx.fillStyle = 'rgba(255,255,255,0.7)'; tCtx.fillRect(765, 275, 75, 20);
+            tCtx.fillStyle = 'black'; tCtx.font = '14px Arial'; tCtx.fillText("eau froide", 770, 290);
+            
+            let uGrad = tCtx.createLinearGradient(520, 300, 520, 260);
+            uGrad.addColorStop(0, '#0288d1'); uGrad.addColorStop(1, '#81d4fa');
+            tCtx.strokeStyle = uGrad;
+            tCtx.beginPath(); tCtx.arc(520, 280, 20, Math.PI/2, Math.PI*1.5); tCtx.stroke();
+
+            tCtx.strokeStyle = '#81d4fa';
+            tCtx.beginPath(); tCtx.moveTo(520, 260); tCtx.lineTo(800, 260); tCtx.lineTo(800, 320); tCtx.stroke();
+            tCtx.fillStyle = 'rgba(255,255,255,0.7)'; tCtx.fillRect(645, 235, 85, 20);
+            tCtx.fillStyle = 'black'; tCtx.fillText("eau chaude", 650, 250);
+
+            // Pertes condenseur
+            drawLossLabel(tCtx, 560, 380, "Pertes thermiques (échauffement de l'eau)");
+
+            let flowOffset = (globalAngle * 25) % 40;
+            tCtx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; tCtx.lineWidth = 4; tCtx.setLineDash([10, 30]); 
+            tCtx.lineDashOffset = -flowOffset;
+            tCtx.beginPath(); tCtx.moveTo(850, 420); tCtx.lineTo(850, 300); tCtx.lineTo(520, 300); tCtx.stroke(); 
+            tCtx.lineDashOffset = flowOffset; 
+            tCtx.beginPath(); tCtx.moveTo(520, 260); tCtx.lineTo(800, 260); tCtx.lineTo(800, 320); tCtx.stroke(); 
+            tCtx.setLineDash([]); 
+
+            // RÉSEAU ÉLECTRIQUE
+            tCtx.strokeStyle = '#c0392b'; tCtx.lineWidth = 2; tCtx.beginPath(); tCtx.moveTo(705, 125); tCtx.quadraticCurveTo(800, 80, 850, 100); tCtx.stroke();
+            tCtx.strokeStyle = '#2980b9'; tCtx.beginPath(); tCtx.moveTo(725, 125); tCtx.quadraticCurveTo(800, 100, 895, 100); tCtx.stroke();
+            
+            drawPylon(tCtx, 870, 240);
+            tCtx.fillStyle = 'rgba(255,255,255,0.7)'; tCtx.fillRect(805, 35, 130, 20);
+            tCtx.fillStyle = 'black'; tCtx.fillText("réseau électrique", 810, 50);
+        }
+
+        function animate() {
+            globalAngle += 0.05;
+            if (document.getElementById('chaines').classList.contains('active')) { renderHydro(); renderTherm(); }
+            requestAnimationFrame(animate);
+        }
+        animate(); 
+
+        // FONCTIONS LOGIQUES
+        function checkHydro() {
+            let res = document.getElementById('hydro-res').value;
+            let en1 = document.getElementById('hydro-en1').value;
+            let enUtile = document.getElementById('hydro-en-utile').value;
+            let enPerte = document.getElementById('hydro-en-perte').value;
+            let fb = document.getElementById('hydro-feedback');
+            if (res === "Eau" && en1 === "Cinétique" && enUtile === "Électrique" && enPerte === "Thermique") {
+                fb.innerHTML = "✅ Excellent ! L'eau en mouvement fournit de l'énergie cinétique à l'alternateur.";
+                fb.style.color = "white"; fb.style.backgroundColor = "var(--success)";
+            } else {
+                fb.innerHTML = "❌ Erreur. Identifiez l'énergie de mouvement de l'eau et l'énergie perdue (frottements).";
+                fb.style.color = "white"; fb.style.backgroundColor = "var(--accent)";
+            }
+            fb.style.display = "block";
+        }
+
+        function checkTherm() {
+            let res = document.getElementById('therm-res').value;
+            let en1 = document.getElementById('therm-en1').value;
+            let conv1 = document.getElementById('therm-conv1').value;
+            let fb = document.getElementById('therm-feedback');
+            if (res === "Charbon" && en1 === "Chimique" && conv1 === "Chaudiere") {
+                fb.innerHTML = "✅ Parfait ! La combustion transforme l'énergie chimique en énergie thermique (vapeur).";
+                fb.style.color = "white"; fb.style.backgroundColor = "var(--success)";
+            } else {
+                fb.innerHTML = "❌ Erreur. Le combustible fossile contient une énergie liée à la matière.";
+                fb.style.color = "white"; fb.style.backgroundColor = "var(--accent)";
+            }
+            fb.style.display = "block";
+        }
+
+        // VÉRIFICATIONS AVEC AIDES INTELLIGENTES
+        function checkRendementHydro() {
+            let rec = parseFloat(document.getElementById('hydro-e-recue').value);
+            let uti = parseFloat(document.getElementById('hydro-e-utile').value);
+            let ren = parseFloat(document.getElementById('hydro-rend').value);
+            let fb = document.getElementById('fb-rend-hydro');
+            
+            fb.style.backgroundColor = "#f39c12"; 
+            fb.style.color = "white";
+
+            if (isNaN(rec) || isNaN(uti) || isNaN(ren)) {
+                fb.innerHTML = "⚠️ Remplis bien toutes les cases avant de vérifier.";
+            } 
+            else if (rec !== 500000) {
+                fb.innerHTML = "💡 <strong>Aide (Énergie reçue) :</strong> Relis bien l'énoncé. L'énergie fournie à la turbine est directement donnée en MJ.";
+            } 
+            else if (uti !== 432000) {
+                fb.innerHTML = "💡 <strong>Aide (Énergie utile) :</strong> Utilise la formule <strong>E = P × t</strong>.<br>P = 5 MW.<br>Le temps <em>t</em> doit être en secondes. Combien y a-t-il de secondes dans 24 heures (24 × 60 × 60) ?";
+            } 
+            else if (ren < 86.3 || ren > 86.5) {
+                fb.innerHTML = "💡 <strong>Aide (Rendement) :</strong> Tes énergies sont justes ! Calcule maintenant : <strong>( Énergie Utile ÷ Énergie Reçue ) × 100</strong>.";
+            } 
+            else {
+                fb.innerHTML = "✅ Parfait ! 5 MW × 86 400 s = 432 000 MJ.<br>Rendement = (432 000 / 500 000) × 100 = 86.4%.<br>L'hydraulique a un excellent rendement !";
+                fb.style.backgroundColor = "var(--success)";
+            }
+            fb.style.display = "block";
+        }
+
+        function checkRendementTherm() {
+            let rec = parseFloat(document.getElementById('therm-e-recue').value);
+            let uti = parseFloat(document.getElementById('therm-e-utile').value);
+            let ren = parseFloat(document.getElementById('therm-rend').value);
+            let fb = document.getElementById('fb-rend-therm');
+            
+            fb.style.backgroundColor = "#f39c12"; 
+            fb.style.color = "white";
+
+            if (isNaN(rec) || isNaN(uti) || isNaN(ren)) {
+                fb.innerHTML = "⚠️ Remplis bien toutes les cases avant de vérifier.";
+            } 
+            else if (rec !== 1200000) {
+                fb.innerHTML = "💡 <strong>Aide (Énergie reçue) :</strong> Calcule l'énergie totale libérée par le charbon. Multiplie la masse totale (40 tonnes) par l'énergie d'une seule tonne (30 000 MJ).";
+            } 
+            else if (uti !== 360000) {
+                fb.innerHTML = "💡 <strong>Aide (Énergie utile) :</strong> Utilise la formule <strong>E = P × t</strong>.<br>P = 100 MW.<br>Le temps <em>t</em> doit être en secondes. Combien y a-t-il de secondes dans 1 heure ?";
+            } 
+            else if (ren !== 30) {
+                fb.innerHTML = "💡 <strong>Aide (Rendement) :</strong> Tes énergies sont justes ! Calcule maintenant : <strong>( Énergie Utile ÷ Énergie Reçue ) × 100</strong>.";
+            } 
+            else {
+                fb.innerHTML = "✅ Parfait ! (360 000 / 1 200 000) × 100 = 30%.<br>Le rendement thermique est beaucoup plus faible à cause des pertes de chaleur.";
+                fb.style.backgroundColor = "var(--success)";
+            }
+            fb.style.display = "block";
+        }
+
+        let selectedItem = null;
+        function selectCriteria(element) {
+            if (selectedItem) selectedItem.style.border = "none";
+            selectedItem = element; selectedItem.style.border = "2px solid var(--primary)";
+        }
+        function placeCriteria(zoneId) {
+            if (selectedItem) { document.getElementById(zoneId).appendChild(selectedItem); selectedItem.style.border = "none"; selectedItem = null; }
+        }
+        function checkTable() {
+            let correct = true; let zones = ['hydro-av', 'therm-av', 'hydro-inc', 'therm-inc'];
+            zones.forEach(zone => {
+                let items = document.getElementById(zone).children;
+                for(let item of items) {
+                    if (item.getAttribute('data-correct') !== zone) { correct = false; item.style.backgroundColor = "var(--accent)"; } 
+                    else { item.style.backgroundColor = "var(--success)"; }
+                }
+            });
+            let fb = document.getElementById('table-feedback');
+            if (document.querySelectorAll('.drop-zone .criteria-item').length < 8) {
+                fb.innerHTML = "⚠️ Placez tous les arguments."; fb.style.backgroundColor = "#f39c12"; fb.style.color = "white";
+            } else if (correct) {
+                fb.innerHTML = "✅ Bravo ! Le tableau est correct."; fb.style.backgroundColor = "var(--success)"; fb.style.color = "white";
+            } else {
+                fb.innerHTML = "❌ Certaines étiquettes sont mal placées (en rouge)."; fb.style.backgroundColor = "var(--accent)"; fb.style.color = "white";
+            }
+            fb.style.display = "block";
+        }
+    </script>
+</body>
+</html>
