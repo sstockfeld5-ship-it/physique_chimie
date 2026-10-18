@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>La Puissance Électrique - 3e</title>
+  <style>
+    :root {
+      --primary: #d97706;
+      --primary-dark: #b45309;
+      --primary-light: #fef3c7;
+      --accent: #2563eb;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.45; padding-bottom: 30px; }
+    
+    header { background: linear-gradient(135deg, #b45309, #f59e0b); color: white; padding: 14px 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    header h1 { margin: 0; font-size: 1.25rem; font-weight: 800; }
+    header p { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.9; }
+
+    .tabs { position: sticky; top: 0; z-index: 100; display: grid; grid-template-columns: repeat(3, 1fr); background: white; border-bottom: 2px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .tab-btn { border: none; background: none; padding: 12px 6px; font-size: 0.85rem; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .tab-btn span.icon { font-size: 1.15rem; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background-color: #fffbeb; }
+
+    .container { max-width: 680px; margin: 0 auto; padding: 12px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.2s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06); border: 1px solid #e2e8f0; }
+    .card-title { margin: 0 0 10px 0; font-size: 1.05rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+
+    .instruction-step { background: #e0f2fe; border-left: 4px solid #3b82f6; padding: 12px; border-radius: 8px; margin-bottom: 14px; font-size: 0.92rem; color: #1e3a8a; }
+    .instruction-step ol { margin: 6px 0 0; padding-left: 20px; font-weight: 600; }
+
+    .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+    .preset-btn { background: #f8fafc; border: 2px solid var(--border); border-radius: 10px; padding: 10px 4px; font-size: 0.82rem; font-weight: 700; color: var(--text); cursor: pointer; text-align: center; transition: all 0.15s; }
+    .preset-btn.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); transform: scale(1.02); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .preset-btn .emoji { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+
+    .sim-stage { background: #0f172a; border-radius: 12px; height: 220px; position: relative; display: flex; align-items: center; justify-content: center; border: 3px solid #334155; margin-bottom: 16px; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+    
+    .bulb-container { position: relative; display: flex; justify-content: center; align-items: center; width: 150px; height: 150px; }
+    .bulb-glow { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,245,200,1) 0%, rgba(253,224,71,0.8) 30%, rgba(217,119,6,0) 70%); border-radius: 50%; opacity: 0; transform: scale(0.2); transition: opacity 0.1s ease-out, transform 0.1s ease-out; }
+    .bulb-emoji { font-size: 5rem; position: relative; z-index: 2; user-select: none; transition: transform 0.2s; filter: grayscale(100%); }
+    .bulb-emoji.on { filter: grayscale(0%); }
+    .bulb-emoji.broken { filter: grayscale(100%) brightness(0.5); transform: rotate(15deg); }
+
+    .power-display { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.8); color: #fde047; padding: 8px 12px; border-radius: 8px; font-weight: 800; font-family: monospace; font-size: 1.1rem; border: 1px solid #ca8a04; z-index: 10; display: flex; flex-direction: column; gap: 4px; }
+    .alert-box { position: absolute; bottom: 12px; background: rgba(220,38,38,0.9); color: white; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; display: none; z-index: 10; border: 1px solid #f87171; }
+
+    .control-group { margin-bottom: 14px; background: #f1f5f9; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; }
+    .control-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; }
+    .badge-val { background: white; padding: 4px 10px; border-radius: 6px; font-size: 0.95rem; color: #0f172a; border: 2px solid #cbd5e1; font-weight: 800; min-width: 80px; text-align: center; }
+    .badge-read { background: #e2e8f0; border-color: #94a3b8; }
+    
+    input[type="range"] { width: 100%; height: 10px; border-radius: 5px; background: #cbd5e1; outline: none; -webkit-appearance: none; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: var(--primary); cursor: pointer; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+
+    .formula-card { background: #1e293b; color: white; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 14px; }
+    .formula-big { font-size: 1.8rem; font-weight: 800; letter-spacing: 1px; margin: 10px 0; color: white; }
+    .formula-big .hl-p { color: #facc15; }
+    .formula-big .hl-u { color: #60a5fa; }
+    .formula-big .hl-i { color: #4ade80; }
+
+    .unit-list { display: grid; grid-template-columns: 1fr; gap: 8px; text-align: left; margin-top: 12px; font-size: 0.88rem; }
+    .unit-item { background: rgba(255,255,255,0.1); padding: 8px 10px; border-radius: 8px; }
+
+    .exo-selector { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+    .exo-pill { padding: 10px 6px; border: 2px solid var(--border); background: white; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .exo-pill.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+    .exo-pill.done { border-color: var(--success); background: var(--success-light); color: #166534; }
+    .exo-pill.hard { border-color: #dc2626; color: #b91c1c; }
+    .exo-pill.hard.active { background: #fef2f2; }
+
+    .enonce-box { background: #f8fafc; border-left: 4px solid #0f172a; padding: 12px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 14px; }
+
+    .step-box { border: 2px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 12px; background: #ffffff; transition: all 0.25s ease; }
+    .step-box.active-step { border-color: var(--primary); box-shadow: 0 2px 10px rgba(217, 119, 6, 0.15); }
+    .step-box.done-step { border-color: #86efac; background: #f0fdf4; }
+    .step-box.locked { opacity: 0.5; pointer-events: none; background: #f1f5f9; border-style: dashed; }
+    .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .step-title { font-weight: 800; font-size: 0.92rem; color: #1e293b; }
+    .step-status { font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: #e2e8f0; color: #475569; }
+    .step-box.active-step .step-status { background: var(--primary-light); color: var(--primary-dark); }
+    .step-box.done-step .step-status { background: var(--success-light); color: #166534; }
+
+    .input-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .num-input { flex: 1; min-width: 80px; padding: 10px; font-size: 1rem; font-weight: 700; border: 2px solid var(--border); border-radius: 8px; outline: none; text-align: center; }
+    .num-input:focus { border-color: var(--primary); }
+    .unit-select { padding: 10px 8px; font-size: 0.95rem; font-weight: 700; border: 2px solid var(--border); border-radius: 8px; background: white; }
+    .btn { border: none; border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: transform 0.1s; }
+    .btn:active { transform: scale(0.97); }
+    .btn-check { background: var(--primary); color: white; white-space: nowrap; }
+    .btn-success { background: var(--success); color: white; width: 100%; margin-top: 10px; }
+
+    .feedback { margin-top: 8px; padding: 8px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display: none; }
+    .feedback.ok { display: block; background: var(--success-light); color: #14532d; border: 1px solid #86efac; }
+    .feedback.err { display: block; background: var(--danger-light); color: #7f1d1d; border: 1px solid #fca5a5; }
+
+    .calc-toggle { width: 100%; margin-bottom: 12px; background: #f1f5f9; border: 1px dashed #64748b; color: #334155; padding: 9px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .mini-calc { display: none; background: #1e293b; padding: 12px; border-radius: 12px; margin-bottom: 14px; color: white; }
+    .mini-calc.open { display: block; }
+    .calc-screen { background: #0f172a; padding: 10px 12px; border-radius: 8px; text-align: right; font-family: monospace; font-size: 1.25rem; margin-bottom: 8px; min-height: 42px; word-break: break-all; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .calc-key { padding: 12px 0; border: none; border-radius: 8px; font-size: 1.05rem; font-weight: 700; background: #334155; color: white; cursor: pointer; }
+    .calc-key.op { background: var(--primary); }
+    .calc-key.eq { background: #16a34a; }
+    .calc-key.clr { background: #dc2626; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⚡ La Puissance Électrique (3e)</h1>
+    <p>Maîtriser la relation P = U &times; I</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-sim', this)">
+      <span class="icon">💡</span>
+      <span>1. Expérience</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-formule', this)">
+      <span class="icon">📐</span>
+      <span>2. Formule</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-exo', this)">
+      <span class="icon">✏️</span>
+      <span>3. S'entraîner</span>
+    </button>
+  </nav>
+
+  <main class="container">
+
+    <!-- ================= ONGLET 1 : COMPRENDRE ================= -->
+    <section id="tab-sim" class="tab-content active">
+      <div class="card">
+        <h2 class="card-title">🔬 Expérience : De quoi dépend l'éclat ?</h2>
+        
+        <div class="instruction-step">
+          <strong>Consignes de l'expérience :</strong>
+          <ol>
+            <li>Choisis une des trois lampes (L1, L2 ou L3).</li>
+            <li>Fais glisser le curseur pour augmenter la <strong>Tension (U)</strong> délivrée par le générateur.</li>
+            <li>Observe comment l'<strong>Intensité (I)</strong> mesurée réagit et regarde l'évolution de la <strong>Puissance (P)</strong> (l'éclat de la lampe).</li>
+          </ol>
+        </div>
+
+        <div class="preset-grid">
+          <button class="preset-btn active" onclick="setLamp('L1', this)">
+            <span class="emoji">💡</span>
+            Lampe L1<br><small>(6V - 0,3W)</small>
+          </button>
+          <button class="preset-btn" onclick="setLamp('L2', this)">
+            <span class="emoji">💡</span>
+            Lampe L2<br><small>(6V - 0,6W)</small>
+          </button>
+          <button class="preset-btn" onclick="setLamp('L3', this)">
+            <span class="emoji">💡</span>
+            Lampe L3<br><small>(6V - 2,1W)</small>
+          </button>
+        </div>
+
+        <div class="sim-stage">
+          <div class="power-display">
+            <span id="sim-p" style="color: #fde047; font-size: 1.3rem;">P = 0,00 W</span>
+            <span style="font-size: 0.8rem; color: #cbd5e1; font-weight: normal;">(Calcul : P = U &times; I)</span>
+          </div>
+          <div class="alert-box" id="alert-surtension">⚠️ SURTENSION : Lampe grillée !</div>
+          <div class="bulb-container">
+            <div class="bulb-glow" id="sim-glow"></div>
+            <div class="bulb-emoji" id="sim-bulb">💡</div>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span style="color:#2563eb;">🔌 Tension du générateur (U)</span>
+            <span class="badge-val" id="lbl-u">0 V</span>
+          </div>
+          <input type="range" id="slide-u" min="0" max="12" step="0.5" value="0" oninput="updateCircuit()">
+        </div>
+
+        <div class="control-group" style="background: #e2e8f0; border-color: #cbd5e1;">
+          <div class="control-header">
+            <span style="color:#16a34a;">⚡ Intensité mesurée (I)</span>
+            <span class="badge-val badge-read" id="lbl-i">0,00 A</span>
+          </div>
+          <div style="font-size:0.8rem; color:var(--muted); font-style:italic;">
+            L'ampèremètre affiche le courant qui traverse la lampe choisie.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ONGLET 2 : LA FORMULE ================= -->
+    <section id="tab-formule" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">📐 La formule officielle</h2>
+
+        <div class="formula-card">
+          <div class="formula-big">
+            <span class="hl-p">P</span> = <span class="hl-u">U</span> &times; <span class="hl-i">I</span>
+          </div>
+          <div style="font-size:0.85rem; color:#cbd5e1;">La puissance est proportionnelle à la tension et à l'intensité.</div>
+
+          <div class="unit-list">
+            <div class="unit-item">
+              🟡 <strong><span class="hl-p">P</span> (Puissance)</strong> : en <strong>Watts (W)</strong>
+            </div>
+            <div class="unit-item">
+              🔵 <strong><span class="hl-u">U</span> (Tension)</strong> : en <strong>Volts (V)</strong>
+            </div>
+            <div class="unit-item">
+              🟢 <strong><span class="hl-i">I</span> (Intensité)</strong> : en <strong>Ampères (A)</strong>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="card-title">⚠️ Le piège des unités (Milliampères)</h3>
+        <div class="step-box" style="border-left: 4px solid #dc2626;">
+          <div class="step-title" style="color:#b91c1c; margin-bottom:4px;">Ne jamais utiliser les mA dans la formule !</div>
+          <div style="font-size:0.88rem;">
+            Sur l'ampèremètre, si tu lis <strong>200 mA</strong>, il faut obligatoirement convertir en Ampères (A) avant de faire le calcul !<br>
+            👉 <strong>Divise par 1000 :</strong> 200 mA &divide; 1000 = <strong>0,2 A</strong>.
+          </div>
+        </div>
+
+        <h3 class="card-title">🔄 Retrouver U ou I</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div class="step-box" style="text-align:center; margin:0;">
+            <strong>Je cherche I :</strong><br>
+            <span style="font-size:1.2rem; font-weight:800; color:#16a34a;">I = P &divide; U</span>
+          </div>
+          <div class="step-box" style="text-align:center; margin:0;">
+            <strong>Je cherche U :</strong><br>
+            <span style="font-size:1.2rem; font-weight:800; color:#2563eb;">U = P &divide; I</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ONGLET 3 : S'ENTRAÎNER ================= -->
+    <section id="tab-exo" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">✏️ Exercices d'application</h2>
+        
+        <div class="exo-selector" id="exo-buttons"></div>
+
+        <button class="calc-toggle" onclick="toggleCalc()">🧮 Afficher/Masquer la calculatrice intégrée</button>
+        <div id="mini-calc" class="mini-calc">
+          <div id="calc-screen" class="calc-screen">0</div>
+          <div class="calc-grid">
+            <button class="calc-key clr" onclick="calcAction('C')">C</button>
+            <button class="calc-key op" onclick="calcAction('/')">&divide;</button>
+            <button class="calc-key op" onclick="calcAction('*')">&times;</button>
+            <button class="calc-key op" onclick="calcAction('-')">&minus;</button>
+            
+            <button class="calc-key" onclick="calcAction('7')">7</button>
+            <button class="calc-key" onclick="calcAction('8')">8</button>
+            <button class="calc-key" onclick="calcAction('9')">9</button>
+            <button class="calc-key op" style="grid-row: span 2;" onclick="calcAction('+')">+</button>
+            
+            <button class="calc-key" onclick="calcAction('4')">4</button>
+            <button class="calc-key" onclick="calcAction('5')">5</button>
+            <button class="calc-key" onclick="calcAction('6')">6</button>
+            
+            <button class="calc-key" onclick="calcAction('1')">1</button>
+            <button class="calc-key" onclick="calcAction('2')">2</button>
+            <button class="calc-key" onclick="calcAction('3')">3</button>
+            <button class="calc-key eq" style="grid-row: span 2;" onclick="calcAction('=')">=</button>
+            
+            <button class="calc-key" style="grid-column: span 2;" onclick="calcAction('0')">0</button>
+            <button class="calc-key" onclick="calcAction('.')">,</button>
+          </div>
+        </div>
+
+        <div id="exo-enonce" class="enonce-box"></div>
+
+        <!-- ZONE DYNAMIQUE DES EXERCICES -->
+        <div id="exo-zone-standard" style="display:none;">
+          <div id="s-step1" class="step-box active-step">
+            <div class="step-header">
+              <span class="step-title">Étape 1 : Choisir la bonne formule</span>
+              <span id="s-status1" class="step-status">À faire</span>
+            </div>
+            <div class="input-row">
+              <select id="s-formule" class="unit-select" style="flex:1;">
+                <option value="">Sélectionne la formule...</option>
+                <option value="P">P = U &times; I (Calcul de la puissance)</option>
+                <option value="I">I = P &divide; U (Calcul de l'intensité)</option>
+                <option value="U">U = P &divide; I (Calcul de la tension)</option>
+              </select>
+              <button class="btn btn-check" onclick="verifFormule()">Vérifier</button>
+            </div>
+            <div id="s-fb1" class="feedback"></div>
+          </div>
+
+          <div id="s-step2" class="step-box locked">
+            <div class="step-header">
+              <span class="step-title">Étape 2 : Calcul et Unité</span>
+              <span id="s-status2" class="step-status">🔒 Verrouillé</span>
+            </div>
+            <div style="font-size:0.85rem; color:var(--muted); margin-bottom:6px;"><i>Attention : Si l'intensité est en mA, n'oublie pas de la diviser par 1000 !</i></div>
+            <div class="input-row">
+              <span style="font-weight:bold; font-size:1.1rem;">Résultat = </span>
+              <input type="text" id="s-res" class="num-input" placeholder="Ex: 12">
+              <select id="s-unit" class="unit-select">
+                <option value="">Unité ?</option>
+                <option value="W">W (Watts)</option>
+                <option value="V">V (Volts)</option>
+                <option value="A">A (Ampères)</option>
+                <option value="mA">mA</option>
+              </select>
+              <button class="btn btn-check" onclick="verifCalcul()">Vérifier</button>
+            </div>
+            <div id="s-fb2" class="feedback"></div>
+          </div>
+        </div>
+
+        <!-- ZONE DYNAMIQUE : LE DÉFI PLAFONNIER -->
+        <div id="exo-zone-defi" style="display:none;">
+          <div id="d-step1" class="step-box active-step">
+            <div class="step-header">
+              <span class="step-title">Étape 1 : Puissance totale du circuit</span>
+              <span id="d-status1" class="step-status">À faire</span>
+            </div>
+            <div class="input-row">
+              <span style="font-weight:bold;">P<sub>totale</sub> = </span>
+              <input type="text" id="d-ptot" class="num-input" placeholder="Somme">
+              <span style="font-weight:bold;">W</span>
+              <button class="btn btn-check" onclick="verifDefi1()">Vérifier</button>
+            </div>
+            <div id="d-fb1" class="feedback"></div>
+          </div>
+
+          <div id="d-step2" class="step-box locked">
+            <div class="step-header">
+              <span class="step-title">Étape 2 : Calcul de l'intensité (I = P &divide; U)</span>
+              <span id="d-status2" class="step-status">🔒 Verrouillé</span>
+            </div>
+            <div class="input-row">
+              <span style="font-weight:bold;">I<sub>totale</sub> = </span>
+              <input type="text" id="d-itot" class="num-input" placeholder="Résultat">
+              <span style="font-weight:bold;">A</span>
+              <button class="btn btn-check" onclick="verifDefi2()">Vérifier</button>
+            </div>
+            <div id="d-fb2" class="feedback"></div>
+          </div>
+
+          <div id="d-step3" class="step-box locked">
+            <div class="step-header">
+              <span class="step-title">Étape 3 : Conclusion (Le fusible fond-il ?)</span>
+              <span id="d-status3" class="step-status">🔒 Verrouillé</span>
+            </div>
+            <div style="font-size:0.9rem; margin-bottom:8px;">Le fusible tolère <strong>10 A maximum</strong>. L'intensité dépasse-t-elle cette limite ?</div>
+            <div class="input-row">
+              <select id="d-concl" class="unit-select" style="flex:1;">
+                <option value="">Sélectionne ta réponse...</option>
+                <option value="oui">Oui, le fusible fond ! L'intensité dépasse 10 A.</option>
+                <option value="non">Non, tout va bien ! L'intensité est inférieure à 10 A.</option>
+              </select>
+              <button class="btn btn-check" onclick="verifDefi3()">Valider</button>
+            </div>
+            <div id="d-fb3" class="feedback"></div>
+          </div>
+        </div>
+
+        <button id="btn-next-exo" class="btn btn-success" style="display:none;" onclick="nextExo()">🎉 Super ! Passer à l'exercice suivant ➡️</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // --- ONGLETS ---
+    function switchTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+      window.scrollTo(0,0);
+    }
+
+    // --- SIMULATEUR DYNAMIQUE AVEC RESISTANCE ---
+    // Les 3 lampes de l'expérience, conçues pour fonctionner en 6V
+    const lampes = {
+      'L1': { Pnom: 0.3, R: 120 },   // 6V / 0.05A = 120 ohms
+      'L2': { Pnom: 0.6, R: 60 },    // 6V / 0.10A = 60 ohms
+      'L3': { Pnom: 2.1, R: 17.14 }  // 6V / 0.35A = 17.14 ohms
+    };
+
+    let activeLamp = 'L1';
+    let isBroken = false;
+
+    function setLamp(id, btn) {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeLamp = id;
+      
+      // Réinitialiser la lampe si on change
+      isBroken = false;
+      document.getElementById('sim-bulb').className = 'bulb-emoji';
+      document.getElementById('sim-bulb').textContent = '💡';
+      document.getElementById('alert-surtension').style.display = 'none';
+      
+      // Remettre le slider à 0 par sécurité pour bien observer
+      document.getElementById('slide-u').value = 0;
+      updateCircuit();
+    }
+
+    function updateCircuit() {
+      const u = parseFloat(document.getElementById('slide-u').value);
+      document.getElementById('lbl-u').textContent = u.toFixed(1).replace('.', ',') + " V";
+
+      if (isBroken) return; // Si c'est cassé, on ne calcule plus rien
+
+      const R = lampes[activeLamp].R;
+      const Pnom = lampes[activeLamp].Pnom;
+      
+      // Calcul physique de l'intensité (I = U / R) et de la puissance (P = U * I)
+      const i = u / R;
+      const p = u * i;
+
+      document.getElementById('lbl-i').textContent = i.toFixed(2).replace('.', ',') + " A";
+      document.getElementById('sim-p').textContent = "P = " + p.toFixed(2).replace('.', ',') + " W";
+
+      const glow = document.getElementById('sim-glow');
+      const bulb = document.getElementById('sim-bulb');
+      
+      // Cas de surtension (> 8V pour une lampe de 6V)
+      if (u > 8) {
+        isBroken = true;
+        bulb.className = 'bulb-emoji broken';
+        bulb.textContent = "💥";
+        glow.style.opacity = 0;
+        document.getElementById('alert-surtension').style.display = 'block';
+        document.getElementById('lbl-i').textContent = "0,00 A";
+        document.getElementById('sim-p').textContent = "P = 0,00 W";
+        return;
+      }
+
+      // Variation visuelle de l'éclat (toujours l'ampoule 💡)
+      if (p === 0) {
+        glow.style.opacity = 0;
+        bulb.className = 'bulb-emoji';
+      } else {
+        bulb.className = 'bulb-emoji on';
+        // L'éclat dépend du rapport entre la puissance actuelle et la puissance nominale
+        const ratio = Math.min(1.5, p / Pnom); 
+        glow.style.opacity = 0.2 + (ratio * 0.6);
+        glow.style.transform = `scale(${0.3 + ratio})`;
+      }
+    }
+
+    // --- CALCULATRICE ---
+    let calcExpr = "";
+    function toggleCalc() { document.getElementById('mini-calc').classList.toggle('open'); }
+    function calcAction(key) {
+      const screen = document.getElementById('calc-screen');
+      if (key === 'C') { calcExpr = ""; screen.textContent = "0"; return; }
+      if (key === '=') {
+        try { 
+          const val = Function('"use strict";return (' + (calcExpr || "0") + ')')(); 
+          calcExpr = String(Math.round(val * 1000) / 1000); 
+          screen.textContent = calcExpr.replace('.', ','); 
+        } catch(e) { screen.textContent = "Err"; calcExpr = ""; }
+        return;
+      }
+      calcExpr += key;
+      screen.textContent = calcExpr.replace(/\*/g, '×').replace(/\//g, '÷').replace(/\./g, ',');
+    }
+
+    // --- EXERCICES ---
+    const exos = [
+      { id: 0, type: "std", find: "P", ans: 6, unit: "W", title: "1. Lampe simple",
+        enonce: "Une lampe est traversée par un courant de <strong>0,5 A</strong> sous une tension de <strong>12 V</strong>. Calcule sa puissance électrique." },
+      { id: 1, type: "std", find: "I", ans: 10, unit: "A", title: "2. Radiateur",
+        enonce: "Un radiateur a une puissance de <strong>2300 W</strong> et est branché sur le secteur à <strong>230 V</strong>. Calcule l'intensité du courant qui le traverse." },
+      { id: 2, type: "std", find: "P", ans: 1.2, unit: "W", title: "3. Piège (mA)",
+        enonce: "Une lampe fonctionne sous <strong>6 V</strong> avec un courant de <strong>200 mA</strong>. <em>Attention au piège des unités !</em> Calcule sa puissance." },
+      { id: 3, type: "defi", title: "4. DÉFI PLAFONNIER ☠️",
+        enonce: "<strong>Application : Le circuit d'éclairage</strong>.<br>Dans un grand salon, un circuit d'éclairage (tension <strong>230 V</strong>) est protégé par un fusible de <strong>10 A</strong>. On y installe un lustre principal (<strong>800 W</strong>), une série de spots (<strong>1000 W</strong>) et un lampadaire halogène (<strong>600 W</strong>). Le fusible va-t-il fondre ?" }
+    ];
+
+    let currentExo = 0;
+    const completed = new Set();
+
+    function initExos() {
+      const btnContainer = document.getElementById('exo-buttons');
+      btnContainer.innerHTML = '';
+      exos.forEach((ex, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'exo-pill' + (i === currentExo ? ' active' : '') + (completed.has(i) ? ' done' : '') + (ex.type === 'defi' ? ' hard' : '');
+        btn.textContent = (completed.has(i) ? '✅ ' : '') + ex.title;
+        btn.onclick = () => loadExo(i);
+        btnContainer.appendChild(btn);
+      });
+    }
+
+    function loadExo(idx) {
+      currentExo = idx;
+      initExos();
+      const ex = exos[idx];
+      document.getElementById('exo-enonce').innerHTML = ex.enonce;
+      document.getElementById('btn-next-exo').style.display = 'none';
+
+      document.querySelectorAll('.feedback').forEach(f => { f.className = 'feedback'; f.innerHTML = ''; });
+      document.querySelectorAll('.num-input').forEach(i => i.value = '');
+      document.querySelectorAll('.unit-select').forEach(s => s.value = '');
+
+      if (ex.type === 'std') {
+        document.getElementById('exo-zone-standard').style.display = 'block';
+        document.getElementById('exo-zone-defi').style.display = 'none';
+        
+        document.getElementById('s-step1').className = 'step-box active-step';
+        document.getElementById('s-status1').textContent = 'À faire';
+        document.getElementById('s-step2').className = 'step-box locked';
+        document.getElementById('s-status2').textContent = '🔒 Verrouillé';
+      } else {
+        document.getElementById('exo-zone-standard').style.display = 'none';
+        document.getElementById('exo-zone-defi').style.display = 'block';
+
+        document.getElementById('d-step1').className = 'step-box active-step';
+        document.getElementById('d-status1').textContent = 'À faire';
+        document.getElementById('d-step2').className = 'step-box locked';
+        document.getElementById('d-status2').textContent = '🔒 Verrouillé';
+        document.getElementById('d-step3').className = 'step-box locked';
+        document.getElementById('d-status3').textContent = '🔒 Verrouillé';
+      }
+    }
+
+    function parseNum(str) { return parseFloat(str.replace(/\s/g, '').replace(',', '.')); }
+    function setFb(id, isOk, msg) { const el = document.getElementById(id); el.className = 'feedback ' + (isOk ? 'ok' : 'err'); el.innerHTML = msg; }
+
+    function verifFormule() {
+      const ex = exos[currentExo];
+      const val = document.getElementById('s-formule').value;
+      if (val === ex.find) {
+        setFb('s-fb1', true, "✅ Bonne formule ! Passe au calcul.");
+        document.getElementById('s-step1').className = 'step-box done-step';
+        document.getElementById('s-status1').textContent = '✅ Validé';
+        document.getElementById('s-step2').className = 'step-box active-step';
+        document.getElementById('s-status2').textContent = 'À faire';
+      } else {
+        setFb('s-fb1', false, "❌ Mauvaise formule. Relis bien ce que l'on cherche !");
+      }
+    }
+
+    function verifCalcul() {
+      const ex = exos[currentExo];
+      const res = parseNum(document.getElementById('s-res').value);
+      const unit = document.getElementById('s-unit').value;
+      
+      if (isNaN(res)) { setFb('s-fb2', false, "⚠️ Entre un nombre."); return; }
+
+      if (Math.abs(res - ex.ans) < 0.01 && unit === ex.unit) {
+        setFb('s-fb2', true, "✅ Excellent calcul et bonne unité !");
+        document.getElementById('s-step2').className = 'step-box done-step';
+        document.getElementById('s-status2').textContent = '✅ Validé';
+        completed.add(currentExo);
+        initExos();
+        document.getElementById('btn-next-exo').style.display = 'block';
+      } else if (currentExo === 2 && Math.abs(res - 1200) < 1) {
+        setFb('s-fb2', false, "❌ Piège ! Divise d'abord 200 par 1000 pour avoir des Ampères (0,2 A) !");
+      } else {
+        setFb('s-fb2', false, "❌ Vérifie le calcul ou l'unité.");
+      }
+    }
+
+    function verifDefi1() {
+      const res = parseNum(document.getElementById('d-ptot').value);
+      if (Math.abs(res - 2400) < 0.1) {
+        setFb('d-fb1', true, "✅ Exact (800 + 1000 + 600 = 2400 W).");
+        document.getElementById('d-step1').className = 'step-box done-step';
+        document.getElementById('d-status1').textContent = '✅ Validé';
+        document.getElementById('d-step2').className = 'step-box active-step';
+        document.getElementById('d-status2').textContent = 'À faire';
+      } else {
+        setFb('d-fb1', false, "❌ Faux. Additionne les 3 puissances.");
+      }
+    }
+
+    function verifDefi2() {
+      const res = parseNum(document.getElementById('d-itot').value);
+      if (Math.abs(res - (2400/230)) < 0.3) { 
+        setFb('d-fb2', true, "✅ Parfait ! I &approx; 10,4 A.");
+        document.getElementById('d-step2').className = 'step-box done-step';
+        document.getElementById('d-status2').textContent = '✅ Validé';
+        document.getElementById('d-step3').className = 'step-box active-step';
+        document.getElementById('d-status3').textContent = 'À faire';
+      } else {
+        setFb('d-fb2', false, "❌ Faux. Utilise I = P<sub>totale</sub> &divide; U.");
+      }
+    }
+
+    function verifDefi3() {
+      const val = document.getElementById('d-concl').value;
+      if (val === "oui") {
+        setFb('d-fb3', true, "✅ Félicitations ! 10,4 A dépasse la limite de 10 A. Le fusible va fondre.");
+        document.getElementById('d-step3').className = 'step-box done-step';
+        document.getElementById('d-status3').textContent = '✅ Validé';
+        completed.add(currentExo);
+        initExos();
+      } else {
+        setFb('d-fb3', false, "❌ Réfléchis bien... 10,4 A est-il plus grand que 10 A ?");
+      }
+    }
+
+    function nextExo() { loadExo((currentExo + 1) % exos.length); }
+
+    window.onload = () => { updateCircuit(); loadExo(0); };
+  </script>
+</body>
+</html>
+```<ElicitationsGroup>
+  <FollowUp>Est-ce que l'expérience te semble plus fidèle à la réalité avec ce simple halo lumineux ?</FollowUp>
+</ElicitationsGroup>
