@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Énergie - Correction, Explications et Statistiques</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .question-card { transition: all 0.2s; }
+        .question-card:hover { border-color: #3b82f6; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1); }
+        .illustration { width: 140px; height: 140px; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-6 text-center">
+            <h1 class="text-2xl font-bold text-blue-700">Test : Sources et Formes d'Énergie</h1>
+            <p class="text-gray-600">10 questions tirées au sort</p>
+        </header>
+
+        <!-- ZONE DU FORMULAIRE -->
+        <div id="formulaireZone">
+            <form id="qcmForm" class="space-y-4">
+                
+                <div class="bg-white p-5 rounded shadow-sm border border-gray-200">
+                    <label class="block font-semibold mb-2">Votre Nom et Prénom :</label>
+                    <input type="text" id="nomEleve" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" placeholder="Saisir ici...">
+                </div>
+
+                <div id="questionsContainer" class="space-y-4"></div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700 mt-6 transition duration-200">
+                    Valider mes réponses
+                </button>
+                
+                <div id="statusMessage" class="hidden text-center font-bold mt-4 p-3 rounded"></div>
+            </form>
+        </div>
+
+        <!-- ZONE DE CORRECTION -->
+        <div id="correctionZone" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded shadow-sm border border-gray-200 text-center">
+                <h2 class="text-2xl font-bold mb-2">Résultat</h2>
+                <div id="scoreFinal" class="text-4xl font-extrabold text-blue-600 mb-4"></div>
+                <p id="messageScore" class="text-lg text-gray-700 mb-4"></p>
+                <button id="btnRecommencer" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded hover:bg-indigo-700 transition duration-200">
+                    Refaire un test (70% de nouvelles questions)
+                </button>
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-800 mt-6 border-b pb-2">Correction détaillée :</h3>
+            <div id="correctionContainer" class="space-y-4"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. CONFIGURATION DE L'URL ---
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNJWdsJoAupuWmZwAw1tu2AKJetSLVGM9w7gKJHKQQg-U0JaPTJDyWmS9k9Axg_eOUNA/exec';
+
+        // --- 2. DESSINS SVG INCLUS ---
+        const svgCycliste = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="illustration mx-auto"><circle cx="50" cy="150" r="40" fill="none" stroke="#334155" stroke-width="8"/><circle cx="150" cy="150" r="40" fill="none" stroke="#334155" stroke-width="8"/><path d="M50 150 L80 90 L130 90 L150 150 M80 90 L70 60 M130 90 L140 60" fill="none" stroke="#334155" stroke-width="8"/><circle cx="70" cy="50" r="15" fill="#3b82f6"/></svg>`;
+        
+        const svgCoca = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="illustration mx-auto"><path d="M80 200 L80 120 C80 100, 90 90, 90 70 L90 60 L110 60 L110 70 C110 90, 120 100, 120 120 L120 200 Z" fill="#78350f"/><rect x="85" y="50" width="30" height="10" fill="#ef4444"/><path d="M90 50 Q100 -20 130 30" fill="none" stroke="#d97706" stroke-width="15" stroke-linecap="round"/><circle cx="100" cy="15" r="8" fill="#fcd34d"/><circle cx="115" cy="5" r="6" fill="#fcd34d"/></svg>`;
+        
+        const svgEclair = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="illustration mx-auto"><path d="M40 80 Q60 40 100 50 Q140 30 160 70 Q190 90 150 110 L40 110 Q10 90 40 80 Z" fill="#64748b"/><path d="M100 110 L80 150 L110 150 L90 190 L130 140 L100 140 Z" fill="#eab308"/></svg>`;
+        
+        const svgNucleaire = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="illustration mx-auto"><path d="M60 180 L80 50 Q100 30 120 50 L140 180 Z" fill="#cbd5e1"/><circle cx="100" cy="120" r="30" fill="#eab308"/><path d="M100 120 L115 100 A30 30 0 0 0 85 100 Z" fill="#1e293b"/><path d="M100 120 L125 135 A30 30 0 0 0 130 115 Z" fill="#1e293b"/><path d="M100 120 L75 135 A30 30 0 0 1 70 115 Z" fill="#1e293b"/></svg>`;
+        
+        const svgCasserole = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="illustration mx-auto"><rect x="60" y="100" width="80" height="60" rx="10" fill="#94a3b8"/><line x1="20" y1="110" x2="60" y2="110" stroke="#1e293b" stroke-width="12" stroke-linecap="round"/><circle cx="80" cy="140" r="6" fill="#eff6ff"/><circle cx="100" cy="130" r="8" fill="#eff6ff"/><circle cx="120" cy="145" r="5" fill="#eff6ff"/><path d="M80 80 Q90 50 80 20 M100 90 Q110 60 100 30 M120 80 Q130 50 120 20" fill="none" stroke="#cbd5e1" stroke-width="4"/></svg>`;
+        
+        const svgPhosphorescent = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="illustration mx-auto"><path d="M90 40 L110 40 L110 90 L150 170 L50 170 L90 90 Z" fill="#4ade80" opacity="0.9"/><rect x="85" y="30" width="30" height="10" fill="#1e293b"/><line x1="100" y1="130" x2="30" y2="100" stroke="#22c55e" stroke-width="4"/><line x1="100" y1="130" x2="170" y2="100" stroke="#22c55e" stroke-width="4"/><line x1="100" y1="130" x2="40" y2="160" stroke="#22c55e" stroke-width="4"/><line x1="100" y1="130" x2="160" y2="160" stroke="#22c55e" stroke-width="4"/></svg>`;
+
+
+        // --- 3. BANQUE DES 30 QUESTIONS ---
+        const banqueQuestions = [
+            { q: "Quelle forme d'énergie est liée à une transformation chimique ?", svg: null, options: ["Électrique", "Chimique", "Thermique"], correct: "Chimique", explication: "L'énergie chimique est libérée lors d'une réaction entre plusieurs substances (comme dans une pile, la digestion ou lors d'une combustion)." },
+            { q: "Quelle forme d'énergie est liée à la circulation d'un courant électrique ?", svg: null, options: ["Électrique", "Mécanique", "Lumineuse"], correct: "Électrique", explication: "Le mouvement des électrons dans un circuit crée l'énergie électrique." },
+            { q: "L'énergie contenue dans le noyau de l'atome est l'énergie...", svg: null, options: ["Chimique", "Nucléaire", "Thermique"], correct: "Nucléaire", explication: "C'est l'énergie nucléaire, libérée en cassant des noyaux d'uranium dans les centrales." },
+            { q: "L'énergie liée au changement de température est l'énergie...", svg: null, options: ["Thermique", "Mécanique", "Lumineuse"], correct: "Thermique", explication: "L'énergie thermique (la chaleur) est directement liée à la température d'un corps." },
+            { q: "L'énergie liée aux rayonnements est l'énergie...", svg: null, options: ["Lumineuse", "Nucléaire", "Cinétique"], correct: "Lumineuse", explication: "La lumière du Soleil ou d'une lampe transporte de l'énergie sous forme de rayonnements (lumineuse)." },
+            { q: "L'énergie mécanique est la somme de l'énergie cinétique et de l'énergie...", svg: null, options: ["énergie de pesanteur (énergie potentielle)", "Électrique", "Chimique"], correct: "énergie de pesanteur (énergie potentielle)", explication: "Énergie mécanique = Énergie cinétique (vitesse) + Énergie de pesanteur (altitude/position)." },
+            { q: "Quelle forme d'énergie possède un cycliste qui roule ?", svg: svgCycliste, options: ["Mécanique (Cinétique)", "Nucléaire", "Thermique"], correct: "Mécanique (Cinétique)", explication: "Puisqu'il est en mouvement (vitesse), il possède principalement de l'énergie cinétique." },
+            { q: "Quelle forme d'énergie est libérée par le Mentos dans le coca ?", svg: svgCoca, options: ["Chimique", "énergie de pesanteur (énergie potentielle)", "Électrique"], correct: "Chimique", explication: "C'est une réaction au contact des deux matières qui libère violemment le gaz, il s'agit d'énergie chimique." },
+            { q: "Quelle forme d'énergie principale est visible lors d'un éclair de foudre ?", svg: svgEclair, options: ["Électrique / Lumineuse", "Nucléaire", "Mécanique"], correct: "Électrique / Lumineuse", explication: "L'éclair est une énorme décharge de courant (électrique) qui produit un flash très intense (lumineuse)." },
+            { q: "Quelle forme d'énergie est exploitée dans une centrale avec une tour de refroidissement comme celle-ci ?", svg: svgNucleaire, options: ["Nucléaire", "Chimique", "Cinétique"], correct: "Nucléaire", explication: "Ces grandes tours de refroidissement en forme de cheminées évasées sont typiques des centrales nucléaires." },
+            { q: "Quelle forme d'énergie est transférée à l'eau qui chauffe dans une casserole ?", svg: svgCasserole, options: ["Thermique", "Lumineuse", "Mécanique"], correct: "Thermique", explication: "La plaque de cuisson transfère de la chaleur (énergie thermique) à l'eau pour la faire bouillir." },
+            { q: "Un liquide phosphorescent émet de l'énergie...", svg: svgPhosphorescent, options: ["Lumineuse", "énergie de pesanteur (énergie potentielle)", "Thermique"], correct: "Lumineuse", explication: "Puisqu'il brille dans le noir, il émet des rayonnements visibles, donc de l'énergie lumineuse." },
+            { q: "Quelle est la différence entre source et forme d'énergie ?", svg: null, options: ["La source renferme l'énergie, la forme est la façon dont elle est stockée", "C'est la même chose", "La forme crée la source"], correct: "La source renferme l'énergie, la forme est la façon dont elle est stockée", explication: "Exemple : le vent est la source d'énergie, et la forme d'énergie qu'il contient est l'énergie cinétique." },
+            { q: "Quelle forme d'énergie est associée à l'Uranium ?", svg: null, options: ["Nucléaire", "Thermique", "Électrique"], correct: "Nucléaire", explication: "L'uranium est un minerai dont on casse le noyau de l'atome : c'est l'énergie nucléaire." },
+            { q: "Quelle forme d'énergie est contenue dans le charbon ?", svg: null, options: ["Chimique", "Nucléaire", "Cinétique"], correct: "Chimique", explication: "Le charbon doit être brûlé (réaction chimique de combustion) pour libérer son énergie." },
+            { q: "L'eau retenue en hauteur dans un barrage possède une énergie...", svg: null, options: ["énergie de pesanteur (énergie potentielle)", "Thermique", "Lumineuse"], correct: "énergie de pesanteur (énergie potentielle)", explication: "L'eau stockée en altitude possède de l'énergie liée à sa position ou sa hauteur : c'est l'énergie de pesanteur." },
+            { q: "L'énergie du vent est une énergie...", svg: null, options: ["Cinétique", "Nucléaire", "Chimique"], correct: "Cinétique", explication: "Le vent est de l'air en mouvement (vitesse), c'est donc de l'énergie cinétique." },
+            { q: "Le Soleil nous envoie des formes d'énergie...", svg: null, options: ["Lumineuse et thermique", "Uniquement lumineuse", "Cinétique et énergie de pesanteur (énergie potentielle)"], correct: "Lumineuse et thermique", explication: "Le Soleil nous éclaire (énergie lumineuse) et nous chauffe (énergie thermique)." },
+            { q: "L'énergie issue de la chaleur du noyau terrestre est l'énergie...", svg: null, options: ["Thermique (géothermie)", "Chimique", "énergie de pesanteur (énergie potentielle)"], correct: "Thermique (géothermie)", explication: "C'est la chaleur de la Terre, on l'appelle l'énergie thermique ou géothermique." },
+            { q: "L'énergie électrique est-elle une source d'énergie disponible dans la nature ?", svg: null, options: ["Non", "Oui", "Seulement le jour"], correct: "Non", explication: "Il n'y a pas de \"mines\" d'électricité : il faut la fabriquer dans des centrales à partir d'autres sources d'énergie." },
+            { q: "Parmi ces sources, laquelle est RENOUVELABLE ?", svg: null, options: ["Le vent", "Le charbon", "L'uranium"], correct: "Le vent", explication: "Le vent se reforme en permanence, contrairement au charbon ou à l'uranium dont les réserves s'épuisent." },
+            { q: "Parmi ces sources, laquelle est NON renouvelable ?", svg: null, options: ["Le gaz", "Le Soleil", "La biomasse"], correct: "Le gaz", explication: "Le gaz naturel est une énergie fossile qui met des millions d'années à se former dans le sol." },
+            { q: "Le pétrole est une source d'énergie...", svg: null, options: ["Non renouvelable", "Renouvelable", "Inépuisable"], correct: "Non renouvelable", explication: "Le pétrole s'épuise et ne se reforme pas à l'échelle d'une vie humaine : il est non renouvelable." },
+            { q: "La géothermie est une source d'énergie...", svg: null, options: ["Renouvelable", "Non renouvelable", "Polluante"], correct: "Renouvelable", explication: "La chaleur de la Terre est inépuisable à notre échelle, c'est donc une source renouvelable." },
+            { q: "La biomasse (bois, végétaux) est classée comme énergie...", svg: null, options: ["Renouvelable", "Non renouvelable", "Nucléaire"], correct: "Renouvelable", explication: "On peut faire repousser des arbres et des végétaux, la biomasse est donc renouvelable (si elle est bien gérée)." },
+            { q: "Une source d'énergie renouvelable est une source qui...", svg: null, options: ["Se reconstitue naturellement assez vite", "S'épuise avec le temps", "Doit être fabriquée en usine"], correct: "Se reconstitue naturellement assez vite", explication: "Elle ne s'épuise pas car elle se reforme aussi vite (ou plus vite) qu'on ne la consomme." },
+            { q: "L'uranium, utilisé dans les centrales, est-il renouvelable ?", svg: null, options: ["Non", "Oui", "Ça dépend des pays"], correct: "Non", explication: "Les réserves mondiales d'uranium sont limitées dans le sol et finiront par s'épuiser." },
+            { q: "Comment peut-on stocker de l'énergie électrique indirectement ?", svg: null, options: ["Dans des batteries (énergie chimique)", "Dans des câbles", "En la mettant dans un coffre"], correct: "Dans des batteries (énergie chimique)", explication: "L'électricité ne se stocke pas directement : on la transforme en énergie chimique à l'intérieur des piles et batteries." },
+            { q: "Dans une centrale hydraulique, qu'est-ce qui fait tourner la turbine ?", svg: null, options: ["L'eau en mouvement", "Le vent", "La vapeur d'eau"], correct: "L'eau en mouvement", explication: "L'eau chute dans de grands tuyaux et frappe la turbine avec beaucoup de force (énergie cinétique), ce qui la fait tourner." },
+            { q: "Que produit l'alternateur dans une centrale hydraulique ?", svg: null, options: ["Un courant électrique", "De l'eau chaude", "De l'énergie chimique"], correct: "Un courant électrique", explication: "L'alternateur est la pièce maîtresse (une sorte de grosse dynamo) qui transforme le mouvement rotatif en électricité." }
+        ];
+
+        // --- 4. VARIABLES ET LOGIQUE DE TIRAGE ---
+        let indicesPrecedents = [];
+        let questionsActuelles = [];
+
+        function melanger(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function genererTirage() {
+            let tousIndices = Array.from({length: banqueQuestions.length}, (_, i) => i);
+            let tirage = [];
+
+            if (indicesPrecedents.length === 0) {
+                tirage = melanger(tousIndices).slice(0, 10);
+            } else {
+                let anciennesGardees = melanger([...indicesPrecedents]).slice(0, 3);
+                let indicesDisponibles = tousIndices.filter(i => !indicesPrecedents.includes(i));
+                let nouvellesChoisies = melanger(indicesDisponibles).slice(0, 7);
+                tirage = melanger([...anciennesGardees, ...nouvellesChoisies]);
+            }
+            
+            indicesPrecedents = tirage;
+            questionsActuelles = tirage.map(i => banqueQuestions[i]);
+            afficherFormulaire();
+        }
+
+        // --- 5. AFFICHAGE DU FORMULAIRE ---
+        const container = document.getElementById('questionsContainer');
+        const formZone = document.getElementById('formulaireZone');
+        const correctionZone = document.getElementById('correctionZone');
+        const statusMessage = document.getElementById('statusMessage');
+        const qcmForm = document.getElementById('qcmForm');
+
+        function afficherFormulaire() {
+            container.innerHTML = '';
+            correctionZone.classList.add('hidden');
+            formZone.classList.remove('hidden');
+            statusMessage.classList.add('hidden');
+            qcmForm.reset();
+            document.getElementById('submitBtn').disabled = false;
+
+            questionsActuelles.forEach((q, index) => {
+                const optionsMelangees = melanger([...q.options]);
+                let htmlOptions = '';
+                optionsMelangees.forEach(opt => {
+                    htmlOptions += `
+                        <label class="block cursor-pointer p-2 hover:bg-blue-50 rounded">
+                            <input type="radio" name="q${index}" value="${opt}" required class="mr-2">
+                            ${opt}
+                        </label>
+                    `;
+                });
+
+                let htmlSvg = q.svg ? `<div class="w-full flex justify-center bg-gray-50 border rounded p-4 mb-4 mt-2">${q.svg}</div>` : '';
+
+                container.innerHTML += `
+                    <div class="question-card bg-white p-5 rounded shadow-sm border border-gray-200">
+                        <h3 class="font-semibold mb-2">${index + 1}. ${q.q}</h3>
+                        ${htmlSvg}
+                        <div class="space-y-1">
+                            ${htmlOptions}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if(document.getElementById('nomEleve').value === "") {
+                document.getElementById('nomEleve').value = "";
+            }
+        }
+
+        // --- 6. SOUMISSION ET CORRECTION ---
+        qcmForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Correction en cours...";
+
+            let score = 0;
+            let payload = { nom: document.getElementById('nomEleve').value, reponses: [], score: 0 };
+            const correctionContainer = document.getElementById('correctionContainer');
+            correctionContainer.innerHTML = '';
+
+            questionsActuelles.forEach((q, index) => {
+                const radios = document.getElementsByName(`q${index}`);
+                let reponseChoisie = "";
+                for (let radio of radios) { if (radio.checked) { reponseChoisie = radio.value; break; } }
+                
+                let estCorrect = (reponseChoisie === q.correct);
+                if (estCorrect) score++;
+
+                payload.reponses.push({ question: q.q, reponse: reponseChoisie, estCorrect: estCorrect });
+
+                let bgColor = estCorrect ? "bg-green-50 border-green-400" : "bg-red-50 border-red-400";
+                let icon = estCorrect ? "✅ Bonne réponse" : "❌ Mauvaise réponse";
+                
+                let blocExplication = "";
+                if (!estCorrect) {
+                    blocExplication = `
+                        <p class="text-sm text-green-700 mt-2"><strong>Réponse attendue :</strong> ${q.correct}</p>
+                        <div class="mt-2 p-3 bg-blue-50 border-l-4 border-blue-400 text-sm text-blue-800 rounded">
+                            <strong>💡 Explication :</strong> ${q.explication}
+                        </div>
+                    `;
+                }
+
+                correctionContainer.innerHTML += `
+                    <div class="p-4 rounded border ${bgColor}">
+                        <p class="font-bold mb-1">${index + 1}. ${q.q}</p>
+                        <p class="text-sm"><strong>Votre réponse :</strong> ${reponseChoisie} <span class="font-bold ml-2 ${estCorrect ? 'text-green-600' : 'text-red-600'}">${icon}</span></p>
+                        ${blocExplication}
+                    </div>
+                `;
+            });
+
+            payload.score = score;
+            document.getElementById('scoreFinal').innerText = `${score} / 10`;
+            document.getElementById('messageScore').innerText = score >= 7 ? "Félicitations, bon travail !" : "Il faut encore réviser le cours.";
+
+            const formData = new URLSearchParams();
+            formData.append('data', JSON.stringify(payload));
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            })
+            .then(() => {
+                formZone.classList.add('hidden');
+                correctionZone.classList.remove('hidden');
+                window.scrollTo(0, 0);
+            })
+            .catch(() => {
+                statusMessage.className = "text-center font-bold mt-4 p-3 rounded bg-red-100 text-red-700 block";
+                statusMessage.innerText = "Erreur de réseau. Veuillez réessayer.";
+                submitBtn.innerText = "Valider mes réponses";
+                submitBtn.disabled = false;
+            });
+        });
+
+        // --- 7. BOUTON RECOMMENCER ---
+        document.getElementById('btnRecommencer').addEventListener('click', () => {
+            genererTirage();
+            window.scrollTo(0, 0);
+        });
+
+        // Initialisation
+        genererTirage();
+
+    </script>
+</body>
+</html>
