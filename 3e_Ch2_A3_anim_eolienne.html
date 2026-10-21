@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production d'Énergie Électrique - Bilan Final</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --success: #2ecc71;
+            --teal: #00796b;
+            --orange: #d35400;
+            --bg: #f4f6f7;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg); color: var(--primary);
+            margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center;
+        }
+        h1, h2 { color: var(--primary); text-align: center; margin-top: 0; }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .tab-btn {
+            background-color: #bdc3c7; color: var(--primary); border: none;
+            padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px;
+            cursor: pointer; transition: 0.3s;
+        }
+        .tab-btn:hover { background-color: #95a5a6; }
+        .tab-btn.active { background-color: var(--secondary); color: white; }
+        .tab-content { display: none; width: 100%; max-width: 1080px; }
+        .tab-content.active { display: block; }
+        
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        .consigne { background: #e8f4f8; border-left: 5px solid var(--secondary); padding: 14px; border-radius: 0 8px 8px 0; margin-bottom: 15px; font-weight: 500; font-size: 15px; }
+        .info-box { background: #fdf2e9; border: 2px solid #f39c12; padding: 14px; border-radius: 8px; font-size: 15px; line-height: 1.5; margin-bottom: 18px; }
+        
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
+        .sub-tab-btn {
+            background-color: #e2e8f0; color: #334155; border: 2px solid transparent;
+            padding: 7px 14px; font-size: 13px; font-weight: bold; border-radius: 20px;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .sub-tab-btn:hover { background-color: #cbd5e1; }
+        .sub-tab-btn.active { background-color: var(--teal); color: white; border-color: #004d40; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .sub-tab-btn.therm-btn.active { background-color: var(--orange); color: white; border-color: #a04000; }
+
+        .badge-num {
+            background: white; color: var(--teal); border-radius: 50%; width: 19px; height: 19px;
+            display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900;
+        }
+        .therm-btn .badge-num { color: var(--orange); }
+
+        canvas {
+            background: #eef2f5; border: 3px solid #bdc3c7; border-radius: 10px;
+            width: 100%; max-width: 1000px; display: block; margin: 0 auto 20px auto;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1); cursor: pointer;
+        }
+
+        /* NOMENCLATURE CHAÎNES D'ÉNERGIE */
+        .energy-chain {
+            display: flex; align-items: center; justify-content: center;
+            background: #ecf0f1; padding: 20px; border-radius: 10px; flex-wrap: wrap; gap: 15px;
+        }
+        
+        .node.reservoir {
+            background: white; border: 2px solid var(--primary); padding: 10px 15px;
+            border-radius: 0px; text-align: center; font-weight: bold; min-width: 120px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .node.convertisseur {
+            background: white; border: 2px solid var(--secondary); padding: 15px 20px;
+            border-radius: 50%; text-align: center; font-weight: bold; min-width: 130px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .node.perte { border-color: var(--accent); }
+        
+        .arrow-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 110px; position: relative; }
+        .energy-select {
+            font-size: 13px; font-weight: bold; color: var(--accent); border: 1px solid var(--accent);
+            border-radius: 4px; padding: 3px 5px; text-align: center; margin-bottom: -5px; width: 100%; background: white;
+            cursor: pointer;
+        }
+        .arrow { font-size: 28px; color: var(--primary); font-weight: bold; }
+        
+        .arrow-oblique {
+            font-size: 24px; color: var(--accent); font-weight: bold; transform: rotate(45deg); margin-top: 5px;
+        }
+
+        select.res-select { width: 100%; padding: 5px; margin-top: 5px; font-size: 14px; cursor: pointer; }
+
+        /* DISPOSITION COMPACTE SUR UNE SEULE LIGNE POUR LA CENTRALE THERMIQUE (3 CONVERTISSEURS) */
+        .energy-chain.single-line {
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            gap: 5px;
+            padding: 14px 8px;
+            overflow-x: auto;
+        }
+        .energy-chain.single-line .node.reservoir {
+            min-width: 98px;
+            padding: 6px 6px;
+            font-size: 11.5px;
+            flex-shrink: 0;
+        }
+        .energy-chain.single-line .node.convertisseur {
+            min-width: 96px;
+            padding: 10px 6px;
+            font-size: 11.5px;
+            line-height: 1.2;
+            flex-shrink: 0;
+        }
+        .energy-chain.single-line .arrow-container {
+            min-width: 82px;
+            flex-shrink: 0;
+        }
+        .energy-chain.single-line .energy-select {
+            font-size: 11px;
+            padding: 2px 1px;
+        }
+        .energy-chain.single-line select.res-select {
+            font-size: 11px;
+            padding: 3px 2px;
+        }
+        .energy-chain.single-line .arrow {
+            font-size: 22px;
+        }
+
+        .feedback { margin-top: 15px; font-weight: bold; text-align: left; padding: 12px; border-radius: 5px; display: none; line-height: 1.4;}
+        
+        button.action-btn {
+            background-color: var(--success); color: white; border: none; padding: 10px 20px;
+            font-size: 16px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px;
+        }
+        button.action-btn:hover { background-color: #27ae60; }
+        
+        /* STYLES RENDEMENTS & NIVEAUX */
+        .calculator-grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 20px; align-items: start; }
+        @media (max-width: 850px) { .calculator-grid { grid-template-columns: 1fr; } }
+        .formula-box { background: #e8f4f8; padding: 15px; border-left: 5px solid var(--secondary); border-radius: 5px; text-align: center; font-size: 1.05em; line-height: 1.6; }
+        .exercice-box { background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 18px; }
+        
+        .level-selector { display: flex; gap: 8px; margin-bottom: 14px; }
+        .level-btn {
+            flex: 1; padding: 8px 10px; font-size: 13px; font-weight: bold; border-radius: 6px;
+            border: 2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; transition: 0.2s;
+        }
+        .level-btn:hover { background: #f1f5f9; }
+        .level-btn.active { background: var(--orange); color: white; border-color: #a04000; box-shadow: 0 2px 4px rgba(211, 84, 0, 0.25); }
+
+        .step-block { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid var(--secondary); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; }
+        .step-block.therm-step { border-left-color: var(--orange); }
+        .step-title { font-weight: bold; color: var(--primary); font-size: 14px; margin-bottom: 6px; display: block; }
+        .step-desc { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .input-group { margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .input-group label { font-weight: 600; flex: 1; font-size: 13.5px; }
+        .input-group input { width: 135px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; text-align: right; font-weight: bold; }
+        
+        .comparison-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .comparison-table th, .comparison-table td { border: 1px solid #ccc; padding: 15px; text-align: center; width: 33%; background: white;}
+        .comparison-table th { background-color: var(--primary); color: white; }
+        .criteria-list { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .criteria-item { background: var(--secondary); color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; user-select: none; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .criteria-item:active { transform: scale(0.95); }
+        .drop-zone { min-height: 80px; background: #f9f9f9; border: 2px dashed #ccc; border-radius: 8px; display: flex; flex-direction: column; gap: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>Bilan : La Production d'Énergie Électrique</h1>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('chaines', event)">1. Chaînes d'Énergie</button>
+        <button class="tab-btn" onclick="openTab('rendement', event)">2. Rendements</button>
+        <button class="tab-btn" onclick="openTab('comparaison', event)">3. Comparaison</button>
+    </div>
+
+    <!-- ONGLET 1 : CHAINES D'ENERGIE -->
+    <div id="chaines" class="tab-content active">
+        
+        <!-- CENTRALE HYDRAULIQUE -->
+        <div class="card">
+            <h2>Centrale Hydroélectrique</h2>
+            
+            <div class="consigne">
+                <strong>🎯 Consigne :</strong> Cliquez sur les pastilles numérotées (1, 2, 3, 4) directement sur l'animation ou sur les boutons ci-dessous pour découvrir chaque étape et observer où se produisent les pertes. Déduisez ensuite les formes d'énergie pour compléter la chaîne.
+            </div>
+            
+            <div class="info-box">
+                <strong>💧 Principe général :</strong><br>
+                L'eau stockée en hauteur dans le lac de retenue s'engouffre dans de longs tuyaux inclinés (la conduite forcée) où elle prend beaucoup de vitesse. En bas, ce puissant jet d'eau fait tourner une turbine reliée à un alternateur qui produit le courant électrique.
+            </div>
+
+            <!-- BOUTONS DE ZOOM 4 ÉTAPES HYDRAULIQUE -->
+            <div class="sub-tabs">
+                <button id="btnHydroGlobal" class="sub-tab-btn active" onclick="setHydroView('global')">🌍 Vue d'ensemble</button>
+                <button id="btnHydro1" class="sub-tab-btn" onclick="setHydroView('retenue')"><span class="badge-num">1</span> Retenue d'eau</button>
+                <button id="btnHydro2" class="sub-tab-btn" onclick="setHydroView('conduite')"><span class="badge-num">2</span> Conduite forcée</button>
+                <button id="btnHydro3" class="sub-tab-btn" onclick="setHydroView('turbine')"><span class="badge-num">3</span> Turbine et alternateur</button>
+                <button id="btnHydro4" class="sub-tab-btn" onclick="setHydroView('transfo')"><span class="badge-num">4</span> Transformateur</button>
+            </div>
+
+            <canvas id="hydroCanvas" width="1000" height="420"></canvas>
+            
+            <div class="energy-chain">
+                <div class="node reservoir">
+                    Source/Réservoir<br>
+                    <select id="hydro-res" class="res-select">
+                        <option value="">-- Choisir --</option>
+                        <option value="Eau">Eau en altitude</option>
+                        <option value="Charbon">Charbon</option>
+                        <option value="Vent">Vent</option>
+                        <option value="Uranium">Uranium</option>
+                        <option value="Soleil">Soleil</option>
+                    </select>
+                </div>
+                
+                <div class="arrow-container">
+                    <select id="hydro-en1" class="energy-select">
+                        <option value="">Énergie...</option>
+                        <option value="Thermique">Thermique</option>
+                        <option value="Cinétique">Cinétique</option>
+                        <option value="Lumineuse">Lumineuse (Rayonnante)</option>
+                        <option value="Chimique">Chimique</option>
+                    </select>
+                    <div class="arrow">→</div>
+                </div>
+                
+                <div class="node convertisseur">
+                    Convertisseur<br>Turbine + Alternateur
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="arrow-container">
+                            <select id="hydro-en-utile" class="energy-select">
+                                <option value="">Énergie utile...</option>
+                                <option value="Cinétique">Cinétique</option>
+                                <option value="Électrique">Électrique</option>
+                                <option value="Thermique">Thermique</option>
+                                <option value="Nucléaire">Nucléaire</option>
+                            </select>
+                            <div class="arrow">→</div>
+                        </div>
+                        <div class="node reservoir">Réseau Électrique</div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="arrow-container" style="align-items: flex-end;">
+                            <select id="hydro-en-perte" class="energy-select" style="border-color: #e74c3c; color: #e74c3c;">
+                                <option value="">Énergie perdue...</option>
+                                <option value="Thermique">Thermique</option>
+                                <option value="Chimique">Chimique</option>
+                                <option value="Cinétique">Cinétique</option>
+                                <option value="Lumineuse">Lumineuse</option>
+                            </select>
+                            <div class="arrow-oblique">↘</div>
+                        </div>
+                        <div class="node reservoir perte">Environnement</div>
+                    </div>
+                </div>
+            </div>
+            <button class="action-btn" onclick="checkHydro()">Vérifier la chaîne hydraulique</button>
+            <div id="hydro-feedback" class="feedback"></div>
+        </div>
+
+        <!-- CENTRALE THERMIQUE -->
+        <div class="card">
+            <h2>Centrale Thermique à Flamme</h2>
+
+            <div class="consigne">
+                <strong>🎯 Consigne :</strong> Cliquez sur les pastilles numérotées (1, 2, 3, 4) sur l'animation ou sur les boutons ci-dessous pour explorer les 4 étapes de fonctionnement et repérer les différentes pertes d'énergie. Complétez ensuite la chaîne d'énergie.
+            </div>
+
+            <div class="info-box">
+                <strong>🔥 Principe général :</strong><br>
+                Un combustible fossile (charbon, gaz ou pétrole) brûle dans la <strong>chaudière</strong> (en bas) pour chauffer de l'eau dans le <strong>générateur de vapeur</strong> (au-dessus) et produire de la vapeur sous pression. Ce puissant jet de vapeur fait tourner la turbine et l'alternateur afin de produire l'électricité. En sortie de turbine, la vapeur passe dans le condenseur avant de retourner au générateur de vapeur.
+            </div>
+
+            <!-- BOUTONS DE ZOOM 4 ÉTAPES THERMIQUE -->
+            <div class="sub-tabs">
+                <button id="btnThermGlobal" class="sub-tab-btn therm-btn active" onclick="setThermView('global')">🌍 Vue d'ensemble</button>
+                <button id="btnTherm1" class="sub-tab-btn therm-btn" onclick="setThermView('combustion')"><span class="badge-num">1</span> Chaudière et combustion</button>
+                <button id="btnTherm2" class="sub-tab-btn therm-btn" onclick="setThermView('vapeur')"><span class="badge-num">2</span> Générateur de vapeur</button>
+                <button id="btnTherm3" class="sub-tab-btn therm-btn" onclick="setThermView('turbine')"><span class="badge-num">3</span> Turbine et alternateur</button>
+                <button id="btnTherm4" class="sub-tab-btn therm-btn" onclick="setThermView('condenseur')"><span class="badge-num">4</span> Condenseur et rivière</button>
+            </div>
+
+            <canvas id="thermCanvas" width="1000" height="450"></canvas>
+            
+            <!-- CHAÎNE D'ÉNERGIE SUR UNE SEULE LIGNE AVEC SÉPARATION CHAUDIÈRE ET GÉNÉRATEUR DE VAPEUR -->
+            <div class="energy-chain single-line">
+                <div class="node reservoir">
+                    Source/Réservoir<br>
+                    <select id="therm-res" class="res-select">
+                        <option value="">-- Choisir --</option>
+                        <option value="Charbon">Combustible Fossile</option>
+                        <option value="Eau">Eau en mouvement</option>
+                        <option value="Soleil">Soleil</option>
+                        <option value="Uranium">Uranium</option>
+                    </select>
+                </div>
+                
+                <div class="arrow-container">
+                    <select id="therm-en1" class="energy-select">
+                        <option value="">Énergie...</option>
+                        <option value="Chimique">Chimique</option>
+                        <option value="Cinétique">Cinétique</option>
+                        <option value="Nucléaire">Nucléaire</option>
+                        <option value="Thermique">Thermique</option>
+                    </select>
+                    <div class="arrow">→</div>
+                </div>
+                
+                <div class="node convertisseur">
+                    Convertisseur 1<br><strong>Chaudière</strong>
+                </div>
+                
+                <div class="arrow-container">
+                    <select id="therm-en2" class="energy-select">
+                        <option value="">Énergie...</option>
+                        <option value="Chimique">Chimique</option>
+                        <option value="Cinétique">Cinétique</option>
+                        <option value="Thermique">Thermique</option>
+                        <option value="Électrique">Électrique</option>
+                    </select>
+                    <div class="arrow">→</div>
+                </div>
+
+                <div class="node convertisseur">
+                    Convertisseur 2<br><strong>Générateur<br>de vapeur</strong>
+                </div>
+
+                <div class="arrow-container">
+                    <select id="therm-en3" class="energy-select">
+                        <option value="">Énergie...</option>
+                        <option value="Thermique">Thermique / Cinétique</option>
+                        <option value="Chimique">Chimique</option>
+                        <option value="Lumineuse">Lumineuse</option>
+                        <option value="Électrique">Électrique</option>
+                    </select>
+                    <div class="arrow">→</div>
+                </div>
+
+                <div class="node convertisseur">
+                    Convertisseur 3<br><strong>Turbine +<br>Alternateur</strong>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <div class="arrow-container">
+                            <select id="therm-en-utile" class="energy-select">
+                                <option value="">Énergie utile...</option>
+                                <option value="Cinétique">Cinétique</option>
+                                <option value="Électrique">Électrique</option>
+                                <option value="Thermique">Thermique</option>
+                                <option value="Lumineuse">Lumineuse</option>
+                            </select>
+                            <div class="arrow">→</div>
+                        </div>
+                        <div class="node reservoir">
+                            Destination<br>
+                            <select id="therm-dest-utile" class="res-select">
+                                <option value="">-- Choisir --</option>
+                                <option value="Reseau">Réseau Électrique</option>
+                                <option value="Batterie">Batteries géantes</option>
+                                <option value="Maison">Maison isolée</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <div class="arrow-container" style="align-items: flex-end;">
+                            <select id="therm-en-perte" class="energy-select" style="border-color: #e74c3c; color: #e74c3c;">
+                                <option value="">Énergie perdue...</option>
+                                <option value="Thermique">Thermique</option>
+                                <option value="Chimique">Chimique</option>
+                                <option value="Cinétique">Cinétique</option>
+                            </select>
+                            <div class="arrow-oblique">↘</div>
+                        </div>
+                        <div class="node reservoir perte">
+                            Destination<br>
+                            <select id="therm-dest-perte" class="res-select" style="border-color: #e74c3c; color: #e74c3c;">
+                                <option value="">-- Choisir --</option>
+                                <option value="Environnement">Environnement</option>
+                                <option value="Reseau">Réseau Électrique</option>
+                                <option value="Espace">L'espace</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="action-btn" onclick="checkTherm()">Vérifier la chaîne thermique</button>
+            <div id="therm-feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <!-- ONGLET 2 : RENDEMENT (HYDRO SIMPLE + THERMIQUE À 2 NIVEAUX : SIMPLE ET AVANCÉ) -->
+    <div id="rendement" class="tab-content">
+        <div class="card">
+            <h2>Calculs de Rendement Énergétique</h2>
+            <div class="formula-box" style="margin-bottom: 20px;">
+                <strong>Formule du rendement : Rendement (%) = ( Énergie Utile ÷ Énergie Reçue ) × 100</strong><br>
+                <span style="font-size: 0.92em; color: #333;">• Rappel de cours (Niveau Avancé) : L'énergie se calcule avec la relation <strong>E = P × t</strong></span><br>
+                <span style="font-size: 0.9em; color: #555;">• Unités : Si la puissance <strong>P</strong> est en Mégawatts (MW) et le temps <strong>t</strong> en secondes (s), alors l'énergie <strong>E</strong> est en Mégajoules (MJ). (Rappel : 1 heure = 3 600 secondes).</span>
+            </div>
+
+            <div class="calculator-grid">
+                
+                <!-- EXERCICE 1 : HYDRAULIQUE (CALCUL SIMPLE ET DIRECT) -->
+                <div class="exercice-box">
+                    <h3 style="color: var(--secondary); margin-top:0;">1. Centrale Hydroélectrique</h3>
+                    <p style="font-size: 14.5px; line-height: 1.5;">
+                        En tombant dans la conduite forcée, l'eau fournit à la centrale une énergie reçue de <strong>1 000 MJ</strong>.<br>
+                        Grâce à cette eau, l'alternateur produit une énergie électrique utile de <strong>850 MJ</strong> (le reste est perdu sous forme de chaleur à cause des frottements).
+                    </p>
+                    
+                    <div class="step-block">
+                        <span class="step-title">Étape 1 : Relever les données de l'énoncé</span>
+                        <div class="input-group">
+                            <label>Énergie reçue E<sub>reçue</sub> (MJ) :</label>
+                            <input type="number" id="hydro-e-recue" placeholder="En MJ">
+                        </div>
+                        <div class="input-group">
+                            <label>Énergie utile E<sub>utile</sub> (MJ) :</label>
+                            <input type="number" id="hydro-e-utile" placeholder="En MJ">
+                        </div>
+                    </div>
+
+                    <div class="step-block">
+                        <span class="step-title">Étape 2 : Calculer le rendement</span>
+                        <div class="step-desc">Applique la formule : (E<sub>utile</sub> ÷ E<sub>reçue</sub>) × 100</div>
+                        <div class="input-group">
+                            <label>Rendement (%) :</label>
+                            <input type="number" step="0.1" id="hydro-rend" placeholder="%">
+                        </div>
+                    </div>
+
+                    <button class="action-btn" onclick="checkRendementHydro()">Vérifier (Centrale Hydraulique)</button>
+                    <div id="fb-rend-hydro" class="feedback"></div>
+                </div>
+
+                <!-- EXERCICE 2 : THERMIQUE (2 NIVEAUX : SIMPLE ET AVANCÉ) -->
+                <div class="exercice-box">
+                    <h3 style="color: var(--orange); margin-top:0;">2. Centrale Thermique</h3>
+                    
+                    <!-- SÉLECTEUR DE NIVEAU -->
+                    <div class="level-selector">
+                        <button id="btnThermSimple" class="level-btn active" onclick="setThermLevel('simple')">⭐ Niveau Simple (Direct)</button>
+                        <button id="btnThermAvance" class="level-btn" onclick="setThermLevel('avance')">⭐⭐ Niveau Avancé (Détaillé)</button>
+                    </div>
+
+                    <!-- CONTENU NIVEAU SIMPLE -->
+                    <div id="therm-level-simple">
+                        <p style="font-size: 14.5px; line-height: 1.5;">
+                            En brûlant dans la chaudière, le charbon fournit à la centrale une énergie reçue totale de <strong>1 200 000 MJ</strong>.<br>
+                            En sortie, l'alternateur transfère au réseau une énergie électrique utile de <strong>360 000 MJ</strong> (le reste est dissipé en chaleur dans les fumées et la rivière).
+                        </p>
+
+                        <div class="step-block therm-step">
+                            <span class="step-title">Étape 1 : Relever les données de l'énoncé</span>
+                            <div class="input-group">
+                                <label>Énergie reçue E<sub>reçue</sub> (MJ) :</label>
+                                <input type="number" id="therm-simple-recue" placeholder="En MJ">
+                            </div>
+                            <div class="input-group">
+                                <label>Énergie utile E<sub>utile</sub> (MJ) :</label>
+                                <input type="number" id="therm-simple-utile" placeholder="En MJ">
+                            </div>
+                        </div>
+
+                        <div class="step-block therm-step">
+                            <span class="step-title">Étape 2 : Calculer le rendement de la centrale thermique</span>
+                            <div class="step-desc">Applique la formule : (E<sub>utile</sub> ÷ E<sub>reçue</sub>) × 100</div>
+                            <div class="input-group">
+                                <label>Rendement (%) :</label>
+                                <input type="number" step="0.1" id="therm-simple-rend" placeholder="%">
+                            </div>
+                        </div>
+
+                        <button class="action-btn" onclick="checkRendementThermSimple()">Vérifier (Niveau Simple)</button>
+                        <div id="fb-rend-therm-simple" class="feedback"></div>
+                    </div>
+
+                    <!-- CONTENU NIVEAU AVANCÉ -->
+                    <div id="therm-level-avance" style="display: none;">
+                        <p style="font-size: 14.5px; line-height: 1.5;">
+                            Pendant <strong>1 heure</strong> de fonctionnement, la centrale brûle <strong>40 tonnes</strong> de charbon. La combustion d'<strong>1 seule tonne</strong> de charbon libère <strong>30 000 MJ</strong>.<br>
+                            Durant cette même heure, l'alternateur fournit une puissance électrique <strong>P = 100 MW</strong> au réseau.
+                        </p>
+                        
+                        <div class="step-block therm-step">
+                            <span class="step-title">Étape A : Calculer l'énergie reçue (libérée par le charbon)</span>
+                            <div class="step-desc">On brûle 40 tonnes et chaque tonne libère 30 000 MJ.<br>Calcul : <em>40 × 30 000</em></div>
+                            <div class="input-group">
+                                <label>Énergie reçue E<sub>reçue</sub> (MJ) :</label>
+                                <input type="number" id="therm-e-recue" placeholder="40 × 30000">
+                            </div>
+                        </div>
+
+                        <div class="step-block therm-step">
+                            <span class="step-title">Étape B : Calculer l'énergie électrique utile (E<sub>utile</sub> = P × t)</span>
+                            <div class="step-desc">1. Convertis d'abord la durée de fonctionnement (1 h) en secondes :</div>
+                            <div class="input-group">
+                                <label>Durée <em>t</em> en secondes (s) :</label>
+                                <input type="number" id="therm-temps" placeholder="1 h en s ?">
+                            </div>
+                            <div class="step-desc">2. Multiplie la puissance P (100 MW) par la durée <em>t</em> en secondes :</div>
+                            <div class="input-group">
+                                <label>Énergie utile E<sub>utile</sub> (MJ) :</label>
+                                <input type="number" id="therm-e-utile" placeholder="100 × t">
+                            </div>
+                        </div>
+
+                        <div class="step-block therm-step">
+                            <span class="step-title">Étape C : En déduire le rendement de la centrale thermique</span>
+                            <div class="step-desc">Applique la formule : (E<sub>utile</sub> ÷ E<sub>reçue</sub>) × 100</div>
+                            <div class="input-group">
+                                <label>Rendement (%) :</label>
+                                <input type="number" step="0.1" id="therm-rend" placeholder="%">
+                            </div>
+                        </div>
+
+                        <button class="action-btn" onclick="checkRendementTherm()">Vérifier (Niveau Avancé)</button>
+                        <div id="fb-rend-therm" class="feedback"></div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ONGLET 3 : COMPARAISON -->
+    <div id="comparaison" class="tab-content">
+        <div class="card">
+            <h2>Avantages et Inconvénients</h2>
+            <p>Cliquez sur un argument ci-dessous, puis cliquez sur la case du tableau pour le placer.</p>
+            
+            <div class="criteria-list" id="criteria-list">
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="hydro-av">Énergie Renouvelable</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="therm-inc">Forte émission de CO2</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="therm-av">Pilotable (Production à la demande)</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="hydro-inc">Dépend des précipitations (climat)</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="hydro-av">Pas d'émission de gaz à effet de serre</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="therm-inc">Ressource fossile (épuisable)</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="therm-av">Grande capacité de production (massive)</div>
+                <div class="criteria-item" onclick="selectCriteria(this)" data-correct="hydro-inc">Implantation limitée par le relief (montagnes)</div>
+            </div>
+
+            <table class="comparison-table">
+                <tr>
+                    <th>Critères</th>
+                    <th>Centrale Hydraulique</th>
+                    <th>Centrale Thermique</th>
+                </tr>
+                <tr>
+                    <td><strong>Avantages</strong></td>
+                    <td><div class="drop-zone" id="hydro-av" onclick="placeCriteria('hydro-av')"></div></td>
+                    <td><div class="drop-zone" id="therm-av" onclick="placeCriteria('therm-av')"></div></td>
+                </tr>
+                <tr>
+                    <td><strong>Inconvénients</strong></td>
+                    <td><div class="drop-zone" id="hydro-inc" onclick="placeCriteria('hydro-inc')"></div></td>
+                    <td><div class="drop-zone" id="therm-inc" onclick="placeCriteria('therm-inc')"></div></td>
+                </tr>
+            </table>
+            <button class="action-btn" onclick="checkTable()">Vérifier le tableau</button>
+            <div id="table-feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        function openTab(tabId, evt) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            }
+        }
+
+        // BASCULE ENTRE LE NIVEAU SIMPLE ET AVANCÉ POUR LE RENDEMENT THERMIQUE
+        function setThermLevel(level) {
+            const btnSimple = document.getElementById('btnThermSimple');
+            const btnAvance = document.getElementById('btnThermAvance');
+            const boxSimple = document.getElementById('therm-level-simple');
+            const boxAvance = document.getElementById('therm-level-avance');
+
+            if (level === 'simple') {
+                btnSimple.classList.add('active');
+                btnAvance.classList.remove('active');
+                boxSimple.style.display = 'block';
+                boxAvance.style.display = 'none';
+            } else {
+                btnAvance.classList.add('active');
+                btnSimple.classList.remove('active');
+                boxAvance.style.display = 'block';
+                boxSimple.style.display = 'none';
+            }
+        }
+
+        const hCanvas = document.getElementById('hydroCanvas');
+        const hCtx = hCanvas.getContext('2d');
+        const tCanvas = document.getElementById('thermCanvas');
+        const tCtx = tCanvas.getContext('2d');
+        
+        let globalAngle = 0;
+        let hydroView = 'global'; // 'global', 'retenue', 'conduite', 'turbine', 'transfo'
+        let thermView = 'global'; // 'global', 'combustion', 'vapeur', 'turbine', 'condenseur'
+        let bubbles = [];
+        let smokeParticles = [];
+        let condDrops = [];
+
+        // Pastilles cliquables sur la vue globale hydraulique
+        const hydroHotspots = [
+            { id: 'retenue', num: '1', x: 55, y: 55, r: 18 },
+            { id: 'conduite', num: '2', x: 280, y: 220, r: 18 },
+            { id: 'turbine', num: '3', x: 750, y: 315, r: 18 },
+            { id: 'transfo', num: '4', x: 675, y: 120, r: 18 }
+        ];
+
+        // Pastilles cliquables sur la vue globale thermique
+        const thermHotspots = [
+            { id: 'combustion', num: '1', x: 115, y: 350, r: 18 },
+            { id: 'vapeur', num: '2', x: 200, y: 120, r: 18 },
+            { id: 'turbine', num: '3', x: 545, y: 105, r: 18 },
+            { id: 'condenseur', num: '4', x: 445, y: 315, r: 18 }
+        ];
+
+        // Clic sur le canvas hydraulique
+        hCanvas.addEventListener('click', function(e) {
+            const rect = hCanvas.getBoundingClientRect();
+            const clickX = (e.clientX - rect.left) * (hCanvas.width / rect.width);
+            const clickY = (e.clientY - rect.top) * (hCanvas.height / rect.height);
+
+            if (hydroView === 'global') {
+                for (let h of hydroHotspots) {
+                    if (Math.hypot(clickX - h.x, clickY - h.y) <= h.r + 6) {
+                        setHydroView(h.id);
+                        return;
+                    }
+                }
+            } else {
+                if (clickX >= 780 && clickX <= 985 && clickY >= 15 && clickY <= 52) {
+                    setHydroView('global');
+                }
+            }
+        });
+
+        // Clic sur le canvas thermique
+        tCanvas.addEventListener('click', function(e) {
+            const rect = tCanvas.getBoundingClientRect();
+            const clickX = (e.clientX - rect.left) * (tCanvas.width / rect.width);
+            const clickY = (e.clientY - rect.top) * (tCanvas.height / rect.height);
+
+            if (thermView === 'global') {
+                for (let h of thermHotspots) {
+                    if (Math.hypot(clickX - h.x, clickY - h.y) <= h.r + 6) {
+                        setThermView(h.id);
+                        return;
+                    }
+                }
+            } else {
+                if (clickX >= 780 && clickX <= 985 && clickY >= 15 && clickY <= 52) {
+                    setThermView('global');
+                }
+            }
+        });
+
+        function setHydroView(view) {
+            hydroView = view;
+            ['btnHydroGlobal', 'btnHydro1', 'btnHydro2', 'btnHydro3', 'btnHydro4'].forEach(id => {
+                document.getElementById(id).classList.remove('active');
+            });
+            if(view === 'global') document.getElementById('btnHydroGlobal').classList.add('active');
+            if(view === 'retenue') document.getElementById('btnHydro1').classList.add('active');
+            if(view === 'conduite') document.getElementById('btnHydro2').classList.add('active');
+            if(view === 'turbine') document.getElementById('btnHydro3').classList.add('active');
+            if(view === 'transfo') document.getElementById('btnHydro4').classList.add('active');
+        }
+
+        function setThermView(view) {
+            thermView = view;
+            ['btnThermGlobal', 'btnTherm1', 'btnTherm2', 'btnTherm3', 'btnTherm4'].forEach(id => {
+                document.getElementById(id).classList.remove('active');
+            });
+            if(view === 'global') document.getElementById('btnThermGlobal').classList.add('active');
+            if(view === 'combustion') document.getElementById('btnTherm1').classList.add('active');
+            if(view === 'vapeur') document.getElementById('btnTherm2').classList.add('active');
+            if(view === 'turbine') document.getElementById('btnTherm3').classList.add('active');
+            if(view === 'condenseur') document.getElementById('btnTherm4').classList.add('active');
+        }
+
+        function drawMetallicCylinder(ctx, x, y, w, h, color1, color2, color3, vertical=false) {
+            let grad = vertical ? ctx.createLinearGradient(x, y, x+w, y) : ctx.createLinearGradient(x, y, x, y+h);
+            grad.addColorStop(0, color1); grad.addColorStop(0.5, color2); grad.addColorStop(1, color3);
+            ctx.fillStyle = grad; ctx.fillRect(x, y, w, h);
+        }
+
+        function drawCoalBed(ctx, x, y, w, h) {
+            ctx.save();
+            let emberGrad = ctx.createLinearGradient(x, y, x, y + h);
+            emberGrad.addColorStop(0, '#e67e22');
+            emberGrad.addColorStop(0.5, '#c0392b');
+            emberGrad.addColorStop(1, '#1e272e');
+            ctx.fillStyle = emberGrad;
+            ctx.fillRect(x, y, w, h);
+
+            let numChunks = Math.floor(w / 14);
+            for (let i = 0; i < numChunks; i++) {
+                let cx = x + 8 + i * 14;
+                let cy = y + h * 0.58 + (i % 2) * 4;
+                let r = 7 + (i % 3) * 1.5;
+
+                ctx.fillStyle = (i % 2 === 0) ? '#1e272e' : '#2f3640';
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(cx - r, cy + r * 0.5);
+                ctx.lineTo(cx - r * 0.7, cy - r * 0.7);
+                ctx.lineTo(cx + r * 0.2, cy - r * 0.9);
+                ctx.lineTo(cx + r, cy - r * 0.3);
+                ctx.lineTo(cx + r * 0.8, cy + r * 0.6);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function drawVaporHalo(ctx, x, y, radius, opacity=0.6, tint='255, 255, 255') {
+            ctx.save();
+            let grad = ctx.createRadialGradient(x, y, radius * 0.1, x, y, radius);
+            grad.addColorStop(0, `rgba(${tint}, ${opacity})`);
+            grad.addColorStop(0.55, `rgba(225, 245, 254, ${opacity * 0.65})`);
+            grad.addColorStop(1, `rgba(179, 229, 252, 0)`);
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawSteamTurbine(ctx, x, y, w, h, angle) {
+            ctx.save();
+            let casingGrad = ctx.createLinearGradient(x, y - h/2, x, y + h/2);
+            casingGrad.addColorStop(0, '#546e7a');
+            casingGrad.addColorStop(0.5, '#b0bec5');
+            casingGrad.addColorStop(1, '#455a64');
+            ctx.fillStyle = casingGrad;
+            ctx.beginPath();
+            ctx.moveTo(x, y - h * 0.28);
+            ctx.lineTo(x + w, y - h * 0.5);
+            ctx.lineTo(x + w, y + h * 0.5);
+            ctx.lineTo(x, y + h * 0.28);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            drawMetallicCylinder(ctx, x - 6, y - 6, w + 16, 12, '#37474f', '#eceff1', '#263238', false);
+
+            let stages = 3;
+            for (let s = 0; s < stages; s++) {
+                let sx = x + (s + 0.5) * (w / stages);
+                let sh = h * (0.26 + (s / stages) * 0.2);
+                let stageW = (w / stages) * 0.55;
+
+                let diskGrad = ctx.createLinearGradient(sx - stageW/2, y - sh, sx + stageW/2, y + sh);
+                diskGrad.addColorStop(0, '#78909c');
+                diskGrad.addColorStop(0.5, '#ffffff');
+                diskGrad.addColorStop(1, '#455a64');
+                ctx.fillStyle = diskGrad;
+                ctx.fillRect(sx - stageW/2, y - sh, stageW, sh * 2);
+                ctx.strokeStyle = '#263238';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(sx - stageW/2, y - sh, stageW, sh * 2);
+
+                let numBlades = 7;
+                let phase = (angle * 3 + s * 0.7) % 1;
+                ctx.fillStyle = '#263238';
+                for (let b = 0; b < numBlades; b++) {
+                    let normPos = ((b + phase) / numBlades) * 2 - 1;
+                    let by = y + Math.sin(normPos * (Math.PI / 2)) * (sh - 3);
+                    let bladeThickness = Math.cos(normPos * (Math.PI / 2)) * 4.5 + 1.5;
+                    ctx.fillRect(sx - stageW/2 + 1, by - bladeThickness/2, stageW - 2, bladeThickness);
+                }
+            }
+            ctx.restore();
+        }
+
+        function drawIndustrialAlternator(ctx, x, y, w, h, angle) {
+            ctx.save();
+            drawMetallicCylinder(ctx, x, y, w, h, '#e67e22', '#f39c12', '#d35400', false);
+            ctx.fillStyle = '#2c3e50'; ctx.fillRect(x+8, y+8, w-16, h-16);
+            let rotY = (angle * 20) % Math.max(10, (h-16));
+            ctx.fillStyle = '#ecf0f1';
+            for(let i=-20; i<h; i+=14) {
+                let posY = y + 8 + ((i + rotY) % (h-16));
+                if(posY > y+8 && posY < y+h-12) { ctx.fillRect(x+8, posY, w-16, 5); }
+            }
+            ctx.fillStyle = '#c0392b';
+            ctx.fillRect(x+4, y, 6, h); ctx.fillRect(x+w-10, y, 6, h);
+            ctx.restore();
+        }
+
+        function drawPeltonTurbine(ctx, cx, cy, r, angle) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(angle);
+            ctx.fillStyle = '#f39c12';
+            ctx.strokeStyle = '#d35400';
+            ctx.lineWidth = 2;
+            const numBlades = 12;
+            for(let i=0; i<numBlades; i++) {
+                ctx.rotate((Math.PI * 2) / numBlades);
+                ctx.beginPath();
+                ctx.moveTo(r * 0.45, -4);
+                ctx.quadraticCurveTo(r * 1.05, -10, r, 0);
+                ctx.quadraticCurveTo(r * 1.05, 10, r * 0.45, 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            ctx.beginPath(); ctx.arc(0, 0, r * 0.55, 0, Math.PI * 2);
+            ctx.fillStyle = '#f1c40f'; ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 0, r * 0.25, 0, Math.PI * 2);
+            ctx.fillStyle = '#d35400'; ctx.fill();
+            ctx.restore();
+        }
+
+        function drawTransformer(ctx, x, y, scale=1) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+            drawMetallicCylinder(ctx, 0, 0, 55, 48, '#00838f', '#00acc1', '#006064', true);
+            ctx.fillStyle = '#004d40';
+            for(let i=6; i<44; i+=8) { ctx.fillRect(-3, i, 61, 3); }
+            ctx.strokeStyle = '#37474f'; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(15, 0); ctx.lineTo(5, -18); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(40, 0); ctx.lineTo(50, -18); ctx.stroke();
+            for(let j=4; j<=16; j+=5) {
+                ctx.fillStyle = '#b0bec5';
+                ctx.beginPath(); ctx.arc(15 - j*0.55, -j, 4, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(40 + j*0.55, -j, 4, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.fillStyle = '#78909c'; ctx.fillRect(-10, 48, 75, 6);
+            ctx.restore();
+        }
+
+        function drawPylon(ctx, px, py) {
+            ctx.save();
+            ctx.strokeStyle = '#546e7a'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+            ctx.beginPath(); ctx.moveTo(px-25, py); ctx.lineTo(px-8, py-150); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px+25, py); ctx.lineTo(px+8, py-150); ctx.stroke();
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(px-50, py-95); ctx.lineTo(px+50, py-95); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px-35, py-130); ctx.lineTo(px+35, py-130); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px-8, py-150); ctx.lineTo(px, py-175); ctx.lineTo(px+8, py-150); ctx.stroke();
+            ctx.lineWidth = 1.2;
+            for(let y=0; y<130; y+=20) {
+                let w1 = 25 - (y/150)*17; let w2 = 25 - ((y+20)/150)*17;
+                ctx.beginPath(); ctx.moveTo(px-w1, py-y); ctx.lineTo(px+w2, py-y-20); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(px+w1, py-y); ctx.lineTo(px-w2, py-y-20); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(px-w1, py-y); ctx.lineTo(px+w1, py-y); ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function drawNumberCircle(ctx, x, y, num, bgColor='#00695c') {
+            ctx.save();
+            ctx.fillStyle = bgColor;
+            ctx.beginPath(); ctx.arc(x, y, 17, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5; ctx.stroke();
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(num, x, y + 1);
+            ctx.restore();
+        }
+
+        function drawRedCallout(ctx, x, y, textLines, tipX, tipY) {
+            ctx.save();
+            ctx.font = 'bold 13px Arial';
+            let maxW = 0;
+            for(let line of textLines) {
+                let m = ctx.measureText(line).width;
+                if(m > maxW) maxW = m;
+            }
+            let w = maxW + 26;
+            let h = textLines.length * 18 + 14;
+
+            ctx.fillStyle = '#ef5350';
+            ctx.beginPath();
+            ctx.moveTo(x + w/2 - 10, y + h/2);
+            ctx.lineTo(tipX, tipY);
+            ctx.lineTo(x + w/2 + 10, y + h/2);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.roundRect(x, y, w, h, 6);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            let startY = y + h/2 - ((textLines.length - 1) * 9);
+            for(let i=0; i<textLines.length; i++) {
+                ctx.fillText(textLines[i], x + w/2, startY + i*18);
+            }
+            ctx.restore();
+        }
+
+        function drawZoomSpeechBubble(ctx, bx, by, title, lines, tipX, tipY, bgColor='#ffffff', titleColor='#00695c') {
+            ctx.save();
+            ctx.font = 'bold 17px Arial';
+            let maxW = ctx.measureText(title).width;
+            ctx.font = '14.5px Arial';
+            for(let line of lines) {
+                let m = ctx.measureText(line).width;
+                if(m > maxW) maxW = m;
+            }
+            let bw = maxW + 36;
+            let bh = 50 + lines.length * 21;
+
+            ctx.fillStyle = bgColor;
+            ctx.strokeStyle = '#546e7a';
+            ctx.lineWidth = 2;
+
+            ctx.fillRect(bx, by, bw, bh);
+            ctx.strokeRect(bx, by, bw, bh);
+
+            ctx.beginPath();
+            if (tipY > by + bh) {
+                ctx.moveTo(bx + 35, by + bh - 1);
+                ctx.lineTo(tipX, tipY);
+                ctx.lineTo(bx + 65, by + bh - 1);
+            } else if (tipX < bx) {
+                ctx.moveTo(bx + 1, by + 25);
+                ctx.lineTo(tipX, tipY);
+                ctx.lineTo(bx + 1, by + 48);
+            } else {
+                ctx.moveTo(bx + bw - 1, by + 25);
+                ctx.lineTo(tipX, tipY);
+                ctx.lineTo(bx + bw - 1, by + 48);
+            }
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = titleColor;
+            ctx.font = 'bold 17px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(title, bx + 18, by + 27);
+
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '14.5px Arial';
+            for(let i=0; i<lines.length; i++) {
+                ctx.fillText(lines[i], bx + 18, by + 54 + i*21);
+            }
+            ctx.restore();
+        }
+
+        function drawBackButton(ctx) {
+            ctx.save();
+            ctx.fillStyle = '#2c3e50';
+            ctx.beginPath(); ctx.roundRect(785, 15, 200, 34, 8); ctx.fill();
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 13px Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText("↩ Retour à la vue globale", 885, 32);
+            ctx.restore();
+        }
+
+        function drawLossLabel(ctx, x, y, text) {
+            ctx.save();
+            ctx.font = 'bold 12.5px Arial';
+            let w = ctx.measureText(text).width + 28;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
+            ctx.fillRect(x - 4, y - 15, w, 24);
+            ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 1.8;
+            ctx.strokeRect(x - 4, y - 15, w, 24);
+            ctx.fillStyle = '#c0392b';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+            ctx.fillText("🔥 " + text, x + 2, y + 1);
+            ctx.restore();
+        }
+
+        // =========================================================================
+        // RENDER HYDRAULIQUE
+        // =========================================================================
+        function renderHydro() {
+            hCtx.clearRect(0, 0, 1000, 420);
+
+            if (hydroView === 'global') {
+                hCtx.fillStyle = '#ffffff'; hCtx.fillRect(0, 0, 1000, 420);
+                hCtx.fillStyle = '#64b5f6'; hCtx.fillRect(0, 55, 95, 115);
+                hCtx.fillStyle = '#d7ccc8'; hCtx.fillRect(0, 165, 95, 12);
+
+                hCtx.fillStyle = '#ef9a00';
+                hCtx.beginPath();
+                hCtx.moveTo(0, 175); hCtx.lineTo(200, 175); hCtx.lineTo(310, 260);
+                hCtx.lineTo(1000, 260); hCtx.lineTo(1000, 420); hCtx.lineTo(0, 420);
+                hCtx.closePath(); hCtx.fill();
+
+                hCtx.fillStyle = '#7cb342'; hCtx.fillRect(300, 252, 700, 10);
+
+                hCtx.fillStyle = '#9e9e9e';
+                hCtx.beginPath();
+                hCtx.moveTo(85, 15); hCtx.lineTo(145, 15);
+                hCtx.quadraticCurveTo(160, 110, 195, 175);
+                hCtx.lineTo(85, 175); hCtx.closePath(); hCtx.fill();
+
+                hCtx.fillStyle = '#004d40'; hCtx.fillRect(73, 115, 15, 42);
+
+                hCtx.fillStyle = '#757575'; hCtx.fillRect(410, 280, 440, 125);
+                hCtx.fillStyle = '#bdbdbd'; hCtx.fillRect(410, 355, 440, 50);
+
+                hCtx.fillStyle = '#616161'; hCtx.fillRect(540, 365, 460, 45);
+                hCtx.fillStyle = '#64b5f6'; hCtx.fillRect(555, 372, 445, 30);
+
+                hCtx.strokeStyle = '#29b6f6'; hCtx.lineWidth = 18; hCtx.lineJoin = 'round';
+                hCtx.beginPath();
+                hCtx.moveTo(85, 136); hCtx.lineTo(190, 136); hCtx.lineTo(340, 340); hCtx.lineTo(540, 340);
+                hCtx.stroke();
+
+                let flow = (globalAngle * 35) % 40;
+                hCtx.strokeStyle = '#e1f5fe'; hCtx.lineWidth = 4; hCtx.setLineDash([12, 28]);
+                hCtx.lineDashOffset = -flow;
+                hCtx.beginPath();
+                hCtx.moveTo(85, 136); hCtx.lineTo(190, 136); hCtx.lineTo(340, 340); hCtx.lineTo(540, 340);
+                hCtx.stroke();
+                hCtx.setLineDash([]);
+
+                hCtx.strokeStyle = '#4fc3f7'; hCtx.lineWidth = 6;
+                hCtx.beginPath(); hCtx.moveTo(535, 340); hCtx.lineTo(575, 330); hCtx.stroke();
+
+                hCtx.save();
+                hCtx.translate(615, 315);
+                hCtx.rotate(-0.2);
+                drawIndustrialAlternator(hCtx, 0, -22, 55, 44, globalAngle);
+                hCtx.fillStyle = '#bdbdbd'; hCtx.fillRect(-35, -5, 35, 10);
+                hCtx.restore();
+
+                drawPeltonTurbine(hCtx, 560, 342, 32, globalAngle * 2);
+
+                hCtx.fillStyle = '#9e9e9e'; hCtx.fillRect(445, 165, 75, 87);
+                hCtx.fillStyle = '#757575'; hCtx.fillRect(440, 155, 85, 12);
+                
+                drawTransformer(hCtx, 585, 200, 1.1);
+                drawPylon(hCtx, 745, 252);
+                drawPylon(hCtx, 895, 252);
+
+                hCtx.strokeStyle = '#00695c'; hCtx.lineWidth = 3.5;
+                hCtx.beginPath();
+                hCtx.moveTo(645, 295); hCtx.lineTo(645, 270); hCtx.lineTo(475, 270);
+                hCtx.lineTo(475, 195); hCtx.lineTo(575, 195); hCtx.lineTo(595, 182);
+                hCtx.stroke();
+
+                hCtx.beginPath();
+                hCtx.moveTo(635, 182); hCtx.lineTo(655, 195); hCtx.lineTo(695, 195); hCtx.lineTo(735, 120);
+                hCtx.stroke();
+
+                hCtx.lineWidth = 2;
+                hCtx.beginPath(); hCtx.moveTo(745, 122); hCtx.quadraticCurveTo(820, 160, 895, 122); hCtx.stroke();
+                hCtx.beginPath(); hCtx.moveTo(745, 155); hCtx.quadraticCurveTo(820, 190, 895, 155); hCtx.stroke();
+                hCtx.beginPath(); hCtx.moveTo(895, 122); hCtx.quadraticCurveTo(950, 150, 1000, 130); hCtx.stroke();
+
+                drawRedCallout(hCtx, 200, 28, ["Retenue d'eau"], 125, 65);
+                drawRedCallout(hCtx, 35, 210, ["Conduite", "forcée"], 260, 225);
+                drawRedCallout(hCtx, 175, 325, ["Turbine et", "alternateur"], 525, 348);
+                drawRedCallout(hCtx, 585, 28, ["Transformateur"], 635, 185);
+
+                for (let h of hydroHotspots) {
+                    drawNumberCircle(hCtx, h.x, h.y, h.num, '#00695c');
+                }
+
+            } else if (hydroView === 'retenue') {
+                hCtx.fillStyle = '#f8fafc'; hCtx.fillRect(0, 0, 1000, 420);
+                hCtx.fillStyle = '#64b5f6'; hCtx.fillRect(0, 150, 160, 220);
+                hCtx.fillStyle = '#ef9a00'; hCtx.fillRect(0, 370, 500, 50);
+                hCtx.fillStyle = '#004d40'; hCtx.fillRect(130, 290, 30, 70);
+                
+                hCtx.fillStyle = '#9e9e9e';
+                hCtx.beginPath();
+                hCtx.moveTo(155, 30); hCtx.lineTo(255, 30);
+                hCtx.quadraticCurveTo(270, 220, 325, 370);
+                hCtx.lineTo(155, 370); hCtx.closePath(); hCtx.fill();
+
+                hCtx.fillStyle = '#bdbdbd';
+                hCtx.beginPath();
+                hCtx.moveTo(255, 30); hCtx.lineTo(295, 15);
+                hCtx.quadraticCurveTo(305, 200, 360, 370);
+                hCtx.lineTo(325, 370);
+                hCtx.quadraticCurveTo(270, 220, 255, 30); hCtx.fill();
+
+                drawZoomSpeechBubble(
+                    hCtx, 370, 85,
+                    "1/ La retenue de l'eau",
+                    ["Un barrage retient de grandes quantités d'eau."],
+                    300, 120, '#ffffff'
+                );
+                drawBackButton(hCtx);
+
+            } else if (hydroView === 'conduite') {
+                hCtx.fillStyle = '#ef9a00'; hCtx.fillRect(0, 0, 1000, 420);
+                hCtx.fillStyle = '#ffffff';
+                hCtx.beginPath(); hCtx.moveTo(650, 0); hCtx.lineTo(1000, 0); hCtx.lineTo(1000, 320); hCtx.lineTo(780, 320); hCtx.closePath(); hCtx.fill();
+                hCtx.fillStyle = '#7cb342'; hCtx.fillRect(770, 310, 230, 15);
+
+                hCtx.strokeStyle = '#29b6f6'; hCtx.lineWidth = 34;
+                hCtx.beginPath(); hCtx.moveTo(630, -10); hCtx.lineTo(840, 430); hCtx.stroke();
+
+                let flow = (globalAngle * 50) % 50;
+                hCtx.strokeStyle = '#e1f5fe'; hCtx.lineWidth = 8; hCtx.setLineDash([18, 32]);
+                hCtx.lineDashOffset = -flow;
+                hCtx.beginPath(); hCtx.moveTo(630, -10); hCtx.lineTo(840, 430); hCtx.stroke();
+                hCtx.setLineDash([]);
+
+                drawZoomSpeechBubble(
+                    hCtx, 120, 70,
+                    "2/ La conduite forcée de l'eau",
+                    [
+                        "Des vannes sont ouvertes pour acheminer l'eau",
+                        "jusqu'à la centrale par de longs tuyaux."
+                    ],
+                    675, 105, '#ffecb3'
+                );
+                drawBackButton(hCtx);
+
+            } else if (hydroView === 'turbine') {
+                hCtx.fillStyle = '#757575'; hCtx.fillRect(0, 0, 1000, 420);
+                hCtx.fillStyle = '#bdbdbd'; hCtx.fillRect(0, 280, 1000, 140);
+
+                hCtx.fillStyle = '#616161'; hCtx.fillRect(260, 310, 740, 110);
+                hCtx.fillStyle = '#64b5f6'; hCtx.fillRect(285, 325, 715, 95);
+
+                hCtx.fillStyle = '#29b6f6'; hCtx.fillRect(0, 235, 250, 28);
+                hCtx.strokeStyle = '#e1f5fe'; hCtx.lineWidth = 5;
+                let splash = (globalAngle * 40) % 20;
+                hCtx.beginPath(); hCtx.moveTo(220 + splash, 248); hCtx.lineTo(295, 240); hCtx.stroke();
+                hCtx.beginPath(); hCtx.moveTo(230, 255); hCtx.lineTo(310, 270); hCtx.stroke();
+
+                hCtx.save();
+                hCtx.translate(415, 225);
+                hCtx.rotate(-0.22);
+                drawIndustrialAlternator(hCtx, 0, -40, 110, 80, globalAngle);
+                hCtx.fillStyle = '#e0e0e0'; hCtx.fillRect(-70, -10, 70, 20);
+                hCtx.restore();
+
+                drawPeltonTurbine(hCtx, 310, 265, 65, globalAngle * 2.5);
+
+                drawZoomSpeechBubble(
+                    hCtx, 80, 25,
+                    "3/ La production d'électricité",
+                    [
+                        "L'eau fait tourner la turbine qui entraîne un alternateur.",
+                        "L'alternateur produit de l'électricité."
+                    ],
+                    140, 215, 'rgba(255, 248, 225, 0.96)'
+                );
+                drawLossLabel(hCtx, 430, 145, "Pertes thermiques (échauffement dû aux frottements mécaniques)");
+                drawBackButton(hCtx);
+
+            } else if (hydroView === 'transfo') {
+                hCtx.fillStyle = '#f8fafc'; hCtx.fillRect(0, 0, 1000, 420);
+                hCtx.fillStyle = '#7cb342'; hCtx.fillRect(0, 360, 1000, 60);
+
+                drawTransformer(hCtx, 220, 250, 1.8);
+                drawPylon(hCtx, 580, 360);
+                drawPylon(hCtx, 850, 360);
+
+                hCtx.strokeStyle = '#00695c'; hCtx.lineWidth = 4;
+                hCtx.beginPath();
+                hCtx.moveTo(100, 340); hCtx.lineTo(180, 340); hCtx.lineTo(230, 220);
+                hCtx.moveTo(310, 220); hCtx.lineTo(360, 300); hCtx.lineTo(480, 300); hCtx.lineTo(565, 220);
+                hCtx.stroke();
+
+                hCtx.lineWidth = 2.5;
+                hCtx.beginPath(); hCtx.moveTo(580, 220); hCtx.quadraticCurveTo(715, 260, 850, 220); hCtx.stroke();
+                hCtx.beginPath(); hCtx.moveTo(580, 255); hCtx.quadraticCurveTo(715, 295, 850, 255); hCtx.stroke();
+
+                drawZoomSpeechBubble(
+                    hCtx, 80, 35,
+                    "4/ L'adaptation de la tension",
+                    [
+                        "Un transformateur élève la tension de l'électricité",
+                        "pour le transport dans les lignes haute tension."
+                    ],
+                    245, 235, 'rgba(255, 255, 255, 0.96)'
+                );
+                drawBackButton(hCtx);
+            }
+        }
+
+        // =========================================================================
+        // RENDER THERMIQUE (CHAUDIÈRE POSITIONNÉE PLUS BAS)
+        // =========================================================================
+        function renderTherm() {
+            tCtx.clearRect(0, 0, 1000, 450);
+
+            if (thermView === 'global') {
+                let sky = tCtx.createLinearGradient(0,0,0,450);
+                sky.addColorStop(0, '#e0f7fa'); sky.addColorStop(1, '#ffffff');
+                tCtx.fillStyle = sky; tCtx.fillRect(0, 0, 1000, 450);
+                
+                tCtx.fillStyle = '#dcedc8'; tCtx.beginPath(); tCtx.moveTo(0, 400); tCtx.lineTo(1000, 300); tCtx.lineTo(1000, 450); tCtx.lineTo(0, 450); tCtx.fill();
+
+                tCtx.fillStyle = '#b0bec5'; tCtx.fillRect(100, 140, 200, 310);
+                tCtx.fillStyle = '#cfd8dc'; tCtx.fillRect(400, 200, 190, 250);
+                tCtx.fillStyle = '#90a4ae'; tCtx.fillRect(400, 200, 420, 40); 
+
+                // CHEMINÉE
+                tCtx.fillStyle = '#eceff1'; tCtx.beginPath(); tCtx.moveTo(50, 400); tCtx.lineTo(90, 400); tCtx.lineTo(80, 100); tCtx.lineTo(60, 100); tCtx.fill();
+                tCtx.fillStyle = '#546e7a'; tCtx.fillRect(60, 120, 20, 30); tCtx.fillRect(62, 160, 18, 20);
+                
+                if(Math.random() > 0.2) smokeParticles.push({x: 70, y: 100, a: 0.8, s: 10});
+                for(let i=smokeParticles.length-1; i>=0; i--) {
+                    let p = smokeParticles[i]; p.y -= 2; p.x += 1; p.s += 0.5; p.a -= 0.01;
+                    tCtx.fillStyle = `rgba(100,100,100,${p.a})`; tCtx.beginPath(); tCtx.arc(p.x, p.y, p.s, 0, Math.PI*2); tCtx.fill();
+                    if(p.a <= 0) smokeParticles.splice(i, 1);
+                }
+
+                // CHAUDIÈRE & GÉNÉRATEUR DE VAPEUR
+                tCtx.fillStyle = '#fff'; tCtx.beginPath(); tCtx.arc(200, 200, 70, Math.PI, 0); tCtx.lineTo(270, 380); tCtx.lineTo(130, 380); tCtx.fill();
+                tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 3; tCtx.stroke();
+                
+                for(let i=0; i<5; i++) {
+                    tCtx.fillStyle = (i%2===0) ? '#f1c40f' : '#e74c3c';
+                    tCtx.beginPath(); tCtx.moveTo(145+i*22, 360); tCtx.lineTo(155+i*22, 322-Math.random()*18); tCtx.lineTo(165+i*22, 360); tCtx.fill();
+                }
+                drawCoalBed(tCtx, 133, 355, 134, 24);
+                
+                tCtx.strokeStyle = '#3498db'; tCtx.lineWidth = 8; tCtx.beginPath(); tCtx.moveTo(20, 368); tCtx.lineTo(130, 368); tCtx.stroke();
+                tCtx.fillStyle = '#3498db'; tCtx.beginPath(); tCtx.moveTo(130, 368); tCtx.lineTo(115, 358); tCtx.lineTo(115, 378); tCtx.fill();
+
+                tCtx.fillStyle = '#0288d1'; tCtx.fillRect(133, 270, 134, 52);
+                if(Math.random() > 0.3) bubbles.push({x: 140 + Math.random()*120, y: 318, r: Math.random()*4+2});
+                tCtx.fillStyle = 'white';
+                for(let i=bubbles.length-1; i>=0; i--) {
+                    let b = bubbles[i]; b.y -= 2.5;
+                    tCtx.beginPath(); tCtx.arc(b.x, b.y, b.r, 0, Math.PI*2); tCtx.fill();
+                    if(b.y < 270) bubbles.splice(i, 1);
+                }
+                
+                // Dôme de vapeur avec effet halo
+                tCtx.fillStyle = '#b3e5fc'; tCtx.beginPath(); tCtx.arc(200, 200, 67, Math.PI, 0); tCtx.lineTo(267, 270); tCtx.lineTo(133, 270); tCtx.fill();
+                for(let i=0; i<4; i++) {
+                    let hx = 165 + i*22 + Math.sin(globalAngle*2 + i)*6;
+                    let hy = 225 + Math.cos(globalAngle*2 + i)*8;
+                    drawVaporHalo(tCtx, hx, hy, 28, 0.75);
+                }
+
+                // CHAMBRE DU CONDENSEUR
+                tCtx.fillStyle = '#e1f5fe'; 
+                tCtx.beginPath(); 
+                tCtx.moveTo(465, 110); tCtx.lineTo(545, 110); tCtx.lineTo(545, 220); tCtx.lineTo(535, 220); tCtx.lineTo(535, 245); tCtx.lineTo(565, 245); 
+                tCtx.lineTo(565, 360); tCtx.lineTo(435, 360); tCtx.lineTo(435, 245); tCtx.lineTo(475, 245); tCtx.lineTo(475, 220); tCtx.lineTo(465, 220); tCtx.closePath(); 
+                tCtx.fill();
+                tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 3; tCtx.stroke();
+
+                for(let i=0; i<6; i++) {
+                    let cx = 465 + (i%3)*35 + Math.sin(globalAngle*1.5 + i)*5;
+                    let cy = 240 + Math.floor(i/3)*42 + ((globalAngle*18)%30);
+                    drawVaporHalo(tCtx, cx, cy, 34, 0.7);
+                }
+
+                tCtx.fillStyle = '#0288d1';
+                for(let i=0; i<5; i++) {
+                    let dx = 455 + i*22;
+                    let dy = 285 + ((globalAngle * 35 + i*15) % 35);
+                    tCtx.beginPath(); tCtx.arc(dx, dy, 2.5, 0, Math.PI*2); tCtx.fill();
+                }
+
+                tCtx.fillStyle = '#0288d1'; tCtx.fillRect(437, 320, 126, 38);
+
+                // CIRCUIT VAPEUR
+                tCtx.strokeStyle = '#eceff1'; tCtx.lineWidth = 22; tCtx.lineJoin = 'round';
+                tCtx.beginPath(); tCtx.moveTo(200, 130); tCtx.lineTo(200, 80); tCtx.lineTo(480, 80); tCtx.lineTo(480, 140); tCtx.stroke();
+                tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 3; tCtx.stroke();
+
+                for(let i=0; i<7; i++) {
+                    let prog = ((globalAngle * 0.4 + i / 7) % 1);
+                    let vx = 200 + prog * 280;
+                    let vy = 80;
+                    drawVaporHalo(tCtx, vx, vy, 16, 0.85);
+                }
+                drawVaporHalo(tCtx, 480, 120, 20, 0.9);
+                drawVaporHalo(tCtx, 488, 145, 22, 0.85);
+
+                // TURBINE MULTI-ÉTAGES
+                drawSteamTurbine(tCtx, 475, 160, 68, 76, globalAngle);
+
+                // ALTERNATEUR & AXE
+                tCtx.fillStyle = '#7f8c8d'; tCtx.fillRect(543, 155, 37, 10); 
+                let axisAnim = (globalAngle * 30) % 10;
+                tCtx.fillStyle = '#2c3e50';
+                for(let i=0; i<35; i+=10) {
+                    let ax = 543 + ((i + axisAnim) % 35);
+                    tCtx.fillRect(ax, 155, 3, 10);
+                }
+                drawIndustrialAlternator(tCtx, 580, 135, 75, 50, globalAngle);
+
+                tCtx.strokeStyle = '#333'; tCtx.lineWidth = 3; tCtx.beginPath(); tCtx.moveTo(655, 160); tCtx.lineTo(690, 160); tCtx.stroke();
+                drawTransformer(tCtx, 690, 135);
+
+                // Retour eau liquide vers chaudière
+                tCtx.strokeStyle = '#3498db'; tCtx.lineWidth = 12; tCtx.lineJoin = 'round';
+                tCtx.beginPath(); tCtx.moveTo(435, 350); tCtx.lineTo(400, 350); tCtx.lineTo(400, 385); tCtx.lineTo(270, 385); tCtx.stroke();
+                tCtx.fillStyle = '#ffffff';
+                tCtx.beginPath(); tCtx.moveTo(335, 385); tCtx.lineTo(347, 379); tCtx.lineTo(347, 391); tCtx.fill(); 
+
+                // RIVIÈRE
+                tCtx.save();
+                tCtx.fillStyle = '#8d6e63'; 
+                tCtx.beginPath(); tCtx.moveTo(760, 280); tCtx.quadraticCurveTo(880, 300, 1000, 280); tCtx.lineTo(1000, 265); tCtx.lineTo(760, 265); tCtx.fill();
+                tCtx.fillStyle = '#81c784'; 
+                tCtx.beginPath(); tCtx.moveTo(760, 275); tCtx.quadraticCurveTo(880, 295, 1000, 275); tCtx.lineTo(1000, 260); tCtx.lineTo(760, 260); tCtx.fill();
+                let rivGrad = tCtx.createLinearGradient(0, 280, 0, 450);
+                rivGrad.addColorStop(0, '#4fc3f7'); rivGrad.addColorStop(1, '#0277bd');
+                tCtx.fillStyle = rivGrad;
+                tCtx.beginPath(); tCtx.moveTo(760, 280); tCtx.quadraticCurveTo(880, 300, 1000, 280); tCtx.lineTo(1000, 450); tCtx.lineTo(760, 450); tCtx.fill();
+                tCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; tCtx.lineWidth = 2;
+                let waveOffset = (globalAngle * 15) % 30;
+                for(let i=0; i<6; i++) {
+                    tCtx.beginPath(); tCtx.moveTo(780 + i*40 + waveOffset, 310 + i*15);
+                    tCtx.quadraticCurveTo(800 + i*40 + waveOffset, 300 + i*15, 820 + i*40 + waveOffset, 310 + i*15); tCtx.stroke();
+                }
+                tCtx.restore();
+
+                // Serpentin Eau Rivière dans le condenseur
+                tCtx.strokeStyle = '#0288d1'; tCtx.lineWidth = 13; tCtx.lineJoin = 'round';
+                tCtx.beginPath(); tCtx.moveTo(850, 420); tCtx.lineTo(850, 300); tCtx.lineTo(500, 300); tCtx.stroke();
+                
+                let uGrad = tCtx.createLinearGradient(500, 300, 500, 260);
+                uGrad.addColorStop(0, '#0288d1'); uGrad.addColorStop(1, '#81d4fa');
+                tCtx.strokeStyle = uGrad;
+                tCtx.beginPath(); tCtx.arc(500, 280, 20, Math.PI/2, Math.PI*1.5); tCtx.stroke();
+
+                tCtx.strokeStyle = '#81d4fa';
+                tCtx.beginPath(); tCtx.moveTo(500, 260); tCtx.lineTo(800, 260); tCtx.lineTo(800, 320); tCtx.stroke();
+
+                let flowOffset = (globalAngle * 25) % 40;
+                tCtx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; tCtx.lineWidth = 4; tCtx.setLineDash([10, 30]); 
+                tCtx.lineDashOffset = -flowOffset;
+                tCtx.beginPath(); tCtx.moveTo(850, 420); tCtx.lineTo(850, 300); tCtx.lineTo(500, 300); tCtx.stroke(); 
+                tCtx.lineDashOffset = flowOffset; 
+                tCtx.beginPath(); tCtx.moveTo(500, 260); tCtx.lineTo(800, 260); tCtx.lineTo(800, 320); tCtx.stroke(); 
+                tCtx.setLineDash([]); 
+
+                // RÉSEAU ÉLECTRIQUE
+                tCtx.strokeStyle = '#c0392b'; tCtx.lineWidth = 2; tCtx.beginPath(); tCtx.moveTo(705, 125); tCtx.quadraticCurveTo(800, 80, 850, 100); tCtx.stroke();
+                tCtx.strokeStyle = '#2980b9'; tCtx.beginPath(); tCtx.moveTo(725, 125); tCtx.quadraticCurveTo(800, 100, 895, 100); tCtx.stroke();
+                drawPylon(tCtx, 870, 240);
+
+                // TEXTES DE LA VUE GLOBALE
+                tCtx.fillStyle = 'rgba(255,255,255,0.88)'; tCtx.fillRect(5, 18, 215, 56); 
+                tCtx.fillStyle = '#c0392b'; tCtx.font = 'bold 12.5px Arial';
+                tCtx.fillText("émission de dioxyde de carbone", 10, 34); 
+                tCtx.font = 'italic 11.5px Arial'; tCtx.fillText("(gaz à effet de serre)", 10, 49);
+                tCtx.font = 'bold 12.5px Arial'; tCtx.fillText("et autres gaz ou fumées", 10, 65);
+                tCtx.fillStyle = 'black'; tCtx.font = '13px Arial'; tCtx.fillText("cheminée", 8, 150);
+
+                // Combustible fossile placé SOUS les flammes et le charbon
+                tCtx.fillStyle = 'rgba(255,255,255,0.94)'; tCtx.fillRect(110, 396, 180, 36);
+                tCtx.strokeStyle = '#d35400'; tCtx.lineWidth = 1.2; tCtx.strokeRect(110, 396, 180, 36);
+                tCtx.beginPath(); tCtx.moveTo(200, 396); tCtx.lineTo(200, 378); tCtx.stroke();
+                tCtx.fillStyle = '#d35400'; tCtx.font = 'bold 12px Arial'; tCtx.fillText("Combustible fossile", 142, 411);
+                tCtx.font = '11px Arial'; tCtx.fillText("(ex : charbon, gaz, pétrole)", 132, 425);
+
+                tCtx.fillStyle = 'black'; tCtx.font = '13px Arial'; tCtx.fillText("entrée d'air", 15, 355);
+
+                // Générateur de vapeur en haut (dans le dôme)
+                tCtx.font = 'bold 12.5px Arial'; 
+                tCtx.fillText("générateur", 167, 182);
+                tCtx.fillText("de vapeur", 170, 197);
+
+                // Chaudière placée plus bas (au niveau du foyer et des flammes)
+                tCtx.fillStyle = 'rgba(255,255,255,0.9)'; tCtx.fillRect(162, 323, 76, 18);
+                tCtx.fillStyle = '#d35400'; tCtx.font = 'bold 13px Arial';
+                tCtx.fillText("chaudière", 169, 337);
+
+                tCtx.fillStyle = 'rgba(255,255,255,0.88)'; tCtx.fillRect(310, 48, 95, 20); 
+                tCtx.fillStyle = '#e74c3c'; tCtx.font = 'bold 13px Arial'; tCtx.fillText("jet de vapeur", 315, 62);
+
+                tCtx.fillStyle = 'rgba(255,255,255,0.88)'; tCtx.fillRect(482, 52, 54, 20);
+                tCtx.fillStyle = 'black'; tCtx.font = 'bold 13px Arial'; tCtx.fillText("turbine", 487, 66);
+                tCtx.fillStyle = 'rgba(255,255,255,0.88)'; tCtx.fillRect(580, 105, 76, 19);
+                tCtx.fillStyle = 'black'; tCtx.font = 'bold 13px Arial'; tCtx.fillText("alternateur", 584, 119);
+
+                tCtx.fillStyle = 'rgba(255,255,255,0.88)'; tCtx.fillRect(342, 260, 86, 20); 
+                tCtx.fillStyle = 'black'; tCtx.font = 'bold 13px Arial'; tCtx.fillText("condenseur", 347, 275);
+
+                tCtx.fillStyle = 'rgba(255,255,255,0.88)'; tCtx.fillRect(325, 395, 75, 18);
+                tCtx.fillStyle = 'black'; tCtx.font = '13px Arial'; tCtx.fillText("eau liquide", 330, 408);
+                tCtx.fillStyle = 'rgba(255,255,255,0.88)'; tCtx.fillRect(765, 275, 70, 18);
+                tCtx.fillStyle = 'black'; tCtx.font = '13px Arial'; tCtx.fillText("eau froide", 770, 288);
+                tCtx.fillStyle = 'rgba(255,255,255,0.88)'; tCtx.fillRect(645, 235, 80, 18);
+                tCtx.fillStyle = 'black'; tCtx.font = '13px Arial'; tCtx.fillText("eau chaude", 650, 248);
+
+                tCtx.fillStyle = 'rgba(255,255,255,0.88)'; tCtx.fillRect(855, 360, 65, 22);
+                tCtx.fillStyle = 'black'; tCtx.font = 'bold 14px Arial'; tCtx.fillText("rivière", 865, 376);
+
+                tCtx.fillStyle = 'rgba(255,255,255,0.88)'; tCtx.fillRect(805, 35, 120, 19);
+                tCtx.fillStyle = 'black'; tCtx.font = 'bold 13px Arial'; tCtx.fillText("réseau électrique", 810, 49);
+
+                for (let h of thermHotspots) {
+                    drawNumberCircle(tCtx, h.x, h.y, h.num, '#d35400');
+                }
+
+            } else if (thermView === 'combustion') {
+                tCtx.fillStyle = '#f8fafc'; tCtx.fillRect(0, 0, 1000, 450);
+                tCtx.fillStyle = '#b0bec5'; tCtx.fillRect(80, 70, 320, 365);
+
+                tCtx.fillStyle = '#cfd8dc';
+                tCtx.beginPath(); tCtx.moveTo(20, 435); tCtx.lineTo(70, 435); tCtx.lineTo(60, 40); tCtx.lineTo(30, 40); tCtx.fill();
+                if(Math.random() > 0.2) smokeParticles.push({x: 45, y: 40, a: 0.8, s: 12});
+                for(let i=smokeParticles.length-1; i>=0; i--) {
+                    let p = smokeParticles[i]; p.y -= 1.5; p.x += 1.2; p.s += 0.4; p.a -= 0.012;
+                    tCtx.fillStyle = `rgba(90,90,90,${p.a})`; tCtx.beginPath(); tCtx.arc(p.x, p.y, p.s, 0, Math.PI*2); tCtx.fill();
+                    if(p.a <= 0) smokeParticles.splice(i, 1);
+                }
+
+                tCtx.fillStyle = '#ffffff'; tCtx.fillRect(140, 125, 200, 240);
+                tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 4; tCtx.strokeRect(140, 125, 200, 240);
+
+                for(let i=0; i<6; i++) {
+                    tCtx.fillStyle = (i%2===0) ? '#f1c40f' : '#e74c3c';
+                    tCtx.beginPath();
+                    tCtx.moveTo(150+i*30, 330);
+                    tCtx.lineTo(165+i*30, 235 - Math.random()*35);
+                    tCtx.lineTo(180+i*30, 330);
+                    tCtx.fill();
+                }
+                drawCoalBed(tCtx, 144, 325, 192, 36);
+
+                // Étiquette Chaudière en bas dans le foyer
+                tCtx.fillStyle = 'rgba(255,255,255,0.92)'; tCtx.fillRect(190, 292, 100, 24);
+                tCtx.fillStyle = '#d35400'; tCtx.font = 'bold 15px Arial';
+                tCtx.fillText("Chaudière", 202, 309);
+
+                tCtx.fillStyle = 'rgba(255,255,255,0.95)'; tCtx.fillRect(130, 378, 220, 40);
+                tCtx.strokeStyle = '#d35400'; tCtx.lineWidth = 1.5; tCtx.strokeRect(130, 378, 220, 40);
+                tCtx.beginPath(); tCtx.moveTo(240, 378); tCtx.lineTo(240, 360); tCtx.stroke();
+                tCtx.fillStyle = '#d35400'; tCtx.font = 'bold 13px Arial'; tCtx.fillText("Combustible fossile", 178, 395);
+                tCtx.font = '12px Arial'; tCtx.fillText("(ex : charbon, gaz ou pétrole)", 160, 411);
+
+                drawZoomSpeechBubble(
+                    tCtx, 430, 90,
+                    "1/ La combustion dans la chaudière",
+                    [
+                        "Les combustibles fossiles (charbon, gaz ou fioul/pétrole)",
+                        "brûlent dans la chaudière (en bas) et dégagent une forte chaleur.",
+                        "Une partie de cette chaleur s'échappe par la cheminée",
+                        "dans l'environnement avec les fumées (CO2)."
+                    ],
+                    340, 280, '#fff8e1', '#d35400'
+                );
+                drawLossLabel(tCtx, 430, 260, "Pertes thermiques (fumées chaudes) + émission de CO2 (gaz à effet de serre)");
+                drawBackButton(tCtx);
+
+            } else if (thermView === 'vapeur') {
+                tCtx.fillStyle = '#f8fafc'; tCtx.fillRect(0, 0, 1000, 450);
+
+                tCtx.fillStyle = '#ffffff';
+                tCtx.beginPath(); tCtx.arc(240, 200, 100, Math.PI, 0); tCtx.lineTo(340, 390); tCtx.lineTo(140, 390); tCtx.closePath();
+                tCtx.fill(); tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 4; tCtx.stroke();
+
+                tCtx.fillStyle = '#0288d1'; tCtx.fillRect(143, 250, 194, 110);
+                if(Math.random() > 0.2) bubbles.push({x: 155 + Math.random()*170, y: 355, r: Math.random()*5+3});
+                tCtx.fillStyle = '#ffffff';
+                for(let i=bubbles.length-1; i>=0; i--) {
+                    let b = bubbles[i]; b.y -= 3;
+                    tCtx.beginPath(); tCtx.arc(b.x, b.y, b.r, 0, Math.PI*2); tCtx.fill();
+                    if(b.y < 250) bubbles.splice(i, 1);
+                }
+
+                tCtx.fillStyle = '#b3e5fc';
+                tCtx.beginPath(); tCtx.arc(240, 200, 97, Math.PI, 0); tCtx.lineTo(337, 250); tCtx.lineTo(143, 250); tCtx.closePath(); tCtx.fill();
+                for(let i=0; i<6; i++) {
+                    let hx = 175 + i*26 + Math.sin(globalAngle*2 + i)*8;
+                    let hy = 195 + Math.cos(globalAngle*2 + i)*12;
+                    drawVaporHalo(tCtx, hx, hy, 42, 0.85);
+                }
+
+                tCtx.fillStyle = '#2c3e50'; tCtx.font = 'bold 15px Arial';
+                tCtx.fillText("Générateur de vapeur", 162, 175);
+
+                tCtx.strokeStyle = '#eceff1'; tCtx.lineWidth = 34; tCtx.lineJoin = 'round';
+                tCtx.beginPath(); tCtx.moveTo(240, 100); tCtx.lineTo(240, 55); tCtx.lineTo(800, 55); tCtx.stroke();
+                tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 4; tCtx.stroke();
+
+                for(let i=0; i<8; i++) {
+                    let prog = ((globalAngle * 0.45 + i / 8) % 1);
+                    let vx = 240 + prog * 540;
+                    drawVaporHalo(tCtx, vx, 55, 22, 0.9);
+                }
+
+                drawZoomSpeechBubble(
+                    tCtx, 400, 130,
+                    "2/ Le générateur de vapeur",
+                    [
+                        "La chaleur reçue de la chaudière chauffe l'eau dans le",
+                        "générateur de vapeur pour la transformer en vapeur.",
+                        "Un épais halo de vapeur sous haute pression se forme",
+                        "et file vers la turbine à travers un long tuyau."
+                    ],
+                    340, 180, '#e1f5fe', '#0277bd'
+                );
+                drawBackButton(tCtx);
+
+            } else if (thermView === 'turbine') {
+                tCtx.fillStyle = '#f8fafc'; tCtx.fillRect(0, 0, 1000, 450);
+
+                tCtx.fillStyle = '#eceff1'; tCtx.fillRect(30, 165, 190, 44);
+                tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 3.5; tCtx.strokeRect(30, 165, 190, 44);
+
+                drawSteamTurbine(tCtx, 220, 195, 175, 145, globalAngle * 1.4);
+
+                for(let i=0; i<9; i++) {
+                    let prog = ((globalAngle * 0.65 + i / 9) % 1);
+                    let jx = 45 + prog * 310;
+                    let spread = prog > 0.5 ? (prog - 0.5) * 55 : 0;
+                    let jy = 187 + Math.sin(prog * 12 + i) * spread;
+                    let rad = 18 + prog * 24;
+                    drawVaporHalo(tCtx, jx, jy, rad, 0.85);
+                }
+                tCtx.strokeStyle = '#e74c3c'; tCtx.lineWidth = 3;
+                let arrowShift = (globalAngle * 35) % 40;
+                for(let k=0; k<3; k++) {
+                    let ax = 65 + k*50 + arrowShift;
+                    tCtx.beginPath();
+                    tCtx.moveTo(ax, 187); tCtx.lineTo(ax + 22, 187);
+                    tCtx.lineTo(ax + 15, 181); tCtx.moveTo(ax + 22, 187); tCtx.lineTo(ax + 15, 193);
+                    tCtx.stroke();
+                }
+                tCtx.fillStyle = '#c0392b'; tCtx.font = 'bold 14px Arial';
+                tCtx.fillText("Jet de vapeur sous pression", 45, 152);
+
+                tCtx.fillStyle = '#7f8c8d'; tCtx.fillRect(395, 185, 75, 20);
+                let axOff = (globalAngle * 40) % 14;
+                tCtx.fillStyle = '#2c3e50';
+                for(let i=0; i<70; i+=14) {
+                    tCtx.fillRect(395 + ((i + axOff) % 70), 185, 4, 20);
+                }
+
+                drawIndustrialAlternator(tCtx, 470, 145, 130, 100, globalAngle);
+                tCtx.strokeStyle = '#333'; tCtx.lineWidth = 4;
+                tCtx.beginPath(); tCtx.moveTo(600, 195); tCtx.lineTo(660, 195); tCtx.stroke();
+                drawTransformer(tCtx, 660, 165, 1.3);
+                drawPylon(tCtx, 850, 320);
+
+                drawZoomSpeechBubble(
+                    tCtx, 110, 290,
+                    "3/ La turbine et l'alternateur",
+                    [
+                        "Le puissant jet de vapeur pousse les pales et met en",
+                        "rotation la turbine, qui entraîne le rotor de l'alternateur.",
+                        "L'alternateur produit alors l'électricité envoyée au réseau."
+                    ],
+                    300, 260, '#fff8e1', '#d35400'
+                );
+                drawLossLabel(tCtx, 410, 115, "Pertes thermiques (échauffement dû aux frottements mécaniques)");
+                drawBackButton(tCtx);
+
+            } else if (thermView === 'condenseur') {
+                tCtx.fillStyle = '#f8fafc'; tCtx.fillRect(0, 0, 1000, 450);
+
+                tCtx.fillStyle = '#cfe8fc'; tCtx.fillRect(130, 60, 250, 310);
+                tCtx.strokeStyle = '#34495e'; tCtx.lineWidth = 4; tCtx.strokeRect(130, 60, 250, 310);
+
+                for(let i=0; i<12; i++) {
+                    let hx = 165 + (i%4)*55 + Math.sin(globalAngle*1.5 + i)*10;
+                    let hy = 95 + Math.floor(i/4)*55 + ((globalAngle*15) % 25);
+                    let op = 0.85 - Math.floor(i/4)*0.22;
+                    drawVaporHalo(tCtx, hx, hy, 48, op);
+                }
+                tCtx.fillStyle = '#0277bd'; tCtx.font = 'bold 14px Arial';
+                tCtx.fillText("Halo de vapeur chaude", 175, 90);
+
+                if(Math.random() > 0.15) {
+                    condDrops.push({ x: 155 + Math.random()*200, y: 215 + Math.random()*30, r: 3.5 + Math.random()*2 });
+                }
+                tCtx.fillStyle = '#0288d1';
+                for(let i=condDrops.length-1; i>=0; i--) {
+                    let d = condDrops[i];
+                    d.y += 3.5;
+                    tCtx.beginPath(); tCtx.arc(d.x, d.y, d.r, 0, Math.PI*2); tCtx.fill();
+                    if(d.y > 305) condDrops.splice(i, 1);
+                }
+
+                tCtx.fillStyle = '#0288d1'; tCtx.fillRect(134, 300, 242, 66);
+                tCtx.fillStyle = '#ffffff'; tCtx.font = 'bold 14px Arial';
+                tCtx.fillText("Eau redevenue liquide (condensée)", 145, 340);
+
+                tCtx.fillStyle = '#29b6f6'; tCtx.fillRect(710, 180, 290, 270);
+                tCtx.fillStyle = 'black'; tCtx.font = 'bold 18px Arial'; tCtx.fillText("Rivière", 815, 210);
+
+                tCtx.strokeStyle = '#0288d1'; tCtx.lineWidth = 18; tCtx.lineJoin = 'round';
+                tCtx.beginPath(); tCtx.moveTo(740, 275); tCtx.lineTo(250, 275); tCtx.stroke();
+                tCtx.beginPath(); tCtx.arc(250, 235, 40, Math.PI/2, Math.PI*1.5); tCtx.stroke();
+                tCtx.strokeStyle = '#81d4fa';
+                tCtx.beginPath(); tCtx.moveTo(250, 195); tCtx.lineTo(740, 195); tCtx.stroke();
+
+                let cFlow = (globalAngle * 30) % 40;
+                tCtx.strokeStyle = 'rgba(255,255,255,0.65)'; tCtx.lineWidth = 5; tCtx.setLineDash([12, 28]);
+                tCtx.lineDashOffset = -cFlow;
+                tCtx.beginPath(); tCtx.moveTo(740, 275); tCtx.lineTo(250, 275); tCtx.stroke();
+                tCtx.lineDashOffset = cFlow;
+                tCtx.beginPath(); tCtx.moveTo(250, 195); tCtx.lineTo(740, 195); tCtx.stroke();
+                tCtx.setLineDash([]);
+
+                tCtx.fillStyle = '#01579b'; tCtx.font = 'bold 13px Arial';
+                tCtx.fillText("← Eau froide pompée", 530, 298);
+                tCtx.fillStyle = '#c0392b';
+                tCtx.fillText("Eau tiède rejetée →", 530, 182);
+
+                tCtx.strokeStyle = '#3498db'; tCtx.lineWidth = 14;
+                tCtx.beginPath(); tCtx.moveTo(130, 335); tCtx.lineTo(35, 335); tCtx.stroke();
+                tCtx.fillStyle = 'black'; tCtx.font = 'bold 12px Arial'; tCtx.fillText("← Vers générateur de vapeur", 8, 315);
+
+                drawZoomSpeechBubble(
+                    tCtx, 405, 18,
+                    "4/ Le condenseur et son rôle",
+                    [
+                        "Rôle du condenseur : refroidir la vapeur d'eau en sortie",
+                        "de turbine pour la condenser (la faire redevenir liquide).",
+                        "Au contact du tuyau d'eau froide pompée dans la rivière,",
+                        "le halo de vapeur se transforme en gouttes d'eau qui",
+                        "retournent ensuite vers le générateur de vapeur."
+                    ],
+                    380, 115, '#e0f7fa', '#00695c'
+                );
+                drawLossLabel(tCtx, 405, 395, "Pertes thermiques dans l'environnement + pollution thermique (réchauffement de la rivière)");
+                drawBackButton(tCtx);
+            }
+        }
+
+        // BOUCLE D'ANIMATION CONTINUE
+        function animate() {
+            globalAngle += 0.05;
+            if (document.getElementById('chaines').classList.contains('active')) {
+                renderHydro();
+                renderTherm();
+            }
+            requestAnimationFrame(animate);
+        }
+        animate(); 
+
+        // FONCTIONS LOGIQUES DE VÉRIFICATION
+        function checkHydro() {
+            let res = document.getElementById('hydro-res').value;
+            let en1 = document.getElementById('hydro-en1').value;
+            let enUtile = document.getElementById('hydro-en-utile').value;
+            let enPerte = document.getElementById('hydro-en-perte').value;
+            let fb = document.getElementById('hydro-feedback');
+            if (res === "Eau" && en1 === "Cinétique" && enUtile === "Électrique" && enPerte === "Thermique") {
+                fb.innerHTML = "✅ Excellent ! L'eau en mouvement fournit de l'énergie cinétique à la turbine et à l'alternateur, qui la convertissent en énergie électrique utile (avec des pertes thermiques dues aux frottements).";
+                fb.style.color = "white"; fb.style.backgroundColor = "var(--success)";
+            } else {
+                fb.innerHTML = "❌ Erreur. Identifiez bien la source (l'eau en altitude), l'énergie liée au mouvement de l'eau et l'énergie perdue sous forme de chaleur.";
+                fb.style.color = "white"; fb.style.backgroundColor = "var(--accent)";
+            }
+            fb.style.display = "block";
+        }
+
+        function checkTherm() {
+            let res = document.getElementById('therm-res').value;
+            let en1 = document.getElementById('therm-en1').value;
+            let en2 = document.getElementById('therm-en2').value;
+            let en3 = document.getElementById('therm-en3').value;
+            let enUtile = document.getElementById('therm-en-utile').value;
+            let destUtile = document.getElementById('therm-dest-utile').value;
+            let enPerte = document.getElementById('therm-en-perte').value;
+            let destPerte = document.getElementById('therm-dest-perte').value;
+            let fb = document.getElementById('therm-feedback');
+            
+            if (res === "Charbon" && en1 === "Chimique" && en2 === "Thermique" && en3 === "Thermique" && enUtile === "Électrique" && destUtile === "Reseau" && enPerte === "Thermique" && destPerte === "Environnement") {
+                fb.innerHTML = "✅ Parfait ! Le combustible fossile libère son énergie chimique dans la chaudière (énergie thermique), qui chauffe l'eau dans le générateur de vapeur (énergie thermique/cinétique du jet de vapeur) pour entraîner la turbine et l'alternateur, produisant de l'électricité pour le réseau avec des pertes thermiques dans l'environnement.";
+                fb.style.color = "white"; fb.style.backgroundColor = "var(--success)";
+            } else {
+                fb.innerHTML = "❌ Erreur. Vérifiez bien chaque forme d'énergie entre la chaudière, le générateur de vapeur et l'ensemble turbine + alternateur, ainsi que les destinations finales.";
+                fb.style.color = "white"; fb.style.backgroundColor = "var(--accent)";
+            }
+            fb.style.display = "block";
+        }
+
+        // VÉRIFICATION SIMPLIFIÉE POUR L'HYDRAULIQUE
+        function checkRendementHydro() {
+            let rec = parseFloat(document.getElementById('hydro-e-recue').value);
+            let uti = parseFloat(document.getElementById('hydro-e-utile').value);
+            let ren = parseFloat(document.getElementById('hydro-rend').value);
+            let fb = document.getElementById('fb-rend-hydro');
+            
+            fb.style.backgroundColor = "#f39c12"; 
+            fb.style.color = "white";
+
+            if (isNaN(rec) || isNaN(uti) || isNaN(ren)) {
+                fb.innerHTML = "⚠️ Remplis bien les 3 cases avant de vérifier.";
+            } 
+            else if (rec !== 1000) {
+                fb.innerHTML = "💡 <strong>Aide (Étape 1 - Énergie reçue) :</strong> Relis la première phrase de l'énoncé : quelle est l'énergie fournie par l'eau (en MJ) ?";
+            } 
+            else if (uti !== 850) {
+                fb.innerHTML = "💡 <strong>Aide (Étape 1 - Énergie utile) :</strong> Relis la deuxième phrase : quelle est l'énergie électrique utile produite par l'alternateur (en MJ) ?";
+            } 
+            else if (ren !== 85) {
+                fb.innerHTML = "💡 <strong>Aide (Étape 2 - Rendement) :</strong> Tes valeurs sont bonnes ! Calcule maintenant : <strong>( 850 ÷ 1 000 ) × 100</strong>.";
+            } 
+            else {
+                fb.innerHTML = "✅ <strong>Bravo !</strong><br>• Énergie reçue = 1 000 MJ | Énergie utile = 850 MJ<br>• Rendement = (850 ÷ 1 000) × 100 = <strong>85 %</strong>.<br>La centrale hydroélectrique possède un très bon rendement !";
+                fb.style.backgroundColor = "var(--success)";
+            }
+            fb.style.display = "block";
+        }
+
+        // VÉRIFICATION NIVEAU SIMPLE POUR LE THERMIQUE
+        function checkRendementThermSimple() {
+            let rec = parseFloat(document.getElementById('therm-simple-recue').value);
+            let uti = parseFloat(document.getElementById('therm-simple-utile').value);
+            let ren = parseFloat(document.getElementById('therm-simple-rend').value);
+            let fb = document.getElementById('fb-rend-therm-simple');
+            
+            fb.style.backgroundColor = "#f39c12"; 
+            fb.style.color = "white";
+
+            if (isNaN(rec) || isNaN(uti) || isNaN(ren)) {
+                fb.innerHTML = "⚠️ Remplis bien les 3 cases avant de vérifier.";
+            } 
+            else if (rec !== 1200000) {
+                fb.innerHTML = "💡 <strong>Aide (Étape 1 - Énergie reçue) :</strong> Relis la première phrase de l'énoncé : quelle est l'énergie fournie par le charbon (<strong>1 200 000</strong> MJ) ?";
+            } 
+            else if (uti !== 360000) {
+                fb.innerHTML = "💡 <strong>Aide (Étape 1 - Énergie utile) :</strong> Relis la deuxième phrase : quelle est l'énergie électrique utile transférée au réseau (<strong>360 000</strong> MJ) ?";
+            } 
+            else if (ren !== 30) {
+                fb.innerHTML = "💡 <strong>Aide (Étape 2 - Rendement) :</strong> Tes énergies sont justes ! Calcule maintenant : <strong>( 360 000 ÷ 1 200 000 ) × 100</strong>.";
+            } 
+            else {
+                fb.innerHTML = "✅ <strong>Bravo !</strong><br>• Énergie reçue = 1 200 000 MJ | Énergie utile = 360 000 MJ<br>• Rendement = (360 000 ÷ 1 200 000) × 100 = <strong>30 %</strong>.<br><em>Conclusion :</em> 70 % de l'énergie est perdue sous forme de chaleur dans l'environnement !";
+                fb.style.backgroundColor = "var(--success)";
+            }
+            fb.style.display = "block";
+        }
+
+        // VÉRIFICATION NIVEAU AVANCÉ (DÉTAILLÉ PAS À PAS) POUR LE THERMIQUE
+        function checkRendementTherm() {
+            let rec = parseFloat(document.getElementById('therm-e-recue').value);
+            let tps = parseFloat(document.getElementById('therm-temps').value);
+            let uti = parseFloat(document.getElementById('therm-e-utile').value);
+            let ren = parseFloat(document.getElementById('therm-rend').value);
+            let fb = document.getElementById('fb-rend-therm');
+            
+            fb.style.backgroundColor = "#f39c12"; 
+            fb.style.color = "white";
+
+            if (isNaN(rec) || isNaN(tps) || isNaN(uti) || isNaN(ren)) {
+                fb.innerHTML = "⚠️ Remplis bien toutes les étapes (A, B et C) avant de vérifier.";
+            } 
+            else if (rec !== 1200000) {
+                fb.innerHTML = "💡 <strong>Aide (Étape A) :</strong> Pour trouver l'énergie reçue, multiplie la masse de charbon brûlé (<strong>40 tonnes</strong>) par l'énergie libérée par une tonne (<strong>30 000 MJ</strong>) : 40 × 30 000.";
+            } 
+            else if (tps !== 3600) {
+                fb.innerHTML = "💡 <strong>Aide (Étape B - Question 1) :</strong> Dans 1 heure, il y a 60 minutes de 60 secondes (60 × 60 = <strong>3 600 s</strong>).";
+            } 
+            else if (uti !== 360000) {
+                fb.innerHTML = "💡 <strong>Aide (Étape B - Question 2) :</strong> Applique la formule <strong>E<sub>utile</sub> = P × t</strong> avec P = 100 MW et t = 3 600 s (100 × 3 600).";
+            } 
+            else if (ren !== 30) {
+                fb.innerHTML = "💡 <strong>Aide (Étape C) :</strong> Tes énergies sont exactes (E<sub>reçue</sub> = 1 200 000 MJ et E<sub>utile</sub> = 360 000 MJ) !<br>Il ne te reste plus qu'à calculer : <strong>( 360 000 ÷ 1 200 000 ) × 100</strong>.";
+            } 
+            else {
+                fb.innerHTML = "✅ <strong>Parfait, tout le détail est exact !</strong><br>• <strong>Étape A :</strong> E<sub>reçue</sub> = 40 × 30 000 = <strong>1 200 000 MJ</strong><br>• <strong>Étape B :</strong> t = 3 600 s, donc E<sub>utile</sub> = 100 MW × 3 600 s = <strong>360 000 MJ</strong><br>• <strong>Étape C :</strong> Rendement = (360 000 ÷ 1 200 000) × 100 = <strong>30 %</strong>.<br><em>Conclusion :</em> 70 % de l'énergie du charbon est perdue sous forme de chaleur dans l'environnement !";
+                fb.style.backgroundColor = "var(--success)";
+            }
+            fb.style.display = "block";
+        }
+
+        let selectedItem = null;
+        function selectCriteria(element) {
+            if (selectedItem) selectedItem.style.border = "none";
+            selectedItem = element; selectedItem.style.border = "2px solid var(--primary)";
+        }
+        function placeCriteria(zoneId) {
+            if (selectedItem) { document.getElementById(zoneId).appendChild(selectedItem); selectedItem.style.border = "none"; selectedItem = null; }
+        }
+        function checkTable() {
+            let correct = true; let zones = ['hydro-av', 'therm-av', 'hydro-inc', 'therm-inc'];
+            zones.forEach(zone => {
+                let items = document.getElementById(zone).children;
+                for(let item of items) {
+                    if (item.getAttribute('data-correct') !== zone) { correct = false; item.style.backgroundColor = "var(--accent)"; } 
+                    else { item.style.backgroundColor = "var(--success)"; }
+                }
+            });
+            let fb = document.getElementById('table-feedback');
+            if (document.querySelectorAll('.drop-zone .criteria-item').length < 8) {
+                fb.innerHTML = "⚠️ Placez tous les arguments."; fb.style.backgroundColor = "#f39c12"; fb.style.color = "white";
+            } else if (correct) {
+                fb.innerHTML = "✅ Bravo ! Le tableau est correct."; fb.style.backgroundColor = "var(--success)"; fb.style.color = "white";
+            } else {
+                fb.innerHTML = "❌ Certaines étiquettes sont mal placées (en rouge)."; fb.style.backgroundColor = "var(--accent)"; fb.style.color = "white";
+            }
+            fb.style.display = "block";
+        }
+    </script>
+</body>
+</html>
