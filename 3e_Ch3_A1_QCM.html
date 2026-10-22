@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QCM 3ème - Chapitre 3 : L'infiniment petit et les atomes</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #2563eb;
+      --accent: #0ea5e9;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 20px 12px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* En-tête */
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      padding: 24px 28px;
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(30, 58, 138, 0.18);
+      margin-bottom: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header h1 {
+      font-size: 1.45rem;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .badge-level {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    /* Cartes */
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+      margin-bottom: 20px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .card h2 {
+      color: var(--primary);
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Formulaire élève */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #f8fafc;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      background: #fff;
+    }
+
+    /* Choix du parcours QCM */
+    .mode-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .mode-card {
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #f8fafc;
+      position: relative;
+    }
+
+    .mode-card:hover {
+      border-color: var(--primary-light);
+      background: #eff6ff;
+      transform: translateY(-2px);
+    }
+
+    .mode-card.selected {
+      border-color: var(--primary-light);
+      background: #eff6ff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+    }
+
+    .mode-card h3 {
+      color: var(--primary);
+      font-size: 1.08rem;
+      margin-bottom: 6px;
+    }
+
+    .mode-card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .mode-tag {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 99px;
+      background: #dbeafe;
+      color: var(--primary);
+    }
+
+    /* Boutons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--primary-light);
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover {
+      background: var(--primary);
+    }
+
+    .btn:active {
+      transform: scale(0.99);
+    }
+
+    .btn-secondary {
+      background: #64748b;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-block {
+      width: 100%;
+      margin-top: 18px;
+    }
+
+    /* Barre de progression */
+    .progress-bar-wrap {
+      background: #e2e8f0;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0 6px 0;
+    }
+
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--primary-light), var(--accent));
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Question */
+    .question-box {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      background: #ffffff;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+
+    .q-number {
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+
+    .q-part-badge {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #0369a1;
+      background: #e0f2fe;
+      padding: 2px 9px;
+      border-radius: 6px;
+    }
+
+    .question-text {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: #0f172a;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: #f8fafc;
+      font-size: 0.94rem;
+    }
+
+    .option-label:hover {
+      border-color: var(--primary-light);
+      background: #eff6ff;
+    }
+
+    .option-label input[type="radio"] {
+      accent-color: var(--primary-light);
+      transform: scale(1.15);
+    }
+
+    /* Correction */
+    .option-label.correct-answer {
+      border-color: var(--success);
+      background: #dcfce7;
+      color: #14532d;
+      font-weight: 600;
+    }
+
+    .option-label.wrong-answer {
+      border-color: var(--danger);
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
+
+    .explanation-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      font-size: 0.88rem;
+      color: #166534;
+    }
+
+    /* Résultats */
+    .score-banner {
+      text-align: center;
+      padding: 22px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border: 2px solid #93c5fd;
+      margin-bottom: 18px;
+    }
+
+    .score-big {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .sync-status {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .sync-pending { background: #fef3c7; color: #92400e; }
+    .sync-ok { background: #dcfce7; color: #166534; }
+    .sync-error { background: #fee2e2; color: #991b1b; }
+
+    .hidden { display: none !important; }
+
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- EN-TÊTE -->
+  <div class="header">
+    <div>
+      <h1>QCM – L'infiniment petit et l'atome</h1>
+      <p>Chapitre 3 • Activité 1 : Voir et modéliser les atomes (10 questions tirées au sort)</p>
+    </div>
+    <span class="badge-level">Niveau 3ème • Banque de 40 questions</span>
+  </div>
+
+  <!-- ÉCRAN D'ACCUEIL : IDENTIFICATION & CHOIX DU QCM -->
+  <div id="screen-start" class="card">
+    <h2>1. Identification de l'élève</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="student-lastname">Nom *</label>
+        <input type="text" id="student-lastname" placeholder="Ex : DUPONT" required>
+      </div>
+      <div class="form-group">
+        <label for="student-firstname">Prénom *</label>
+        <input type="text" id="student-firstname" placeholder="Ex : Lucas" required>
+      </div>
+      <div class="form-group">
+        <label for="student-class">Classe *</label>
+        <select id="student-class">
+          <option value="">-- Choisir la classe --</option>
+          <option value="3e 1">3ème 1</option>
+          <option value="3e 2">3ème 2</option>
+          <option value="3e 3">3ème 3</option>
+          <option value="3e 4">3ème 4</option>
+          <option value="3e 5">3ème 5</option>
+          <option value="3e Projet">3ème Projet</option>
+        </select>
+      </div>
+    </div>
+
+    <h2>2. Choix du parcours de QCM</h2>
+    <p style="font-size:0.92rem; color:var(--muted); margin-bottom:10px;">
+      Sélectionne le parcours demandé par ton professeur. Chaque essai tire au sort <strong>10 questions</strong> avec propositions mélangées.
+    </p>
+
+    <div class="mode-selector">
+      <div class="mode-card selected" id="mode-qcm1" onclick="selectMode('QCM1')">
+        <h3>📘 Parcours 1 : Parties 1, 2 et 3</h3>
+        <p>
+          • <strong>Partie 1 :</strong> Échelles de l'univers et puissances de 10<br>
+          • <strong>Partie 2 :</strong> Histoire du modèle de l'atome<br>
+          • <strong>Partie 3 :</strong> Microscope à effet tunnel et conversions (m / nm)
+        </p>
+        <span class="mode-tag">10 questions tirées parmi 30 (Parties 1 à 3)</span>
+      </div>
+
+      <div class="mode-card" id="mode-qcm2" onclick="selectMode('QCM2')">
+        <h3>🚀 Parcours 2 : Parties 1, 2, 3 et 4 (Complet)</h3>
+        <p>
+          • <strong>Parties 1, 2 et 3</strong> complètes<br>
+          • <strong>Partie 4 :</strong> Expérience de la feuille d'or de Rutherford et calcul du vide dans l'atome
+        </p>
+        <span class="mode-tag">10 questions tirées parmi 40 (Parties 1 à 4)</span>
+      </div>
+    </div>
+
+    <div id="start-error" class="alert-error">
+      ⚠️ Merci de renseigner ton Nom, ton Prénom et ta Classe avant de commencer le QCM.
+    </div>
+
+    <button class="btn btn-block" onclick="startQuiz()">Démarrer le QCM (10 questions)</button>
+  </div>
+
+  <!-- ÉCRAN DU QCM -->
+  <div id="screen-quiz" class="card hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <h2 id="quiz-title-display" style="margin-bottom:0;">QCM en cours</h2>
+      <span id="student-badge" style="font-weight:600; font-size:0.9rem; color:var(--primary);"></span>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div id="progress-bar" class="progress-bar-fill"></div>
+    </div>
+    <p id="progress-text" style="font-size:0.85rem; color:var(--muted); margin-bottom:16px;">
+      Réponds aux 10 questions ci-dessous puis clique sur « Valider et envoyer mes réponses ».
+    </p>
+
+    <div id="questions-container"></div>
+
+    <div id="quiz-error" class="alert-error">
+      ⚠️ Tu n'as pas répondu à toutes les questions ! Vérifie que les 10 questions sont bien cochées.
+    </div>
+
+    <button id="btn-submit" class="btn btn-block" onclick="submitQuiz()">
+      ✅ Valider et envoyer mes réponses
+    </button>
+  </div>
+
+  <!-- ÉCRAN DE RÉSULTATS -->
+  <div id="screen-results" class="card hidden">
+    <div class="score-banner">
+      <p style="font-weight:600; color:#1e40af; text-transform:uppercase; font-size:0.85rem;">Résultat final</p>
+      <div class="score-big" id="final-score-text">0 / 10</div>
+      <p id="final-comment" style="margin-top:4px; font-weight:500;"></p>
+      <div id="sync-status" class="sync-status sync-pending">⏳ Envoi des résultats vers Google Sheets...</div>
+    </div>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+      <button class="btn btn-secondary" onclick="restartWithNewQuestions()">🔄 Nouvel essai (10 nouvelles questions)</button>
+      <button class="btn" onclick="backToHome()">🏠 Retour à l'accueil</button>
+    </div>
+
+    <h2 style="margin-top:10px;">Correction détaillée de ton tirage</h2>
+    <div id="correction-container"></div>
+  </div>
+</div>
+
+<script>
+  // ============================================================================
+  // CONFIGURATION GOOGLE SHEETS (URL DU SCRIPT WEB APP GOOGLE APPS SCRIPT)
+  // ============================================================================
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUT4MHmbrwVniSZ1woiO8bGHCrY-Y3lqc3MnM6OdgZtRSsozANY19XQuDP5XQbL1FRbA/exec";
+
+  // ============================================================================
+  // BANQUE DE 40 QUESTIONS :
+  // - Parties 1, 2 et 3 = 30 questions (10 par partie) -> Garantit 30 questions pour le QCM 1
+  // - Partie 4 = 10 questions -> Garantit 40 questions au total pour le QCM 2
+  // ============================================================================
+  const QUESTION_BANK = [
+    // ================= PARTIE 1 : ÉCHELLES & PUISSANCES DE 10 (10 questions) =================
+    {
+      id: 1, part: 1, partLabel: "Partie 1 • Ordres de grandeur",
+      q: "Quel est l'ordre de grandeur de la taille d'un être humain ?",
+      options: ["10⁰ m (soit 1 m)", "10⁻² m", "10⁻⁶ m", "10³ m"],
+      correct: 0,
+      exp: "Un être humain mesure environ 1,7 m, ce qui correspond à l'ordre de grandeur 10⁰ m (= 1 m)."
+    },
+    {
+      id: 2, part: 1, partLabel: "Partie 1 • Ordres de grandeur",
+      q: "Parmi les objets suivants, lequel est le plus petit ?",
+      options: ["Le noyau d'un atome de chlore", "Un atome de carbone", "Une molécule de glucose", "Une cellule de la peau"],
+      correct: 0,
+      exp: "Le noyau d'un atome (~10⁻¹⁴ à 10⁻¹⁵ m) est cent mille fois plus petit que l'atome lui-même (~10⁻¹⁰ m)."
+    },
+    {
+      id: 3, part: 1, partLabel: "Partie 1 • Ordres de grandeur",
+      q: "Dans quel ordre croissant (du plus petit au plus grand) ces objets sont-ils correctement rangés ?",
+      options: [
+        "Atome → Molécule → Cellule → Fourmi",
+        "Molécule → Atome → Cellule → Fourmi",
+        "Cellule → Molécule → Atome → Fourmi",
+        "Noyau → Cellule → Molécule → Atome"
+      ],
+      correct: 0,
+      exp: "Les atomes (10⁻¹⁰ m) forment des molécules (10⁻⁹ m), qui composent les cellules (10⁻⁵ m), constituant la fourmi (10⁻³ m)."
+    },
+    {
+      id: 4, part: 1, partLabel: "Partie 1 • Ordres de grandeur",
+      q: "Quel est l'ordre de grandeur du diamètre d'un atome de carbone ?",
+      options: ["10⁻¹⁰ m", "10⁻¹⁵ m", "10⁻³ m", "10⁻⁶ m"],
+      correct: 0,
+      exp: "Le diamètre d'un atome est de l'ordre de 10⁻¹⁰ m (soit 0,1 nanomètre)."
+    },
+    {
+      id: 5, part: 1, partLabel: "Partie 1 • Ordres de grandeur",
+      q: "La largeur d'un cheveu humain est d'environ 0,1 mm (soit 100 µm). Quelle puissance de 10 en mètre cela représente-t-il ?",
+      options: ["10⁻⁴ m", "10⁻⁹ m", "10⁻¹⁰ m", "10⁻¹ m"],
+      correct: 0,
+      exp: "0,1 mm = 0,0001 m = 10⁻⁴ m."
+    },
+    {
+      id: 6, part: 1, partLabel: "Partie 1 • Ordres de grandeur",
+      q: "Quel est l'ordre de grandeur de la taille d'une molécule de glucose ou de la largeur d'un brin d'ADN ?",
+      options: ["Environ 10⁻⁹ m (échelle du nanomètre)", "Environ 10⁻³ m (échelle du millimètre)", "Environ 10⁻¹⁵ m (échelle du femtomètre)", "Environ 10⁰ m (échelle du mètre)"],
+      correct: 0,
+      exp: "Une molécule de glucose mesure environ 1 nm (10⁻⁹ m) et un brin d'ADN environ 2 à 3 nm (3 × 10⁻⁹ m)."
+    },
+    {
+      id: 7, part: 1, partLabel: "Partie 1 • Ordres de grandeur",
+      q: "Quel est l'ordre de grandeur de la dimension d'une cellule de la peau humaine ?",
+      options: ["Environ 10⁻⁵ m (quelques dizaines de micromètres)", "Environ 10⁻¹⁰ m", "Environ 10⁻² m", "Environ 10⁻¹⁵ m"],
+      correct: 0,
+      exp: "Une cellule de la peau mesure environ 30 µm = 3 × 10⁻⁵ m."
+    },
+    {
+      id: 8, part: 1, partLabel: "Partie 1 • Ordres de grandeur",
+      q: "Que signifie l'écriture en puissance de dix 10⁻⁶ m ?",
+      options: ["0,000 001 m (un millionième de mètre)", "0,000 000 001 m (un milliardième de mètre)", "1 000 000 m", "-6 mètres"],
+      correct: 0,
+      exp: "L'exposant -6 indique que le chiffre 1 est au 6ème rang après la virgule : 0,000 001 m (1 micromètre)."
+    },
+    {
+      id: 9, part: 1, partLabel: "Partie 1 • Ordres de grandeur",
+      q: "Dans l'animation des échelles de l'Univers, une musaraigne mesure environ 5 cm. À quelle puissance de 10 en mètre cela correspond-il ?",
+      options: ["5 × 10⁻² m", "5 × 10⁻³ m", "5 × 10⁻⁶ m", "5 × 10² m"],
+      correct: 0,
+      exp: "1 cm = 0,01 m = 10⁻² m, donc 5 cm = 5 × 10⁻² m."
+    },
+    {
+      id: 10, part: 1, partLabel: "Partie 1 • Ordres de grandeur",
+      q: "Une particule d'argile mesure environ 2 micromètres (2 µm) et une fourmi environ 4 millimètres (4 mm). Laquelle est la plus petite ?",
+      options: [
+        "La particule d'argile (2 × 10⁻⁶ m) est environ 2 000 fois plus petite que la fourmi (4 × 10⁻³ m)",
+        "La fourmi est plus petite que la particule d'argile",
+        "Elles ont exactement le même ordre de grandeur",
+        "La particule d'argile mesure 2 mètres"
+      ],
+      correct: 0,
+      exp: "L'échelle du micromètre (10⁻⁶ m) est mille fois plus petite que celle du millimètre (10⁻³ m)."
+    },
+
+    // ================= PARTIE 2 : HISTOIRE DU MODÈLE DE L'ATOME (10 questions) =================
+    {
+      id: 11, part: 2, partLabel: "Partie 2 • Histoire de l'atome",
+      q: "Au Ve siècle av. J.-C., que signifie le mot grec « atomos » utilisé par le philosophe Démocrite ?",
+      options: [
+        "Insécable (que l'on ne peut pas couper ou diviser)",
+        "Chargé d'électricité négative",
+        "Invisible au microscope optique",
+        "Constitué essentiellement de vide"
+      ],
+      correct: 0,
+      exp: "Pour Démocrite et les atomistes grecs, la matière est formée de grains pleins et indivisibles : « a-tomos » signifie « insécable »."
+    },
+    {
+      id: 12, part: 2, partLabel: "Partie 2 • Histoire de l'atome",
+      q: "Quel savant britannique reprend au début du XIXe siècle l'hypothèse de Démocrite d'un atome plein et insécable ?",
+      options: ["John Dalton", "Albert Einstein", "Louis Pasteur", "Isaac Newton"],
+      correct: 0,
+      exp: "Comme indiqué dans l'animation historique, l'hypothèse des atomistes grecs est reprise par John Dalton au début du XIXe siècle."
+    },
+    {
+      id: 13, part: 2, partLabel: "Partie 2 • Histoire de l'atome",
+      q: "En 1902, à quoi ressemble le modèle de l'atome proposé par J.J. Thomson ?",
+      options: [
+        "À un « pudding » : une sphère pleine positive contenant des électrons négatifs",
+        "À un système solaire avec des planètes autour d'un noyau",
+        "À un nuage de probabilités autour de protons et neutrons",
+        "À un cube métallique totalement vide"
+      ],
+      correct: 0,
+      exp: "Après avoir découvert l'électron, Thomson imagine une sphère positive dans laquelle sont incrustés les électrons négatifs comme des raisins dans un pudding."
+    },
+    {
+      id: 14, part: 2, partLabel: "Partie 2 • Histoire de l'atome",
+      q: "Quelle particule chargée négativement a été découverte par J.J. Thomson, prouvant que l'atome n'est finalement pas insécable ?",
+      options: ["L'électron", "Le neutron", "Le proton", "La molécule"],
+      correct: 0,
+      exp: "L'électron (portant une charge électrique négative) est le premier constituant de l'atome découvert en 1897 par J.J. Thomson."
+    },
+    {
+      id: 15, part: 2, partLabel: "Partie 2 • Histoire de l'atome",
+      q: "Dans le modèle de Thomson (1902), pourquoi la pâte de la sphère doit-elle être chargée positivement ?",
+      options: [
+        "Pour compenser la charge négative des électrons, car un atome est électriquement neutre",
+        "Parce que les électrons sont eux-mêmes chargés positivement",
+        "Pour repousser les électrons hors de l'atome",
+        "Parce que le noyau contient uniquement des neutrons"
+      ],
+      correct: 0,
+      exp: "Un atome étant globalement neutre, la charge négative des électrons est compensée par une charge positive égale."
+    },
+    {
+      id: 16, part: 2, partLabel: "Partie 2 • Histoire de l'atome",
+      q: "Comment appelle-t-on le modèle proposé par Ernest Rutherford en 1911 ?",
+      options: [
+        "Le modèle planétaire (électrons en orbite autour d'un noyau central positif)",
+        "Le modèle du pudding aux raisins",
+        "Le modèle de la bille pleine insécable",
+        "Le modèle probabiliste quantique"
+      ],
+      correct: 0,
+      exp: "Rutherford compare l'atome à un système planétaire : des électrons gravitent sur des orbites autour d'un très petit noyau central positif."
+    },
+    {
+      id: 17, part: 2, partLabel: "Partie 2 • Histoire de l'atome",
+      q: "Quelle est la grande différence entre le modèle de Thomson (1902) et celui de Rutherford (1911) ?",
+      options: [
+        "Chez Thomson l'atome est plein, alors que chez Rutherford il possède un petit noyau central entouré d'un grand vide",
+        "Chez Thomson il y a un noyau, alors que chez Rutherford il n'y a pas de noyau",
+        "Rutherford supprime les électrons du modèle de l'atome",
+        "Thomson place des orbites planétaires autour du noyau"
+      ],
+      correct: 0,
+      exp: "Rutherford découvre en 1911 que la charge positive n'est pas étalée dans une sphère pleine mais concentrée dans un minuscule noyau entouré de vide."
+    },
+    {
+      id: 18, part: 2, partLabel: "Partie 2 • Histoire de l'atome",
+      q: "Dans le modèle de la physique moderne (1927), comment décrit-on la position des électrons autour du noyau ?",
+      options: [
+        "On ne connaît pas leur position précise, seulement des zones de probabilité de présence (nuage électronique)",
+        "Ils sont immobiles et collés contre le noyau central",
+        "Ils suivent des rails circulaires parfaitement fixes et visibles",
+        "Ils se trouvent à l'intérieur du noyau avec les neutrons"
+      ],
+      correct: 0,
+      exp: "En physique moderne (modèle probabiliste), on ne peut pas donner la trajectoire exacte d'un électron : on représente un nuage de probabilités de présence."
+    },
+    {
+      id: 19, part: 2, partLabel: "Partie 2 • Histoire de l'atome",
+      q: "Dans quel ordre chronologique les différents modèles de l'atome se sont-ils succédé ?",
+      options: [
+        "Démocrite (Ve s. av. J.-C.) → Thomson (1902) → Rutherford (1911) → Modèle moderne (1927)",
+        "Thomson (1902) → Démocrite (Ve s. av. J.-C.) → Rutherford (1911) → Modèle moderne (1927)",
+        "Démocrite (Ve s. av. J.-C.) → Rutherford (1911) → Thomson (1902) → Modèle moderne (1927)",
+        "Modèle moderne → Rutherford → Thomson → Démocrite"
+      ],
+      correct: 0,
+      exp: "La chronologie est : Atomistes grecs (Antiquité) → Pudding de Thomson (1902) → Modèle planétaire de Rutherford (1911) → Physique moderne (1927)."
+    },
+    {
+      id: 20, part: 2, partLabel: "Partie 2 • Histoire de l'atome",
+      q: "Pourquoi le modèle de l'atome a-t-il changé plusieurs fois au cours de l'histoire des sciences (Compétence D5) ?",
+      options: [
+        "De nouvelles découvertes et expériences scientifiques ont obligé les chercheurs à faire évoluer le modèle",
+        "La structure physique des atomes dans la nature a changé depuis l'Antiquité",
+        "Les scientifiques ont voté au hasard pour changer les schémas des manuels",
+        "Les électrons n'existaient pas dans la matière avant l'année 1902"
+      ],
+      correct: 0,
+      exp: "Compétence D5 : Un modèle scientifique évolue lorsque de nouvelles observations ou expériences mettent en défaut l'ancien modèle."
+    },
+
+    // ================= PARTIE 3 : VOIR ET MESURER LES ATOMES / CONVERSIONS (10 questions) =================
+    {
+      id: 21, part: 3, partLabel: "Partie 3 • Voir et mesurer",
+      q: "Quel instrument spécial permet d'obtenir une image des atomes à la surface d'un métal à l'échelle nanoscopique ?",
+      options: [
+        "Le microscope à effet tunnel",
+        "Le microscope optique de la salle de SVT",
+        "Une loupe binoculaire",
+        "Un télescope spatial"
+      ],
+      correct: 0,
+      exp: "Le microscope à effet tunnel balaie la surface avec une pointe ultrafine pour reconstituer par ordinateur l'image des atomes à l'échelle du nanomètre."
+    },
+    {
+      id: 22, part: 3, partLabel: "Partie 3 • Voir et mesurer",
+      q: "Comment sont disposés les atomes à la surface d'un métal solide observé au microscope à effet tunnel ?",
+      options: [
+        "Ils sont bien rangés de façon régulière et ordonnée : ils forment un cristal",
+        "Ils sont dispersés totalement au hasard et très éloignés les uns des autres",
+        "Ils sont empilés uniquement par paires de deux atomes",
+        "Ils n'ont aucune organisation particulière"
+      ],
+      correct: 0,
+      exp: "Dans un métal solide, les atomes sont régulièrement rangés selon un réseau géométrique appelé cristal."
+    },
+    {
+      id: 23, part: 3, partLabel: "Partie 3 • Voir et mesurer",
+      q: "Que ne peut-on PAS visualiser avec un microscope à effet tunnel ?",
+      options: [
+        "L'intérieur de l'atome : le noyau et les électrons",
+        "L'alignement régulier des atomes à la surface du métal",
+        "Le relief de la surface métallique à l'échelle du nanomètre",
+        "Le nombre d'atomes alignés sur une longueur de 3 nm"
+      ],
+      correct: 0,
+      exp: "Le microscope à effet tunnel montre l'enveloppe des atomes en surface, mais ne permet pas de voir le noyau (10⁻¹⁵ m) ni les électrons."
+    },
+    {
+      id: 24, part: 3, partLabel: "Partie 3 • Voir et mesurer",
+      q: "Dans un métal, comment appelle-t-on les électrons peu retenus par le noyau qui peuvent circuler d'un atome à un autre ?",
+      options: [
+        "Les électrons libres (qui permettent le passage du courant électrique)",
+        "Les neutrons voyageurs",
+        "Les protons libres",
+        "Les molécules isolantes"
+      ],
+      correct: 0,
+      exp: "Dans les métaux, certains électrons dits « électrons libres » peuvent se déplacer d'atome en atome, ce qui distingue un métal conducteur d'un isolant."
+    },
+    {
+      id: 25, part: 3, partLabel: "Partie 3 • Conversions & calculs",
+      q: "À combien de mètres est égal 1 nanomètre (1 nm) ?",
+      options: [
+        "0,000 000 001 m = 10⁻⁹ m",
+        "0,000 001 m = 10⁻⁶ m",
+        "0,001 m = 10⁻³ m",
+        "0,000 000 000 1 m = 10⁻¹⁰ m"
+      ],
+      correct: 0,
+      exp: "« Nano » signifie un milliardième : 1 nm = 0,000 000 001 m = 10⁻⁹ m."
+    },
+    {
+      id: 26, part: 3, partLabel: "Partie 3 • Conversions & calculs",
+      q: "Sur l'image au microscope à effet tunnel, on compte n = 10 atomes alignés sur une longueur L = 3 nm. Quel est le diamètre d d'un atome ?",
+      options: [
+        "d = 3 ÷ 10 = 0,3 nm",
+        "d = 10 ÷ 3 = 3,33 nm",
+        "d = 3 × 10 = 30 nm",
+        "d = 10 - 3 = 7 nm"
+      ],
+      correct: 0,
+      exp: "On utilise la formule d = L ÷ n, soit d = 3 nm ÷ 10 = 0,3 nm."
+    },
+    {
+      id: 27, part: 3, partLabel: "Partie 3 • Conversions & calculs",
+      q: "Un atome a un diamètre de 0,3 nm. Quelle est sa dimension exprimée en mètres ?",
+      options: [
+        "0,3 × 10⁻⁹ m (soit 3 × 10⁻¹⁰ m)",
+        "0,3 × 10⁻⁶ m",
+        "3 × 10⁻⁸ m",
+        "0,3 × 10⁻³ m"
+      ],
+      correct: 0,
+      exp: "Comme 1 nm = 10⁻⁹ m, on a 0,3 nm = 0,3 × 10⁻⁹ m = 3 × 10⁻¹⁰ m."
+    },
+    {
+      id: 28, part: 3, partLabel: "Partie 3 • Conversions & calculs",
+      q: "Dans le tableau des sous-multiples du mètre, quelle relation est exacte ?",
+      options: [
+        "1 µm = 0,001 mm et 1 nm = 0,001 µm",
+        "1 nm = 0,001 mm",
+        "1 µm = 1 000 mm",
+        "1 m = 1 000 nm"
+      ],
+      correct: 0,
+      exp: "Chaque sous-multiple principal (mm → µm → nm) est 1 000 fois plus petit que le précédent (× 10⁻³)."
+    },
+    {
+      id: 29, part: 3, partLabel: "Partie 3 • Conversions & calculs",
+      q: "Quelle formule permet de calculer le nombre n d'atomes de diamètre d alignés côte à côte sur une longueur totale L ?",
+      options: [
+        "n = L ÷ d (avec L et d dans la même unité)",
+        "n = L × d",
+        "n = d ÷ L",
+        "n = L + d"
+      ],
+      correct: 0,
+      exp: "Si d = L ÷ n, alors le nombre d'atomes alignés est n = L ÷ d (en exprimant L et d dans la même unité, par exemple en mètres)."
+    },
+    {
+      id: 30, part: 3, partLabel: "Partie 3 • Conversions & calculs",
+      q: "Combien de fois un nanomètre (1 nm = 10⁻⁹ m) est-il plus petit qu'un mètre (1 m) ?",
+      options: [
+        "Un milliard de fois plus petit (1 000 000 000 fois)",
+        "Un million de fois plus petit (1 000 000 fois)",
+        "Mille fois plus petit (1 000 fois)",
+        "Cent mille fois plus petit (100 000 fois)"
+      ],
+      correct: 0,
+      exp: "1 nm = 10⁻⁹ m = 1 / 1 000 000 000 m, soit un milliardième de mètre."
+    },
+
+    // ================= PARTIE 4 : RUTHERFORD & STRUCTURE LACUNAIRE (10 questions) =================
+    {
+      id: 31, part: 4, partLabel: "Partie 4 • Rutherford & Vide",
+      q: "Dans son expérience célèbre de 1909, que bombarde Ernest Rutherford avec des particules alpha ?",
+      options: [
+        "Une très fine feuille d'or",
+        "Un bloc épais de plomb",
+        "Une goutte d'eau pure",
+        "Une cellule de peau humaine"
+      ],
+      correct: 0,
+      exp: "Rutherford envoie un faisceau de particules alpha (chargées positivement) à travers une feuille d'or extrêmement fine."
+    },
+    {
+      id: 32, part: 4, partLabel: "Partie 4 • Rutherford & Vide",
+      q: "Lors de l'expérience de Rutherford, qu'observe-t-on pour la quasi-totalité (99,99 %) des particules envoyées sur la feuille d'or ?",
+      options: [
+        "Elles traversent la feuille d'or tout droit sans être déviées",
+        "Elles rebondissent toutes en arrière sur la feuille d'or",
+        "Elles restent collées à l'intérieur des atomes d'or",
+        "Elles détruisent la feuille d'or en la faisant fondre"
+      ],
+      correct: 0,
+      exp: "Presque toutes les particules passent tout droit sans rencontrer d'obstacle, produisant une tache lumineuse en face de la source sur l'écran détecteur."
+    },
+    {
+      id: 33, part: 4, partLabel: "Partie 4 • Rutherford & Vide",
+      q: "Que déduit Rutherford du fait que la quasi-totalité des particules alpha traversent la feuille d'or sans obstacle ?",
+      options: [
+        "Que l'atome est constitué essentiellement de vide (structure lacunaire)",
+        "Que l'atome est une bille pleine et dure comme le pensait Démocrite",
+        "Que l'atome ne possède aucun noyau en son centre",
+        "Que l'or est un métal transparent à la lumière"
+      ],
+      correct: 0,
+      exp: "Si les particules traversent sans heurter quoi que ce soit, c'est que l'espace occupé par l'atome est majoritairement vide."
+    },
+    {
+      id: 34, part: 4, partLabel: "Partie 4 • Rutherford & Vide",
+      q: "Pourquoi une toute petite fraction des particules alpha (environ 1 sur 10 000) est-elle fortement déviée ou renvoyée en arrière ?",
+      options: [
+        "Elles heurtent ou passent très près d'un noyau central minuscule, très dense et chargé positivement",
+        "Elles rebondissent contre les électrons du nuage électronique",
+        "Elles sont arrêtées par l'air présent autour de la feuille d'or",
+        "Elles manquent de vitesse au départ du canon à particules"
+      ],
+      correct: 0,
+      exp: "Toute la masse et la charge positive de l'atome sont concentrées dans un tout petit noyau central sur lequel rebondissent ces rares particules."
+    },
+    {
+      id: 35, part: 4, partLabel: "Partie 4 • Rutherford & Vide",
+      q: "Quel est l'ordre de grandeur du diamètre du noyau d'un atome ?",
+      options: [
+        "10⁻¹⁵ m (1 femtomètre)",
+        "10⁻¹⁰ m",
+        "10⁻⁹ m (1 nanomètre)",
+        "10⁻⁶ m (1 micromètre)"
+      ],
+      correct: 0,
+      exp: "Le diamètre du noyau d'un atome est de l'ordre de 10⁻¹⁵ m (un femtomètre)."
+    },
+    {
+      id: 36, part: 4, partLabel: "Partie 4 • Rutherford & Vide",
+      q: "Pour comparer le diamètre d'un atome (10⁻¹⁰ m) et celui de son noyau (10⁻¹⁵ m), quel calcul doit-on poser ?",
+      options: [
+        "Diviser le plus grand par le plus petit : 10⁻¹⁰ ÷ 10⁻¹⁵",
+        "Multiplier les deux dimensions : 10⁻¹⁰ × 10⁻¹⁵",
+        "Additionner les deux dimensions : 10⁻¹⁰ + 10⁻¹⁵",
+        "Diviser le plus petit par le plus grand : 10⁻¹⁵ ÷ 10⁻¹⁰"
+      ],
+      correct: 0,
+      exp: "Pour savoir combien de fois l'atome est plus grand que son noyau, on calcule le rapport d_atome ÷ d_noyau = 10⁻¹⁰ ÷ 10⁻¹⁵."
+    },
+    {
+      id: 37, part: 4, partLabel: "Partie 4 • Rutherford & Vide",
+      q: "Quelle règle sur les puissances de 10 utilise-t-on pour calculer le quotient 10ᵃ ÷ 10ᵇ ?",
+      options: [
+        "10ᵃ ÷ 10ᵇ = 10ᵃ⁻ᵇ (on soustrait les exposants)",
+        "10ᵃ ÷ 10ᵇ = 10ᵃ⁺ᵇ (on additionne les exposants)",
+        "10ᵃ ÷ 10ᵇ = 10ᵃ×ᵇ (on multiplie les exposants)",
+        "10ᵃ ÷ 10ᵇ = 10ᵃ÷ᵇ (on divise les exposants)"
+      ],
+      correct: 0,
+      exp: "Pour diviser deux puissances de 10, on soustrait les exposants : 10⁻¹⁰ ÷ 10⁻¹⁵ = 10⁻¹⁰⁻⁽⁻¹⁵⁾ = 10⁻¹⁰⁺¹⁵ = 10⁵."
+    },
+    {
+      id: 38, part: 4, partLabel: "Partie 4 • Rutherford & Vide",
+      q: "Combien de fois le diamètre de l'atome (10⁻¹⁰ m) est-il plus grand que le diamètre de son noyau (10⁻¹⁵ m) ?",
+      options: [
+        "10⁵ fois plus grand, soit 100 000 fois plus grand",
+        "10⁻²⁵ fois plus grand",
+        "5 fois plus grand",
+        "1 000 fois plus grand (10³)"
+      ],
+      correct: 0,
+      exp: "10⁻¹⁰ ÷ 10⁻¹⁵ = 10⁵ = 100 000. L'atome est cent mille fois plus grand que son noyau."
+    },
+    {
+      id: 39, part: 4, partLabel: "Partie 4 • Rutherford & Vide",
+      q: "Si on représentait le noyau d'un atome par une orange de 10 cm de diamètre, quel serait le diamètre de la sphère représentant l'atome entier ?",
+      options: [
+        "10 km (soit 10 000 m)",
+        "10 m",
+        "100 m (la longueur d'un stade)",
+        "1 km"
+      ],
+      correct: 0,
+      exp: "10 cm × 100 000 = 1 000 000 cm = 10 000 m = 10 km ! Entre l'orange au centre et la sphère de 10 km, il n'y a quasiment que du vide."
+    },
+    {
+      id: 40, part: 4, partLabel: "Partie 4 • Rutherford & Vide",
+      q: "Que signifie l'expression scientifique : « L'atome a une structure lacunaire » ?",
+      options: [
+        "Que l'atome comporte d'immenses espaces vides entre son minuscule noyau et ses électrons",
+        "Que l'atome contient de l'eau à l'intérieur de son noyau",
+        "Que l'atome est une sphère pleine sans aucun espace vide",
+        "Que l'atome ne possède aucune charge électrique"
+      ],
+      correct: 0,
+      exp: "« Lacunaire » signifie qui présente des lacunes, c'est-à-dire du vide : la matière à l'échelle atomique est constituée à plus de 99,99 % de vide."
+    }
+  ];
+
+  // ============================================================================
+  // VARIABLES D'ÉTAT DU QCM
+  // ============================================================================
+  let selectedMode = "QCM1"; // 'QCM1' (Parties 1-2-3 : 30 questions) ou 'QCM2' (Parties 1-2-3-4 : 40 questions)
+  let currentQuizQuestions = [];
+  let startTime = null;
+
+  function selectMode(mode) {
+    selectedMode = mode;
+    document.getElementById("mode-qcm1").classList.toggle("selected", mode === "QCM1");
+    document.getElementById("mode-qcm2").classList.toggle("selected", mode === "QCM2");
+  }
+
+  function shuffleArray(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  // Tirage équilibré de 10 questions parmi la réserve d'au moins 30 questions
+  function drawTenQuestions(mode) {
+    if (mode === "QCM1") {
+      // Réserve de 30 questions (10 en P1, 10 en P2, 10 en P3)
+      const p1 = shuffleArray(QUESTION_BANK.filter(q => q.part === 1));
+      const p2 = shuffleArray(QUESTION_BANK.filter(q => q.part === 2));
+      const p3 = shuffleArray(QUESTION_BANK.filter(q => q.part === 3));
+      // Tirage équilibré : 3 questions P1, 4 questions P2, 3 questions P3
+      const selection = [...p1.slice(0, 3), ...p2.slice(0, 4), ...p3.slice(0, 3)];
+      return shuffleArray(selection);
+    } else {
+      // Réserve de 40 questions (10 en P1, 10 en P2, 10 en P3, 10 en P4)
+      const p1 = shuffleArray(QUESTION_BANK.filter(q => q.part === 1));
+      const p2 = shuffleArray(QUESTION_BANK.filter(q => q.part === 2));
+      const p3 = shuffleArray(QUESTION_BANK.filter(q => q.part === 3));
+      const p4 = shuffleArray(QUESTION_BANK.filter(q => q.part === 4));
+      // Tirage équilibré : 2 questions P1, 3 questions P2, 2 questions P3, 3 questions P4
+      const selection = [...p1.slice(0, 2), ...p2.slice(0, 3), ...p3.slice(0, 2), ...p4.slice(0, 3)];
+      return shuffleArray(selection);
+    }
+  }
+
+  function startQuiz() {
+    const lastName = document.getElementById("student-lastname").value.trim();
+    const firstName = document.getElementById("student-firstname").value.trim();
+    const studentClass = document.getElementById("student-class").value;
+    const errorBox = document.getElementById("start-error");
+
+    if (!lastName || !firstName || !studentClass) {
+      errorBox.style.display = "block";
+      return;
+    }
+    errorBox.style.display = "none";
+
+    const rawQuestions = drawTenQuestions(selectedMode);
+    currentQuizQuestions = rawQuestions.map(q => {
+      const indexedOptions = q.options.map((optText, idx) => ({
+        text: optText,
+        isCorrect: idx === q.correct
+      }));
+      return {
+        ...q,
+        shuffledOptions: shuffleArray(indexedOptions)
+      };
+    });
+
+    startTime = new Date();
+
+    document.getElementById("screen-start").classList.add("hidden");
+    document.getElementById("screen-results").classList.add("hidden");
+    document.getElementById("screen-quiz").classList.remove("hidden");
+
+    const modeTitle = selectedMode === "QCM1"
+      ? "📘 QCM 1 : Parties 1, 2 et 3 (sur 30 questions)"
+      : "🚀 QCM 2 : Parties 1, 2, 3 et 4 (sur 40 questions)";
+    document.getElementById("quiz-title-display").textContent = modeTitle;
+    document.getElementById("student-badge").textContent = `${firstName} ${lastName.toUpperCase()} (${studentClass})`;
+
+    renderQuestions();
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderQuestions() {
+    const container = document.getElementById("questions-container");
+    container.innerHTML = "";
+
+    currentQuizQuestions.forEach((item, index) => {
+      const qDiv = document.createElement("div");
+      qDiv.className = "question-box";
+
+      const optionsHtml = item.shuffledOptions.map((opt, optIdx) => `
+        <label class="option-label">
+          <input type="radio" name="q_${index}" value="${optIdx}" onchange="updateProgress()">
+          <span>${opt.text}</span>
+        </label>
+      `).join("");
+
+      qDiv.innerHTML = `
+        <div class="question-header">
+          <span class="q-number">Question ${index + 1} / 10</span>
+          <span class="q-part-badge">${item.partLabel}</span>
+        </div>
+        <div class="question-text">${item.q}</div>
+        <div class="options-list">${optionsHtml}</div>
+      `;
+      container.appendChild(qDiv);
+    });
+  }
+
+  function updateProgress() {
+    let answered = 0;
+    for (let i = 0; i < currentQuizQuestions.length; i++) {
+      if (document.querySelector(`input[name="q_${i}"]:checked`)) {
+        answered++;
+      }
+    }
+    const percent = Math.round((answered / currentQuizQuestions.length) * 100);
+    document.getElementById("progress-bar").style.width = `${percent}%`;
+    document.getElementById("progress-text").textContent =
+      `Progression : ${answered} / ${currentQuizQuestions.length} questions répondues`;
+  }
+
+  function submitQuiz() {
+    const quizError = document.getElementById("quiz-error");
+    const studentAnswers = [];
+
+    for (let i = 0; i < currentQuizQuestions.length; i++) {
+      const checked = document.querySelector(`input[name="q_${i}"]:checked`);
+      if (!checked) {
+        quizError.style.display = "block";
+        return;
+      }
+      studentAnswers.push(parseInt(checked.value, 10));
+    }
+    quizError.style.display = "none";
+
+    let score = 0;
+    const detailsArray = [];
+
+    currentQuizQuestions.forEach((item, idx) => {
+      const chosenIdx = studentAnswers[idx];
+      const chosenOption = item.shuffledOptions[chosenIdx];
+      const isRight = chosenOption.isCorrect;
+      if (isRight) score++;
+      detailsArray.push(`Q${item.id}:${isRight ? "1" : "0"}`);
+    });
+
+    const durationSec = Math.round((new Date() - startTime) / 1000);
+
+    document.getElementById("screen-quiz").classList.add("hidden");
+    document.getElementById("screen-results").classList.remove("hidden");
+
+    document.getElementById("final-score-text").textContent = `${score} / 10`;
+
+    let comment = "";
+    if (score >= 9) comment = "🌟 Excellent travail ! Tu maîtrises parfaitement le chapitre.";
+    else if (score >= 7) comment = "👍 Très bon résultat ! Les notions essentielles sont bien comprises.";
+    else if (score >= 5) comment = "🙂 Ensemble correct, mais relis bien la correction des questions ratées.";
+    else comment = "💪 Il faut reprendre la fiche d'activité et refaire un essai pour progresser.";
+    document.getElementById("final-comment").textContent = comment;
+
+    renderCorrection(studentAnswers);
+    sendResultsToGoogleSheet(score, durationSec, detailsArray.join(" | "));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderCorrection(studentAnswers) {
+    const container = document.getElementById("correction-container");
+    container.innerHTML = "";
+
+    currentQuizQuestions.forEach((item, idx) => {
+      const chosenIdx = studentAnswers[idx];
+      const qDiv = document.createElement("div");
+      qDiv.className = "question-box";
+
+      const optionsHtml = item.shuffledOptions.map((opt, optIdx) => {
+        let extraClass = "";
+        let icon = "";
+        if (opt.isCorrect) {
+          extraClass = "correct-answer";
+          icon = " ✔️";
+        } else if (optIdx === chosenIdx && !opt.isCorrect) {
+          extraClass = "wrong-answer";
+          icon = " ❌ (Ton choix)";
+        }
+        return `
+          <div class="option-label ${extraClass}" style="cursor:default;">
+            <span>${opt.text}${icon}</span>
+          </div>
+        `;
+      }).join("");
+
+      qDiv.innerHTML = `
+        <div class="question-header">
+          <span class="q-number">Question ${idx + 1} (ID #${item.id})</span>
+          <span class="q-part-badge">${item.partLabel}</span>
+        </div>
+        <div class="question-text">${item.q}</div>
+        <div class="options-list">${optionsHtml}</div>
+        <div class="explanation-box">
+          <strong>💡 Explication :</strong> ${item.exp}
+        </div>
+      `;
+      container.appendChild(qDiv);
+    });
+  }
+
+  function sendResultsToGoogleSheet(score, durationSec, detailsStr) {
+    const statusEl = document.getElementById("sync-status");
+    const payload = {
+      timestamp: new Date().toLocaleString("fr-FR"),
+      nom: document.getElementById("student-lastname").value.trim().toUpperCase(),
+      prenom: document.getElementById("student-firstname").value.trim(),
+      classe: document.getElementById("student-class").value,
+      parcours: selectedMode === "QCM1" ? "QCM 1 (Parties 1-2-3)" : "QCM 2 (Parties 1-2-3-4)",
+      score: score,
+      total: 10,
+      duree_secondes: durationSec,
+      details_questions: detailsStr
+    };
+
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === "COLLEZ_ICI_URL_WEB_APP_GOOGLE_SCRIPT") {
+      statusEl.className = "sync-status sync-pending";
+      statusEl.textContent = "ℹ️ Mode démonstration : collez l'URL Google Apps Script à la ligne 318 pour activer l'envoi vers Google Sheets.";
+      return;
+    }
+
+    statusEl.className = "sync-status sync-pending";
+    statusEl.textContent = "⏳ Enregistrement du résultat dans Google Sheets en cours...";
+
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      statusEl.className = "sync-status sync-ok";
+      statusEl.textContent = "✅ Résultat bien envoyé au professeur sur Google Sheets !";
+    })
+    .catch((err) => {
+      console.error(err);
+      statusEl.className = "sync-status sync-error";
+      statusEl.textContent = "⚠️ Erreur de connexion lors de l'envoi. Montre ton écran au professeur.";
+    });
+  }
+
+  function restartWithNewQuestions() {
+    startQuiz();
+  }
+
+  function backToHome() {
+    document.getElementById("screen-results").classList.add("hidden");
+    document.getElementById("screen-quiz").classList.add("hidden");
+    document.getElementById("screen-start").classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+</script>
+
+</body>
+</html>
