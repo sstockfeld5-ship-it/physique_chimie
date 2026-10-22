@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animation : Histoire du Modèle de l'Atome - 3ème</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b1120;
+            color: #f8fafc;
+            user-select: none;
+        }
+        .canvas-wrapper {
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.7);
+            position: relative;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .timeline-btn {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .timeline-active {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border-color: #60a5fa;
+            box-shadow: 0 6px 20px -3px rgba(37, 99, 235, 0.6);
+            transform: translateY(-2px);
+            color: #ffffff;
+        }
+        .timeline-inactive {
+            background-color: #1e293b;
+            border-color: #334155;
+            color: #cbd5e1;
+        }
+        .timeline-inactive:hover {
+            background-color: #334155;
+            border-color: #475569;
+            color: #ffffff;
+        }
+        .highlight-word {
+            background-color: rgba(250, 204, 21, 0.2);
+            color: #fde047;
+            border: 1px solid rgba(250, 204, 21, 0.45);
+            padding: 1px 6px;
+            border-radius: 5px;
+            font-weight: 700;
+        }
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+            50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+        }
+        .btn-comments-pulse {
+            animation: pulse-border 2.2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
+
+    <!-- Conteneur Principal -->
+    <div class="max-w-6xl w-full bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+
+        <!-- BARRE SUPÉRIEURE : Titre & Bouton "Commentaires" en haut à droite -->
+        <header class="bg-slate-950 px-5 py-3.5 border-b border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-extrabold text-lg">
+                    3e
+                </div>
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-blue-400">Chapitre 3 : L'infiniment petit • Partie 2 (Question 3)</span>
+                    <h1 class="text-lg sm:text-xl font-extrabold text-white leading-tight">
+                        L'histoire du modèle de l'atome au cours des siècles
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Bouton Commentaires & Légendes (Exigence de la consigne élève) -->
+            <button id="toggleCommentsBtn" onclick="toggleComments()" class="btn-comments-pulse flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400 transition shadow-lg cursor-pointer">
+                <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <span id="commentsBtnText">Commentaires & Légendes : ACTIVÉS</span>
+            </button>
+        </header>
+
+        <!-- FRISE CHRONOLOGIQUE (4 ÉPOQUES) -->
+        <nav class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 p-3.5 bg-slate-900/90 border-b border-slate-800">
+            <button id="tab-0" onclick="selectModel(0)" class="timeline-btn timeline-active p-3 rounded-xl border text-left flex flex-col justify-between">
+                <div class="flex items-center justify-between w-full mb-1">
+                    <span class="text-xs font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-black/30 text-amber-300">Ve siècle av. J.-C.</span>
+                    <span class="text-xs opacity-75">Étape 1/4</span>
+                </div>
+                <div class="font-bold text-base">Les atomistes grecs</div>
+                <div class="text-xs opacity-80">Démocrite (Vase & Atome)</div>
+            </button>
+
+            <button id="tab-1" onclick="selectModel(1)" class="timeline-btn timeline-inactive p-3 rounded-xl border text-left flex flex-col justify-between">
+                <div class="flex items-center justify-between w-full mb-1">
+                    <span class="text-xs font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-black/30 text-rose-300">1902</span>
+                    <span class="text-xs opacity-75">Étape 2/4</span>
+                </div>
+                <div class="font-bold text-base">Modèle de Thomson</div>
+                <div class="text-xs opacity-80">Modèle du « Pudding »</div>
+            </button>
+
+            <button id="tab-2" onclick="selectModel(2)" class="timeline-btn timeline-inactive p-3 rounded-xl border text-left flex flex-col justify-between">
+                <div class="flex items-center justify-between w-full mb-1">
+                    <span class="text-xs font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-black/30 text-cyan-300">1911</span>
+                    <span class="text-xs opacity-75">Étape 3/4</span>
+                </div>
+                <div class="font-bold text-base">Modèle de Rutherford</div>
+                <div class="text-xs opacity-80">Modèle planétaire</div>
+            </button>
+
+            <button id="tab-3" onclick="selectModel(3)" class="timeline-btn timeline-inactive p-3 rounded-xl border text-left flex flex-col justify-between">
+                <div class="flex items-center justify-between w-full mb-1">
+                    <span class="text-xs font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-black/30 text-purple-300">1927 (Modèle actuel)</span>
+                    <span class="text-xs opacity-75">Étape 4/4</span>
+                </div>
+                <div class="font-bold text-base">Modèle probabiliste</div>
+                <div class="text-xs opacity-80">Nuage électronique</div>
+            </button>
+        </nav>
+
+        <!-- ZONE PRINCIPALE : ANIMATION CANVAS + PANNEAU COMMENTAIRES -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[520px]">
+
+            <!-- COLONNE GAUCHE : Canvas d'animation + Contrôles interactifs -->
+            <div class="lg:col-span-7 canvas-wrapper flex flex-col justify-between min-h-[420px] lg:min-h-[520px] border-b lg:border-b-0 lg:border-r border-slate-800">
+                
+                <!-- Bandeau supérieur d'indication dans le canvas -->
+                <div class="z-10 px-4 pt-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+                    <span id="canvasBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-900/85 border border-slate-700 text-amber-300 shadow">
+                        Expérience de pensée de Démocrite : couper un vase en terre cuite
+                    </span>
+                    <span id="legendStatusBadge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950/90 border border-emerald-500/40 text-emerald-300">
+                        📌 Légendes visibles sur le schéma
+                    </span>
+                </div>
+
+                <!-- Canvas HTML5 -->
+                <div class="relative flex-grow w-full h-full flex items-center justify-center">
+                    <canvas id="atomCanvas"></canvas>
+                </div>
+
+                <!-- Barre de contrôles spécifique à l'animation en bas du canvas -->
+                <div id="democriteControls" class="z-10 bg-slate-950/90 backdrop-blur border-t border-slate-800 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold uppercase text-slate-400">Découpage :</span>
+                        <span id="cutStepLabel" class="text-xs sm:text-sm font-bold text-amber-400 bg-amber-950/60 border border-amber-500/40 px-2.5 py-1 rounded-lg">
+                            Étape 1/6 : Vase grec entier
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btnCutAction" onclick="triggerDemocriteCut()" class="px-3.5 py-1.5 rounded-lg font-bold text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-slate-950 transition shadow flex items-center gap-1.5 cursor-pointer">
+                            <span>🔪 Couper en deux</span>
+                        </button>
+                        <button id="btnAutoPlay" onclick="toggleDemocriteAuto()" class="px-3 py-1.5 rounded-lg font-semibold text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition cursor-pointer">
+                            ⏸ Lecture auto : ON
+                        </button>
+                        <button onclick="resetDemocrite()" class="px-2.5 py-1.5 rounded-lg font-semibold text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer" title="Recommencer depuis le vase entier">
+                            ↺
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contrôles pour les autres modèles (Thomson, Rutherford, Actuel) -->
+                <div id="otherControls" class="hidden z-10 bg-slate-950/90 backdrop-blur border-t border-slate-800 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+                    <div id="otherControlHint" class="text-xs sm:text-sm text-slate-300">
+                        Observe le mouvement des particules et les flèches de légende.
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btnSpeedToggle" onclick="toggleAnimationSpeed()" class="px-3 py-1.5 rounded-lg font-semibold text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition cursor-pointer">
+                            ⚡ Vitesse : Normale
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLONNE DROITE : Panneau Commentaires & Aide au remplissage de la fiche -->
+            <div class="lg:col-span-5 bg-slate-900 p-5 sm:p-6 flex flex-col justify-between">
+                
+                <!-- Contenu affiché quand "Commentaires" est ACTIVÉ -->
+                <div id="commentsPanelContent" class="space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div>
+                            <span id="panelEpoch" class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Ve siècle av. J.-C.</span>
+                            <h2 id="panelTitle" class="text-xl sm:text-2xl font-extrabold text-white">Les atomistes grecs (Démocrite)</h2>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-blue-950 text-blue-300 border border-blue-700/50">
+                            Commentaires
+                        </span>
+                    </div>
+
+                    <!-- Explication historique et scientifique -->
+                    <div id="panelStory" class="text-slate-300 text-sm leading-relaxed space-y-2.5 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80">
+                        <!-- Injecté par JS -->
+                    </div>
+
+                    <!-- Encart "Légendes du schéma" exactement comme sur la fiche -->
+                    <div class="bg-slate-800/60 rounded-xl p-3.5 border border-slate-700">
+                        <div class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 mb-2 flex items-center gap-1.5">
+                            <span>🎯 Légendes à placer sur le schéma de ta fiche :</span>
+                        </div>
+                        <ul id="panelLegendsList" class="space-y-1.5 text-sm text-slate-100 font-medium">
+                            <!-- Injecté par JS -->
+                        </ul>
+                    </div>
+
+                    <!-- Encart "Texte à compléter sur la fiche d'activité (Question 3)" -->
+                    <div class="bg-gradient-to-br from-blue-950/80 to-slate-900 rounded-xl p-4 border-2 border-blue-500/50 shadow-lg">
+                        <div class="text-xs font-extrabold uppercase tracking-wider text-blue-300 mb-2 flex items-center justify-between">
+                            <span>✏️ À compléter sous le schéma (Question 3) :</span>
+                            <span class="text-[11px] bg-blue-500/20 px-2 py-0.5 rounded text-blue-200">Fiche élève</span>
+                        </div>
+                        <div id="panelWorksheetFill" class="text-sm sm:text-base text-white leading-relaxed">
+                            <!-- Injecté par JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message affiché si l'élève masque les commentaires -->
+                <div id="commentsHiddenNotice" class="hidden my-auto text-center p-6 bg-slate-950/70 rounded-2xl border border-dashed border-slate-700 space-y-4">
+                    <div class="w-12 h-12 rounded-full bg-slate-800 text-slate-400 mx-auto flex items-center justify-center text-2xl">
+                        👁️‍🗨️
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Les commentaires et légendes sont masqués</h3>
+                    <p class="text-sm text-slate-400">
+                        Pour afficher les flèches de légende et les descriptions permettant de compléter la Question 3 de ta fiche d'activité, clique sur le bouton <strong>« Commentaires & Légendes »</strong> en haut à droite.
+                    </p>
+                    <button onclick="toggleComments()" class="px-4 py-2 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white transition shadow cursor-pointer">
+                        Afficher les commentaires
+                    </button>
+                </div>
+
+                <!-- Pied de panneau : Navigation rapide -->
+                <div class="pt-4 mt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                    <button id="prevBtn" onclick="navigateModel(-1)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition cursor-pointer">
+                        ← Modèle précédent
+                    </button>
+                    <span id="stepIndicator" class="font-bold text-slate-400">Modèle 1 / 4</span>
+                    <button id="nextBtn" onclick="navigateModel(1)" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition cursor-pointer">
+                        Modèle suivant →
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('atomCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let currentModel = 0;
+        let showComments = true;
+        let animTime = 0;
+        let speedMultiplier = 1;
+
+        // ============================================================================
+        // DONNÉES PÉDAGOGIQUES EXACTEMENT ALIGNÉES SUR LA FICHE D'ACTIVITÉ (PARTIE 2)
+        // ============================================================================
+        const modelsInfo = [
+            {
+                epoch: "Ve siècle av. J.-C.",
+                title: "Les atomistes grecs (Démocrite)",
+                badge: "Expérience de pensée de Démocrite : du vase en argile jusqu'à l'atome",
+                story: `
+                    <p>Le philosophe grec <strong>Démocrite</strong> observe un objet du quotidien, comme un <strong>vase en terre cuite</strong>. Il imagine qu'on le coupe en deux, puis encore en deux, de plus en plus petit...</p>
+                    <p>Selon lui, on finit obligatoirement par arriver à une minuscule bille de matière <strong>pleine, dure et impossible à couper davantage</strong> : il l'appelle <em>« atomos »</em> (en grec : qu'on ne peut pas couper). Cette idée sera reprise par Dalton au début du XIXe siècle.</p>
+                `,
+                legends: [
+                    `<li>🔹 Flèche sous la bille : <span class="highlight-word">Atome insécable</span> (bille pleine indivisible)</li>`
+                ],
+                worksheet: `
+                    <div class="space-y-1">
+                        <div class="text-xs uppercase text-slate-400 font-bold">Idée de Démocrite :</div>
+                        <div>« Atome » signifie : <span class="highlight-word">insécable</span> (c'est-à-dire une <span class="highlight-word">partie de la matière que l'on ne peut pas couper / diviser</span>).</div>
+                    </div>
+                `
+            },
+            {
+                epoch: "1902",
+                title: "Modèle de Thomson (« Pudding »)",
+                badge: "1902 : Découverte des électrons et modèle du « Pudding de Thomson »",
+                story: `
+                    <p>En 1897, <strong>J.J. Thomson</strong> découvre la première particule plus petite que l'atome : <strong>l'électron</strong>, qui porte une charge électrique <strong>négative (-)</strong>.</p>
+                    <p>Comme l'atome est globalement neutre, Thomson imagine en 1902 que l'atome est une <strong>sphère pleine chargée positivement (+)</strong> (comme la pâte d'un gâteau, le <em>pudding</em>) dans laquelle sont répartis des <strong>électrons négatifs (-)</strong> (comme des raisins secs).</p>
+                `,
+                legends: [
+                    `<li>🔵 Flèche du haut (billes bleues) : <span class="highlight-word">Électrons (-)</span> (charges négatives)</li>`,
+                    `<li>🔴 Flèche du bas (sphère rose/rouge) : <span class="highlight-word">Matière chargée positivement (+)</span></li>`
+                ],
+                worksheet: `
+                    <div class="space-y-1">
+                        <div class="text-xs uppercase text-slate-400 font-bold">Description :</div>
+                        <div>Sphère pleine chargée <span class="highlight-word">positivement (+)</span> contenant des <span class="highlight-word">électrons négatifs (-)</span>.</div>
+                    </div>
+                `
+            },
+            {
+                epoch: "1911",
+                title: "Modèle de Rutherford (Planétaire)",
+                badge: "1911 : Modèle planétaire de Rutherford (Noyau, vide et trajectoires)",
+                story: `
+                    <p>Grâce à sa célèbre expérience de la feuille d'or, <strong>Ernest Rutherford</strong> prouve que l'atome n'est pas plein : il est <strong>essentiellement constitué de vide</strong> !</p>
+                    <p>Toute la masse et la charge positive (+) sont concentrées au milieu dans un minuscule <strong>noyau central</strong>. Les <strong>électrons (-)</strong> tournent tout autour dans le vide sur des <strong>trajectoires bien visibles</strong>, comme des planètes autour du Soleil.</p>
+                `,
+                legends: [
+                    `<li>🔵 Flèche du haut : <span class="highlight-word">Électron (-)</span> (sur sa trajectoire)</li>`,
+                    `<li>🔴 Flèche du milieu (centre) : <span class="highlight-word">Noyau (+)</span> (chargé positivement)</li>`,
+                    `<li>⚪ Flèche du bas (espace autour) : <span class="highlight-word">Vide</span> (ou trajectoire de l'électron)</li>`
+                ],
+                worksheet: `
+                    <div class="space-y-1">
+                        <div class="text-xs uppercase text-slate-400 font-bold">Nouveauté majeure :</div>
+                        <div>Un <span class="highlight-word">noyau</span> central entouré de <span class="highlight-word">vide</span> et d'électrons.</div>
+                    </div>
+                `
+            },
+            {
+                epoch: "1927 (Modèle actuel)",
+                title: "Modèle probabiliste (Nuage électronique)",
+                badge: "1927 à aujourd'hui : Physique moderne et modèle probabiliste",
+                story: `
+                    <p>En physique moderne (Schrödinger, Heisenberg), on découvre que les électrons se déplacent si vite et de manière si complexe qu'<strong>on ne peut pas tracer leur trajectoire exacte</strong>.</p>
+                    <p>On représente donc uniquement les endroits où les électrons ont le plus de chances de se trouver : cette zone de points autour du noyau forme le <strong>nuage électronique</strong>. Au centre, le noyau est constitué de <strong>nucléons</strong> (protons + et neutrons).</p>
+                `,
+                legends: [
+                    `<li>🟣 Nuage de points bleus : <span class="highlight-word">Nuage électronique</span> (probabilité de présence des électrons)</li>`,
+                    `<li>🔴 Centre et loupe de zoom : <span class="highlight-word">Noyau</span> (formé de protons et de neutrons)</li>`
+                ],
+                worksheet: `
+                    <div class="space-y-1">
+                        <div class="text-xs uppercase text-slate-400 font-bold">Modèle actuel (déjà rédigé sur ta fiche) :</div>
+                        <div>On ne connaît pas la trajectoire exacte des électrons : ils forment un <span class="highlight-word">nuage électronique</span> autour du <span class="highlight-word">noyau</span>.</div>
+                    </div>
+                `
+            }
+        ];
+
+        // ============================================================================
+        // ÉTAT DE L'ANIMATION DE DÉMOCRITE (VASE -> ... -> ATOME INSÉCABLE)
+        // ============================================================================
+        const democriteStages = [
+            { name: "Étape 1/6 : Vase grec entier en terre cuite", scaleLabel: "Objet macroscopique (~ 30 cm)" },
+            { name: "Étape 2/6 : Moitié de vase coupée", scaleLabel: "Morceau (~ 15 cm)" },
+            { name: "Étape 3/6 : Tesson de terre cuite", scaleLabel: "Fragment (~ 3 cm)" },
+            { name: "Étape 4/6 : Petit grain d'argile", scaleLabel: "Grain (~ 1 mm)" },
+            { name: "Étape 5/6 : Poussière microscopique", scaleLabel: "Poussière (~ 1 µm)" },
+            { name: "Étape 6/6 : L'ATOME (Bille pleine INSÉCABLE !)", scaleLabel: "Échelle atomique (~ 0,1 nm) - INDIVISIBLE" }
+        ];
+
+        let demo = {
+            stage: 0,           // 0 à 5
+            phase: 'idle',      // 'idle', 'cutting', 'splitting', 'zooming', 'unbreakable'
+            timer: 0,
+            autoPlay: true,
+            idleWait: 0,
+            bladeY: -180,
+            splitOffset: 0,
+            rightAlpha: 1,
+            zoomProgress: 0,
+            sparks: [],
+            bounceCount: 0,
+            shakeX: 0,
+            shakeY: 0
+        };
+
+        function resetDemocrite() {
+            demo.stage = 0;
+            demo.phase = 'idle';
+            demo.timer = 0;
+            demo.idleWait = 0;
+            demo.bladeY = -180;
+            demo.splitOffset = 0;
+            demo.rightAlpha = 1;
+            demo.zoomProgress = 0;
+            demo.sparks = [];
+            demo.bounceCount = 0;
+            updateDemocriteUI();
+        }
+
+        function triggerDemocriteCut() {
+            if (demo.phase !== 'idle') return;
+            if (demo.stage < 5) {
+                demo.phase = 'cutting';
+                demo.timer = 0;
+                demo.bladeY = -170;
+            } else {
+                // Étape finale : tentative de couper l'atome -> rebond + étincelles !
+                demo.phase = 'unbreakable';
+                demo.timer = 0;
+                demo.bladeY = -170;
+                demo.sparks = [];
+            }
+            updateDemocriteUI();
+        }
+
+        function toggleDemocriteAuto() {
+            demo.autoPlay = !demo.autoPlay;
+            const btn = document.getElementById('btnAutoPlay');
+            if (demo.autoPlay) {
+                btn.textContent = "⏸ Lecture auto : ON";
+                btn.className = "px-3 py-1.5 rounded-lg font-semibold text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-600/50 transition cursor-pointer";
+            } else {
+                btn.textContent = "▶️ Lecture auto : OFF";
+                btn.className = "px-3 py-1.5 rounded-lg font-semibold text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 transition cursor-pointer";
+            }
+        }
+
+        function updateDemocriteUI() {
+            const label = document.getElementById('cutStepLabel');
+            const btnCut = document.getElementById('btnCutAction');
+            if (!label || !btnCut) return;
+
+            label.textContent = democriteStages[demo.stage].name;
+            if (demo.stage < 5) {
+                btnCut.innerHTML = `<span>🔪 Couper en deux</span>`;
+                btnCut.className = "px-3.5 py-1.5 rounded-lg font-bold text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-slate-950 transition shadow flex items-center gap-1.5 cursor-pointer";
+            } else {
+                btnCut.innerHTML = `<span>⚡ Essayer de couper l'atome !</span>`;
+                btnCut.className = "px-3.5 py-1.5 rounded-lg font-bold text-xs sm:text-sm bg-rose-600 hover:bg-rose-500 text-white transition shadow flex items-center gap-1.5 cursor-pointer";
+            }
+        }
+
+        // ============================================================================
+        // PARTICULES POUR LE MODÈLE PROBABILISTE (1927)
+        // ============================================================================
+        const cloudPoints = [];
+        for (let i = 0; i < 340; i++) {
+            const u = 1 - Math.random();
+            const v = Math.random();
+            const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            const r = Math.min(Math.abs(z * 52), 145);
+            cloudPoints.push({
+                r: r,
+                angle: Math.random() * Math.PI * 2,
+                speed: (0.015 + Math.random() * 0.03) * (Math.random() < 0.5 ? 1 : -1),
+                phase: Math.random() * Math.PI * 2,
+                blinkSpeed: 0.06 + Math.random() * 0.12
+            });
+        }
+
+        // ============================================================================
+        // GESTION DU REDIMENSIONNEMENT & DE L'INTERFACE
+        // ============================================================================
+        function resizeCanvas() {
+            const parent = canvas.parentElement;
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function selectModel(index) {
+            currentModel = index;
+            animTime = 0;
+
+            for (let i = 0; i < 4; i++) {
+                const tab = document.getElementById(`tab-${i}`);
+                if (i === index) {
+                    tab.classList.replace('timeline-inactive', 'timeline-active');
+                } else {
+                    tab.classList.replace('timeline-active', 'timeline-inactive');
+                }
+            }
+
+            // Contrôles du bas
+            const demoCtrl = document.getElementById('democriteControls');
+            const otherCtrl = document.getElementById('otherControls');
+            if (index === 0) {
+                demoCtrl.classList.remove('hidden');
+                otherCtrl.classList.add('hidden');
+                resetDemocrite();
+            } else {
+                demoCtrl.classList.add('hidden');
+                otherCtrl.classList.remove('hidden');
+            }
+
+            // Mise à jour des textes
+            const info = modelsInfo[index];
+            document.getElementById('canvasBadge').textContent = info.badge;
+            document.getElementById('panelEpoch').textContent = info.epoch;
+            document.getElementById('panelTitle').textContent = info.title;
+            document.getElementById('panelStory').innerHTML = info.story;
+            document.getElementById('panelLegendsList').innerHTML = info.legends.join('');
+            document.getElementById('panelWorksheetFill').innerHTML = info.worksheet;
+
+            document.getElementById('stepIndicator').textContent = `Modèle ${index + 1} / 4`;
+            document.getElementById('prevBtn').disabled = (index === 0);
+            document.getElementById('prevBtn').style.opacity = (index === 0) ? '0.4' : '1';
+            document.getElementById('nextBtn').disabled = (index === 3);
+            document.getElementById('nextBtn').style.opacity = (index === 3) ? '0.4' : '1';
+        }
+
+        function navigateModel(delta) {
+            const next = currentModel + delta;
+            if (next >= 0 && next <= 3) selectModel(next);
+        }
+
+        function toggleComments() {
+            showComments = !showComments;
+            const btn = document.getElementById('toggleCommentsBtn');
+            const btnText = document.getElementById('commentsBtnText');
+            const panelContent = document.getElementById('commentsPanelContent');
+            const hiddenNotice = document.getElementById('commentsHiddenNotice');
+            const badge = document.getElementById('legendStatusBadge');
+
+            if (showComments) {
+                btnText.textContent = "Commentaires & Légendes : ACTIVÉS";
+                btn.className = "btn-comments-pulse flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400 transition shadow-lg cursor-pointer";
+                panelContent.classList.remove('hidden');
+                hiddenNotice.classList.add('hidden');
+                badge.textContent = "📌 Légendes visibles sur le schéma";
+                badge.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950/90 border border-emerald-500/40 text-emerald-300";
+            } else {
+                btnText.textContent = "Afficher les commentaires";
+                btn.className = "flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition shadow cursor-pointer";
+                panelContent.classList.add('hidden');
+                hiddenNotice.classList.remove('hidden');
+                badge.textContent = "🙈 Légendes masquées";
+                badge.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-400";
+            }
+        }
+
+        function toggleAnimationSpeed() {
+            const btn = document.getElementById('btnSpeedToggle');
+            if (speedMultiplier === 1) {
+                speedMultiplier = 0.35;
+                btn.textContent = "🐢 Vitesse : Ralenti (Observation)";
+            } else {
+                speedMultiplier = 1;
+                btn.textContent = "⚡ Vitesse : Normale";
+            }
+        }
+
+        // ============================================================================
+        // UTILITAIRE DE DESSIN DE BOÎTE DE LÉGENDE AVEC FLÈCHE SUR LE CANVAS
+        // ============================================================================
+        function drawCallout(targetX, targetY, boxX, boxY, text, subtext, borderColor = '#38bdf8') {
+            if (!showComments) return;
+
+            ctx.save();
+            ctx.font = 'bold 13px Inter, sans-serif';
+            const textWidth = ctx.measureText(text).width;
+            let subWidth = 0;
+            if (subtext) {
+                ctx.font = '11px Inter, sans-serif';
+                subWidth = ctx.measureText(subtext).width;
+            }
+            const boxW = Math.max(textWidth, subWidth) + 24;
+            const boxH = subtext ? 44 : 30;
+
+            // Ligne de flèche
+            ctx.beginPath();
+            ctx.moveTo(boxX, boxY);
+            ctx.lineTo(targetX, targetY);
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Pointe de flèche sur la cible
+            const angle = Math.atan2(targetY - boxY, targetX - boxX);
+            ctx.beginPath();
+            ctx.moveTo(targetX, targetY);
+            ctx.lineTo(targetX - 9 * Math.cos(angle - Math.PI / 6), targetY - 9 * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(targetX - 9 * Math.cos(angle + Math.PI / 6), targetY - 9 * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fillStyle = borderColor;
+            ctx.fill();
+
+            // Boîte de texte
+            const rx = boxX - boxW / 2;
+            const ry = boxY - boxH / 2;
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.roundRect(rx, ry, boxW, boxH, 8);
+            ctx.fill();
+            ctx.stroke();
+
+            // Texte principal
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 13px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, boxX, subtext ? boxY - 7 : boxY);
+
+            // Sous-texte éventuel
+            if (subtext) {
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '11px Inter, sans-serif';
+                ctx.fillText(subtext, boxX, boxY + 10);
+            }
+            ctx.restore();
+        }
+
+        // ============================================================================
+        // DESSIN DU MODÈLE 1 : DÉMOCRITE (VASE GREC -> ... -> ATOME INSÉCABLE)
+        // ============================================================================
+        function drawGreekVaseShape(ctx, scale = 1) {
+            ctx.save();
+            ctx.scale(scale, scale);
+
+            // Anses du vase (amphore grecque)
+            ctx.strokeStyle = '#c2410c';
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+            // Anse gauche
+            ctx.beginPath();
+            ctx.moveTo(-22, -62);
+            ctx.bezierCurveTo(-62, -65, -62, -15, -38, -5);
+            ctx.stroke();
+            // Anse droite
+            ctx.beginPath();
+            ctx.moveTo(22, -62);
+            ctx.bezierCurveTo(62, -65, 62, -15, 38, -5);
+            ctx.stroke();
+
+            // Corps de l'amphore en terre cuite
+            const vaseGrad = ctx.createLinearGradient(-50, -80, 50, 80);
+            vaseGrad.addColorStop(0, '#ea580c');
+            vaseGrad.addColorStop(0.5, '#c2410c');
+            vaseGrad.addColorStop(1, '#7c2d12');
+
+            ctx.fillStyle = vaseGrad;
+            ctx.strokeStyle = '#431407';
+            ctx.lineWidth = 2.5;
+
+            ctx.beginPath();
+            ctx.moveTo(-28, -82); // Col haut gauche
+            ctx.lineTo(28, -82);  // Col haut droit
+            ctx.quadraticCurveTo(20, -62, 24, -48); // Col
+            ctx.bezierCurveTo(64, -25, 56, 45, 22, 72); // Panse droite
+            ctx.lineTo(30, 84);   // Pied droit
+            ctx.lineTo(-30, 84);  // Base du pied
+            ctx.lineTo(-22, 72);  // Pied gauche
+            ctx.bezierCurveTo(-56, 45, -64, -25, -24, -48); // Panse gauche
+            ctx.quadraticCurveTo(-20, -62, -28, -82);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Motifs grecs géométriques sur la panse
+            ctx.save();
+            ctx.clip();
+            ctx.fillStyle = '#1c1917';
+            ctx.fillRect(-70, -22, 140, 12);
+            ctx.fillRect(-70, 26, 140, 8);
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 2;
+            for (let x = -50; x <= 50; x += 16) {
+                ctx.strokeRect(x, -20, 10, 8);
+            }
+            ctx.restore();
+
+            // Lèvre du vase
+            ctx.fillStyle = '#9a3412';
+            ctx.beginPath();
+            ctx.roundRect(-32, -87, 64, 7, 3);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawStageObject(ctx, stage) {
+            if (stage === 0) {
+                // Vase entier
+                drawGreekVaseShape(ctx, 0.95);
+            } else if (stage === 1) {
+                // Moitié de vase
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(-90, -100, 90, 200);
+                ctx.clip();
+                drawGreekVaseShape(ctx, 1.05);
+                ctx.restore();
+            } else if (stage === 2) {
+                // Tesson de terre cuite
+                const grad = ctx.createLinearGradient(-50, -50, 50, 50);
+                grad.addColorStop(0, '#ea580c');
+                grad.addColorStop(1, '#9a3412');
+                ctx.fillStyle = grad;
+                ctx.strokeStyle = '#431407';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(-48, -35);
+                ctx.lineTo(15, -52);
+                ctx.lineTo(52, -10);
+                ctx.lineTo(35, 48);
+                ctx.lineTo(-32, 42);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                // Bande décorative grecque restante
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(-36, -5);
+                ctx.lineTo(36, 5);
+                ctx.stroke();
+            } else if (stage === 3) {
+                // Petit grain d'argile
+                ctx.fillStyle = '#c2410c';
+                ctx.strokeStyle = '#7c2d12';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, 38, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                // Texture argile
+                ctx.fillStyle = '#9a3412';
+                ctx.beginPath(); ctx.arc(-12, -10, 5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(14, 8, 4, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(-5, 15, 3.5, 0, Math.PI * 2); ctx.fill();
+            } else if (stage === 4) {
+                // Poussière microscopique (composée de quelques atomes collés)
+                ctx.fillStyle = '#d97706';
+                const positions = [[-14, -10], [14, -10], [-14, 12], [14, 12], [0, 0]];
+                positions.forEach(([px, py]) => {
+                    ctx.beginPath();
+                    ctx.arc(px, py, 14, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#78350f';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                });
+            } else if (stage === 5) {
+                // L'ATOME INSÉCABLE : Bille pleine, dure, dorée/métallique brillante
+                const atomGrad = ctx.createRadialGradient(-12, -12, 4, 0, 0, 38);
+                atomGrad.addColorStop(0, '#fef08a');
+                atomGrad.addColorStop(0.45, '#f59e0b');
+                atomGrad.addColorStop(0.85, '#b45309');
+                atomGrad.addColorStop(1, '#78350f');
+
+                ctx.beginPath();
+                ctx.arc(0, 0, 36, 0, Math.PI * 2);
+                ctx.fillStyle = atomGrad;
+                ctx.shadowColor = '#f59e0b';
+                ctx.shadowBlur = 22;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#fde047';
+                ctx.stroke();
+
+                // Reflet spéculaire d'une bille pleine et dure
+                ctx.beginPath();
+                ctx.arc(-12, -12, 8, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+                ctx.fill();
+            }
+        }
+
+        function drawDemocrite(cx, cy) {
+            // Gestion de l'automatisme
+            if (demo.autoPlay && demo.phase === 'idle') {
+                demo.idleWait++;
+                if (demo.idleWait > 65) {
+                    demo.idleWait = 0;
+                    if (demo.stage < 5) {
+                        triggerDemocriteCut();
+                    } else if (demo.bounceCount === 0) {
+                        triggerDemocriteCut();
+                    }
+                }
+            }
+
+            // Mise à jour des phases d'animation
+            if (demo.phase === 'cutting') {
+                demo.bladeY += 12;
+                if (demo.bladeY >= 15) {
+                    demo.phase = 'splitting';
+                    demo.timer = 0;
+                }
+            } else if (demo.phase === 'splitting') {
+                demo.timer++;
+                demo.splitOffset += 2.2;
+                demo.rightAlpha = Math.max(0, 1 - demo.timer / 28);
+                if (demo.timer > 32) {
+                    demo.phase = 'zooming';
+                    demo.timer = 0;
+                }
+            } else if (demo.phase === 'zooming') {
+                demo.timer++;
+                if (demo.timer > 22) {
+                    demo.stage++;
+                    demo.phase = 'idle';
+                    demo.timer = 0;
+                    demo.splitOffset = 0;
+                    demo.rightAlpha = 1;
+                    demo.bladeY = -170;
+                    updateDemocriteUI();
+                }
+            } else if (demo.phase === 'unbreakable') {
+                demo.timer++;
+                if (demo.timer <= 12) {
+                    // Descente rapide de la lame sur l'atome
+                    demo.bladeY = -170 + (demo.timer / 12) * 135;
+                } else if (demo.timer === 13) {
+                    // IMPACT ! Création d'étincelles et rebond
+                    demo.bounceCount++;
+                    for (let i = 0; i < 24; i++) {
+                        const ang = -Math.PI + Math.random() * Math.PI;
+                        const spd = 3 + Math.random() * 6;
+                        demo.sparks.push({
+                            x: 0,
+                            y: -36,
+                            vx: Math.cos(ang) * spd,
+                            vy: Math.sin(ang) * spd - 2,
+                            life: 1
+                        });
+                    }
+                } else if (demo.timer < 55) {
+                    // La lame rebondit et tremble, l'atome reste 100% intact !
+                    demo.bladeY -= 4.5;
+                    demo.shakeX = (Math.random() - 0.5) * 8;
+                    demo.shakeY = (Math.random() - 0.5) * 8;
+                } else {
+                    demo.shakeX = 0;
+                    demo.shakeY = 0;
+                    demo.phase = 'idle';
+                    demo.timer = 0;
+                }
+            }
+
+            // Barre de progression visuelle des 6 tailles en haut du canvas
+            ctx.save();
+            const stepsY = 58;
+            const totalW = Math.min(canvas.width - 40, 460);
+            const startX = cx - totalW / 2;
+            const stepNamesShort = ["1. Vase", "2. Moitié", "3. Tesson", "4. Grain", "5. Poussière", "6. ATOME"];
+
+            for (let i = 0; i < 6; i++) {
+                const sx = startX + (i * (totalW / 5));
+                if (i < 5) {
+                    ctx.beginPath();
+                    ctx.moveTo(sx, stepsY);
+                    ctx.lineTo(sx + totalW / 5, stepsY);
+                    ctx.strokeStyle = i < demo.stage ? '#f59e0b' : '#334155';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+                ctx.beginPath();
+                ctx.arc(sx, stepsY, i === demo.stage ? 9 : 6, 0, Math.PI * 2);
+                ctx.fillStyle = i <= demo.stage ? '#f59e0b' : '#1e293b';
+                ctx.fill();
+                ctx.strokeStyle = i === demo.stage ? '#fef08a' : '#475569';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = i === demo.stage ? '#fef08a' : '#94a3b8';
+                ctx.font = i === demo.stage ? 'bold 11px Inter' : '10px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText(stepNamesShort[i], sx, stepsY + 20);
+            }
+            ctx.restore();
+
+            // DESSIN DE L'OBJET AU CENTRE
+            ctx.save();
+            ctx.translate(cx + demo.shakeX, cy + 12 + demo.shakeY);
+
+            if (demo.phase === 'idle' || demo.phase === 'cutting' || demo.phase === 'unbreakable') {
+                drawStageObject(ctx, demo.stage);
+            } else if (demo.phase === 'splitting' || demo.phase === 'zooming') {
+                // Moitié gauche qui reste et se recentre
+                ctx.save();
+                ctx.translate(-demo.splitOffset * 0.5, 0);
+                ctx.beginPath();
+                ctx.rect(-150, -140, 150, 280);
+                ctx.clip();
+                drawStageObject(ctx, demo.stage);
+                ctx.restore();
+
+                // Moitié droite qui s'écarte et disparaît
+                if (demo.rightAlpha > 0) {
+                    ctx.save();
+                    ctx.globalAlpha = demo.rightAlpha;
+                    ctx.translate(demo.splitOffset * 1.4, 0);
+                    ctx.beginPath();
+                    ctx.rect(0, -140, 150, 280);
+                    ctx.clip();
+                    drawStageObject(ctx, demo.stage);
+                    ctx.restore();
+                }
+
+                // Cercle de loupe indiquant qu'on zoome sur le morceau restant
+                if (demo.phase === 'zooming') {
+                    ctx.strokeStyle = '#38bdf8';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 4]);
+                    ctx.beginPath();
+                    ctx.arc(-15, 0, 58 - demo.timer, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.font = 'bold 12px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText("🔍 Zoom sur le morceau...", 0, -75);
+                }
+            }
+
+            // DESSIN DE LA LAME / CISEAU QUI COUPE
+            if (demo.phase === 'cutting' || demo.phase === 'unbreakable') {
+                ctx.save();
+                const isBroken = (demo.phase === 'unbreakable' && demo.timer > 13);
+                ctx.translate(0, demo.bladeY);
+                if (isBroken) ctx.rotate(0.28);
+
+                // Lame métallique
+                ctx.fillStyle = isBroken ? '#f87171' : '#e2e8f0';
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-6, -65);
+                ctx.lineTo(6, -65);
+                ctx.lineTo(2, 0);
+                ctx.lineTo(-2, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Pointillés de coupe
+                if (!isBroken) {
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(0, 90);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                } else {
+                    // Message "IMPOSSIBLE À COUPER !"
+                    ctx.fillStyle = '#fca5a5';
+                    ctx.font = 'extrabold 13px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText("💥 Lame bloquée : IMPOSSIBLE À COUPER !", 0, -78);
+                }
+                ctx.restore();
+            }
+
+            // Étincelles lors du choc sur l'atome insécable
+            demo.sparks.forEach(sp => {
+                sp.x += sp.vx;
+                sp.y += sp.vy;
+                sp.vy += 0.25;
+                sp.life -= 0.03;
+                if (sp.life > 0) {
+                    ctx.save();
+                    ctx.globalAlpha = sp.life;
+                    ctx.fillStyle = '#fde047';
+                    ctx.beginPath();
+                    ctx.arc(sp.x, sp.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+
+            ctx.restore();
+
+            // LÉGENDES SUR LE SCHÉMA (Démocrite)
+            if (demo.stage === 5) {
+                // Légende exacte de la fiche élève : flèche pointant vers l'atome insécable
+                drawCallout(
+                    cx, cy + 52,
+                    cx, cy + 125,
+                    "Légende : Atome insécable",
+                    "« Atome » = partie insécable (indivisible) de la matière",
+                    "#f59e0b"
+                );
+            } else {
+                drawCallout(
+                    cx + 45, cy + 10,
+                    cx + 155, cy + 95,
+                    democriteStages[demo.stage].scaleLabel,
+                    "On peut encore couper cette matière en deux",
+                    "#94a3b8"
+                );
+            }
+        }
+
+        // ============================================================================
+        // DESSIN DU MODÈLE 2 : THOMSON (1902 - LE PUDDING)
+        // ============================================================================
+        function drawThomson(cx, cy) {
+            const radius = 108 + Math.sin(animTime * 0.04) * 2;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            // Sphère pleine chargée positivement (dégradé 3D rose/rouge comme sur la fiche)
+            const sphereGrad = ctx.createRadialGradient(-35, -35, 12, 0, 0, radius);
+            sphereGrad.addColorStop(0, '#fecdd3');
+            sphereGrad.addColorStop(0.45, '#fb7185');
+            sphereGrad.addColorStop(0.85, '#e11d48');
+            sphereGrad.addColorStop(1, '#881337');
+
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, Math.PI * 2);
+            ctx.fillStyle = sphereGrad;
+            ctx.shadowColor = 'rgba(225, 29, 72, 0.45)';
+            ctx.shadowBlur = 25;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = '#fda4af';
+            ctx.stroke();
+
+            // Signes (+) répartis dans la pâte positive
+            const plusCoords = [
+                [-45, -55], [40, -55], [-65, 5], [0, -25],
+                [60, 10], [-40, 60], [35, 62], [5, 32]
+            ];
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+            ctx.font = 'bold 20px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            plusCoords.forEach(([px, py]) => {
+                ctx.fillText('+', px, py);
+            });
+
+            // Électrons (-) incrustés comme des raisins secs dans le pudding
+            const electrons = [
+                { x: -48, y: -22 }, { x: 42, y: -28 },
+                { x: -12, y: -68 }, { x: 0, y: 4 },
+                { x: -52, y: 34 },  { x: 48, y: 36 },
+                { x: -6, y: 66 },   { x: 74, y: -8 },
+                { x: -76, y: -8 }
+            ];
+
+            electrons.forEach((el, idx) => {
+                const vx = Math.cos(animTime * 0.08 + idx * 1.3) * 2.2;
+                const vy = Math.sin(animTime * 0.08 + idx * 1.7) * 2.2;
+                const ex = el.x + vx;
+                const ey = el.y + vy;
+
+                const elGrad = ctx.createRadialGradient(ex - 4, ey - 4, 2, ex, ey, 14);
+                elGrad.addColorStop(0, '#93c5fd');
+                elGrad.addColorStop(0.6, '#2563eb');
+                elGrad.addColorStop(1, '#1e3a8a');
+
+                ctx.beginPath();
+                ctx.arc(ex, ey, 13, 0, Math.PI * 2);
+                ctx.fillStyle = elGrad;
+                ctx.fill();
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#dbeafe';
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px Inter';
+                ctx.fillText('-', ex, ey + 1);
+            });
+
+            ctx.restore();
+
+            // LÉGENDES EXACTES DU MODÈLE DE THOMSON (comme sur la fiche)
+            drawCallout(
+                cx + 42, cy - 28,
+                cx + 175, cy - 95,
+                "Électrons (-)",
+                "Particules de charge négative",
+                "#3b82f6"
+            );
+
+            drawCallout(
+                cx - 65, cy + 55,
+                cx - 165, cy + 115,
+                "Sphère pleine positive (+)",
+                "Matière chargée positivement (« pâte »)",
+                "#fb7185"
+            );
+        }
+
+        // ============================================================================
+        // DESSIN DU MODÈLE 3 : RUTHERFORD (1911 - PLANÉTAIRE AVEC TRAJECTOIRES VISIBLES)
+        // ============================================================================
+        function drawRutherford(cx, cy) {
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            // Cercle délimitant le volume de l'atome (rempli de vide)
+            ctx.beginPath();
+            ctx.arc(0, 0, 145, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.35)';
+            ctx.fill();
+            ctx.setLineDash([4, 6]);
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Définition des 3 orbites elliptiques (TRAJECTOIRES TRÈS VISIBLES)
+            const orbits = [
+                { rx: 140, ry: 48, rot: -Math.PI / 6, speed: 0.045, offset: 0, color: '#38bdf8' },
+                { rx: 140, ry: 48, rot: Math.PI / 6,  speed: 0.052, offset: 2.1, color: '#60a5fa' },
+                { rx: 140, ry: 44, rot: Math.PI / 2,  speed: 0.040, offset: 4.2, color: '#22d3ee' }
+            ];
+
+            // 1. Tracé des trajectoires elliptiques bien nettes et lumineuses
+            orbits.forEach(orb => {
+                ctx.save();
+                ctx.rotate(orb.rot);
+
+                // Halo de la trajectoire
+                ctx.beginPath();
+                ctx.ellipse(0, 0, orb.rx, orb.ry, 0, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+                ctx.lineWidth = 6;
+                ctx.stroke();
+
+                // Ligne principale continue très visible de la trajectoire
+                ctx.beginPath();
+                ctx.ellipse(0, 0, orb.rx, orb.ry, 0, 0, Math.PI * 2);
+                ctx.strokeStyle = '#bae6fd';
+                ctx.lineWidth = 2.2;
+                ctx.stroke();
+
+                ctx.restore();
+            });
+
+            // 2. Dessin du noyau central positif (+)
+            const nucGrad = ctx.createRadialGradient(-3, -3, 2, 0, 0, 14);
+            nucGrad.addColorStop(0, '#fca5a5');
+            nucGrad.addColorStop(0.5, '#ef4444');
+            nucGrad.addColorStop(1, '#991b1b');
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 12, 0, Math.PI * 2);
+            ctx.fillStyle = nucGrad;
+            ctx.shadowColor = '#ef4444';
+            ctx.shadowBlur = 18;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#fecaca';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 14px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('+', 0, 1);
+
+            // 3. Calcul et dessin des électrons en mouvement sur leurs trajectoires
+            let trackedElectronPos = { x: 0, y: 0 };
+
+            orbits.forEach((orb, index) => {
+                const angle = animTime * orb.speed + orb.offset;
+                const localX = orb.rx * Math.cos(angle);
+                const localY = orb.ry * Math.sin(angle);
+
+                // Rotation pour coordonnées globales
+                const cosR = Math.cos(orb.rot);
+                const sinR = Math.sin(orb.rot);
+                const gx = localX * cosR - localY * sinR;
+                const gy = localX * sinR + localY * cosR;
+
+                if (index === 0) {
+                    trackedElectronPos = { x: gx, y: gy };
+                }
+
+                // Petites flèches directionnelles sur l'orbite pour montrer le sens de parcours
+                const tangentAngle = Math.atan2(
+                    orb.rx * Math.cos(angle) * sinR + orb.ry * (-Math.sin(angle)) * cosR,
+                    orb.rx * (-Math.sin(angle)) * cosR - orb.ry * Math.cos(angle) * sinR
+                );
+
+                // Électron
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(gx, gy, 9, 0, Math.PI * 2);
+                ctx.fillStyle = '#0284c7';
+                ctx.shadowColor = '#38bdf8';
+                ctx.shadowBlur = 12;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#e0f2fe';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 13px Inter';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('-', gx, gy + 0.5);
+                ctx.restore();
+            });
+
+            ctx.restore();
+
+            // LÉGENDES DU MODÈLE DE RUTHERFORD (3 flèches comme sur la fiche élève)
+            // 1. Flèche du haut : Électron (-) et sa trajectoire
+            drawCallout(
+                cx + trackedElectronPos.x, cy + trackedElectronPos.y,
+                cx - 155, cy - 115,
+                "Électron (-)",
+                "En mouvement sur sa trajectoire",
+                "#38bdf8"
+            );
+
+            // 2. Flèche du milieu : Noyau central (+)
+            drawCallout(
+                cx + 8, cy,
+                cx + 175, cy - 15,
+                "Noyau central (+)",
+                "Concentrant la charge positive",
+                "#ef4444"
+            );
+
+            // 3. Flèche du bas : Vide + Trajectoire
+            drawCallout(
+                cx - 55, cy + 55,
+                cx + 145, cy + 115,
+                "Vide (et trajectoire)",
+                "L'atome est essentiellement vide",
+                "#94a3b8"
+            );
+        }
+
+        // ============================================================================
+        // DESSIN DU MODÈLE 4 : MODÈLE PROBABILISTE ACTUEL (1927 - NUAGE ÉLECTRONIQUE)
+        // ============================================================================
+        function drawModern(cx, cy) {
+            const atomX = cx - 45;
+            const atomY = cy;
+
+            ctx.save();
+            ctx.translate(atomX, atomY);
+
+            // Halos de densité de probabilité
+            const cloudGrad = ctx.createRadialGradient(0, 0, 5, 0, 0, 145);
+            cloudGrad.addColorStop(0, 'rgba(59, 130, 246, 0.45)');
+            cloudGrad.addColorStop(0.4, 'rgba(59, 130, 246, 0.22)');
+            cloudGrad.addColorStop(0.75, 'rgba(59, 130, 246, 0.06)');
+            cloudGrad.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 145, 0, Math.PI * 2);
+            ctx.fillStyle = cloudGrad;
+            ctx.fill();
+
+            // Nuage dynamique de points de probabilité de présence des électrons
+            cloudPoints.forEach(pt => {
+                pt.angle += pt.speed * speedMultiplier;
+                const alpha = 0.15 + 0.85 * Math.abs(Math.sin(animTime * pt.blinkSpeed + pt.phase));
+                const px = pt.r * Math.cos(pt.angle);
+                const py = pt.r * Math.sin(pt.angle);
+
+                ctx.fillStyle = `rgba(147, 197, 253, ${alpha.toFixed(2)})`;
+                ctx.beginPath();
+                ctx.arc(px, py, 1.8, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Minuscule noyau au centre du nuage
+            ctx.beginPath();
+            ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#ef4444';
+            ctx.shadowColor = '#ef4444';
+            ctx.shadowBlur = 10;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.restore();
+
+            // LOUPE DE ZOOM SUR LE NOYAU (Exactement comme sur le schéma 1927 de la fiche)
+            const zoomX = cx + 135;
+            const zoomY = cy + 60;
+            const zoomR = 46;
+
+            // Lignes de projection du zoom entre le noyau et la loupe
+            ctx.save();
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.6)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(atomX + 4, atomY - 3);
+            ctx.lineTo(zoomX - 20, zoomY - zoomR + 6);
+            ctx.moveTo(atomX + 4, atomY + 3);
+            ctx.lineTo(zoomX - 35, zoomY + zoomR - 12);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Cercle de la loupe
+            ctx.beginPath();
+            ctx.arc(zoomX, zoomY, zoomR, 0, Math.PI * 2);
+            ctx.fillStyle = '#0f172a';
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#64748b';
+            ctx.stroke();
+
+            // Nucléons (protons rouges + et neutrons gris) dans le zoom du noyau (ex: Hélium He)
+            const nucleons = [
+                { dx: -11, dy: -9, type: 'proton' },
+                { dx: 11, dy: -8, type: 'neutron' },
+                { dx: -9, dy: 11, type: 'neutron' },
+                { dx: 9, dy: 10, type: 'proton' }
+            ];
+
+            nucleons.forEach((nuc, i) => {
+                const jx = Math.cos(animTime * 0.1 + i) * 1.2;
+                const jy = Math.sin(animTime * 0.12 + i) * 1.2;
+                const nx = zoomX + nuc.dx + jx;
+                const ny = zoomY + nuc.dy + jy;
+
+                const grad = ctx.createRadialGradient(nx - 4, ny - 4, 2, nx, ny, 15);
+                if (nuc.type === 'proton') {
+                    grad.addColorStop(0, '#fca5a5');
+                    grad.addColorStop(0.6, '#dc2626');
+                    grad.addColorStop(1, '#7f1d1d');
+                } else {
+                    grad.addColorStop(0, '#f1f5f9');
+                    grad.addColorStop(0.6, '#94a3b8');
+                    grad.addColorStop(1, '#334155');
+                }
+
+                ctx.beginPath();
+                ctx.arc(nx, ny, 14, 0, Math.PI * 2);
+                ctx.fillStyle = grad;
+                ctx.fill();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.stroke();
+
+                if (nuc.type === 'proton') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('+', nx, ny + 0.5);
+                }
+            });
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = 'bold 11px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText("Zoom sur le noyau", zoomX, zoomY + zoomR + 15);
+            ctx.restore();
+
+            // LÉGENDES DU MODÈLE PROBABILISTE
+            drawCallout(
+                atomX - 45, atomY - 45,
+                atomX - 80, atomY - 125,
+                "Nuage électronique",
+                "Zone de probabilité de présence des électrons",
+                "#60a5fa"
+            );
+
+            drawCallout(
+                atomX, atomY,
+                atomX + 125, atomY - 95,
+                "Noyau central (+)",
+                "Formé de protons (+) et neutrons",
+                "#ef4444"
+            );
+        }
+
+        // ============================================================================
+        // BOUCLE PRINCIPALE D'ANIMATION
+        // ============================================================================
+        function animateLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            animTime += speedMultiplier;
+
+            if (currentModel === 0) {
+                drawDemocrite(cx, cy);
+            } else if (currentModel === 1) {
+                drawThomson(cx, cy);
+            } else if (currentModel === 2) {
+                drawRutherford(cx, cy);
+            } else if (currentModel === 3) {
+                drawModern(cx, cy);
+            }
+
+            requestAnimationFrame(animateLoop);
+        }
+
+        window.onload = function () {
+            resizeCanvas();
+            selectModel(0);
+            animateLoop();
+        };
+    </script>
+</body>
+</html>
