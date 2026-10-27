@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Labo Électricité 6e - Le circuit électrique à une boucle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb; --primary-light: #dbeafe;
+      --secondary: #059669; --secondary-light: #d1fae5;
+      --danger: #dc2626; --danger-light: #fee2e2;
+      --warning: #d97706; --warning-light: #fef3c7;
+      --bg: #f8fafc; --card-bg: #ffffff;
+      --text: #1e293b; --text-muted: #64748b;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nunito', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+    
+    header { background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white; padding: 16px; text-align: center; box-shadow: var(--shadow); }
+    header h1 { font-family: 'Fredoka', cursive; font-size: 24px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    header p { font-size: 14px; opacity: 0.9; }
+
+    /* NAVIGATION TABS */
+    .nav-tabs { display: flex; justify-content: flex-start; background: white; padding: 8px 12px; gap: 8px; border-bottom: 2px solid #e2e8f0; overflow-x: auto; position: sticky; top: 0; z-index: 20; white-space: nowrap; scrollbar-width: none; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    @media (min-width: 640px) { .nav-tabs { justify-content: center; } }
+    .tab-btn { background: none; border: none; padding: 10px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease; flex-shrink: 0; }
+    .tab-btn:hover { background-color: var(--primary-light); color: var(--primary); }
+    .tab-btn.active { background-color: var(--primary); color: white; }
+
+    main { flex: 1; max-width: 1080px; margin: 16px auto; padding: 0 12px; width: 100%; }
+    .module-card { display: none; background: var(--card-bg); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-lg); border: 1px solid #e2e8f0; animation: fadeIn 0.3s ease-out; }
+    .module-card.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .module-title { font-family: 'Fredoka', cursive; font-size: 20px; color: #1e3a8a; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .module-subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+
+    /* BUTTONS */
+    .btn { background-color: var(--primary); color: white; border: none; padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s, transform 0.1s, background-color 0.2s; width: 100%; margin-bottom: 8px; }
+    @media (min-width: 600px) { .btn { width: auto; margin-bottom: 0; margin-right: 6px; } }
+    .btn:active { transform: scale(0.98); }
+    .btn-secondary { background-color: #64748b; }
+    .btn-success { background-color: var(--secondary); }
+    .btn-warning { background-color: var(--warning); }
+    .btn-danger { background-color: var(--danger); }
+    .btn-outline { background-color: white; color: var(--primary); border: 2px solid var(--primary); }
+    .btn-outline.active { background-color: var(--primary); color: white; }
+
+    /* MEMO & FEEDBACK */
+    .memo-box { background: #eff6ff; border-left: 5px solid var(--primary); padding: 12px 16px; border-radius: 0 12px 12px 0; margin-bottom: 20px; font-size: 13.5px; line-height: 1.5; color: #1e3a8a; }
+    .feedback-banner { margin-top: 16px; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; display: none; align-items: center; gap: 10px; line-height: 1.4; }
+    .feedback-banner.success { display: flex; background-color: var(--secondary-light); color: #065f46; border: 1px solid #a7f3d0; }
+    .feedback-banner.error { display: flex; background-color: var(--danger-light); color: #991b1b; border: 1px solid #fecaca; }
+
+    /* SECTIONS & TOUCH SORTING (MODULE 1 & 3) */
+    .exercise-section { border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 24px; background: #f8fafc; }
+    .exercise-section h3 { margin-bottom: 12px; color: #1e293b; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .drag-playground { display: flex; flex-direction: column; gap: 16px; }
+    
+    .item-pool { background: white; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 12px; min-height: 84px; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; justify-content: center; }
+    .drag-card { background: white; border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 700; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow); transition: all 0.15s; }
+    .drag-card:hover { border-color: #94a3b8; }
+    .drag-card.selected { border-color: var(--primary); background-color: var(--primary-light); transform: scale(1.05); box-shadow: 0 0 0 2px var(--primary); }
+    
+    .drop-targets { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 680px) { .drop-targets-3 { grid-template-columns: repeat(3, 1fr); } .drop-targets-6 { grid-template-columns: repeat(3, 1fr); } }
+    
+    .drop-box { background: white; border: 2px dashed #94a3b8; border-radius: 12px; padding: 12px; min-height: 100px; display: flex; flex-direction: column; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+    .drop-box:hover { border-color: var(--primary); background: #f8fafc; }
+    .drop-box:active { background: var(--primary-light); }
+    .drop-box h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; pointer-events: none; }
+    .drop-box .box-desc { font-size: 11.5px; color: #64748b; margin-bottom: 8px; pointer-events: none; }
+    .drop-box .slot { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; align-content: flex-start; justify-content: center; pointer-events: none; }
+
+    /* QUIZ STYLES */
+    .quiz-box { background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 16px; box-shadow: var(--shadow); }
+    .quiz-question { margin-bottom: 16px; }
+    .quiz-question p { font-weight: 700; margin-bottom: 8px; color: #1e293b; font-size: 14px; line-height: 1.4; }
+    .quiz-question select { width: 100%; padding: 11px 12px; border-radius: 8px; border: 2px solid #cbd5e1; font-size: 14px; background: white; font-weight: 600; color: #1e293b; }
+    .quiz-question select.correct { border-color: #16a34a; background-color: #f0fdf4; color: #065f46; }
+    .quiz-question select.wrong { border-color: #dc2626; background-color: #fef2f2; color: #991b1b; }
+
+    /* MODULE 2: CIRCUIT SIMULATOR & CASES A B C D */
+    .preset-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    @media (min-width: 768px) { .preset-bar { grid-template-columns: repeat(4, 1fr); } }
+    .preset-btn { background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 10px 8px; font-size: 12.5px; font-weight: 800; color: #334155; cursor: pointer; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .preset-btn i { font-size: 18px; color: var(--primary); }
+    .preset-btn.active { border-color: var(--primary); background: var(--primary-light); color: #1e3a8a; box-shadow: var(--shadow); }
+
+    .sim-stage { background: white; border: 2px solid #cbd5e1; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .svg-bench { width: 100%; max-width: 520px; height: auto; background: #f1f5f9; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .sim-controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%; }
+    .sim-status { padding: 10px 16px; border-radius: 8px; font-weight: 800; font-size: 14px; text-align: center; width: 100%; max-width: 520px; }
+    .sim-status.on { background: #fef9c3; color: #854d0e; border: 2px solid #eab308; }
+    .sim-status.off { background: #f1f5f9; color: #475569; border: 2px solid #cbd5e1; }
+
+    @keyframes dashFlow { to { stroke-dashoffset: -24; } }
+    .current-flow { stroke: #eab308; stroke-width: 4; stroke-dasharray: 6 6; animation: dashFlow 0.6s linear infinite; fill: none; }
+    @keyframes spinBlade { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .spinning-blade { transform-origin: center; transform-box: fill-box; animation: spinBlade 0.7s linear infinite; }
+
+    .cases-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    @media (min-width: 800px) { .cases-grid { grid-template-columns: repeat(4, 1fr); } }
+    .case-card { background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+    .case-badge { background: var(--primary); color: white; font-weight: 800; font-size: 14px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+    .case-desc { font-size: 12px; color: #475569; font-weight: 700; margin-top: 6px; line-height: 1.3; }
+
+    /* MODULE 3: SCHEMA BUILDER */
+    .schema-workspace { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: center; }
+    @media (min-width: 820px) { .schema-workspace { grid-template-columns: 1fr 1.3fr; } }
+    .model-circuit-card { background: white; border: 2px solid #cbd5e1; border-radius: 12px; padding: 14px; text-align: center; }
+    .schema-board { background: white; border: 2px solid #cbd5e1; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; align-items: center; }
+    
+    .rect-frame { position: relative; width: 280px; height: 200px; border: 4px solid #0f172a; margin: 28px auto; background: #ffffff; }
+    @media (min-width: 480px) { .rect-frame { width: 320px; height: 210px; } }
+    .corner-dot { position: absolute; width: 8px; height: 8px; background: #0f172a; border-radius: 50%; }
+    .corner-tl { top: -6px; left: -6px; } .corner-tr { top: -6px; right: -6px; }
+    .corner-bl { bottom: -6px; left: -6px; } .corner-br { bottom: -6px; right: -6px; }
+
+    .schema-slot { position: absolute; width: 86px; height: 54px; background: #f8fafc; border: 2px dashed #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; font-size: 11px; font-weight: 800; color: #64748b; text-align: center; }
+    .schema-slot:hover { border-color: var(--primary); background: var(--primary-light); }
+    .schema-slot.filled { border-style: solid; border-color: #94a3b8; background: #ffffff; }
+    .slot-top { top: -29px; left: 50%; transform: translateX(-50%); }
+    .slot-bottom { bottom: -29px; left: 50%; transform: translateX(-50%); }
+    .slot-left { left: -45px; top: 50%; transform: translateY(-50%); }
+    .slot-right { right: -45px; top: 50%; transform: translateY(-50%); }
+
+    .checklist-card { background: #fefce8; border: 2px solid #fde047; border-radius: 10px; padding: 12px 16px; margin-top: 14px; width: 100%; font-size: 13px; }
+    .checklist-card label { display: flex; align-items: center; gap: 8px; margin: 6px 0; cursor: pointer; font-weight: 700; color: #713f12; }
+    .checklist-card input[type=checkbox] { width: 16px; height: 16px; accent-color: #16a34a; }
+
+    /* MODULE 4: CHAÎNES D'ÉNERGIE */
+    .chain-builder { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius); padding: 20px 12px; margin-bottom: 20px; }
+    .chain-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    
+    .chain-grid-res { display: grid; gap: 10px; justify-content: center; align-items: center; }
+    @media (min-width: 800px) {
+      .chain-grid-res { grid-template-columns: auto auto auto auto auto; grid-template-areas: "source t1 conv t2 dest" ". . perte . ." ". . env . ."; }
+      .icon-mobile { display: none !important; }
+    }
+    @media (max-width: 799px) {
+      .chain-grid-res { grid-template-columns: 1fr; grid-template-areas: "source" "t1" "conv" "t2" "dest" "perte" "env"; gap: 6px; }
+      .icon-desktop { display: none !important; }
+      .cg-t1, .cg-t2 { padding: 4px 0; }
+    }
+
+    .cg-source { grid-area: source; justify-self: center; }
+    .cg-t1 { grid-area: t1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .cg-conv { grid-area: conv; justify-self: center; }
+    .cg-t2 { grid-area: t2; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .cg-dest { grid-area: dest; justify-self: center; }
+    .cg-perte { grid-area: perte; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .cg-env { grid-area: env; justify-self: center; }
+
+    .node-box { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 13px; font-weight: 800; background: white; transition: all 0.2s; cursor: pointer; box-shadow: var(--shadow); padding: 10px; }
+    .node-box.rect { border: 3px dashed #3b82f6; border-radius: 8px; width: 145px; height: 62px; color: #1e3a8a; }
+    .node-box.oval { border: 3px dashed #eab308; border-radius: 50%; width: 145px; height: 82px; color: #a16207; }
+    .node-box.filled.rect { border-style: solid; background-color: #eff6ff; }
+    .node-box.filled.oval { border-style: solid; background-color: #fefce8; }
+    .arrow-icon { font-size: 20px; color: #64748b; }
+    .arrow-slot { padding: 6px 10px; background: white; border: 2px dashed #94a3b8; border-radius: 6px; font-size: 12px; font-weight: 800; min-width: 130px; text-align: center; cursor: pointer; color: #475569; }
+    .arrow-slot.filled { border-style: solid; }
+
+    .word-bank { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: white; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 16px; }
+    .word-chip { background: #f1f5f9; border: 2px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+    .word-chip.selected { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
+    .word-chip.used { opacity: 0.35; cursor: not-allowed; border-style: dashed; pointer-events: none; }
+
+    footer { text-align: center; padding: 16px; font-size: 12px; color: var(--text-muted); margin-top: auto; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1><i class="fa-solid fa-plug-circle-bolt"></i> Labo Électricité 6<sup>e</sup></h1>
+    <p>Chapitre 2 • Activité 1 : Le circuit électrique à une boucle</p>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-dipoles', this)"><i class="fa-solid fa-battery-full"></i> 1. Dipôles</button>
+    <button class="tab-btn" onclick="switchTab('tab-boucle', this)"><i class="fa-solid fa-lightbulb"></i> 2. La Boucle</button>
+    <button class="tab-btn" onclick="switchTab('tab-schema', this)"><i class="fa-solid fa-compass-drafting"></i> 3. Symboles & Schéma</button>
+    <button class="tab-btn" onclick="switchTab('tab-chaine', this)"><i class="fa-solid fa-diagram-project"></i> 4. Chaîne d'énergie</button>
+  </nav>
+
+  <main>
+    <!-- ==========================================
+         MODULE 1 : LES DIPÔLES & LEURS FAMILLES
+         ========================================== -->
+    <section id="tab-dipoles" class="module-card active">
+      <h2 class="module-title"><i class="fa-solid fa-boxes-stacked"></i> Les dipôles et leur rôle</h2>
+      
+      <div class="memo-box">
+        <strong><i class="fa-solid fa-book-open"></i> Vocabulaire à retenir :</strong><br>
+        • <strong>Dipôle :</strong> Composant électrique qui possède <strong>deux bornes</strong> de branchement.<br>
+        • <strong>Générateur :</strong> Dipôle qui <strong>produit / fournit</strong> de l'énergie électrique.<br>
+        • <strong>Récepteur :</strong> Dipôle qui <strong>reçoit et convertit</strong> l'énergie électrique en une autre forme d'énergie.
+      </div>
+
+      <div class="exercise-section">
+        <h3><i class="fa-solid fa-hand-pointer"></i> Défi 1 : Classe chaque composant dans sa famille</h3>
+        <p style="font-size: 13px; color: #475569; margin-bottom: 12px;">
+          <strong>Touche une étiquette</strong>, puis <strong>touche la boîte</strong> correspondante pour la ranger.
+        </p>
+
+        <div class="drag-playground">
+          <div class="item-pool" id="pool-dipoles">
+            <div class="drag-card drag-dip" onclick="selectItem(this, 'drag-dip')" data-type="generateur"><i class="fa-solid fa-car-battery" style="color:#2563eb;"></i> Pile plate</div>
+            <div class="drag-card drag-dip" onclick="selectItem(this, 'drag-dip')" data-type="recepteur"><i class="fa-solid fa-lightbulb" style="color:#eab308;"></i> Lampe</div>
+            <div class="drag-card drag-dip" onclick="selectItem(this, 'drag-dip')" data-type="commande"><i class="fa-solid fa-toggle-on" style="color:#059669;"></i> Interrupteur</div>
+            <div class="drag-card drag-dip" onclick="selectItem(this, 'drag-dip')" data-type="recepteur"><i class="fa-solid fa-fan" style="color:#0284c7;"></i> Moteur électrique</div>
+            <div class="drag-card drag-dip" onclick="selectItem(this, 'drag-dip')" data-type="commande"><i class="fa-solid fa-grip-lines" style="color:#dc2626;"></i> Fil de connexion</div>
+            <div class="drag-card drag-dip" onclick="selectItem(this, 'drag-dip')" data-type="generateur"><i class="fa-solid fa-solar-panel" style="color:#7c3aed;"></i> Photopile éclairée</div>
+          </div>
+
+          <div class="drop-targets drop-targets-3">
+            <div class="drop-box drop-dip" data-accept="generateur" onclick="placeItem(this, 'drag-dip')" style="border-color: #3b82f6;">
+              <h4 style="color: #1e3a8a;"><i class="fa-solid fa-bolt"></i> GÉNÉRATEUR</h4>
+              <span class="box-desc">Produit de l'énergie électrique</span>
+              <div class="slot"></div>
+            </div>
+            <div class="drop-box drop-dip" data-accept="recepteur" onclick="placeItem(this, 'drag-dip')" style="border-color: #eab308;">
+              <h4 style="color: #a16207;"><i class="fa-solid fa-gears"></i> RÉCEPTEUR</h4>
+              <span class="box-desc">Convertit l'énergie électrique reçue</span>
+              <div class="slot"></div>
+            </div>
+            <div class="drop-box drop-dip" data-accept="commande" onclick="placeItem(this, 'drag-dip')" style="border-color: #10b981;">
+              <h4 style="color: #065f46;"><i class="fa-solid fa-link"></i> TRANSFERT & COMMANDE</h4>
+              <span class="box-desc">Relie les dipôles ou ouvre/ferme le circuit</span>
+              <div class="slot"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <button class="btn" onclick="verifierTriDipoles()"><i class="fa-solid fa-check"></i> Valider le Défi 1</button>
+          <button class="btn btn-secondary" onclick="resetTriDipoles()"><i class="fa-solid fa-arrow-rotate-left"></i> Recommencer</button>
+        </div>
+        <div id="feedback-dipoles" class="feedback-banner"></div>
+      </div>
+
+      <!-- Défi 2 : Quiz Définitions & Photopile -->
+      <div class="quiz-box">
+        <h3 style="font-size: 16px; margin-bottom: 12px; color: #1e3a8a;"><i class="fa-solid fa-graduation-cap"></i> Défi 2 : Questions du contrôle & Cas de la photopile</h3>
+        
+        <div class="quiz-question">
+          <p>1. Comment appelle-t-on une chaîne de composants électriques, comportant au moins un générateur, reliés par des fils ?</p>
+          <select id="q-voc1">
+            <option value="">-- Choisis la bonne définition --</option>
+            <option value="dipole">Un dipôle</option>
+            <option value="circuit">Un circuit électrique</option>
+            <option value="interrupteur">Un interrupteur</option>
+          </select>
+        </div>
+
+        <div class="quiz-question">
+          <p>2. Quel dipôle permet d'ouvrir (position O) ou de fermer (position I) le circuit électrique ?</p>
+          <select id="q-voc2">
+            <option value="">-- Choisis la bonne réponse --</option>
+            <option value="generateur">Le générateur</option>
+            <option value="recepteur">Le récepteur</option>
+            <option value="interrupteur">L'interrupteur</option>
+          </select>
+        </div>
+
+        <div class="quiz-question">
+          <p>3. <em>(Exercice Doc. 1)</em> On éclaire une <strong>photopile</strong> avec une lampe pour faire tourner un moteur. Quel est le rôle de la photopile dans ce circuit ?</p>
+          <select id="q-voc3">
+            <option value="">-- Choisis la bonne explication --</option>
+            <option value="gen">C'est un générateur car elle fournit de l'énergie électrique au moteur</option>
+            <option value="rec">C'est un récepteur car elle utilise l'énergie électrique du moteur</option>
+            <option value="int">C'est un simple fil de connexion</option>
+          </select>
+        </div>
+
+        <button class="btn" onclick="verifierQuizVocab()"><i class="fa-solid fa-check"></i> Vérifier mes réponses</button>
+        <div id="feedback-quiz-vocab" class="feedback-banner"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         MODULE 2 : SIMULATEUR DE BOUCLE & CAS A, B, C, D
+         ========================================== -->
+    <section id="tab-boucle" class="module-card">
+      <h2 class="module-title"><i class="fa-solid fa-flask"></i> À quelles conditions la lampe brille-t-elle ?</h2>
+      <p class="module-subtitle">Teste les 4 listes de matériel de l'Activité 1 sur la table d'expérience ci-dessous.</p>
+
+      <div class="exercise-section">
+        <h3><i class="fa-solid fa-vial"></i> Partie A : Teste les 4 listes de matériel</h3>
+        
+        <div class="preset-bar">
+          <button class="preset-btn active" id="btn-list-1" onclick="loadCircuitList(1)">
+            <i class="fa-solid fa-1"></i>
+            <span>Liste 1</span>
+            <small style="font-weight:600; color:#64748b;">Pile + Lampe + Fils</small>
+          </button>
+          <button class="preset-btn" id="btn-list-2" onclick="loadCircuitList(2)">
+            <i class="fa-solid fa-2"></i>
+            <span>Liste 2</span>
+            <small style="font-weight:600; color:#64748b;">Moteur + Lampe + Fils</small>
+          </button>
+          <button class="preset-btn" id="btn-list-3" onclick="loadCircuitList(3)">
+            <i class="fa-solid fa-3"></i>
+            <span>Liste 3</span>
+            <small style="font-weight:600; color:#64748b;">Pile + Inter. + Lampe</small>
+          </button>
+          <button class="preset-btn" id="btn-list-4" onclick="loadCircuitList(4)">
+            <i class="fa-solid fa-4"></i>
+            <span>Liste 4</span>
+            <small style="font-weight:600; color:#64748b;">Inter. + Lampe + Fils</small>
+          </button>
+        </div>
+
+        <div class="sim-stage">
+          <svg id="circuitSvg" class="svg-bench" viewBox="0 0 500 250"></svg>
+          
+          <div class="sim-controls" id="sim-interactive-btns"></div>
+          <div id="sim-status-banner" class="sim-status on"></div>
+        </div>
+      </div>
+
+      <!-- Partie B : Exercice Cas A, B, C, D -->
+      <div class="exercise-section">
+        <h3><i class="fa-solid fa-magnifying-glass"></i> Partie B : Observe les 4 circuits A, B, C et D (Fiche Exercices)</h3>
+        
+        <div class="cases-grid">
+          <!-- Cas A -->
+          <div class="case-card">
+            <div class="case-badge">A</div>
+            <svg viewBox="0 0 160 110" width="100%" height="95">
+              <!-- Fils -->
+              <path d="M 55 25 L 25 25 L 25 85 L 55 85" stroke="#dc2626" stroke-width="3" fill="none"/>
+              <path d="M 105 25 L 135 25 L 135 55 L 115 55" stroke="#dc2626" stroke-width="3" fill="none"/>
+              <path d="M 95 55 L 95 85 L 85 85" stroke="#dc2626" stroke-width="3" fill="none"/>
+              <!-- Pile -->
+              <rect x="55" y="12" width="50" height="32" rx="3" fill="#1e293b"/>
+              <rect x="55" y="12" width="50" height="10" fill="#eab308"/>
+              <text x="63" y="36" fill="white" font-size="11" font-weight="bold">+</text>
+              <text x="92" y="36" fill="white" font-size="11" font-weight="bold">-</text>
+              <!-- Interrupteur ouvert -->
+              <circle cx="55" cy="85" r="4" fill="#334155"/>
+              <circle cx="85" cy="85" r="4" fill="#334155"/>
+              <line x1="55" y1="85" x2="80" y2="68" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+              <!-- Lampe éteinte -->
+              <circle cx="105" cy="55" r="10" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+            </svg>
+            <div class="case-desc">Pile + Lampe + Interrupteur <strong>ouvert (O)</strong></div>
+          </div>
+
+          <!-- Cas B -->
+          <div class="case-card" style="border-color:#22c55e; background:#f0fdf4;">
+            <div class="case-badge" style="background:#16a34a;">B</div>
+            <svg viewBox="0 0 160 110" width="100%" height="95">
+              <path d="M 55 25 L 25 25 L 25 85 L 55 85" stroke="#dc2626" stroke-width="3" fill="none"/>
+              <path d="M 85 85 L 125 85 L 125 25 L 105 25" stroke="#dc2626" stroke-width="3" fill="none"/>
+              <!-- Pile -->
+              <rect x="55" y="12" width="50" height="32" rx="3" fill="#1e293b"/>
+              <rect x="55" y="12" width="50" height="10" fill="#eab308"/>
+              <!-- Interrupteur fermé -->
+              <circle cx="55" cy="85" r="4" fill="#334155"/>
+              <circle cx="85" cy="85" r="4" fill="#334155"/>
+              <line x1="55" y1="85" x2="85" y2="85" stroke="#16a34a" stroke-width="4" stroke-linecap="round"/>
+              <!-- Moteur qui tourne -->
+              <circle cx="125" cy="60" r="14" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+              <g class="spinning-blade">
+                <ellipse cx="125" cy="60" rx="18" ry="4" fill="#3b82f6"/>
+                <ellipse cx="125" cy="60" rx="4" ry="18" fill="#3b82f6"/>
+              </g>
+            </svg>
+            <div class="case-desc">Pile + Interrupteur <strong>fermé (I)</strong> + Moteur qui tourne</div>
+          </div>
+
+          <!-- Cas C -->
+          <div class="case-card">
+            <div class="case-badge">C</div>
+            <svg viewBox="0 0 160 110" width="100%" height="95">
+              <path d="M 65 30 L 30 30 L 30 85 L 65 85" stroke="#1e293b" stroke-width="3" fill="none"/>
+              <path d="M 95 30 L 130 30 L 130 85 L 95 85" stroke="#1e293b" stroke-width="3" fill="none"/>
+              <!-- Moteur arrêté -->
+              <rect x="68" y="15" width="24" height="28" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+              <ellipse cx="80" cy="29" rx="18" ry="4" fill="#64748b" transform="rotate(-30 80 29)"/>
+              <!-- Lampe éteinte -->
+              <circle cx="80" cy="82" r="11" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+            </svg>
+            <div class="case-desc">Moteur + Lampe reliés par 2 fils <strong>(sans pile)</strong></div>
+          </div>
+
+          <!-- Cas D -->
+          <div class="case-card">
+            <div class="case-badge">D</div>
+            <svg viewBox="0 0 160 110" width="100%" height="95">
+              <path d="M 95 30 L 40 30 L 40 60" stroke="#1e293b" stroke-width="3" fill="none"/>
+              <path d="M 40 60 L 40 90 L 145 90 L 145 35" stroke="#1e293b" stroke-width="3" fill="none"/>
+              <!-- Pile -->
+              <rect x="90" y="25" width="42" height="45" rx="3" fill="#65a30d" stroke="#1e293b" stroke-width="2"/>
+              <rect x="90" y="25" width="42" height="10" fill="#eab308"/>
+              <!-- Fil débranché -->
+              <circle cx="145" cy="32" r="4" fill="#dc2626"/>
+              <text x="142" y="22" fill="#dc2626" font-size="12" font-weight="bold">!</text>
+              <!-- Lampe éteinte -->
+              <circle cx="40" cy="60" r="11" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+            </svg>
+            <div class="case-desc">Pile + Lampe + <strong>un fil débranché</strong> à droite</div>
+          </div>
+        </div>
+
+        <div class="quiz-box" style="margin-top:0;">
+          <div class="quiz-question">
+            <p>1. Dans quel(s) cas le circuit est-il <strong>ouvert</strong> ?</p>
+            <select id="q-boucle1">
+              <option value="">-- Choisis --</option>
+              <option value="AD">Dans les cas A et D (interrupteur ouvert en A, fil débranché en D)</option>
+              <option value="B">Uniquement dans le cas B</option>
+              <option value="BC">Dans les cas B et C</option>
+            </select>
+          </div>
+          <div class="quiz-question">
+            <p>2. Dans quel(s) cas un <strong>transfert d'énergie électrique</strong> a-t-il lieu (le courant circule) ?</p>
+            <select id="q-boucle2">
+              <option value="">-- Choisis --</option>
+              <option value="BC">Dans les cas B et C</option>
+              <option value="B">Uniquement dans le cas B</option>
+              <option value="ABD">Dans les cas A, B et D car ils ont une pile</option>
+            </select>
+          </div>
+          <div class="quiz-question">
+            <p>3. <strong>Conclusion du cours :</strong> Quelles sont les <strong>deux conditions nécessaires</strong> pour qu'une lampe reçoive de l'énergie électrique ?</p>
+            <select id="q-boucle3">
+              <option value="">-- Choisis la conclusion --</option>
+              <option value="cond_ok">Le circuit doit comporter un générateur (pile) ET former une boucle fermée</option>
+              <option value="cond_f1">Il suffit d'avoir deux fils de connexion et un interrupteur</option>
+              <option value="cond_f2">Le circuit doit être ouvert et contenir deux récepteurs</option>
+            </select>
+          </div>
+          <button class="btn" onclick="verifierQuizBoucle()"><i class="fa-solid fa-check"></i> Vérifier mes réponses</button>
+          <div id="feedback-quiz-boucle" class="feedback-banner"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         MODULE 3 : SYMBOLES & SCHÉMA NORMALISÉ
+         ========================================== -->
+    <section id="tab-schema" class="module-card">
+      <h2 class="module-title"><i class="fa-solid fa-compass-drafting"></i> Symboles et Schéma électrique</h2>
+
+      <div class="memo-box">
+        <strong><i class="fa-solid fa-ruler-combined"></i> Règles d'or du schéma électrique :</strong><br>
+        1. L'allure générale du circuit en série (une boucle) est un <strong>rectangle tracé à la règle et au crayon à papier</strong>.<br>
+        2. Chaque dipôle est représenté par son <strong>symbole normalisé</strong> placé au <strong>milieu d'un côté</strong> (jamais dans les coins !).<br>
+        3. Les composants sont placés <strong>dans le même ordre</strong> par rapport à la pile.
+      </div>
+
+      <!-- Défi 1 : Associer les symboles -->
+      <div class="exercise-section">
+        <h3><i class="fa-solid fa-shapes"></i> Défi 1 : Associe chaque symbole électrique à son nom</h3>
+        <p style="font-size: 13px; color: #475569; margin-bottom: 12px;">
+          <strong>Touche un symbole</strong> ci-dessous, puis <strong>touche la case</strong> portant le nom du dipôle correspondant.
+        </p>
+
+        <div class="drag-playground">
+          <div class="item-pool" id="pool-symboles">
+            <!-- Symbole Pile -->
+            <div class="drag-card drag-sym" onclick="selectItem(this, 'drag-sym')" data-type="pile">
+              <svg width="70" height="42" viewBox="0 0 70 42">
+                <line x1="5" y1="21" x2="29" y2="21" stroke="#0f172a" stroke-width="2.5"/>
+                <line x1="29" y1="6" x2="29" y2="36" stroke="#0f172a" stroke-width="2.5"/>
+                <line x1="41" y1="13" x2="41" y2="29" stroke="#0f172a" stroke-width="5"/>
+                <line x1="41" y1="21" x2="65" y2="21" stroke="#0f172a" stroke-width="2.5"/>
+                <text x="16" y="14" font-size="11" font-weight="bold" fill="#dc2626">+</text>
+                <text x="47" y="14" font-size="12" font-weight="bold" fill="#2563eb">-</text>
+              </svg>
+            </div>
+            <!-- Symbole Lampe -->
+            <div class="drag-card drag-sym" onclick="selectItem(this, 'drag-sym')" data-type="lampe">
+              <svg width="70" height="42" viewBox="0 0 70 42">
+                <line x1="5" y1="21" x2="21" y2="21" stroke="#0f172a" stroke-width="2.5"/>
+                <circle cx="35" cy="21" r="14" fill="white" stroke="#0f172a" stroke-width="2.5"/>
+                <line x1="25" y1="11" x2="45" y2="31" stroke="#0f172a" stroke-width="2.5"/>
+                <line x1="45" y1="11" x2="25" y2="31" stroke="#0f172a" stroke-width="2.5"/>
+                <line x1="49" y1="21" x2="65" y2="21" stroke="#0f172a" stroke-width="2.5"/>
+              </svg>
+            </div>
+            <!-- Symbole Moteur -->
+            <div class="drag-card drag-sym" onclick="selectItem(this, 'drag-sym')" data-type="moteur">
+              <svg width="70" height="42" viewBox="0 0 70 42">
+                <line x1="5" y1="21" x2="21" y2="21" stroke="#0f172a" stroke-width="2.5"/>
+                <circle cx="35" cy="21" r="14" fill="white" stroke="#0f172a" stroke-width="2.5"/>
+                <text x="35" y="26" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">M</text>
+                <line x1="49" y1="21" x2="65" y2="21" stroke="#0f172a" stroke-width="2.5"/>
+              </svg>
+            </div>
+            <!-- Symbole Générateur -->
+            <div class="drag-card drag-sym" onclick="selectItem(this, 'drag-sym')" data-type="generateur">
+              <svg width="70" height="42" viewBox="0 0 70 42">
+                <line x1="5" y1="21" x2="21" y2="21" stroke="#0f172a" stroke-width="2.5"/>
+                <circle cx="35" cy="21" r="14" fill="white" stroke="#0f172a" stroke-width="2.5"/>
+                <text x="35" y="26" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">G</text>
+                <line x1="49" y1="21" x2="65" y2="21" stroke="#0f172a" stroke-width="2.5"/>
+              </svg>
+            </div>
+            <!-- Symbole Interrupteur Ouvert -->
+            <div class="drag-card drag-sym" onclick="selectItem(this, 'drag-sym')" data-type="inter_ouvert">
+              <svg width="70" height="42" viewBox="0 0 70 42">
+                <line x1="5" y1="26" x2="23" y2="26" stroke="#0f172a" stroke-width="2.5"/>
+                <circle cx="23" cy="26" r="3" fill="#0f172a"/>
+                <line x1="23" y1="26" x2="45" y2="10" stroke="#0f172a" stroke-width="2.5"/>
+                <circle cx="47" cy="26" r="3" fill="#0f172a"/>
+                <line x1="47" y1="26" x2="65" y2="26" stroke="#0f172a" stroke-width="2.5"/>
+              </svg>
+            </div>
+            <!-- Symbole Interrupteur Fermé -->
+            <div class="drag-card drag-sym" onclick="selectItem(this, 'drag-sym')" data-type="inter_ferme">
+              <svg width="70" height="42" viewBox="0 0 70 42">
+                <line x1="5" y1="24" x2="23" y2="24" stroke="#0f172a" stroke-width="2.5"/>
+                <circle cx="23" cy="24" r="3" fill="#0f172a"/>
+                <line x1="23" y1="24" x2="47" y2="24" stroke="#0f172a" stroke-width="2.5"/>
+                <circle cx="47" cy="24" r="3" fill="#0f172a"/>
+                <line x1="47" y1="24" x2="65" y2="24" stroke="#0f172a" stroke-width="2.5"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="drop-targets drop-targets-6">
+            <div class="drop-box drop-sym" data-accept="pile" onclick="placeItem(this, 'drag-sym')"><h4>Pile</h4><div class="slot"></div></div>
+            <div class="drop-box drop-sym" data-accept="generateur" onclick="placeItem(this, 'drag-sym')"><h4>Générateur</h4><div class="slot"></div></div>
+            <div class="drop-box drop-sym" data-accept="lampe" onclick="placeItem(this, 'drag-sym')"><h4>Lampe</h4><div class="slot"></div></div>
+            <div class="drop-box drop-sym" data-accept="moteur" onclick="placeItem(this, 'drag-sym')"><h4>Moteur</h4><div class="slot"></div></div>
+            <div class="drop-box drop-sym" data-accept="inter_ouvert" onclick="placeItem(this, 'drag-sym')"><h4>Interrupteur ouvert (O)</h4><div class="slot"></div></div>
+            <div class="drop-box drop-sym" data-accept="inter_ferme" onclick="placeItem(this, 'drag-sym')"><h4>Interrupteur fermé (I)</h4><div class="slot"></div></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <button class="btn" onclick="verifierSymboles()"><i class="fa-solid fa-check"></i> Valider les symboles</button>
+          <button class="btn btn-secondary" onclick="resetSymboles()"><i class="fa-solid fa-arrow-rotate-left"></i> Recommencer</button>
+        </div>
+        <div id="feedback-symboles" class="feedback-banner"></div>
+      </div>
+
+      <!-- Défi 2 : Constructeur de schéma électrique -->
+      <div class="exercise-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+          <h3 style="margin:0;"><i class="fa-solid fa-pen-ruler"></i> Défi 2 : Réalise le schéma électrique normalisé</h3>
+          <div>
+            <button class="btn btn-outline active" id="btn-sch-1" onclick="loadSchemaMission(0)" style="padding:6px 12px; font-size:12.5px;">Mission 1 (Activité 1)</button>
+            <button class="btn btn-outline" id="btn-sch-2" onclick="loadSchemaMission(1)" style="padding:6px 12px; font-size:12.5px;">Mission 2 (Contrôle)</button>
+          </div>
+        </div>
+
+        <p id="schema-mission-desc" style="font-size: 13.5px; color: #1e3a8a; font-weight:700; margin-bottom: 14px;"></p>
+
+        <div class="schema-workspace">
+          <!-- Modèle illustré du circuit réel -->
+          <div class="model-circuit-card">
+            <h4 style="font-size:13px; color:#475569; margin-bottom:8px;"><i class="fa-solid fa-eye"></i> Circuit réel observé :</h4>
+            <div id="schema-model-svg"></div>
+          </div>
+
+          <!-- Cadre rectangulaire à compléter -->
+          <div class="schema-board">
+            <span style="font-size:12px; font-weight:700; color:#64748b;">Sélectionne un symbole en bas puis touche un côté du rectangle :</span>
+            
+            <div class="rect-frame">
+              <div class="corner-dot corner-tl"></div>
+              <div class="corner-dot corner-tr"></div>
+              <div class="corner-dot corner-bl"></div>
+              <div class="corner-dot corner-br"></div>
+
+              <div class="schema-slot slot-top" id="sch-top" onclick="placeOnSchema('top')">[Côté Haut]</div>
+              <div class="schema-slot slot-right" id="sch-right" onclick="placeOnSchema('right')">[Côté Droit]</div>
+              <div class="schema-slot slot-bottom" id="sch-bottom" onclick="placeOnSchema('bottom')">[Côté Bas]</div>
+              <div class="schema-slot slot-left" id="sch-left" onclick="placeOnSchema('left')">[Côté Gauche]</div>
+            </div>
+
+            <!-- Palette de symboles pour le schéma -->
+            <div class="word-bank" id="schema-palette" style="margin-top:10px; width:100%;"></div>
+
+            <!-- Grille d'autoévaluation de l'Activité 1 -->
+            <div class="checklist-card">
+              <strong><i class="fa-solid fa-list-check"></i> Autoévaluation (sur ma feuille de papier) :</strong>
+              <label><input type="checkbox" checked> Mon schéma est un rectangle tracé à la règle et au crayon à papier.</label>
+              <label><input type="checkbox" checked> Chaque symbole est placé au milieu d'un côté (jamais dans les coins).</label>
+              <label><input type="checkbox" checked> Les composants sont dans l'ordre par rapport à la pile.</label>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <button class="btn" onclick="verifierSchema()"><i class="fa-solid fa-check"></i> Vérifier mon schéma</button>
+          <button class="btn btn-secondary" onclick="resetSchemaSlots()"><i class="fa-solid fa-eraser"></i> Vider le rectangle</button>
+        </div>
+        <div id="feedback-schema" class="feedback-banner"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         MODULE 4 : CHAÎNES D'ÉNERGIE
+         ========================================== -->
+    <section id="tab-chaine" class="module-card">
+      <h2 class="module-title"><i class="fa-solid fa-diagram-project"></i> Chaînes d'énergie du circuit</h2>
+      <p class="module-subtitle">Complète la chaîne d'énergie de la lampe (Conclusion Activité 1) puis celle de la photopile (Exercice Doc. 1).</p>
+
+      <div class="chain-builder">
+        <div class="chain-header">
+          <h3 id="chain-title" style="font-size: 16px; color:#1e3a8a;">1. Chaîne d'énergie de la Lampe</h3>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-outline active" id="btn-ch-0" onclick="selectChainIndex(0)" style="padding:6px 12px; font-size:12px;">1. La Lampe</button>
+            <button class="btn btn-outline" id="btn-ch-1" onclick="selectChainIndex(1)" style="padding:6px 12px; font-size:12px;">2. La Photopile</button>
+          </div>
+        </div>
+
+        <div class="chain-grid-res">
+          <div class="node-box rect cg-source" id="slot-source" onclick="assignW(this)">[Source / Départ]</div>
+          
+          <div class="cg-t1">
+            <div class="arrow-slot" id="slot-recue" onclick="assignW(this)">(Énergie reçue)</div>
+            <i class="fa-solid fa-arrow-right-long arrow-icon icon-desktop"></i>
+            <i class="fa-solid fa-arrow-down-long arrow-icon icon-mobile"></i>
+          </div>
+          
+          <div class="node-box oval cg-conv" id="slot-convertisseur" onclick="assignW(this)">(Convertisseur)</div>
+          
+          <div class="cg-t2">
+            <div class="arrow-slot" id="slot-utile" style="color:#16a34a; border-color:#16a34a;" onclick="assignW(this)">(Énergie utile)</div>
+            <i class="fa-solid fa-arrow-right-long arrow-icon icon-desktop" style="color:#16a34a;"></i>
+            <i class="fa-solid fa-arrow-down-long arrow-icon icon-mobile" style="color:#16a34a;"></i>
+          </div>
+          
+          <div class="node-box rect cg-dest" id="slot-dest" onclick="assignW(this)">[Arrivée]</div>
+          
+          <div class="cg-perte">
+            <i class="fa-solid fa-arrow-turn-down arrow-icon icon-desktop" style="color:#dc2626; transform:translate(-20px, 10px);"></i>
+            <i class="fa-solid fa-arrow-down-long arrow-icon icon-mobile" style="color:#dc2626;"></i>
+            <div class="arrow-slot" id="slot-perdue" style="color:#dc2626; border-color:#dc2626;" onclick="assignW(this)">(Énergie dissipée)</div>
+            <i class="fa-solid fa-arrow-down-long arrow-icon icon-mobile" style="color:#dc2626;"></i>
+          </div>
+          
+          <div class="node-box rect cg-env" id="slot-env" style="background:#f8fafc; border-color:#94a3b8; color:#64748b; cursor:default;">Milieu extérieur</div>
+        </div>
+
+        <div class="word-bank" id="chain-words-container"></div>
+      </div>
+
+      <div>
+        <button class="btn" onclick="verifierChaine()"><i class="fa-solid fa-check"></i> Valider la chaîne</button>
+        <button class="btn btn-secondary" onclick="initChain()"><i class="fa-solid fa-arrow-rotate-left"></i> Effacer</button>
+        <button class="btn btn-success" onclick="nextChaine()" id="btn-next-chaine" style="display: none;"><i class="fa-solid fa-forward"></i> Chaîne suivante</button>
+      </div>
+      <div id="feedback-chaine" class="feedback-banner"></div>
+    </section>
+  </main>
+
+  <footer>
+    Collège 6<sup>e</sup> • Sciences et Technologie • Chapitre 2 : Le circuit électrique à une boucle
+  </footer>
+
+  <script>
+    // ==========================================
+    // NAVIGATION PAR ONGLETS
+    // ==========================================
+    function switchTab(tabId, btnEl) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.module-card').forEach(card => card.classList.remove('active'));
+      btnEl.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // ==========================================
+    // SYSTÈME GÉNÉRIQUE TAP-TO-PLACE (MODULES 1 & 3)
+    // ==========================================
+    let selectedCard = null;
+    let selectedGroup = null;
+
+    function selectItem(el, groupClass) {
+      document.querySelectorAll('.' + groupClass).forEach(c => c.classList.remove('selected'));
+      selectedCard = el;
+      selectedGroup = groupClass;
+      el.classList.add('selected');
+    }
+
+    function placeItem(box, expectedGroup) {
+      if (!selectedCard || selectedGroup !== expectedGroup) return;
+      box.querySelector('.slot').appendChild(selectedCard);
+      selectedCard.classList.remove('selected');
+      selectedCard.style.borderColor = '#cbd5e1';
+      selectedCard = null;
+      selectedGroup = null;
+    }
+
+    // --- MODULE 1 : VALIDATION DIPÔLES ---
+    function verifierTriDipoles() {
+      let correct = 0;
+      const total = 6;
+      const fb = document.getElementById('feedback-dipoles');
+      document.querySelectorAll('.drop-dip').forEach(box => {
+        const accept = box.dataset.accept;
+        box.querySelectorAll('.drag-dip').forEach(it => {
+          if (it.dataset.type === accept) {
+            it.style.borderColor = '#16a34a';
+            it.style.backgroundColor = '#f0fdf4';
+            correct++;
+          } else {
+            it.style.borderColor = '#dc2626';
+            it.style.backgroundColor = '#fef2f2';
+          }
+        });
+      });
+      fb.style.display = 'flex';
+      if (correct === total) {
+        fb.className = 'feedback-banner success';
+        fb.innerHTML = '<i class="fa-solid fa-circle-check"></i> Bravo ! Tu maîtrises parfaitement les familles de dipôles.';
+      } else {
+        fb.className = 'feedback-banner error';
+        fb.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Score : ${correct} / ${total}. Vérifie les étiquettes encadrées en rouge ou oubliées.`;
+      }
+    }
+
+    function resetTriDipoles() {
+      const pool = document.getElementById('pool-dipoles');
+      document.querySelectorAll('.drag-dip').forEach(card => {
+        card.style.borderColor = '#cbd5e1';
+        card.style.backgroundColor = 'white';
+        card.classList.remove('selected');
+        pool.appendChild(card);
+      });
+      document.getElementById('feedback-dipoles').style.display = 'none';
+    }
+
+    function verifierQuizVocab() {
+      const q1 = document.getElementById('q-voc1');
+      const q2 = document.getElementById('q-voc2');
+      const q3 = document.getElementById('q-voc3');
+      let score = 0;
+      if (q1.value === 'circuit') { q1.className = 'correct'; score++; } else { q1.className = 'wrong'; }
+      if (q2.value === 'interrupteur') { q2.className = 'correct'; score++; } else { q2.className = 'wrong'; }
+      if (q3.value === 'gen') { q3.className = 'correct'; score++; } else { q3.className = 'wrong'; }
+
+      const fb = document.getElementById('feedback-quiz-vocab');
+      fb.style.display = 'flex';
+      if (score === 3) {
+        fb.className = 'feedback-banner success';
+        fb.innerHTML = '<i class="fa-solid fa-trophy"></i> 3 / 3 ! Tu es prêt pour le contrôle de vocabulaire et la question sur la photopile.';
+      } else {
+        fb.className = 'feedback-banner error';
+        fb.innerHTML = `<i class="fa-solid fa-xmark"></i> ${score} / 3. Corrige les réponses encadrées en rouge.`;
+      }
+    }
+
+    // ==========================================
+    // MODULE 2 : SIMULATEUR DE BOUCLE (LISTES 1 À 4)
+    // ==========================================
+    let currentList = 1;
+    let switchClosed = true;
+    let wireDisconnected = false;
+
+    function loadCircuitList(num) {
+      currentList = num;
+      switchClosed = true;
+      wireDisconnected = false;
+      document.querySelectorAll('.preset-btn').forEach((b, idx) => {
+        b.classList.toggle('active', idx + 1 === num);
+      });
+      renderBenchCircuit();
+    }
+
+    function toggleSwitchSim() {
+      switchClosed = !switchClosed;
+      renderBenchCircuit();
+    }
+
+    function toggleWireSim() {
+      wireDisconnected = !wireDisconnected;
+      renderBenchCircuit();
+    }
+
+    function renderBenchCircuit() {
+      const svg = document.getElementById('circuitSvg');
+      const controls = document.getElementById('sim-interactive-btns');
+      const status = document.getElementById('sim-status-banner');
+
+      const hasBattery = (currentList === 1 || currentList === 3);
+      const hasMotor = (currentList === 2);
+      const hasSwitch = (currentList === 3 || currentList === 4);
+
+      const isClosedLoop = (!wireDisconnected) && (!hasSwitch || switchClosed);
+      const lampShines = hasBattery && isClosedLoop;
+
+      // Construction des boutons interactifs selon la liste
+      let btnsHtml = '';
+      if (hasSwitch) {
+        btnsHtml += `<button class="btn ${switchClosed ? 'btn-warning' : 'btn-success'}" onclick="toggleSwitchSim()" style="width:auto; margin:0;">
+          <i class="fa-solid ${switchClosed ? 'fa-toggle-on' : 'fa-toggle-off'}"></i> 
+          Interrupteur : ${switchClosed ? 'FERMÉ (I) → Ouvrir (O)' : 'OUVERT (O) → Fermer (I)'}
+        </button>`;
+      }
+      btnsHtml += `<button class="btn ${wireDisconnected ? 'btn-primary' : 'btn-danger'}" onclick="toggleWireSim()" style="width:auto; margin:0;">
+        <i class="fa-solid ${wireDisconnected ? 'fa-plug' : 'fa-link-slash'}"></i> 
+        ${wireDisconnected ? 'Rebrancher le fil' : 'Débrancher un fil'}
+      </button>`;
+      controls.innerHTML = btnsHtml;
+
+      // Mise à jour du message d'observation
+      if (lampShines) {
+        status.className = 'sim-status on';
+        status.innerHTML = '<i class="fa-solid fa-lightbulb"></i> <strong>La lampe BRILLE !</strong> Il y a un générateur (la pile) et la boucle est fermée.';
+      } else {
+        status.className = 'sim-status off';
+        if (!hasBattery) {
+          status.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;"></i> <strong>La lampe reste ÉTEINTE :</strong> Il manque un générateur (une pile) pour fournir de l\'énergie électrique !';
+        } else if (wireDisconnected) {
+          status.innerHTML = '<i class="fa-solid fa-link-slash" style="color:#dc2626;"></i> <strong>La lampe s\'ÉTEINT :</strong> Un fil est débranché, la boucle du circuit est ouverte.';
+        } else {
+          status.innerHTML = '<i class="fa-solid fa-power-off" style="color:#d97706;"></i> <strong>La lampe est ÉTEINTE :</strong> L\'interrupteur est ouvert (position O), le courant ne passe pas.';
+        }
+      }
+
+      // Dessin SVG du circuit
+      let s = '';
+      // Boucle de fils principale
+      const wireRightEnd = wireDisconnected ? 'M 330 65 L 405 65 L 430 140' : 'M 300 65 L 410 65 L 410 190 L 300 190';
+      s += `<path d="M 190 65 L 90 65 L 90 190 L 200 190" stroke="#dc2626" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+      s += `<path d="${wireRightEnd}" stroke="#1e293b" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+      if (wireDisconnected) {
+        s += `<path d="M 410 165 L 410 190 L 300 190" stroke="#1e293b" stroke-width="5" fill="none"/>`;
+        s += `<circle cx="430" cy="140" r="6" fill="#dc2626"/><text x="442" y="145" fill="#dc2626" font-size="13" font-weight="800">Fil débranché !</text>`;
+      }
+
+      // Animation du courant si la lampe brille
+      if (lampShines) {
+        s += `<rect x="90" y="65" width="320" height="125" class="current-flow" rx="4"/>`;
+      }
+
+      // COMPOSANT DU HAUT (Pile pour Listes 1 & 3, Moteur pour Liste 2, Fil simple pour Liste 4)
+      if (hasBattery) {
+        s += `
+          <g transform="translate(195, 25)">
+            <rect x="0" y="0" width="105" height="68" rx="6" fill="#1e293b" stroke="#0f172a" stroke-width="2"/>
+            <rect x="0" y="0" width="105" height="22" rx="4" fill="#eab308"/>
+            <rect x="12" y="-8" width="16" height="8" fill="#94a3b8"/>
+            <rect x="77" y="-8" width="16" height="8" fill="#94a3b8"/>
+            <text x="20" y="42" fill="white" font-size="18" font-weight="800">+</text>
+            <text x="80" y="42" fill="white" font-size="18" font-weight="800">-</text>
+            <text x="52" y="56" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="700">PILE 4,5V</text>
+          </g>`;
+      } else if (hasMotor) {
+        s += `
+          <g transform="translate(210, 30)">
+            <rect x="15" y="10" width="50" height="50" rx="6" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+            <circle cx="40" cy="35" r="22" fill="#e2e8f0" stroke="#2563eb" stroke-width="2"/>
+            <ellipse cx="40" cy="35" rx="26" ry="6" fill="#3b82f6" transform="rotate(-25 40 35)"/>
+            <circle cx="40" cy="35" r="4" fill="#1e293b"/>
+            <text x="40" y="75" text-anchor="middle" fill="#334155" font-size="12" font-weight="800">MOTEUR</text>
+          </g>`;
+      } else {
+        s += `<line x1="190" y1="65" x2="300" y2="65" stroke="#dc2626" stroke-width="5"/>`;
+        s += `<text x="245" y="52" text-anchor="middle" fill="#dc2626" font-size="12" font-weight="800">(Aucun générateur)</text>`;
+      }
+
+      // COMPOSANT DE GAUCHE (Interrupteur pour Listes 3 & 4)
+      if (hasSwitch) {
+        s += `
+          <g transform="translate(45, 100)">
+            <rect x="20" y="0" width="50" height="55" rx="6" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+            <circle cx="45" cy="14" r="5" fill="#1e293b"/>
+            <circle cx="45" cy="42" r="5" fill="#1e293b"/>
+            ${switchClosed 
+              ? `<line x1="45" y1="14" x2="45" y2="42" stroke="#16a34a" stroke-width="5" stroke-linecap="round"/>
+                 <text x="45" y="70" text-anchor="middle" fill="#16a34a" font-size="11" font-weight="800">Fermé (I)</text>`
+              : `<line x1="45" y1="14" x2="68" y2="36" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/>
+                 <text x="45" y="70" text-anchor="middle" fill="#dc2626" font-size="11" font-weight="800">Ouvert (O)</text>`
+            }
+          </g>`;
+      }
+
+      // COMPOSANT DU BAS : LA LAMPE
+      s += `
+        <g transform="translate(215, 155)">
+          ${lampShines ? `
+            <circle cx="35" cy="25" r="36" fill="rgba(250, 204, 21, 0.35)"/>
+            <line x1="35" y1="-18" x2="35" y2="-8" stroke="#eab308" stroke-width="3" stroke-linecap="round"/>
+            <line x1="5" y1="-5" x2="13" y2="3" stroke="#eab308" stroke-width="3" stroke-linecap="round"/>
+            <line x1="65" y1="-5" x2="57" y2="3" stroke="#eab308" stroke-width="3" stroke-linecap="round"/>
+            <line x1="-8" y1="22" x2="2" y2="22" stroke="#eab308" stroke-width="3" stroke-linecap="round"/>
+            <line x1="78" y1="22" x2="68" y2="22" stroke="#eab308" stroke-width="3" stroke-linecap="round"/>
+          ` : ''}
+          <rect x="10" y="34" width="50" height="14" rx="3" fill="#64748b"/>
+          <circle cx="35" cy="20" r="18" fill="${lampShines ? '#fef08a' : '#e2e8f0'}" stroke="${lampShines ? '#ca8a04' : '#475569'}" stroke-width="3"/>
+          <path d="M 28 32 L 31 18 L 39 18 L 42 32" stroke="${lampShines ? '#d97706' : '#64748b'}" stroke-width="2" fill="none"/>
+          <text x="35" y="64" text-anchor="middle" fill="#1e293b" font-size="12" font-weight="800">LAMPE</text>
+        </g>`;
+
+      svg.innerHTML = s;
+    }
+
+    function verifierQuizBoucle() {
+      const q1 = document.getElementById('q-boucle1');
+      const q2 = document.getElementById('q-boucle2');
+      const q3 = document.getElementById('q-boucle3');
+      let score = 0;
+      if (q1.value === 'AD') { q1.className = 'correct'; score++; } else { q1.className = 'wrong'; }
+      if (q2.value === 'B') { q2.className = 'correct'; score++; } else { q2.className = 'wrong'; }
+      if (q3.value === 'cond_ok') { q3.className = 'correct'; score++; } else { q3.className = 'wrong'; }
+
+      const fb = document.getElementById('feedback-quiz-boucle');
+      fb.style.display = 'flex';
+      if (score === 3) {
+        fb.className = 'feedback-banner success';
+        fb.innerHTML = '<i class="fa-solid fa-check-double"></i> Parfait (3/3) ! Tu as compris les deux conditions indispensables pour faire fonctionner un circuit.';
+      } else {
+        fb.className = 'feedback-banner error';
+        fb.innerHTML = `<i class="fa-solid fa-xmark"></i> ${score} / 3. Regarde bien les schémas A, B, C, D et corrige les cases rouges.`;
+      }
+    }
+
+    // ==========================================
+    // MODULE 3 : SYMBOLES & CONSTRUCTEUR DE SCHÉMA
+    // ==========================================
+    function verifierSymboles() {
+      let correct = 0;
+      const total = 6;
+      const fb = document.getElementById('feedback-symboles');
+      document.querySelectorAll('.drop-sym').forEach(box => {
+        const accept = box.dataset.accept;
+        box.querySelectorAll('.drag-sym').forEach(it => {
+          if (it.dataset.type === accept) {
+            it.style.borderColor = '#16a34a';
+            it.style.backgroundColor = '#f0fdf4';
+            correct++;
+          } else {
+            it.style.borderColor = '#dc2626';
+            it.style.backgroundColor = '#fef2f2';
+          }
+        });
+      });
+      fb.style.display = 'flex';
+      if (correct === total) {
+        fb.className = 'feedback-banner success';
+        fb.innerHTML = '<i class="fa-solid fa-star"></i> 6 / 6 ! Tu connais tous les symboles normalisés par cœur.';
+      } else {
+        fb.className = 'feedback-banner error';
+        fb.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${correct} / ${total} corrects. Corrige les symboles encadrés en rouge.`;
+      }
+    }
+
+    function resetSymboles() {
+      const pool = document.getElementById('pool-symboles');
+      document.querySelectorAll('.drag-sym').forEach(card => {
+        card.style.borderColor = '#cbd5e1';
+        card.style.backgroundColor = 'white';
+        card.classList.remove('selected');
+        pool.appendChild(card);
+      });
+      document.getElementById('feedback-symboles').style.display = 'none';
+    }
+
+    // --- CONSTRUCTEUR DE SCHÉMA ---
+    const symbolSVGs = {
+      pile: `<svg width="74" height="44" viewBox="0 0 74 44"><line x1="2" y1="22" x2="30" y2="22" stroke="#0f172a" stroke-width="2.5"/><line x1="30" y1="7" x2="30" y2="37" stroke="#0f172a" stroke-width="2.5"/><line x1="43" y1="14" x2="43" y2="30" stroke="#0f172a" stroke-width="5"/><line x1="43" y1="22" x2="72" y2="22" stroke="#0f172a" stroke-width="2.5"/><text x="17" y="15" font-size="11" font-weight="bold" fill="#dc2626">+</text><text x="49" y="15" font-size="12" font-weight="bold" fill="#2563eb">-</text></svg>`,
+      lampe: `<svg width="74" height="44" viewBox="0 0 74 44"><line x1="2" y1="22" x2="23" y2="22" stroke="#0f172a" stroke-width="2.5"/><circle cx="37" cy="22" r="14" fill="white" stroke="#0f172a" stroke-width="2.5"/><line x1="27" y1="12" x2="47" y2="32" stroke="#0f172a" stroke-width="2.5"/><line x1="47" y1="12" x2="27" y2="32" stroke="#0f172a" stroke-width="2.5"/><line x1="51" y1="22" x2="72" y2="22" stroke="#0f172a" stroke-width="2.5"/></svg>`,
+      moteur: `<svg width="74" height="44" viewBox="0 0 74 44"><line x1="2" y1="22" x2="23" y2="22" stroke="#0f172a" stroke-width="2.5"/><circle cx="37" cy="22" r="14" fill="white" stroke="#0f172a" stroke-width="2.5"/><text x="37" y="27" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">M</text><line x1="51" y1="22" x2="72" y2="22" stroke="#0f172a" stroke-width="2.5"/></svg>`,
+      inter_ouvert: `<svg width="74" height="44" viewBox="0 0 74 44"><line x1="2" y1="26" x2="24" y2="26" stroke="#0f172a" stroke-width="2.5"/><circle cx="24" cy="26" r="3" fill="#0f172a"/><line x1="24" y1="26" x2="47" y2="10" stroke="#0f172a" stroke-width="2.5"/><circle cx="49" cy="26" r="3" fill="#0f172a"/><line x1="49" y1="26" x2="72" y2="26" stroke="#0f172a" stroke-width="2.5"/></svg>`,
+      inter_ferme: `<svg width="74" height="44" viewBox="0 0 74 44"><line x1="2" y1="22" x2="24" y2="22" stroke="#0f172a" stroke-width="2.5"/><circle cx="24" cy="22" r="3" fill="#0f172a"/><line x1="24" y1="22" x2="49" y2="22" stroke="#0f172a" stroke-width="2.5"/><circle cx="49" cy="22" r="3" fill="#0f172a"/><line x1="49" y1="22" x2="72" y2="22" stroke="#0f172a" stroke-width="2.5"/></svg>`,
+      fil: `<svg width="74" height="44" viewBox="0 0 74 44"><line x1="0" y1="22" x2="74" y2="22" stroke="#0f172a" stroke-width="3.5"/></svg>`
+    };
+
+    const schemaMissions = [
+      {
+        desc: "Mission 1 (Activité 1 - Circuit 3) : Schématise le circuit comportant la pile en haut, l'interrupteur fermé à droite, la lampe en bas et un simple fil à gauche.",
+        expected: { top: 'pile', right: 'inter_ferme', bottom: 'lampe', left: 'fil' },
+        modelSvg: `
+          <svg viewBox="0 0 260 170" width="100%" height="150">
+            <path d="M 95 35 L 35 35 L 35 135 L 95 135" stroke="#dc2626" stroke-width="3.5" fill="none"/>
+            <path d="M 165 35 L 220 35 L 220 75" stroke="#dc2626" stroke-width="3.5" fill="none"/>
+            <path d="M 220 105 L 220 135 L 165 135" stroke="#dc2626" stroke-width="3.5" fill="none"/>
+            <!-- Pile en haut -->
+            <rect x="95" y="15" width="70" height="42" rx="4" fill="#1e293b"/>
+            <rect x="95" y="15" width="70" height="12" fill="#eab308"/>
+            <text x="130" y="44" text-anchor="middle" fill="white" font-size="11" font-weight="bold">PILE (Haut)</text>
+            <!-- Interrupteur fermé à droite -->
+            <circle cx="220" cy="75" r="4" fill="#1e293b"/>
+            <circle cx="220" cy="105" r="4" fill="#1e293b"/>
+            <line x1="220" y1="75" x2="220" y2="105" stroke="#16a34a" stroke-width="4.5"/>
+            <text x="172" y="94" fill="#16a34a" font-size="10" font-weight="bold">Inter. fermé</text>
+            <!-- Lampe en bas -->
+            <circle cx="130" cy="135" r="15" fill="#fef08a" stroke="#ca8a04" stroke-width="2.5"/>
+            <text x="130" y="164" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="bold">Lampe (Bas)</text>
+          </svg>`
+      },
+      {
+        desc: "Mission 2 (Sujet du Contrôle) : Observe le montage du contrôle et place les 4 dipôles sur les côtés correspondants du rectangle !",
+        expected: { top: 'pile', right: 'moteur', bottom: 'lampe', left: 'inter_ouvert' },
+        modelSvg: `
+          <svg viewBox="0 0 260 175" width="100%" height="155">
+            <path d="M 95 35 L 40 35 L 40 75" stroke="#64748b" stroke-width="3.5" fill="none"/>
+            <path d="M 40 105 L 40 135 L 95 135" stroke="#64748b" stroke-width="3.5" fill="none"/>
+            <path d="M 165 35 L 220 35 L 220 70" stroke="#64748b" stroke-width="3.5" fill="none"/>
+            <path d="M 220 110 L 220 135 L 165 135" stroke="#64748b" stroke-width="3.5" fill="none"/>
+            <!-- Pile en haut -->
+            <rect x="95" y="12" width="70" height="44" rx="4" fill="#334155"/>
+            <rect x="95" y="12" width="70" height="12" fill="#cbd5e1"/>
+            <text x="130" y="42" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Pile (Haut)</text>
+            <!-- Moteur à droite -->
+            <rect x="202" y="70" width="36" height="40" rx="4" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+            <ellipse cx="220" cy="90" rx="22" ry="5" fill="#64748b" transform="rotate(-30 220 90)"/>
+            <text x="172" y="93" fill="#1e293b" font-size="10" font-weight="bold">Moteur</text>
+            <!-- Interrupteur ouvert à gauche -->
+            <circle cx="40" cy="75" r="4" fill="#1e293b"/>
+            <circle cx="40" cy="105" r="4" fill="#1e293b"/>
+            <line x1="40" y1="75" x2="62" y2="95" stroke="#dc2626" stroke-width="4"/>
+            <text x="85" y="93" fill="#dc2626" font-size="10" font-weight="bold">Inter. ouvert</text>
+            <!-- Lampe en bas -->
+            <circle cx="130" cy="135" r="14" fill="#e2e8f0" stroke="#475569" stroke-width="2.5"/>
+            <text x="130" y="164" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="bold">Lampe (Bas)</text>
+          </svg>`
+      }
+    ];
+
+    let currentSchemaMission = 0;
+    let selectedPaletteSym = null;
+
+    function initSchemaPalette() {
+      const items = [
+        { key: 'pile', label: 'Pile' },
+        { key: 'lampe', label: 'Lampe' },
+        { key: 'moteur', label: 'Moteur' },
+        { key: 'inter_ouvert', label: 'Inter. ouvert' },
+        { key: 'inter_ferme', label: 'Inter. fermé' },
+        { key: 'fil', label: 'Simple fil' }
+      ];
+      const pal = document.getElementById('schema-palette');
+      pal.innerHTML = '';
+      items.forEach(item => {
+        const btn = document.createElement('div');
+        btn.className = 'word-chip sym-chip';
+        btn.dataset.sym = item.key;
+        btn.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; gap:2px;">${symbolSVGs[item.key]}<span style="font-size:11px;">${item.label}</span></div>`;
+        btn.onclick = () => {
+          document.querySelectorAll('.sym-chip').forEach(c => c.classList.remove('selected'));
+          selectedPaletteSym = item.key;
+          btn.classList.add('selected');
+        };
+        pal.appendChild(btn);
+      });
+    }
+
+    function loadSchemaMission(index) {
+      currentSchemaMission = index;
+      document.getElementById('btn-sch-1').classList.toggle('active', index === 0);
+      document.getElementById('btn-sch-2').classList.toggle('active', index === 1);
+      document.getElementById('schema-mission-desc').innerText = schemaMissions[index].desc;
+      document.getElementById('schema-model-svg').innerHTML = schemaMissions[index].modelSvg;
+      resetSchemaSlots();
+    }
+
+    function placeOnSchema(side) {
+      if (!selectedPaletteSym) return;
+      const slot = document.getElementById('sch-' + side);
+      slot.innerHTML = symbolSVGs[selectedPaletteSym];
+      slot.dataset.placed = selectedPaletteSym;
+      slot.classList.add('filled');
+      slot.style.borderColor = '#2563eb';
+    }
+
+    function resetSchemaSlots() {
+      const labels = { top: '[Côté Haut]', right: '[Côté Droit]', bottom: '[Côté Bas]', left: '[Côté Gauche]' };
+      ['top', 'right', 'bottom', 'left'].forEach(side => {
+        const slot = document.getElementById('sch-' + side);
+        slot.innerHTML = labels[side];
+        slot.dataset.placed = '';
+        slot.classList.remove('filled');
+        slot.style.borderColor = '#3b82f6';
+        slot.style.backgroundColor = '#f8fafc';
+      });
+      document.getElementById('feedback-schema').style.display = 'none';
+    }
+
+    function verifierSchema() {
+      const exp = schemaMissions[currentSchemaMission].expected;
+      let score = 0;
+      ['top', 'right', 'bottom', 'left'].forEach(side => {
+        const slot = document.getElementById('sch-' + side);
+        if (slot.dataset.placed === exp[side]) {
+          slot.style.borderColor = '#16a34a';
+          slot.style.backgroundColor = '#f0fdf4';
+          score++;
+        } else {
+          slot.style.borderColor = '#dc2626';
+          slot.style.backgroundColor = '#fef2f2';
+        }
+      });
+
+      const fb = document.getElementById('feedback-schema');
+      fb.style.display = 'flex';
+      if (score === 4) {
+        fb.className = 'feedback-banner success';
+        fb.innerHTML = '<i class="fa-solid fa-check-circle"></i> Bravo ! Ton schéma électrique respecte toutes les règles normalisées.';
+      } else {
+        fb.className = 'feedback-banner error';
+        fb.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${score} / 4 côtés corrects. Regarde bien l'ordre des composants sur le modèle à gauche !`;
+      }
+    }
+
+    // ==========================================
+    // MODULE 4 : CHAÎNES D'ÉNERGIE
+    // ==========================================
+    const chainData = [
+      {
+        title: "1. Chaîne d'énergie de la Lampe (Conclusion Activité 1)",
+        envLabel: "Milieu extérieur",
+        words: ["Pile (Générateur)", "Lampe", "Énergie électrique", "Énergie lumineuse", "Énergie thermique", "Milieu extérieur"],
+        answers: {
+          'slot-source': 'Pile (Générateur)',
+          'slot-recue': 'Énergie électrique',
+          'slot-convertisseur': 'Lampe',
+          'slot-utile': 'Énergie lumineuse',
+          'slot-dest': 'Milieu extérieur',
+          'slot-perdue': 'Énergie thermique'
+        }
+      },
+      {
+        title: "2. Chaîne de la Photopile éclairée qui alimente un Moteur (Doc. 1)",
+        envLabel: "Milieu extérieur",
+        words: ["Lampe", "Photopile (Générateur)", "Énergie lumineuse", "Énergie électrique", "Énergie thermique", "Moteur (Récepteur)"],
+        answers: {
+          'slot-source': 'Lampe',
+          'slot-recue': 'Énergie lumineuse',
+          'slot-convertisseur': 'Photopile (Générateur)',
+          'slot-utile': 'Énergie électrique',
+          'slot-dest': 'Moteur (Récepteur)',
+          'slot-perdue': 'Énergie thermique'
+        }
+      }
+    ];
+
+    let currentChainIndex = 0;
+    let selectedW = null;
+
+    function selectChainIndex(idx) {
+      currentChainIndex = idx;
+      document.getElementById('btn-ch-0').classList.toggle('active', idx === 0);
+      document.getElementById('btn-ch-1').classList.toggle('active', idx === 1);
+      initChain();
+    }
+
+    function initChain() {
+      const data = chainData[currentChainIndex];
+      document.getElementById('chain-title').innerText = data.title;
+      document.getElementById('slot-env').innerText = data.envLabel;
+
+      const slots = ['slot-source', 'slot-recue', 'slot-convertisseur', 'slot-utile', 'slot-dest', 'slot-perdue'];
+      const defaults = ['[Source / Départ]', '(Énergie reçue)', '(Convertisseur)', '(Énergie utile)', '[Arrivée]', '(Énergie dissipée)'];
+      slots.forEach((id, i) => {
+        const el = document.getElementById(id);
+        el.innerText = defaults[i];
+        el.classList.remove('filled');
+        el.style.borderColor = '';
+        el.style.backgroundColor = '';
+        el.dataset.val = '';
+      });
+
+      const container = document.getElementById('chain-words-container');
+      container.innerHTML = '';
+      let shuffled = [...data.words].sort(() => Math.random() - 0.5);
+      shuffled.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'word-chip chain-chip';
+        div.innerText = w;
+        div.onclick = () => {
+          if (div.classList.contains('used')) return;
+          document.querySelectorAll('.chain-chip').forEach(c => c.classList.remove('selected'));
+          selectedW = div;
+          div.classList.add('selected');
+        };
+        container.appendChild(div);
+      });
+
+      document.getElementById('feedback-chaine').style.display = 'none';
+      document.getElementById('btn-next-chaine').style.display = 'none';
+      selectedW = null;
+    }
+
+    function assignW(slot) {
+      if (!selectedW) return;
+      if (slot.dataset.val) {
+        document.querySelectorAll('.chain-chip').forEach(c => {
+          if (c.innerText === slot.dataset.val) c.classList.remove('used');
+        });
+      }
+      slot.innerText = selectedW.innerText;
+      slot.dataset.val = selectedW.innerText;
+      slot.classList.add('filled');
+      slot.style.borderColor = '#2563eb';
+      selectedW.classList.remove('selected');
+      selectedW.classList.add('used');
+      selectedW = null;
+    }
+
+    function verifierChaine() {
+      const data = chainData[currentChainIndex];
+      let correct = 0;
+      for (let key in data.answers) {
+        const el = document.getElementById(key);
+        if (el.dataset.val === data.answers[key]) {
+          el.style.borderColor = '#16a34a';
+          el.style.backgroundColor = '#f0fdf4';
+          correct++;
+        } else {
+          el.style.borderColor = '#dc2626';
+          el.style.backgroundColor = '#fef2f2';
+        }
+      }
+      const fb = document.getElementById('feedback-chaine');
+      fb.style.display = 'flex';
+      if (correct === 6) {
+        fb.className = 'feedback-banner success';
+        fb.innerHTML = '<i class="fa-solid fa-check"></i> Chaîne d\'énergie parfaite !';
+        if (currentChainIndex < chainData.length - 1) {
+          document.getElementById('btn-next-chaine').style.display = 'inline-flex';
+        } else {
+          fb.innerHTML += ' <strong>Tu as terminé toutes les révisions du Chapitre 2 !</strong>';
+        }
+      } else {
+        fb.className = 'feedback-banner error';
+        fb.innerHTML = `<i class="fa-solid fa-xmark"></i> Il y a ${6 - correct} erreur(s). Touche un nouveau mot en bas puis la case rouge à corriger.`;
+      }
+    }
+
+    function nextChaine() {
+      selectChainIndex(1);
+    }
+
+    // INITIALISATION AU CHARGEMENT
+    window.onload = function() {
+      loadCircuitList(1);
+      initSchemaPalette();
+      loadSchemaMission(0);
+      initChain();
+    };
+  </script>
+</body>
+</html>
