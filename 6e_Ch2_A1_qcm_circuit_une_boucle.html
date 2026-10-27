@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>QCM - Circuit électrique à une boucle (6e)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    h1, h2, h3 {
+      color: #003366;
+    }
+    fieldset {
+      border: 1px solid #ccc;
+      padding: 10px 15px;
+      margin-bottom: 15px;
+    }
+    legend {
+      font-weight: bold;
+    }
+    .button-container {
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #results {
+      margin-top: 20px;
+      padding: 10px 15px;
+      border-radius: 4px;
+    }
+    #results.good {
+      border: 2px solid #2e7d32;
+      background-color: #e8f5e9;
+    }
+    #results.medium {
+      border: 2px solid #ffb300;
+      background-color: #fff8e1;
+    }
+    #results.bad {
+      border: 2px solid #c62828;
+      background-color: #ffebee;
+    }
+    .question-feedback {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      background-color: #fafafa;
+    }
+    .question-feedback.correct {
+      border-color: #2e7d32;
+      background-color: #e8f5e9;
+    }
+    .question-feedback.incorrect {
+      border-color: #c62828;
+      background-color: #ffebee;
+    }
+    .question-feedback strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .hidden {
+      display: none;
+    }
+    #advice {
+      margin-top: 20px;
+      padding: 10px 15px;
+      border-radius: 4px;
+      border: 1px dashed #999;
+      background-color: #f5f5f5;
+    }
+    #revision-links {
+      margin-top: 10px;
+      padding: 10px 15px;
+      border-radius: 4px;
+      border: 1px solid #1976d2;
+      background-color: #e3f2fd;
+    }
+    ul {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>QCM d'entraînement – Circuit électrique à une boucle (6e)</h1>
+<p>
+  Réponds aux questions ci-dessous. Le programme choisit au hasard <strong>10 questions</strong> parmi 20 à chaque tentative.
+  À la fin, tu verras ton score, la correction détaillée et des conseils pour progresser.
+</p>
+
+<form id="quiz-form">
+  <div id="questions-container">
+    <!-- Les questions seront générées ici par JavaScript -->
+  </div>
+
+  <div class="button-container">
+    <button type="submit">Valider mes réponses</button>
+  </div>
+</form>
+
+<div id="results" class="hidden"></div>
+<div id="feedback"></div>
+<div id="advice" class="hidden"></div>
+<div id="revision-links" class="hidden">
+  <h3>Pour aller plus loin</h3>
+  <p>Si ton score est inférieur à 70 %, utilise ces ressources (liens à adapter par ton professeur) :</p>
+  <ul>
+    <li><a href="fiche_revision_circuit_une_boucle.pdf" target="_blank">
+      Fiche de révision : le circuit électrique à une boucle
+    </a></li>
+    <li><a href="exercices_sup_circuit_une_boucle.html" target="_blank">
+      Exercices supplémentaires sur les circuits électriques
+    </a></li>
+  </ul>
+</div>
+
+<div class="button-container hidden" id="retry-container">
+  <button type="button" onclick="window.location.reload()">Recommencer le QCM</button>
+</div>
+
+<script>
+  // --- Banque de 20 questions ---
+  // type: "single" (choix unique) ou "multiple" (plusieurs bonnes réponses)
+  const allQuestions = [
+    {
+      id: 1,
+      text: "Quel est le rôle d'un générateur dans un circuit électrique ?",
+      type: "single",
+      skillTags: ["role_generateur_recepteur"],
+      choices: [
+        { text: "Donner de l'énergie électrique aux récepteurs.", correct: true },
+        { text: "Couper ou fermer le circuit.", correct: false },
+        { text: "Convertir l'énergie électrique en lumière ou en mouvement.", correct: false }
+      ],
+      explanation: "Le générateur (pile, batterie...) fournit l'énergie électrique aux récepteurs du circuit (lampe, moteur...)."
+    },
+    {
+      id: 2,
+      text: "Un dipôle est...",
+      type: "single",
+      skillTags: ["vocabulaire_dipole"],
+      choices: [
+        { text: "un composant qui a deux bornes de branchement.", correct: true },
+        { text: "un fil de connexion.", correct: false },
+        { text: "un schéma électrique.", correct: false }
+      ],
+      explanation: "Un dipôle est défini comme un composant qui possède deux bornes de branchement."
+    },
+    {
+      id: 3,
+      text: "Un interrupteur fermé laisse passer le courant électrique.",
+      type: "single",
+      skillTags: ["conditions_fonctionnement"],
+      choices: [
+        { text: "Vrai", correct: true },
+        { text: "Faux", correct: false }
+      ],
+      explanation: "Un interrupteur fermé (position I) laisse passer le courant ; un interrupteur ouvert (position O) coupe le courant."
+    },
+    {
+      id: 4,
+      text: "Pour que la lampe brille, quelles conditions doivent être réunies ?",
+      type: "multiple",
+      skillTags: ["conditions_fonctionnement"],
+      choices: [
+        { text: "Il faut un générateur.", correct: true },
+        { text: "Le circuit doit être fermé.", correct: true },
+        { text: "L'interrupteur doit être ouvert.", correct: false },
+        { text: "Il ne doit y avoir aucun composant dans le circuit.", correct: false }
+      ],
+      explanation: "La lampe brille seulement s'il y a un générateur et si la boucle du circuit est fermée."
+    },
+    {
+      id: 5,
+      text: "Pour que le générateur transfère de l'énergie électrique, la boucle formée par le circuit doit être...",
+      type: "single",
+      skillTags: ["conditions_fonctionnement"],
+      choices: [
+        { text: "ouverte.", correct: false },
+        { text: "fermée.", correct: true }
+      ],
+      explanation: "Dans le cours, on voit que la boucle doit être fermée pour que le générateur puisse transférer de l'énergie électrique."
+    },
+    {
+      id: 6,
+      text: "Dans un schéma électrique, la pile est représentée par...",
+      type: "single",
+      skillTags: ["symboles"],
+      choices: [
+        { text: "deux traits parallèles, l'un long et l'autre court.", correct: true },
+        { text: "un cercle avec la lettre G.", correct: false },
+        { text: "un cercle avec une croix à l'intérieur.", correct: false }
+      ],
+      explanation: "La pile est symbolisée par deux segments parallèles de longueurs différentes (un long, un court)."
+    },
+    {
+      id: 7,
+      text: "Dans un schéma électrique, la lampe est représentée par...",
+      type: "single",
+      skillTags: ["symboles"],
+      choices: [
+        { text: "un cercle avec une croix à l'intérieur.", correct: true },
+        { text: "un cercle avec la lettre M.", correct: false },
+        { text: "un cercle avec la lettre G.", correct: false }
+      ],
+      explanation: "La lampe est représentée par un cercle avec une croix à l'intérieur."
+    },
+    {
+      id: 8,
+      text: "Dans un schéma électrique, l'interrupteur est représenté par...",
+      type: "single",
+      skillTags: ["symboles"],
+      choices: [
+        { text: "un dispositif en forme de levier qui s'ouvre ou se ferme sur la ligne.", correct: true },
+        { text: "un simple trait droit.", correct: false },
+        { text: "un rectangle avec les signes + et -.", correct: false }
+      ],
+      explanation: "L'interrupteur est un symbole qui montre une coupure (ou non) dans le fil, comme un petit levier."
+    },
+    {
+      id: 9,
+      text: "Quels sont des dipôles parmi les composants suivants ?",
+      type: "multiple",
+      skillTags: ["vocabulaire_dipole"],
+      choices: [
+        { text: "Lampe", correct: true },
+        { text: "Générateur (pile)", correct: true },
+        { text: "Fil de connexion", correct: false },
+        { text: "Moteur", correct: true }
+      ],
+      explanation: "La lampe, le générateur et le moteur ont deux bornes : ce sont des dipôles. Le fil de connexion n'est pas un dipôle."
+    },
+    {
+      id: 10,
+      text: "Quelles règles sont correctes pour tracer un schéma de circuit à une boucle ?",
+      type: "multiple",
+      skillTags: ["schema_regles"],
+      choices: [
+        { text: "Le schéma doit avoir l'allure générale d'un rectangle.", correct: true },
+        { text: "On place les symboles au milieu des côtés du rectangle.", correct: true },
+        { text: "On place les symboles sur les coins du rectangle.", correct: false },
+        { text: "On dessine à main levée sans règle.", correct: false }
+      ],
+      explanation: "Le cours précise : forme générale en rectangle, traits à la règle et symboles au milieu des côtés, jamais sur les coins."
+    },
+    {
+      id: 11,
+      text: "Un élève réalise un schéma propre, au crayon à papier, en forme de rectangle, avec les symboles au milieu des côtés et dans l'ordre par rapport à la pile. Ce schéma est-il réussi ?",
+      type: "single",
+      skillTags: ["schema_regles"],
+      choices: [
+        { text: "Oui, il respecte les règles de schématisation.", correct: true },
+        { text: "Non, les symboles devraient être sur les coins.", correct: false }
+      ],
+      explanation: "Il respecte toutes les règles : rectangle, symboles au milieu des côtés, traits à la règle et ordre par rapport à la pile."
+    },
+    {
+      id: 12,
+      text: "Dans un schéma, un élève place la lampe exactement sur un coin du rectangle. Ce schéma est-il correct ?",
+      type: "single",
+      skillTags: ["schema_regles"],
+      choices: [
+        { text: "Oui, on peut placer les symboles sur les coins.", correct: false },
+        { text: "Non, les symboles doivent être au milieu des côtés.", correct: true }
+      ],
+      explanation: "Les symboles ne doivent jamais être placés sur les coins du rectangle, mais au milieu des côtés."
+    },
+    {
+      id: 13,
+      text: "On peut représenter un circuit à une boucle par n'importe quelle forme (triangle, zigzag...), du moment qu'on reconnaît les symboles.",
+      type: "single",
+      skillTags: ["schema_regles"],
+      choices: [
+        { text: "Vrai", correct: false },
+        { text: "Faux", correct: true }
+      ],
+      explanation: "Le schéma d'un circuit à une boucle doit avoir l'allure générale d'un rectangle."
+    },
+    {
+      id: 14,
+      text: "Quand l'interrupteur est ouvert, que se passe-t-il dans le circuit ?",
+      type: "single",
+      skillTags: ["conditions_fonctionnement"],
+      choices: [
+        { text: "Le courant ne passe pas et la lampe est éteinte.", correct: true },
+        { text: "Le courant passe et la lampe brille.", correct: false },
+        { text: "Le générateur ne fonctionne plus du tout.", correct: false }
+      ],
+      explanation: "Interrupteur ouvert = circuit ouvert : le courant ne circule pas, la lampe est éteinte."
+    },
+    {
+      id: 15,
+      text: "Que signifie l'expression « circuit électrique à une boucle » ?",
+      type: "single",
+      skillTags: ["circuit_definition"],
+      choices: [
+        { text: "Les dipôles sont reliés les uns à la suite des autres et forment une seule boucle fermée.", correct: true },
+        { text: "Le circuit contient au moins deux générateurs.", correct: false },
+        { text: "Le circuit contient plusieurs boucles différentes.", correct: false }
+      ],
+      explanation: "Dans un circuit à une boucle, tous les dipôles sont reliés en série et forment une seule boucle."
+    },
+    {
+      id: 16,
+      text: "La pile plate est...",
+      type: "single",
+      skillTags: ["role_generateur_recepteur"],
+      choices: [
+        { text: "un générateur.", correct: true },
+        { text: "un récepteur.", correct: false },
+        { text: "un fil de connexion.", correct: false }
+      ],
+      explanation: "La pile est un générateur : elle fournit de l'énergie électrique au circuit."
+    },
+    {
+      id: 17,
+      text: "La lampe est...",
+      type: "single",
+      skillTags: ["role_generateur_recepteur"],
+      choices: [
+        { text: "un générateur.", correct: false },
+        { text: "un récepteur.", correct: true },
+        { text: "un fil de connexion.", correct: false }
+      ],
+      explanation: "La lampe est un récepteur : elle reçoit de l'énergie électrique et la convertit en énergie lumineuse (et thermique)."
+    },
+    {
+      id: 18,
+      text: "Le fil de connexion sert principalement à...",
+      type: "single",
+      skillTags: ["conditions_fonctionnement"],
+      choices: [
+        { text: "relier les dipôles et permettre le passage du courant.", correct: true },
+        { text: "convertir l'énergie électrique en lumière.", correct: false },
+        { text: "donner de l'énergie électrique.", correct: false }
+      ],
+      explanation: "Le fil de connexion relie les dipôles entre eux et permet au courant de circuler dans la boucle."
+    },
+    {
+      id: 19,
+      text: "On ouvre la boucle du circuit en débranchant un fil. Que constate-t-on ?",
+      type: "single",
+      skillTags: ["conditions_fonctionnement"],
+      choices: [
+        { text: "La lampe s'éteint car le circuit est ouvert.", correct: true },
+        { text: "La lampe brille plus fort.", correct: false },
+        { text: "Rien ne change.", correct: false }
+      ],
+      explanation: "En débranchant un fil, on ouvre la boucle : le courant ne circule plus et la lampe s'éteint."
+    },
+    {
+      id: 20,
+      text: "Un circuit électrique est...",
+      type: "single",
+      skillTags: ["circuit_definition"],
+      choices: [
+        { text: "une chaîne de composants électriques, comportant au moins un générateur, reliés par des fils de connexion.", correct: true },
+        { text: "un seul composant électrique isolé.", correct: false },
+        { text: "le symbole d'une pile.", correct: false }
+      ],
+      explanation: "Un circuit électrique est une chaîne de composants reliés par des fils, comprenant au moins un générateur."
+    }
+  ];
+
+  const skillMessages = {
+    symboles: "Revois les symboles des principaux dipôles : pile, générateur, lampe, interrupteur, moteur. Entraîne-toi à les reconnaître et à les nommer.",
+    conditions_fonctionnement: "Revois les conditions pour qu'un circuit fonctionne : présence d'un générateur, boucle fermée, interrupteur fermé et fils correctement branchés.",
+    schema_regles: "Revois les règles de schématisation : forme en rectangle, symboles au milieu des côtés, traits tracés à la règle, ordre des composants par rapport à la pile.",
+    vocabulaire_dipole: "Revois le vocabulaire : dipôle, générateur, récepteur, fil de connexion, interrupteur.",
+    role_generateur_recepteur: "Revois le rôle du générateur (il fournit l'énergie électrique) et celui des récepteurs (ils convertissent l'énergie électrique).",
+    circuit_definition: "Revois la définition d'un circuit électrique et d'un circuit à une boucle."
+  };
+
+  const NUM_QUESTIONS = 10;
+  let selectedQuestions = [];
+
+  function shuffleArray(array) {
+    const arr = array.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function renderQuestions() {
+    const container = document.getElementById("questions-container");
+    container.innerHTML = "";
+
+    const shuffled = shuffleArray(allQuestions);
+    selectedQuestions = shuffled.slice(0, NUM_QUESTIONS);
+
+    selectedQuestions.forEach((q, index) => {
+      const fieldset = document.createElement("fieldset");
+      const legend = document.createElement("legend");
+      legend.textContent = "Question " + (index + 1);
+      fieldset.appendChild(legend);
+
+      const p = document.createElement("p");
+      p.textContent = q.text;
+      fieldset.appendChild(p);
+
+      q.choices.forEach((choice, cIndex) => {
+        const label = document.createElement("label");
+        label.style.display = "block";
+        const input = document.createElement("input");
+        input.type = (q.type === "multiple") ? "checkbox" : "radio";
+        input.name = "q" + index;
+        input.value = cIndex.toString();
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(" " + choice.text));
+        fieldset.appendChild(label);
+      });
+
+      container.appendChild(fieldset);
+    });
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    let correctCount = 0;
+    const total = selectedQuestions.length;
+    const feedbackContainer = document.getElementById("feedback");
+    feedbackContainer.innerHTML = "";
+    const wrongSkills = new Set();
+
+    selectedQuestions.forEach((q, index) => {
+      const name = "q" + index;
+      const inputs = Array.from(document.querySelectorAll('input[name="' + name + '"]'));
+      let selectedValues = inputs.filter(inp => inp.checked).map(inp => parseInt(inp.value, 10));
+
+      // Si aucune réponse sélectionnée, on considère comme faux
+      if (selectedValues.length === 0) {
+        selectedValues = [];
+      }
+
+      const correctIndices = q.choices
+        .map((choice, idx) => choice.correct ? idx : null)
+        .filter(idx => idx !== null);
+
+      let isCorrect = false;
+      if (q.type === "single") {
+        isCorrect = (selectedValues.length === 1 && correctIndices.length === 1 && selectedValues[0] === correctIndices[0]);
+      } else if (q.type === "multiple") {
+        selectedValues.sort();
+        correctIndices.sort();
+        if (selectedValues.length === correctIndices.length) {
+          isCorrect = selectedValues.every((val, i) => val === correctIndices[i]);
+        }
+      }
+
+      if (isCorrect) {
+        correctCount++;
+      } else {
+        q.skillTags.forEach(tag => wrongSkills.add(tag));
+      }
+
+      // Feedback question par question
+      const fb = document.createElement("div");
+      fb.className = "question-feedback " + (isCorrect ? "correct" : "incorrect");
+      const title = document.createElement("strong");
+      title.textContent = "Question " + (index + 1) + " : " + (isCorrect ? "Correct" : "Incorrect");
+      fb.appendChild(title);
+
+      const explanation = document.createElement("p");
+      explanation.textContent = q.explanation;
+      fb.appendChild(explanation);
+
+      feedbackContainer.appendChild(fb);
+    });
+
+    const scorePercent = Math.round((correctCount / total) * 100);
+    const resultsDiv = document.getElementById("results");
+    resultsDiv.classList.remove("hidden", "good", "medium", "bad");
+
+    let resultsText = "Tu as obtenu " + correctCount + " bonne(s) réponse(s) sur " + total + " (" + scorePercent + " %).";
+
+    if (scorePercent >= 85) {
+      resultsDiv.classList.add("good");
+      resultsText += " Bravo, tu maîtrises très bien ce chapitre !";
+    } else if (scorePercent >= 70) {
+      resultsDiv.classList.add("medium");
+      resultsText += " C'est bien, mais tu peux encore consolider certaines notions.";
+    } else {
+      resultsDiv.classList.add("bad");
+      resultsText += " Ce n'est pas grave : ce QCM sert à t'entraîner. Tu peux progresser en revoyant le cours.";
+    }
+
+    resultsDiv.textContent = resultsText;
+
+    // Conseils personnalisés
+    const adviceDiv = document.getElementById("advice");
+    adviceDiv.innerHTML = "";
+    adviceDiv.classList.remove("hidden");
+
+    const adviceTitle = document.createElement("h3");
+    adviceTitle.textContent = "Conseils pour progresser";
+    adviceDiv.appendChild(adviceTitle);
+
+    const adviceIntro = document.createElement("p");
+    if (scorePercent >= 70) {
+      adviceIntro.textContent = "Tu as déjà un bon niveau. Voici quelques pistes pour être encore plus à l'aise :";
+    } else {
+      adviceIntro.textContent = "Tu peux t'améliorer en revoyant les parties suivantes du cours :";
+    }
+    adviceDiv.appendChild(adviceIntro);
+
+    const list = document.createElement("ul");
+
+    if (wrongSkills.size === 0) {
+      const li = document.createElement("li");
+      li.textContent = "Relis rapidement ton cours et refais le QCM pour vérifier que tu gardes ces bonnes habitudes.";
+      list.appendChild(li);
+    } else {
+      wrongSkills.forEach(skill => {
+        if (skillMessages[skill]) {
+          const li = document.createElement("li");
+          li.textContent = skillMessages[skill];
+          list.appendChild(li);
+        }
+      });
+    }
+
+    adviceDiv.appendChild(list);
+
+    // Liens de révision si score < 70 %
+    const revisionDiv = document.getElementById("revision-links");
+    if (scorePercent < 70) {
+      revisionDiv.classList.remove("hidden");
+    } else {
+      revisionDiv.classList.add("hidden");
+    }
+
+    // Bouton recommencer
+    const retryContainer = document.getElementById("retry-container");
+    retryContainer.classList.remove("hidden");
+  }
+
+  document.getElementById("quiz-form").addEventListener("submit", handleSubmit);
+
+  // Génération initiale des questions au chargement de la page
+  renderQuestions();
+</script>
+
+</body>
+</html>
