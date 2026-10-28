@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atelier de Construction de l'Atome - 3ème</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --proton: #ef4444;
+            --neutron: #64748b;
+            --electron: #3b82f6;
+            --success: #16a34a;
+            --warning: #d97706;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            text-align: center;
+            max-width: 900px;
+            margin-bottom: 15px;
+        }
+        h1 { margin: 0 0 5px 0; color: #0f172a; font-size: 1.6rem; }
+        .subtitle { margin: 0; color: #475569; font-size: 0.95rem; }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #cbd5e1;
+            color: #1e293b;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 20px;
+            max-width: 1050px;
+            width: 100%;
+        }
+        @media (max-width: 850px) {
+            .workspace { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            padding: 20px;
+        }
+
+        .canvas-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        canvas {
+            background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 550px;
+            height: auto;
+        }
+        .atom-identity {
+            position: absolute;
+            top: 30px;
+            left: 35px;
+            background: rgba(255,255,255,0.92);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: #0f172a;
+        }
+        .status-badge {
+            margin-top: 12px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 550px;
+        }
+        .status-neutral { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
+        .status-charged { background: #fef3c7; color: #b45309; border: 2px solid #fde68a; }
+
+        .control-group {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border-left: 5px solid #cbd5e1;
+        }
+        .control-group.proton { border-left-color: var(--proton); }
+        .control-group.neutron { border-left-color: var(--neutron); }
+        .control-group.electron { border-left-color: var(--electron); }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn-counter {
+            flex: 1;
+            padding: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.15s;
+        }
+        .btn-counter:hover { opacity: 0.9; }
+        .btn-p { background: var(--proton); }
+        .btn-n { background: var(--neutron); }
+        .btn-e { background: var(--electron); }
+
+        .bilan-box {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .bilan-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+        .bilan-total {
+            border-top: 2px solid #cbd5e1;
+            padding-top: 8px;
+            margin-top: 8px;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Onglet Échelle */
+        .scale-panel {
+            max-width: 850px;
+            width: 100%;
+            text-align: center;
+        }
+        .slider-box {
+            margin: 25px 0;
+        }
+        input[type="range"] {
+            width: 80%;
+            accent-color: var(--primary);
+        }
+        .stadium-visual {
+            background: #15803d;
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            position: relative;
+            margin-top: 20px;
+            border: 4px solid #dcfce7;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🔬 Atelier de Construction de l'Atome</h1>
+    <p class="subtitle">Manipulez les particules pour comprendre la structure et la neutralité électrique de l'atome</p>
+</header>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('builder')">1. Simulateur de particules</button>
+    <button class="tab-btn" onclick="switchTab('scale')">2. Défi de la tête d'épingle (Échelle)</button>
+</div>
+
+<!-- ONGLET 1 : CONSTRUCTEUR D'ATOME -->
+<div id="tab-builder" class="workspace">
+    <div class="card canvas-box">
+        <div class="atom-identity" id="element-name">Aucun atome (0 proton)</div>
+        <canvas id="atomCanvas" width="500" height="420"></canvas>
+        <div id="neutrality-banner" class="status-badge status-neutral">
+            Ajoutez des particules pour commencer l'expérience
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0;">Composer l'atome</h3>
+
+        <!-- Protons -->
+        <div class="control-group proton">
+            <div class="control-header">
+                <span>🔴 Protons (Noyau)</span>
+                <span id="p-count">0</span>
+            </div>
+            <div class="btn-row">
+                <button class="btn-counter btn-p" onclick="updateParticle('p', -1)">−</button>
+                <button class="btn-counter btn-p" onclick="updateParticle('p', 1)">+</button>
+            </div>
+        </div>
+
+        <!-- Neutrons -->
+        <div class="control-group neutron">
+            <div class="control-header">
+                <span>⚪ Neutrons (Noyau)</span>
+                <span id="n-count">0</span>
+            </div>
+            <div class="btn-row">
+                <button class="btn-counter btn-n" onclick="updateParticle('n', -1)">−</button>
+                <button class="btn-counter btn-n" onclick="updateParticle('n', 1)">+</button>
+            </div>
+        </div>
+
+        <!-- Électrons -->
+        <div class="control-group electron">
+            <div class="control-header">
+                <span>🔵 Électrons (Cortège)</span>
+                <span id="e-count">0</span>
+            </div>
+            <div class="btn-row">
+                <button class="btn-counter btn-e" onclick="updateParticle('e', -1)">−</button>
+                <button class="btn-counter btn-e" onclick="updateParticle('e', 1)">+</button>
+            </div>
+        </div>
+
+        <!-- Bilan électrique et nucléons -->
+        <div class="bilan-box">
+            <div class="bilan-line">
+                <span>Nombre total de <strong>nucléons</strong> :</span>
+                <strong id="nucleon-total">0</strong>
+            </div>
+            <div class="bilan-line">
+                <span>Charge du noyau :</span>
+                <strong id="nucleus-charge" style="color:var(--proton);">0</strong>
+            </div>
+            <div class="bilan-line">
+                <span>Charge du cortège électronique :</span>
+                <strong id="cloud-charge" style="color:var(--electron);">0</strong>
+            </div>
+            <div class="bilan-line bilan-total">
+                <span>Charge globale de l'atome :</span>
+                <span id="total-charge">0</span>
+            </div>
+        </div>
+
+        <button onclick="resetAtom()" style="width:100%; margin-top:12px; padding:10px; border:none; border-radius:6px; background:#e2e8f0; font-weight:bold; cursor:pointer;">
+            🔄 Réinitialiser à zéro
+        </button>
+    </div>
+</div>
+
+<!-- ONGLET 2 : ANALOGIE DE LA TÊTE D'ÉPINGLE -->
+<div id="tab-scale" class="card scale-panel hidden">
+    <h2>📏 Le défi de la feuille de papier (Question 6)</h2>
+    <p>Dans le modèle de gauche, le noyau a été énormément grossi pour être visible. En réalité, l'atome est <strong>100 000 fois plus grand</strong> que son noyau !</p>
+    
+    <div class="slider-box">
+        <label for="pinSize"><strong>Choisissez le diamètre du noyau sur votre dessin :</strong></label><br><br>
+        <input type="range" id="pinSize" min="1" max="10" value="2" oninput="updateScaleCalc()">
+        <p style="font-size:1.2rem; margin:10px 0;">
+            Diamètre du noyau choisi : <strong id="pin-val" style="color:var(--primary);">2 mm</strong> (Rayon r = <span id="pin-rad">1</span> mm)
+        </p>
+    </div>
+
+    <div class="stadium-visual">
+        <h3 style="margin-top:0;">Résultat à l'échelle × 100 000 :</h3>
+        <p style="font-size:1.3rem;">
+            Diamètre total de l'atome : <strong id="atom-diam-m">200 mètres</strong><br>
+            Rayon R du cercle à tracer : <strong id="atom-rad-m" style="color:#fde047; font-size:1.6rem;">100 mètres (100 000 mm)</strong>
+        </p>
+        <p id="scale-comparison" style="margin-bottom:0; font-style:italic;">
+            ⚽ Une feuille A4 ne mesure que 0,21 m de large ! Pour dessiner cet atome autour de votre tête d'épingle de 2 mm, il faudrait une feuille de la taille de <strong>deux terrains de football</strong>. Entre la tête d'épingle au centre et le bord du terrain : 99,999999 % de vide !
+        </p>
+    </div>
+</div>
+
+<script>
+    const elements = [
+        "Vide (Aucun proton)", "Hydrogène (H)", "Hélium (He)", "Lithium (Li)", 
+        "Béryllium (Be)", "Bore (B)", "Carbone (C)", "Azote (N)", 
+        "Oxygène (O)", "Fluor (F)", "Néon (Ne)"
+    ];
+
+    let state = { p: 0, n: 0, e: 0 };
+    let angle = 0;
+
+    const canvas = document.getElementById('atomCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function updateParticle(type, delta) {
+        state[type] = Math.max(0, Math.min(10, state[type] + delta));
+        updateUI();
+    }
+
+    function resetAtom() {
+        state = { p: 0, n: 0, e: 0 };
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('p-count').textContent = state.p;
+        document.getElementById('n-count').textContent = state.n;
+        document.getElementById('e-count').textContent = state.e;
+
+        const nucleons = state.p + state.n;
+        const netCharge = state.p - state.e;
+
+        document.getElementById('nucleon-total').textContent = nucleons;
+        document.getElementById('nucleus-charge').textContent = (state.p > 0 ? "+" : "") + state.p;
+        document.getElementById('cloud-charge').textContent = (state.e > 0 ? "−" : "") + state.e;
+        document.getElementById('total-charge').textContent = (netCharge > 0 ? "+" : "") + netCharge;
+
+        const elName = state.p === 0 ? "Aucun atome (0 proton)" : `Élément : ${elements[state.p]}`;
+        document.getElementById('element-name').textContent = elName;
+
+        const banner = document.getElementById('neutrality-banner');
+        if (state.p === 0 && state.e === 0 && state.n === 0) {
+            banner.className = "status-badge status-neutral";
+            banner.textContent = "Ajoutez des particules pour commencer l'expérience";
+        } else if (netCharge === 0 && state.p > 0) {
+            banner.className = "status-badge status-neutral";
+            banner.textContent = `✅ Atome électriquement NEUTRE (${state.p} charges + compensent ${state.e} charges −)`;
+        } else {
+            banner.className = "status-badge status-charged";
+            const sign = netCharge > 0 ? `+${netCharge}` : netCharge;
+            banner.textContent = `⚠️ État NON NEUTRE (Charge globale : ${sign}) — Ajustez les protons ou électrons`;
+        }
+    }
+
+    function drawAtom() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+
+        ctx.strokeStyle = "rgba(59, 130, 246, 0.25)";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.arc(cx, cy, 110, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, 165, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        for (let i = 0; i < state.e; i++) {
+            const radius = i < 2 ? 110 : 165;
+            const totalInShell = i < 2 ? Math.min(2, state.e) : state.e - 2;
+            const indexInShell = i < 2 ? i : i - 2;
+            const speed = i < 2 ? angle * 1.4 : -angle * 0.9;
+            const theta = speed + (indexInShell * 2 * Math.PI / totalInShell);
+
+            const ex = cx + radius * Math.cos(theta);
+            const ey = cy + radius * Math.sin(theta);
+
+            ctx.beginPath();
+            ctx.arc(ex, ey, 9, 0, Math.PI * 2);
+            ctx.fillStyle = "#3b82f6";
+            ctx.fill();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 12px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("−", ex, ey);
+        }
+
+        const nucleons = [];
+        for (let i = 0; i < state.p; i++) nucleons.push('p');
+        for (let i = 0; i < state.n; i++) nucleons.push('n');
+
+        nucleons.forEach((type, idx) => {
+            const r = idx === 0 ? 0 : (idx < 7 ? 16 : 30);
+            const a = idx * 2.4;
+            const nx = cx + r * Math.cos(a);
+            const ny = cy + r * Math.sin(a);
+
+            ctx.beginPath();
+            ctx.arc(nx, ny, 12, 0, Math.PI * 2);
+            ctx.fillStyle = type === 'p' ? "#ef4444" : "#64748b";
+            ctx.fill();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            if (type === 'p') {
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 13px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("+", nx, ny);
+            }
+        });
+
+        angle += 0.02;
+        requestAnimationFrame(drawAtom);
+    }
+
+    function switchTab(tab) {
+        document.getElementById('tab-builder').classList.toggle('hidden', tab !== 'builder');
+        document.getElementById('tab-scale').classList.toggle('hidden', tab !== 'scale');
+        const btns = document.querySelectorAll('.tab-btn');
+        btns[0].classList.toggle('active', tab === 'builder');
+        btns[1].classList.toggle('active', tab === 'scale');
+    }
+
+    function updateScaleCalc() {
+        const dMm = parseInt(document.getElementById('pinSize').value);
+        const rMm = dMm / 2;
+        const atomDiamM = (dMm * 100000) / 1000;
+        const atomRadM = atomDiamM / 2;
+        const atomRadMm = rMm * 100000;
+
+        document.getElementById('pin-val').textContent = dMm + " mm";
+        document.getElementById('pin-rad').textContent = rMm;
+        document.getElementById('atom-diam-m').textContent = atomDiamM + " mètres";
+        document.getElementById('atom-rad-m').textContent = `${atomRadM} mètres (${atomRadMm.toLocaleString('fr-FR')} mm)`;
+    }
+
+    updateUI();
+    drawAtom();
+</script>
+
+</body>
+</html>
