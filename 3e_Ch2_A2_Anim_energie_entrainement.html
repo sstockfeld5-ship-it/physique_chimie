@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Puissance & Énergie Électrique - 3e</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #f59e0b;
+      --accent-light: #fef3c7;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 40px; }
+    
+    header { background: linear-gradient(135deg, #0369a1, #0ea5e9); color: white; padding: 16px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    header h1 { margin: 0; font-size: 1.3rem; font-weight: 800; }
+    header p { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.95; }
+
+    .tabs { position: sticky; top: 0; z-index: 100; display: grid; grid-template-columns: repeat(3, 1fr); background: white; border-bottom: 2px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .tab-btn { border: none; background: none; padding: 12px 4px; font-size: 0.8rem; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f0f9ff; }
+    .tab-btn span.icon { font-size: 1.2rem; }
+
+    .container { max-width: 640px; margin: 0 auto; padding: 12px; }
+    .tab-content { display: none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+    .card-title { margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+
+    .concept-box { background: var(--primary-light); border-left: 4px solid var(--primary); padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; }
+    
+    /* Simulateur Multiprise & Compteur */
+    .breaker-selector { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; font-size: 0.85rem; font-weight: 700; }
+    .breaker-pill { flex: 1; padding: 8px; text-align: center; border-radius: 10px; border: 2px solid var(--border); background: #f8fafc; cursor: pointer; transition: 0.2s; }
+    .breaker-pill.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+
+    .preset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+    @media (min-width: 480px) { .preset-grid { grid-template-columns: repeat(4, 1fr); } }
+    .preset-btn { background: #f8fafc; border: 2px solid var(--border); border-radius: 12px; padding: 10px 6px; text-align: center; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s; position: relative; }
+    .preset-btn.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); box-shadow: 0 2px 6px rgba(2,132,199,0.15); }
+    .preset-btn .emoji { font-size: 1.7rem; display: block; margin-bottom: 4px; }
+    .preset-btn .amp-tag { display: inline-block; margin-top: 4px; font-size: 0.72rem; background: #e2e8f0; color: #334155; padding: 2px 6px; border-radius: 6px; }
+    .preset-btn.active .amp-tag { background: var(--primary); color: white; }
+
+    .gauge-box { background: #f1f5f9; border-radius: 12px; padding: 12px; margin-bottom: 16px; border: 1px solid var(--border); }
+    .gauge-header { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; }
+    .gauge-bar-bg { width: 100%; height: 14px; background: #cbd5e1; border-radius: 99px; overflow: hidden; }
+    .gauge-bar-fill { height: 100%; width: 0%; background: var(--success); transition: width 0.3s ease, background 0.3s ease; }
+    .breaker-alert { display: none; margin-top: 10px; background: var(--danger-light); color: #7f1d1d; border: 1px solid #fca5a5; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-align: center; animation: shake 0.4s ease; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+    .control-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; }
+    .badge-val { background: #e2e8f0; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; color: var(--primary-dark); }
+    input[type="range"] { width: 100%; height: 8px; border-radius: 5px; background: #cbd5e1; outline: none; -webkit-appearance: none; margin-bottom: 16px; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); cursor: pointer; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+    .meter-box { background: #1e293b; color: white; padding: 16px; border-radius: 16px; text-align: center; border: 4px solid #334155; }
+    .meter-top-row { display: flex; justify-content: space-around; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
+    .meter-value { font-family: 'Courier New', Courier, monospace; font-size: 2.1rem; font-weight: 900; color: #38bdf8; letter-spacing: 2px; background: #0f172a; padding: 8px 14px; border-radius: 8px; display: inline-block; border: 2px inset #475569; }
+    .meter-label { font-size: 0.8rem; color: #94a3b8; margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .meter-sub { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; background: #0f172a; padding: 10px; border-radius: 10px; font-size: 0.85rem; }
+
+    /* Comparateur TP Bouilloire vs Plaque */
+    .tp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .tp-card { border: 2px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; background: #f8fafc; position: relative; }
+    .tp-card.winner { border-color: var(--success); background: #f0fdf4; }
+    .tp-card h4 { margin: 4px 0; font-size: 0.95rem; }
+    .tp-stat { font-size: 0.8rem; color: var(--muted); margin: 4px 0; }
+    .tp-energy { font-size: 1rem; font-weight: 800; color: var(--primary-dark); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
+    .tp-card.winner .tp-energy { color: var(--success); }
+
+    /* Onglet Cours */
+    .formula-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+    .formula-box { background: #fffbeb; border: 2px dashed #f59e0b; padding: 14px; border-radius: 12px; text-align: center; }
+    .formula-big { font-size: 1.5rem; font-weight: 900; color: #b45309; margin: 6px 0; }
+    .formula-sub { font-size: 0.82rem; color: #78350f; }
+    .formula-trio { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
+    .formula-badge { background: #fef3c7; border: 1px solid #f59e0b; padding: 4px 10px; border-radius: 8px; font-weight: 800; color: #92400e; font-size: 0.9rem; }
+
+    .chain-container { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-top: 12px; text-align: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02); }
+    .svg-diagram { width: 100%; max-width: 560px; height: auto; display: block; margin: 8px auto 0; }
+    .sankey-badge { display: inline-block; margin-top: 8px; background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; font-size: 0.82rem; font-weight: 800; padding: 6px 12px; border-radius: 99px; }
+
+    .unit-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.82rem; text-align: left; }
+    .unit-table th, .unit-table td { padding: 8px; border: 1px solid var(--border); }
+    .unit-table th { background: #f1f5f9; }
+    .unit-system-1 { background: #f0fdf4; }
+    .unit-system-2 { background: #eff6ff; }
+
+    /* Exercices pas à pas */
+    .step-box { border: 2px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; background: white; transition: 0.2s; }
+    .step-box.active-step { border-color: var(--primary); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15); }
+    .step-box.done-step { border-color: #86efac; background: #f0fdf4; }
+    .step-box.locked { opacity: 0.5; pointer-events: none; background: #f8fafc; }
+    
+    .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .step-title { font-weight: 800; font-size: 0.95rem; color: var(--primary-dark); }
+    .step-status { font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 12px; background: #e2e8f0; }
+    .active-step .step-status { background: var(--primary-light); color: var(--primary-dark); }
+    .done-step .step-status { background: var(--success-light); color: #166534; }
+
+    .input-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .num-input { flex: 1; min-width: 80px; padding: 10px; font-size: 1rem; font-weight: 700; border: 2px solid var(--border); border-radius: 8px; text-align: center; }
+    .unit-select { padding: 10px; font-size: 0.9rem; font-weight: 700; border: 2px solid var(--border); border-radius: 8px; background: white; }
+    .btn-check { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-check:active { transform: scale(0.97); }
+    
+    .feedback { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display: none; }
+    .feedback.ok { display: block; background: var(--success-light); color: #14532d; border: 1px solid #86efac; }
+    .feedback.err { display: block; background: var(--danger-light); color: #7f1d1d; border: 1px solid #fca5a5; }
+
+    .exo-selector { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 6px; }
+    .exo-pill { padding: 8px 12px; border: 2px solid var(--border); background: white; border-radius: 20px; font-size: 0.82rem; font-weight: 700; white-space: nowrap; cursor: pointer; transition: 0.2s; }
+    .exo-pill.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+    .exo-pill.done { border-color: var(--success); background: var(--success-light); color: #166534; }
+
+    .hint-text { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⚡ Puissance & Énergie Électrique (3e)</h1>
+    <p>Maîtriser P = U × I, E = P × t et le Bilan Énergétique</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-sim', this)">
+      <span class="icon">🔍</span><span>Comprendre</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-form', this)">
+      <span class="icon">📐</span><span>Le Cours</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-exo', this)">
+      <span class="icon">✏️</span><span>S'entraîner</span>
+    </button>
+  </nav>
+
+  <main class="container">
+
+    <!-- ONGLET 1 : COMPRENDRE & SIMULER -->
+    <section id="tab-sim" class="tab-content active">
+      
+      <!-- CARTE 1 : PUISSANCE, MULTIPRISE ET COMPTEUR -->
+      <div class="card">
+        <h2 class="card-title">🔌 1. Puissance, Intensité & Disjoncteur</h2>
+        <div class="concept-box">
+          <p style="margin-top:0;">En France, la tension du secteur est <strong>U = 230 V</strong>. La puissance nominale reçue par un appareil dépend de l'intensité <strong>I (en Ampères)</strong> qui le traverse : <strong>P = U × I</strong> (soit <strong>I = P / U</strong>).</p>
+          <p style="margin-bottom:0;">⚠️ Si l'intensité totale dépasse le calibre du <strong>disjoncteur (10 A ou 16 A)</strong>, il y a <strong>surintensité</strong> : le disjoncteur coupe le circuit pour éviter l'incendie !</p>
+        </div>
+
+        <div style="background: #f1f5f9; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem;">
+          <strong>📝 Manipule la multiprise :</strong> Choisis le disjoncteur de la ligne, puis branche <strong>un ou plusieurs appareils en même temps</strong> en cliquant dessus !
+        </div>
+
+        <div class="breaker-selector">
+          <span>Calibre du disjoncteur :</span>
+          <div class="breaker-pill active" id="brk-10" onclick="setBreaker(10)">Prise 10 A (max 2300 W)</div>
+          <div class="breaker-pill" id="brk-16" onclick="setBreaker(16)">Prise 16 A (max 3680 W)</div>
+        </div>
+
+        <div class="preset-grid">
+          <button class="preset-btn active" id="app-0" onclick="toggleAppliance(0)">
+            <span class="emoji">🔥</span>Bec électrique<br><small>500 W</small><br>
+            <span class="amp-tag">I ≈ 2,2 A</span>
+          </button>
+          <button class="preset-btn" id="app-1" onclick="toggleAppliance(1)">
+            <span class="emoji">♨️</span>Radiateur<br><small>1500 W</small><br>
+            <span class="amp-tag">I ≈ 6,5 A</span>
+          </button>
+          <button class="preset-btn" id="app-2" onclick="toggleAppliance(2)">
+            <span class="emoji">🫖</span>Bouilloire<br><small>2000 W</small><br>
+            <span class="amp-tag">I ≈ 8,7 A</span>
+          </button>
+          <button class="preset-btn" id="app-3" onclick="toggleAppliance(3)">
+            <span class="emoji">🍕</span>Four<br><small>2500 W</small><br>
+            <span class="amp-tag">I ≈ 10,9 A</span>
+          </button>
+        </div>
+
+        <!-- Jauge d'intensité et sécurité -->
+        <div class="gauge-box">
+          <div class="gauge-header">
+            <span>Puissance totale : <strong id="sim-p-tot">500 W</strong></span>
+            <span>Intensité I = P / 230 : <strong id="sim-i-tot">2,2 A</strong> / <span id="sim-i-max">10 A</span></span>
+          </div>
+          <div class="gauge-bar-bg">
+            <div class="gauge-bar-fill" id="sim-gauge-bar"></div>
+          </div>
+          <div class="breaker-alert" id="sim-breaker-alert">
+            🚨 SURINTENSITÉ ! L'intensité dépasse le calibre du disjoncteur : le courant est coupé ! Débranche un appareil ou passe sur une prise 16 A.
+          </div>
+        </div>
+
+        <div class="control-header">
+          <span>⏱️ Durée de fonctionnement (t)</span>
+          <span class="badge-val" id="sim-t-label">2 h</span>
+        </div>
+        <input type="range" id="sim-t-slider" min="1" max="10" value="2" oninput="updateSim()">
+
+        <!-- Compteur EDF -->
+        <div class="meter-box">
+          <div class="meter-top-row">
+            <span>Tension : <strong>230 V</strong></span>
+            <span>Index départ (t₁ = 0 h) : <strong>1053 kWh</strong></span>
+          </div>
+          <div class="meter-value" id="sim-meter">01054.0</div>
+          <div class="meter-label">Index du Compteur (kWh) à t₂ = <span id="sim-t2-txt">2 h</span></div>
+          
+          <div class="meter-sub">
+            <div>
+              <span style="color:#94a3b8; font-size:0.75rem;">Énergie (E = P × t)</span><br>
+              <strong style="color:#38bdf8;" id="sim-e-wh">1000 Wh (1 kWh)</strong>
+            </div>
+            <div>
+              <span style="color:#94a3b8; font-size:0.75rem;">Coût estimé (0,20 €/kWh)</span><br>
+              <strong style="color:#4ade80;" id="sim-cost">0,20 €</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARTE 2 : TP BOUILLOIRE VS PLAQUE CHAUFFANTE -->
+      <div class="card">
+        <h2 class="card-title">🧪 2. TP : Bouilloire vs Bec électrique</h2>
+        <div class="concept-box" style="background: var(--accent-light); border-left-color: var(--accent);">
+          <strong>Situation-problème (Activité 2) :</strong> Est-il plus économique de faire bouillir la même quantité d'eau (500 mL) avec une <strong>bouilloire (2000 W)</strong> ou avec un <strong>bec électrique (500 W)</strong> ?
+        </div>
+
+        <div class="tp-grid">
+          <div class="tp-card winner">
+            <div style="font-size:1.8rem;">🫖</div>
+            <h4>Bouilloire</h4>
+            <div class="tp-stat">Puissance : <strong>2000 W</strong></div>
+            <div class="tp-stat">Durée d'ébullition : <strong>3 min (180 s)</strong></div>
+            <div class="tp-stat" style="color:var(--success); font-weight:700;">Isolée (peu de pertes)</div>
+            <div class="tp-energy">
+              E = 2000 × 180<br>
+              = 360 000 J (100 Wh)
+            </div>
+          </div>
+
+          <div class="tp-card">
+            <div style="font-size:1.8rem;">🔥</div>
+            <h4>Bec électrique</h4>
+            <div class="tp-stat">Puissance : <strong>500 W</strong></div>
+            <div class="tp-stat">Durée d'ébullition : <strong>15 min (900 s)</strong></div>
+            <div class="tp-stat" style="color:var(--danger); font-weight:700;">Pertes thermiques dans l'air</div>
+            <div class="tp-energy">
+              E = 500 × 900<br>
+              = 450 000 J (125 Wh)
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #f0fdf4; border: 1px solid #86efac; padding: 12px; border-radius: 10px; font-size: 0.85rem; color: #14532d;">
+          <strong>💡 Conclusion du TP :</strong> Même si sa puissance est 4 fois plus grande, la <strong>bouilloire est plus économique</strong> ! Elle chauffe l'eau directement et très rapidement (3 min), ce qui limite les pertes d'énergie thermique dans l'air ambiant (meilleur <strong>rendement</strong>).
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ONGLET 2 : LE COURS -->
+    <section id="tab-form" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">🧠 1. Les 3 Relations Essentielles (3e)</h2>
+        
+        <div class="formula-grid">
+          <div class="formula-box">
+            <div style="font-weight:700;">1. La Puissance électrique reçue</div>
+            <div class="formula-big">P = U × I &nbsp;&nbsp;<small style="font-size:1rem;">(ou I = P / U)</small></div>
+            <div class="formula-sub"><strong>P</strong> en Watt (W) &nbsp;|&nbsp; <strong>U</strong> en Volt (V) &nbsp;|&nbsp; <strong>I</strong> en Ampère (A)</div>
+          </div>
+
+          <div class="formula-box">
+            <div style="font-weight:700;">2. L'Énergie électrique transférée</div>
+            <div class="formula-big">E = P × t</div>
+            <div class="formula-trio">
+              <span class="formula-badge">Chercher E : E = P × t</span>
+              <span class="formula-badge">Chercher P : P = E / t</span>
+              <span class="formula-badge">Chercher t : t = E / P</span>
+            </div>
+            <div class="formula-sub"><strong>E</strong> en Joule (J) ou kWh &nbsp;|&nbsp; <strong>P</strong> en W ou kW &nbsp;|&nbsp; <strong>t</strong> en s ou h</div>
+          </div>
+
+          <div class="formula-box" style="background:#f0fdf4; border-color:#16a34a;">
+            <div style="font-weight:700; color:#166534;">3. Bilan énergétique & Conservation</div>
+            <div class="formula-big" style="color:#15803d; font-size:1.3rem;">E<sub>reçue</sub> = E<sub>utile</sub> + E<sub>perdue</sub></div>
+            <div class="formula-sub" style="color:#166534;">
+              <strong>Rendement (η)</strong> = E<sub>utile</sub> / E<sub>reçue</sub> (exprimé en %)
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size: 0.95rem; margin: 16px 0 8px 0;">🔄 Chaînes d'énergie et diagramme de bilan</h3>
+        
+        <!-- SCHÉMA 1 : CHAÎNE D'ÉNERGIE NORMALISÉE DE LA BOUILLOIRE -->
+        <div class="chain-container">
+          <div style="font-size:0.88rem; font-weight:800; color:var(--text);">Chaîne d'énergie de la bouilloire :</div>
+          <svg class="svg-diagram" viewBox="0 0 600 185" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7"/>
+              </marker>
+              <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a"/>
+              </marker>
+              <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+              </marker>
+            </defs>
+
+            <!-- Réservoir gauche : Réseau électrique -->
+            <rect x="10" y="62" width="125" height="60" rx="8" fill="#ffffff" stroke="#0284c7" stroke-width="2.5"/>
+            <text x="72" y="88" text-anchor="middle" font-size="13" font-weight="800" fill="#0f172a">Réseau</text>
+            <text x="72" y="106" text-anchor="middle" font-size="13" font-weight="800" fill="#0f172a">électrique</text>
+
+            <!-- Flèche Énergie électrique -->
+            <line x1="135" y1="92" x2="228" y2="92" stroke="#0284c7" stroke-width="3" marker-end="url(#arrow-blue)"/>
+            <text x="182" y="70" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0369a1">Énergie</text>
+            <text x="182" y="84" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0369a1">électrique</text>
+
+            <!-- Convertisseur central : Bouilloire (Ovale) -->
+            <ellipse cx="295" cy="92" rx="60" ry="42" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5"/>
+            <text x="295" y="85" text-anchor="middle" font-size="18">🫖</text>
+            <text x="295" y="106" text-anchor="middle" font-size="13.5" font-weight="800" fill="#0369a1">Bouilloire</text>
+
+            <!-- Flèche haute : Transfert thermique utile -->
+            <path d="M 352 76 L 455 46" fill="none" stroke="#16a34a" stroke-width="3" marker-end="url(#arrow-green)"/>
+            <text x="403" y="42" text-anchor="middle" font-size="11" font-weight="800" fill="#15803d">Énergie thermique</text>
+            <text x="403" y="55" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16a34a">(utile)</text>
+
+            <!-- Réservoir haut droite : Eau -->
+            <rect x="465" y="16" width="125" height="54" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2.5"/>
+            <text x="527" y="41" text-anchor="middle" font-size="13.5" font-weight="800" fill="#14532d">💧 Eau</text>
+            <text x="527" y="58" text-anchor="middle" font-size="10.5" font-weight="700" fill="#166534">(Transfert utile)</text>
+
+            <!-- Flèche basse : Transfert thermique perdu -->
+            <path d="M 352 108 L 455 138" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="5,3" marker-end="url(#arrow-red)"/>
+            <text x="403" y="143" text-anchor="middle" font-size="11" font-weight="800" fill="#b91c1c">Énergie thermique</text>
+            <text x="403" y="156" text-anchor="middle" font-size="10.5" font-weight="700" fill="#dc2626">(pertes)</text>
+
+            <!-- Réservoir bas droite : Air ambiant -->
+            <rect x="465" y="114" width="125" height="54" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2" stroke-dasharray="5,3"/>
+            <text x="527" y="139" text-anchor="middle" font-size="13" font-weight="800" fill="#7f1d1d">🌬️ Air ambiant</text>
+            <text x="527" y="156" text-anchor="middle" font-size="10.5" font-weight="700" fill="#991b1b">(Pertes thermiques)</text>
+          </svg>
+        </div>
+
+        <!-- SCHÉMA 2 : DIAGRAMME DE SANKEY PROPORTIONNEL -->
+        <div class="chain-container" style="margin-top:12px;">
+          <div style="font-size:0.88rem; font-weight:800; color:var(--text);">Exemple : Cellule photovoltaïque (Diagramme énergétique)</div>
+          <svg class="svg-diagram" viewBox="0 0 600 215" xmlns="http://www.w3.org/2000/svg">
+            <!-- Grande flèche entrante : Énergie lumineuse 100 J -->
+            <path d="M 12 48 L 210 48 L 210 108 L 12 108 Z" fill="#fde047" stroke="#eab308" stroke-width="2"/>
+            <text x="110" y="74" text-anchor="middle" font-size="12.5" font-weight="800" fill="#713f12">☀️ Énergie lumineuse</text>
+            <text x="110" y="93" text-anchor="middle" font-size="13" font-weight="900" fill="#854d0e">E_reçue = 100 J</text>
+
+            <!-- Branche sortante droite (20% d'épaisseur) : Énergie électrique utile 20 J -->
+            <path d="M 330 48 L 435 48 L 435 38 L 462 56 L 435 74 L 435 64 L 330 64 Z" fill="#4ade80" stroke="#16a34a" stroke-width="2"/>
+            <text x="472" y="52" text-anchor="start" font-size="12" font-weight="800" fill="#15803d">⚡ Énergie électrique « utile »</text>
+            <text x="472" y="69" text-anchor="start" font-size="13" font-weight="900" fill="#166534">E_utile = 20 J</text>
+
+            <!-- Branche sortante courbée vers le bas (80% d'épaisseur) : Énergie thermique perdue 80 J -->
+            <path d="M 330 64 Q 382 64 382 125 L 382 155 L 396 155 L 360 188 L 324 155 L 338 155 L 338 125 Q 338 108 310 108 L 210 108 L 210 64 Z" fill="#fca5a5" stroke="#dc2626" stroke-width="2"/>
+            <text x="410" y="148" text-anchor="start" font-size="12" font-weight="800" fill="#b91c1c">🌡️ Énergie thermique « inutile »</text>
+            <text x="410" y="166" text-anchor="start" font-size="13" font-weight="900" fill="#991b1b">E_perdue = 80 J</text>
+
+            <!-- Convertisseur au centre : Cellule photovoltaïque -->
+            <ellipse cx="270" cy="78" rx="64" ry="44" fill="#ffffff" stroke="#0284c7" stroke-width="3"/>
+            <text x="270" y="74" text-anchor="middle" font-size="13" font-weight="800" fill="#0369a1">Cellule</text>
+            <text x="270" y="92" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0369a1">photovoltaïque</text>
+          </svg>
+          <div class="sankey-badge">
+            Bilan : 100 J = 20 J + 80 J &nbsp;|&nbsp; Rendement : η = 20 / 100 = 0,20 soit <strong>20 %</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">📏 2. Unités et Facteurs de Conversion</h2>
+        <p style="font-size: 0.85rem; margin-top:0;">Le joule étant une très petite unité, on utilise le <strong>kilowattheure (kWh)</strong> sur les factures d'électricité, ou la <strong>tep</strong> à l'échelle mondiale :</p>
+        
+        <table class="unit-table">
+          <thead>
+            <tr>
+              <th>Système</th>
+              <th>Puissance (P)</th>
+              <th>Durée (t)</th>
+              <th>Énergie (E)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="unit-system-1">
+              <td><strong>International</strong><br><small>(Physique)</small></td>
+              <td>Watt (W)</td>
+              <td>Seconde (s)</td>
+              <td><strong>Joule (J)</strong></td>
+            </tr>
+            <tr class="unit-system-2">
+              <td><strong>Usuel</strong><br><small>(Compteur EDF)</small></td>
+              <td>Watt (W)<br>Kilowatt (kW)</td>
+              <td>Heure (h)</td>
+              <td><strong>Wattheure (Wh)</strong><br><strong>Kilowattheure (kWh)</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="background: var(--danger-light); border-left: 4px solid var(--danger); padding: 12px; margin-top: 16px; font-size: 0.85rem; border-radius: 6px;">
+          <strong>À retenir par cœur en 3e :</strong><br>
+          • <strong>1 kW = 1 000 W</strong> et <strong>1 min = 60 s</strong> ; <strong>1 h = 3 600 s</strong><br>
+          • <strong>1 Wh = 3 600 J</strong><br>
+          • <strong>1 kWh = 1 000 Wh = 3,6 × 10<sup>6</sup> J</strong> (3 600 000 J)<br>
+          • <strong>1 tep</strong> (tonne équivalent pétrole) = <strong>4,19 × 10<sup>10</sup> J</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET 3 : S'ENTRAÎNER -->
+    <section id="tab-exo" class="tab-content">
+      <div class="card">
+        <div class="exo-selector" id="exo-tabs">
+          <!-- Injecté en JS -->
+        </div>
+
+        <div id="exo-text" style="background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 0.92rem; margin-bottom: 16px; border-left: 4px solid var(--primary);">
+          <!-- Énoncé injecté -->
+        </div>
+
+        <!-- Conteneur dynamique des étapes -->
+        <div id="steps-container"></div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // --- NAVIGATION ONGLETS ---
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // --- ONGLET 1 : SIMULATEUR MULTIPRISE & COMPTEUR (3e) ---
+    const appliances = [
+      { name: "Bec électrique", power: 500, active: true },
+      { name: "Radiateur", power: 1500, active: false },
+      { name: "Bouilloire", power: 2000, active: false },
+      { name: "Four", power: 2500, active: false }
+    ];
+    let maxAmps = 10; // Calibre disjoncteur (10 A ou 16 A)
+    const voltage = 230;
+    const baseIndex = 1053; // Comme dans le manuel de 3e (1053 kWh)
+
+    function setBreaker(amps) {
+      maxAmps = amps;
+      document.getElementById('brk-10').classList.toggle('active', amps === 10);
+      document.getElementById('brk-16').classList.toggle('active', amps === 16);
+      updateSim();
+    }
+
+    function toggleAppliance(index) {
+      appliances[index].active = !appliances[index].active;
+      document.getElementById(`app-${index}`).classList.toggle('active', appliances[index].active);
+      updateSim();
+    }
+
+    function updateSim() {
+      let totalPower = 0;
+      appliances.forEach(app => {
+        if (app.active) totalPower += app.power;
+      });
+
+      let totalAmps = totalPower / voltage;
+      let t = Number(document.getElementById('sim-t-slider').value);
+
+      // Affichage Puissance & Intensité
+      document.getElementById('sim-p-tot').innerText = totalPower + " W";
+      document.getElementById('sim-i-tot').innerText = totalAmps.toFixed(1).replace('.', ',') + " A";
+      document.getElementById('sim-i-max').innerText = maxAmps + " A";
+
+      // Jauge et Disjoncteur
+      let pct = Math.min(100, (totalAmps / maxAmps) * 100);
+      let bar = document.getElementById('sim-gauge-bar');
+      let alertBox = document.getElementById('sim-breaker-alert');
+      bar.style.width = pct + "%";
+
+      let isTripped = totalAmps > maxAmps;
+      if (isTripped) {
+        bar.style.background = "var(--danger)";
+        alertBox.style.display = "block";
+      } else if (pct > 80) {
+        bar.style.background = "var(--accent)";
+        alertBox.style.display = "none";
+      } else {
+        bar.style.background = "var(--success)";
+        alertBox.style.display = "none";
+      }
+
+      // Durée et Compteur
+      document.getElementById('sim-t-label').innerText = t + " h";
+      document.getElementById('sim-t2-txt').innerText = t + " h";
+
+      // Si le disjoncteur saute, l'énergie consommée tombe à 0
+      let energyWh = isTripped ? 0 : totalPower * t;
+      let energyKwh = energyWh / 1000;
+      let newIndex = baseIndex + energyKwh;
+      let cost = energyKwh * 0.20;
+
+      document.getElementById('sim-meter').innerText = newIndex.toFixed(1).padStart(7, '0');
+      document.getElementById('sim-e-wh').innerText = `${energyWh} Wh (${energyKwh.toFixed(2).replace('.', ',')} kWh)`;
+      document.getElementById('sim-cost').innerText = cost.toFixed(2).replace('.', ',') + " €";
+    }
+
+    // --- ONGLET 3 : EXERCICES PAS À PAS (CALCULER E, P OU t) ---
+    const exercises = [
+      {
+        title: "Exo 1 : Calculer E (en J)",
+        text: "<strong>Le sèche-cheveux :</strong> Un sèche-cheveux de puissance <strong>P = 1800 W</strong> fonctionne pendant <strong>t = 5 minutes</strong>.<br>Calcule l'énergie électrique <strong>E</strong> transférée en <strong>Joules (J)</strong>.",
+        steps: [
+          {
+            title: "Étape 1 : Identifier la Puissance (P)",
+            hint: "Pour obtenir des Joules (J), la puissance doit être exprimée en Watts (W).",
+            label: "P =", val: 1800, unit: "W", units: ["W", "kW", "J"],
+            okMsg: "Très bien ! P = 1800 W.",
+            errMsg: "Relève la puissance du sèche-cheveux en Watts (W)."
+          },
+          {
+            title: "Étape 2 : Convertir la Durée en secondes (t)",
+            hint: "Attention : pour calculer en Joules, convertis les 5 minutes en secondes (1 min = 60 s).",
+            label: "t =", val: 300, unit: "s", units: ["s", "min", "h"],
+            okMsg: "Parfait ! 5 × 60 = 300 s.",
+            errMsg: "Multiplie 5 minutes par 60 pour obtenir la durée en secondes (s)."
+          },
+          {
+            title: "Étape 3 : Calculer l'Énergie (E = P × t)",
+            hint: "Applique la formule E = P × t avec P en W et t en s.",
+            label: "E =", val: 540000, unit: "J", units: ["J", "Wh", "kWh"],
+            okMsg: "Bravo ! E = 1800 × 300 = 540 000 J (soit 540 kJ).",
+            errMsg: "Multiplie 1800 W par 300 s et sélectionne l'unité Joule (J)."
+          }
+        ]
+      },
+      {
+        title: "Exo 2 : Calculer E (kWh) & Coût",
+        text: "<strong>La console de jeux :</strong> Une console et son téléviseur ont une puissance totale <strong>P = 300 W</strong>. Ils sont utilisés pendant <strong>t = 4 heures</strong>.<br>Calcule l'énergie consommée en <strong>kWh</strong>, puis son coût sachant que <strong>1 kWh coûte 0,25 €</strong>.",
+        steps: [
+          {
+            title: "Étape 1 : Convertir la Puissance en kilowatts (P)",
+            hint: "Pour obtenir directement des kWh, convertis 300 W en kilowatts (divise par 1000).",
+            label: "P =", val: 0.3, unit: "kW", units: ["kW", "W", "kWh"],
+            okMsg: "Exact ! 300 W ÷ 1000 = 0,3 kW.",
+            errMsg: "Divise 300 par 1000 pour convertir la puissance en kW (0,3 kW)."
+          },
+          {
+            title: "Étape 2 : Identifier la Durée (t)",
+            hint: "Pour des kilowattheures (kWh), le temps doit être en heures (h).",
+            label: "t =", val: 4, unit: "h", units: ["h", "s", "min"],
+            okMsg: "Bien ! t = 4 h.",
+            errMsg: "Relève la durée d'utilisation en heures (h)."
+          },
+          {
+            title: "Étape 3 : Calculer l'Énergie (E = P × t)",
+            hint: "Multiplie la puissance P (en kW) par la durée t (en h).",
+            label: "E =", val: 1.2, unit: "kWh", units: ["kWh", "Wh", "J"],
+            okMsg: "Parfait ! E = 0,3 × 4 = 1,2 kWh.",
+            errMsg: "Calcule 0,3 kW × 4 h et choisis l'unité kWh."
+          },
+          {
+            title: "Étape 4 : Calculer le Coût",
+            hint: "Multiplie l'énergie en kWh (1,2) par le prix d'un kWh (0,25 €).",
+            label: "Coût =", val: 0.3, unit: "€", units: ["€", "kWh", "W"],
+            okMsg: "Excellent ! 1,2 kWh × 0,25 € = 0,30 €.",
+            errMsg: "Multiplie 1,2 par 0,25 et sélectionne l'unité €."
+          }
+        ]
+      },
+      {
+        title: "Exo 3 : Calculer P (Puissance)",
+        text: "<strong>Le lave-linge :</strong> Durant un cycle de lavage qui dure <strong>t = 2 heures</strong>, le compteur indique que le lave-linge a consommé une énergie <strong>E = 3,2 kWh</strong>.<br>Calcule la puissance moyenne <strong>P</strong> de ce lave-linge en <strong>Watts (W)</strong>.",
+        steps: [
+          {
+            title: "Étape 1 : Convertir l'Énergie en Wattheures (E)",
+            hint: "Comme on cherche P en Watts (W), convertis d'abord 3,2 kWh en Wattheures (multiplie par 1000).",
+            label: "E =", val: 3200, unit: "Wh", units: ["Wh", "kWh", "J"],
+            okMsg: "Très bien ! 3,2 kWh × 1000 = 3200 Wh.",
+            errMsg: "Multiplie 3,2 kWh par 1000 pour obtenir l'énergie en Wattheures (Wh)."
+          },
+          {
+            title: "Étape 2 : Identifier la Durée (t)",
+            hint: "Relève la durée du cycle en heures (h).",
+            label: "t =", val: 2, unit: "h", units: ["h", "min", "s"],
+            okMsg: "Parfait ! t = 2 h.",
+            errMsg: "La durée du cycle est de 2 heures (h)."
+          },
+          {
+            title: "Étape 3 : Calculer la Puissance (P = E / t)",
+            hint: "À partir de E = P × t, on a P = E / t. Divise l'énergie (en Wh) par la durée (en h).",
+            label: "P =", val: 1600, unit: "W", units: ["W", "kW", "Wh"],
+            okMsg: "Félicitations ! P = 3200 Wh ÷ 2 h = 1600 W (soit 1,6 kW).",
+            errMsg: "Divise 3200 par 2 et sélectionne l'unité de puissance : le Watt (W)."
+          }
+        ]
+      },
+      {
+        title: "Exo 4 : Calculer t (en heures)",
+        text: "<strong>La trottinette électrique :</strong> Pour recharger complètement une batterie de trottinette, il faut lui fournir une énergie <strong>E = 450 Wh</strong>. Son chargeur délivre une puissance de <strong>P = 90 W</strong>.<br>Calcule la durée <strong>t</strong> (en heures) nécessaire pour cette recharge.",
+        steps: [
+          {
+            title: "Étape 1 : Identifier l'Énergie (E)",
+            hint: "Relève l'énergie électrique stockée en Wattheures (Wh).",
+            label: "E =", val: 450, unit: "Wh", units: ["Wh", "J", "W"],
+            okMsg: "Exact ! E = 450 Wh.",
+            errMsg: "Relève l'énergie indiquée dans l'énoncé en Wattheures (Wh)."
+          },
+          {
+            title: "Étape 2 : Identifier la Puissance (P)",
+            hint: "Relève la puissance du chargeur en Watts (W).",
+            label: "P =", val: 90, unit: "W", units: ["W", "Wh", "h"],
+            okMsg: "Bien ! P = 90 W.",
+            errMsg: "La puissance du chargeur est de 90 Watts (W)."
+          },
+          {
+            title: "Étape 3 : Calculer la Durée (t = E / P)",
+            hint: "À partir de E = P × t, on trouve t = E / P. Divise l'énergie E (en Wh) par la puissance P (en W).",
+            label: "t =", val: 5, unit: "h", units: ["h", "s", "min"],
+            okMsg: "Bravo ! t = 450 Wh ÷ 90 W = 5 h de charge.",
+            errMsg: "Divise 450 par 90. Avec E en Wh et P en W, le temps t est en heures (h)."
+          }
+        ]
+      },
+      {
+        title: "Exo 5 : Calculer t (en secondes)",
+        text: "<strong>Le four à micro-ondes :</strong> Pour réchauffer un bol de soupe, un micro-ondes de puissance <strong>P = 900 W</strong> consomme une énergie électrique <strong>E = 108 000 J</strong>.<br>Pendant quelle durée <strong>t</strong> (en secondes) a-t-il fonctionné ?",
+        steps: [
+          {
+            title: "Étape 1 : Identifier l'Énergie (E)",
+            hint: "Relève l'énergie consommée en Joules (J).",
+            label: "E =", val: 108000, unit: "J", units: ["J", "Wh", "W"],
+            okMsg: "Parfait ! E = 108 000 J.",
+            errMsg: "Écris 108000 et choisis l'unité Joule (J)."
+          },
+          {
+            title: "Étape 2 : Identifier la Puissance (P)",
+            hint: "Relève la puissance du micro-ondes en Watts (W).",
+            label: "P =", val: 900, unit: "W", units: ["W", "kW", "J"],
+            okMsg: "Très bien ! P = 900 W.",
+            errMsg: "La puissance du four à micro-ondes est de 900 W."
+          },
+          {
+            title: "Étape 3 : Calculer la Durée (t = E / P)",
+            hint: "Applique la relation t = E / P. Comme E est en Joules (J) et P en Watts (W), le temps sera en secondes (s).",
+            label: "t =", val: 120, unit: "s", units: ["s", "h", "min"],
+            okMsg: "Excellent ! t = 108 000 J ÷ 900 W = 120 s (soit exactement 2 minutes).",
+            errMsg: "Divise 108000 par 900 et choisis l'unité seconde (s)."
+          }
+        ]
+      }
+    ];
+
+    let currentExo = 0;
+    let completedExos = [];
+
+    function initExercises() {
+      let tabsHtml = "";
+      exercises.forEach((ex, i) => {
+        let isDone = completedExos.includes(i) ? "done" : "";
+        let isActive = i === currentExo ? "active" : "";
+        let checkMark = completedExos.includes(i) ? "✅ " : "";
+        tabsHtml += `<div class="exo-pill ${isActive} ${isDone}" onclick="loadExo(${i})">${checkMark}${ex.title}</div>`;
+      });
+      document.getElementById('exo-tabs').innerHTML = tabsHtml;
+      loadExo(currentExo);
+    }
+
+    function loadExo(index) {
+      currentExo = index;
+      let ex = exercises[currentExo];
+      
+      document.querySelectorAll('.exo-pill').forEach((el, i) => {
+        el.classList.toggle('active', i === currentExo);
+      });
+
+      document.getElementById('exo-text').innerHTML = ex.text;
+      
+      let stepsHtml = "";
+      ex.steps.forEach((st, idx) => {
+        let stepNum = idx + 1;
+        let isFirst = idx === 0;
+        let boxClass = isFirst ? "step-box active-step" : "step-box locked";
+        let statusText = isFirst ? "À faire" : "🔒 Bloqué";
+        
+        let optionsHtml = `<option value="">Unité ?</option>`;
+        st.units.forEach(u => {
+          optionsHtml += `<option value="${u}">${u}</option>`;
+        });
+
+        stepsHtml += `
+          <div id="step-box-${idx}" class="${boxClass}">
+            <div class="step-header">
+              <span class="step-title">${st.title}</span>
+              <span class="step-status" id="step-status-${idx}">${statusText}</span>
+            </div>
+            <div class="hint-text">${st.hint}</div>
+            <div class="input-row">
+              <strong>${st.label}</strong>
+              <input type="text" inputmode="decimal" id="inp-${idx}" class="num-input" placeholder="Valeur">
+              <select id="unit-${idx}" class="unit-select">
+                ${optionsHtml}
+              </select>
+              <button class="btn-check" onclick="checkStep(${idx})">Vérifier</button>
+            </div>
+            <div id="fb-${idx}" class="feedback"></div>
+          </div>
+        `;
+      });
+
+      document.getElementById('steps-container').innerHTML = stepsHtml;
+    }
+
+    function checkStep(stepIdx) {
+      let ex = exercises[currentExo];
+      let st = ex.steps[stepIdx];
+      
+      let rawVal = document.getElementById(`inp-${stepIdx}`).value.trim().replace(',', '.');
+      let val = rawVal === "" ? NaN : Number(rawVal);
+      let unit = document.getElementById(`unit-${stepIdx}`).value;
+
+      let fb = document.getElementById(`fb-${stepIdx}`);
+      let box = document.getElementById(`step-box-${stepIdx}`);
+      let status = document.getElementById(`step-status-${stepIdx}`);
+
+      if (Math.abs(val - st.val) < 0.05 && unit === st.unit) {
+        box.className = "step-box done-step";
+        status.innerText = "✅ Validé";
+        fb.className = "feedback ok";
+        fb.innerHTML = `✅ ${st.okMsg}`;
+        fb.style.display = "block";
+
+        // Débloquer l'étape suivante ou valider l'exercice
+        if (stepIdx + 1 < ex.steps.length) {
+          let nextBox = document.getElementById(`step-box-${stepIdx + 1}`);
+          let nextStatus = document.getElementById(`step-status-${stepIdx + 1}`);
+          nextBox.className = "step-box active-step";
+          nextStatus.innerText = "À faire";
+        } else {
+          if (!completedExos.includes(currentExo)) {
+            completedExos.push(currentExo);
+            // Mise à jour visuelle des pastilles sans réinitialiser les champs
+            document.querySelectorAll('.exo-pill').forEach((el, i) => {
+              if (completedExos.includes(i)) {
+                el.classList.add('done');
+                if (!el.innerText.startsWith('✅')) el.innerText = '✅ ' + el.innerText;
+              }
+            });
+          }
+        }
+      } else {
+        fb.className = "feedback err";
+        if (Math.abs(val - st.val) < 0.05 && unit !== st.unit) {
+          fb.innerHTML = `❌ La valeur numérique (${rawVal}) est juste, mais l'unité choisie n'est pas la bonne !`;
+        } else {
+          fb.innerHTML = `❌ ${st.errMsg}`;
+        }
+        fb.style.display = "block";
+      }
+    }
+
+    // Initialisation au chargement
+    updateSim();
+    initExercises();
+  </script>
+</body>
+</html>
