@@ -1,0 +1,2577 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>6ème - Activité 1 : Les circuits électriques à une boucle</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      color: #1e293b;
+    }
+    @keyframes dashFlow {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .current-flow {
+      stroke-dasharray: 8 6;
+      animation: dashFlow 0.7s linear infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.85)); }
+      50% { filter: drop-shadow(0 0 18px rgba(250, 204, 21, 1)); }
+    }
+    .bulb-glow {
+      animation: pulseGlow 1.5s infinite;
+    }
+    @keyframes spinMotor {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .motor-spin {
+      transform-origin: center;
+      animation: spinMotor 0.8s linear infinite;
+    }
+    .bridge-leaf {
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-origin: 185px 125px;
+    }
+    .switch-blade {
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-origin: 245px 70px;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    @keyframes shakeRemind {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+    .shake-remind {
+      animation: shakeRemind 0.35s ease-in-out 2;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- En-tête de l'activité (sans le bouton Corrigé & Bilan) -->
+  <header class="bg-gradient-to-r from-indigo-900 via-blue-800 to-indigo-900 text-white shadow-lg sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="bg-amber-400 text-slate-900 text-xs font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">6ème • Chapitre 2</span>
+          <span class="text-blue-200 text-xs font-medium">Activité 1 expérimentale & interactive</span>
+        </div>
+        <h1 class="text-lg md:text-xl font-extrabold tracking-tight mt-0.5">
+          ⚡ Les circuits électriques à une boucle
+        </h1>
+      </div>
+
+      <!-- Compétences visées -->
+      <div class="flex flex-wrap gap-1.5 text-xs">
+        <span class="bg-white/10 border border-white/20 px-2.5 py-1 rounded-md text-blue-100">
+          🔧 Réaliser un circuit (D4)
+        </span>
+        <span class="bg-white/10 border border-white/20 px-2.5 py-1 rounded-md text-blue-100">
+          📐 Schéma électrique (D1.3)
+        </span>
+        <span class="bg-white/10 border border-white/20 px-2.5 py-1 rounded-md text-blue-100">
+          🔬 Interpréter des résultats (D4)
+        </span>
+      </div>
+    </div>
+
+    <!-- Barre de problématique -->
+    <div class="bg-indigo-950/80 border-t border-indigo-700/60">
+      <div class="max-w-6xl mx-auto px-4 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <p class="text-xs sm:text-sm font-semibold text-amber-300 flex items-center gap-2">
+          <span>❓ Problématique :</span>
+          <span class="text-white font-bold">À quelles conditions une lampe reçoit-elle de l'énergie électrique ?</span>
+        </p>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-indigo-200">Progression :</span>
+          <div class="w-28 bg-indigo-900 rounded-full h-2.5 overflow-hidden border border-indigo-600">
+            <div id="progressBar" class="bg-emerald-400 h-full transition-all duration-500" style="width: 20%"></div>
+          </div>
+          <span id="progressText" class="text-xs font-bold text-emerald-300">1/5</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation par étapes -->
+  <nav class="bg-white border-b border-slate-200 shadow-sm sticky top-[92px] md:top-[84px] z-20">
+    <div class="max-w-6xl mx-auto px-2 sm:px-4">
+      <div class="flex overflow-x-auto custom-scroll py-2 gap-1.5 sm:gap-2" id="stepTabs">
+        <button onclick="goToStep(1)" id="tab-1" class="step-tab flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all bg-blue-600 text-white shadow-sm">
+          <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">1</span>
+          <span>Expérience (Q1-Q3)</span>
+        </button>
+        <button onclick="goToStep(2)" id="tab-2" class="step-tab flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+          <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-xs">2</span>
+          <span>Schéma normalisé (Q4a)</span>
+        </button>
+        <button onclick="goToStep(3)" id="tab-3" class="step-tab flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 ring-2 ring-amber-400/70">
+          <span class="w-5 h-5 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center text-xs">3</span>
+          <span>⚠️ Interrupteur O / I (Q4b-4c)</span>
+        </button>
+        <button onclick="goToStep(4)" id="tab-4" class="step-tab flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+          <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-xs">4</span>
+          <span>Dipôles & Boucle (Q5-Q6)</span>
+        </button>
+        <button onclick="goToStep(5)" id="tab-5" class="step-tab flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+          <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-xs">5</span>
+          <span>Conclusion & Énergie (Q7-Q8)</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenu principal -->
+  <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-1">
+
+    <!-- ==========================================
+         ÉTAPE 1 : EXPÉRIENCE & OBSERVATION (Q1, Q2, Q3)
+    =========================================== -->
+    <section id="step-1" class="step-section space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-100 pb-4 mb-5">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Étape 1 • Expérience & J'observe</span>
+            <h2 class="text-xl font-extrabold text-slate-800 mt-0.5">1- Essayons de faire briller la lampe avec le matériel proposé</h2>
+          </div>
+          <span class="text-xs bg-blue-50 text-blue-700 font-semibold px-3 py-1.5 rounded-full border border-blue-200">
+            👉 Clique sur chaque liste pour réaliser le montage et observer la lampe !
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <!-- Sélecteur des 4 listes -->
+          <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+            <button onclick="selectBenchList(1)" id="btn-list-1" class="bench-btn text-left p-3.5 rounded-xl border-2 border-blue-600 bg-blue-50/70 transition-all shadow-sm flex items-start gap-3">
+              <div class="w-8 h-8 rounded-lg bg-blue-600 text-white font-extrabold flex items-center justify-center shrink-0 mt-0.5">1</div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-slate-900">Liste 1</span>
+                  <span id="badge-list-1" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Testée ✓</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                  Une pile, une lampe, deux fils de connexion, deux pinces crocodiles.
+                </p>
+              </div>
+            </button>
+
+            <button onclick="selectBenchList(2)" id="btn-list-2" class="bench-btn text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-blue-300 bg-white transition-all flex items-start gap-3">
+              <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-700 font-extrabold flex items-center justify-center shrink-0 mt-0.5">2</div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-slate-900">Liste 2</span>
+                  <span id="badge-list-2" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">À tester</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                  Un moteur, une lampe, deux fils de connexion.
+                </p>
+              </div>
+            </button>
+
+            <button onclick="selectBenchList(3)" id="btn-list-3" class="bench-btn text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-blue-300 bg-white transition-all flex items-start gap-3">
+              <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-700 font-extrabold flex items-center justify-center shrink-0 mt-0.5">3</div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-slate-900">Liste 3</span>
+                  <span id="badge-list-3" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">À tester</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                  Une pile plate, une lampe, un interrupteur, trois fils de connexion, deux pinces crocodiles.
+                </p>
+              </div>
+            </button>
+
+            <button onclick="selectBenchList(4)" id="btn-list-4" class="bench-btn text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-blue-300 bg-white transition-all flex items-start gap-3">
+              <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-700 font-extrabold flex items-center justify-center shrink-0 mt-0.5">4</div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-slate-900">Liste 4</span>
+                  <span id="badge-list-4" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">À tester</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                  Un interrupteur, une lampe, deux fils de connexion.
+                </p>
+              </div>
+            </button>
+          </div>
+
+          <!-- Paillasse virtuelle (SVG interactif) -->
+          <div class="lg:col-span-7 bg-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-inner border border-slate-800 flex flex-col justify-between">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+                <h3 id="benchTitle" class="font-bold text-sm sm:text-base text-amber-300">Paillasse d'expérience : Montage de la Liste 1</h3>
+              </div>
+              <div id="benchSwitchControl" class="hidden">
+                <button onclick="toggleList3BenchSwitch()" id="btnList3Switch" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1.5">
+                  <span>🔘 Interrupteur : FERMÉ (Position I)</span>
+                  <span class="underline ml-1">Changer</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Zone graphique du circuit testé -->
+            <div class="my-4 bg-slate-950/90 rounded-xl border border-slate-800 p-2 flex items-center justify-center min-h-[250px]">
+              <svg id="benchSvg" viewBox="0 0 540 240" class="w-full max-w-[520px] h-auto"></svg>
+            </div>
+
+            <!-- Résultat de l'observation -->
+            <div id="benchObservationBox" class="bg-slate-800/90 border border-slate-700 rounded-xl p-3.5 flex items-start gap-3">
+              <div id="benchObsIcon" class="text-2xl shrink-0">💡</div>
+              <div>
+                <div id="benchObsTitle" class="font-bold text-sm text-emerald-300">Observation pour la Liste 1 : La lampe brille !</div>
+                <p id="benchObsDesc" class="text-xs text-slate-300 mt-0.5">
+                  La pile plate fournit de l'énergie électrique à la lampe grâce aux deux fils de connexion et aux pinces crocodiles reliés aux bornes + et -.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Questions 2 et 3 + Encadré Vocabulaire -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-8 space-y-4">
+          <!-- Question 2 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <span class="bg-blue-600 text-white w-6 h-6 rounded-full text-xs flex items-center justify-center font-extrabold">2</span>
+              <span>Indique avec quelle(s) liste(s) la lampe brille ? <span class="text-slate-500 font-normal text-sm">(Coche les bonnes cases)</span></span>
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+              <label class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="checkbox" id="q2-l1" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                <span class="font-semibold text-sm">Liste 1</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="checkbox" id="q2-l2" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                <span class="font-semibold text-sm">Liste 2</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="checkbox" id="q2-l3" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                <span class="font-semibold text-sm">Liste 3</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="checkbox" id="q2-l4" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                <span class="font-semibold text-sm">Liste 4</span>
+              </label>
+            </div>
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+              <button onclick="checkQ2()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition">
+                ✔️ Vérifier la question 2
+              </button>
+              <div id="feedback-q2" class="text-xs sm:text-sm font-semibold hidden"></div>
+            </div>
+          </div>
+
+          <!-- Question 3 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <span class="bg-blue-600 text-white w-6 h-6 rounded-full text-xs flex items-center justify-center font-extrabold">3</span>
+              <span>Déduis-en le nom du composant indispensable qui fournit l'énergie électrique pour faire briller la lampe :</span>
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+              <label class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="radio" name="q3" id="q3-moteur" value="moteur" class="w-4 h-4 text-blue-600">
+                <span class="font-semibold text-sm">moteur</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="radio" name="q3" id="q3-pile" value="pile" class="w-4 h-4 text-blue-600">
+                <span class="font-semibold text-sm">pile plate</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="radio" name="q3" id="q3-inter" value="interrupteur" class="w-4 h-4 text-blue-600">
+                <span class="font-semibold text-sm">interrupteur</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="radio" name="q3" id="q3-fils" value="fils" class="w-4 h-4 text-blue-600">
+                <span class="font-semibold text-sm">fils de connexion</span>
+              </label>
+            </div>
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+              <button onclick="checkQ3()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition">
+                ✔️ Vérifier la question 3
+              </button>
+              <div id="feedback-q3" class="text-xs sm:text-sm font-semibold hidden"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Encadrés Fiche : Interrupteur & Vocabulaire Dipôle -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center gap-2 text-amber-900 font-extrabold text-sm uppercase tracking-wider mb-2">
+              <span>📖 Repère de la fiche : L'interrupteur</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5 text-xs">
+              <div class="bg-white p-3 rounded-xl border border-amber-200">
+                <span class="inline-block bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded mb-1">Position O</span>
+                <p class="text-slate-700 leading-relaxed">
+                  Un interrupteur est dit <strong class="text-rose-700 underline">ouvert</strong> quand il <strong>ne laisse pas passer</strong> le courant électrique.
+                </p>
+              </div>
+              <div class="bg-white p-3 rounded-xl border border-amber-200">
+                <span class="inline-block bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded mb-1">Position I</span>
+                <p class="text-slate-700 leading-relaxed">
+                  Un interrupteur est dit <strong class="text-emerald-700 underline">fermé</strong> lorsqu'il <strong>laisse passer</strong> le courant électrique.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-4 shadow-sm">
+            <div class="text-indigo-900 font-extrabold text-sm uppercase tracking-wider mb-1.5">
+              📚 Vocabulaire à retenir
+            </div>
+            <p class="text-xs sm:text-sm text-indigo-950 leading-relaxed">
+              • <strong>Dipôle :</strong> composant électrique qui possède <strong>deux bornes</strong> de branchement (exemple : pile, lampe, moteur, interrupteur).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RAPPEL FEUILLE PAPIER ÉTAPE 1 -->
+      <div id="reminder-box-1" class="bg-amber-50 border-2 border-amber-400 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-start gap-3.5">
+          <div class="w-11 h-11 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl shrink-0 shadow-sm">
+            ✍️
+          </div>
+          <div>
+            <h4 class="font-extrabold text-amber-950 text-sm sm:text-base">
+              À faire sur ta feuille d'activité avant de passer à l'étape 2 !
+            </h4>
+            <p class="text-xs sm:text-sm text-amber-900 mt-0.5 leading-relaxed">
+              N'oublie pas de <strong>recopier et cocher tes réponses aux questions 2 et 3</strong> directement sur ta fiche papier :
+              <span class="font-bold underline">Liste 1 et Liste 3</span> pour la question 2, et <span class="font-bold underline">pile plate</span> pour la question 3.
+            </p>
+            <p id="warn-sheet-1" class="hidden text-xs font-extrabold text-rose-600 mt-1.5">
+              ⚠️ Coche d'abord la case « Fait sur ma feuille » à droite avant de passer à l'étape suivante !
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+          <label id="label-sheet-1" class="flex items-center gap-2.5 bg-white px-4 py-2.5 rounded-xl border-2 border-amber-400 cursor-pointer hover:bg-amber-100/60 transition shadow-sm">
+            <input type="checkbox" id="check-sheet-1" onchange="toggleSheetCheck(1)" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">
+            <span id="text-sheet-1" class="font-extrabold text-xs sm:text-sm text-slate-800">J'ai recopié sur ma feuille ✓</span>
+          </label>
+          <button onclick="tryNextStep(1, 2)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl shadow flex items-center justify-center gap-2 transition text-sm">
+            <span>Étape 2 : Schéma électrique</span>
+            <span>➔</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ÉTAPE 2 : SCHÉMA ÉLECTRIQUE NORMALISÉ (Q4a)
+    =========================================== -->
+    <section id="step-2" class="step-section hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+        <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Étape 2 • Question 4a : Schématiser le circuit de la Liste 3</span>
+        <h2 class="text-xl font-extrabold text-slate-800 mt-0.5">4- On réalise le circuit de la liste 3 : Règles du schéma électrique</h2>
+
+        <!-- Règles et symboles -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
+          <div class="lg:col-span-5 bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-2.5">
+            <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+              <span>📏 Règles à respecter pour tracer un schéma :</span>
+            </h3>
+            <ul class="text-xs sm:text-sm text-slate-700 space-y-2 list-disc list-inside leading-relaxed">
+              <li>Le schéma doit se faire au <strong>crayon à papier</strong> et à la <strong>règle</strong>.</li>
+              <li>Dans un circuit en série, les dipôles forment une boucle schématisée par un <strong>rectangle</strong>.</li>
+              <li>Les symboles des dipôles doivent être placés <strong>au milieu des côtés</strong> du rectangle, <strong>jamais dans les coins</strong>.</li>
+              <li>Les composants doivent être représentés <strong>dans l'ordre par rapport à la pile</strong>.</li>
+            </ul>
+          </div>
+
+          <!-- Tableau des symboles normalisés -->
+          <div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-800 text-white text-xs font-bold px-4 py-2 uppercase tracking-wider">
+              Doc : Les symboles électriques normalisés
+            </div>
+            <div class="grid grid-cols-3 sm:grid-cols-7 divide-x divide-y sm:divide-y-0 divide-slate-200 text-center">
+              <!-- Pile -->
+              <div class="p-2 flex flex-col items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-700">Pile</span>
+                <svg viewBox="0 0 80 50" class="w-14 h-10 my-1">
+                  <line x1="5" y1="25" x2="34" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+                  <line x1="34" y1="8" x2="34" y2="42" stroke="#0f172a" stroke-width="2.5"/>
+                  <line x1="46" y1="15" x2="46" y2="35" stroke="#0f172a" stroke-width="5"/>
+                  <line x1="46" y1="25" x2="75" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+                  <text x="20" y="16" font-size="12" font-weight="bold" fill="#dc2626">+</text>
+                  <text x="53" y="16" font-size="13" font-weight="bold" fill="#1e293b">-</text>
+                </svg>
+                <span class="text-[10px] text-slate-500">Grande barre = +</span>
+              </div>
+              <!-- Générateur -->
+              <div class="p-2 flex flex-col items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-700">Générateur</span>
+                <svg viewBox="0 0 80 50" class="w-14 h-10 my-1">
+                  <line x1="5" y1="25" x2="24" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+                  <circle cx="40" cy="25" r="15" fill="white" stroke="#0f172a" stroke-width="2.5"/>
+                  <text x="40" y="30" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">G</text>
+                  <line x1="56" y1="25" x2="75" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+                </svg>
+                <span class="text-[10px] text-slate-500">Cercle G</span>
+              </div>
+              <!-- Lampe -->
+              <div class="p-2 flex flex-col items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-700">Lampe</span>
+                <svg viewBox="0 0 80 50" class="w-14 h-10 my-1">
+                  <line x1="5" y1="25" x2="24" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+                  <circle cx="40" cy="25" r="15" fill="white" stroke="#0f172a" stroke-width="2.5"/>
+                  <line x1="29.5" y1="14.5" x2="50.5" y2="35.5" stroke="#0f172a" stroke-width="2.5"/>
+                  <line x1="29.5" y1="35.5" x2="50.5" y2="14.5" stroke="#0f172a" stroke-width="2.5"/>
+                  <line x1="56" y1="25" x2="75" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+                </svg>
+                <span class="text-[10px] text-slate-500">Croix dans cercle</span>
+              </div>
+              <!-- Interrupteur ouvert -->
+              <div class="p-2 flex flex-col items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-700">Inter. ouvert</span>
+                <svg viewBox="0 0 80 50" class="w-14 h-10 my-1">
+                  <line x1="5" y1="30" x2="26" y2="30" stroke="#0f172a" stroke-width="2.5"/>
+                  <circle cx="26" cy="30" r="3" fill="#0f172a"/>
+                  <line x1="26" y1="30" x2="50" y2="12" stroke="#0f172a" stroke-width="2.5"/>
+                  <circle cx="54" cy="30" r="3" fill="#0f172a"/>
+                  <line x1="54" y1="30" x2="75" y2="30" stroke="#0f172a" stroke-width="2.5"/>
+                </svg>
+                <span class="text-[10px] text-rose-600 font-semibold">Position O</span>
+              </div>
+              <!-- Interrupteur fermé -->
+              <div class="p-2 flex flex-col items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-700">Inter. fermé</span>
+                <svg viewBox="0 0 80 50" class="w-14 h-10 my-1">
+                  <line x1="5" y1="30" x2="26" y2="30" stroke="#0f172a" stroke-width="2.5"/>
+                  <circle cx="26" cy="30" r="3" fill="#0f172a"/>
+                  <line x1="26" y1="30" x2="54" y2="30" stroke="#0f172a" stroke-width="2.5"/>
+                  <circle cx="54" cy="30" r="3" fill="#0f172a"/>
+                  <line x1="54" y1="30" x2="75" y2="30" stroke="#0f172a" stroke-width="2.5"/>
+                </svg>
+                <span class="text-[10px] text-emerald-600 font-semibold">Position I</span>
+              </div>
+              <!-- Moteur -->
+              <div class="p-2 flex flex-col items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-700">Moteur</span>
+                <svg viewBox="0 0 80 50" class="w-14 h-10 my-1">
+                  <line x1="5" y1="25" x2="24" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+                  <circle cx="40" cy="25" r="15" fill="white" stroke="#0f172a" stroke-width="2.5"/>
+                  <text x="40" y="30" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">M</text>
+                  <line x1="56" y1="25" x2="75" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+                </svg>
+                <span class="text-[10px] text-slate-500">Cercle M</span>
+              </div>
+              <!-- Fil -->
+              <div class="p-2 flex flex-col items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-700">Fil connexion</span>
+                <svg viewBox="0 0 80 50" class="w-14 h-10 my-1">
+                  <line x1="10" y1="25" x2="70" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+                </svg>
+                <span class="text-[10px] text-slate-500">Trait à la règle</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Constructeur interactif du schéma de la liste 3 + Autoévaluation -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <h3 class="font-bold text-slate-800 text-base">
+                ✏️ 4a- Construis le schéma électrique du circuit 3
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Observe le dessin du montage de la <strong>Liste 3</strong> ci-dessous, puis clique sur les <strong>3 emplacements (Gauche, Bas, Droite)</strong> du rectangle pour placer chaque symbole dans le bon ordre !
+              </p>
+            </div>
+            <button onclick="resetSchematic()" class="text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition">
+              🔄 Réinitialiser
+            </button>
+          </div>
+
+          <!-- RAPPEL DU DESSIN DU CIRCUIT DE LA LISTE 3 -->
+          <div class="mb-4 bg-slate-900 rounded-xl p-3 border border-slate-800 text-white">
+            <div class="flex items-center justify-between text-xs text-amber-300 font-bold mb-1.5 px-1">
+              <span>👁️ Modèle : Dessin du montage réel de la Liste 3</span>
+              <span class="text-[11px] text-slate-300 font-normal">Suis les fils depuis la borne + (à gauche) jusqu'à la borne - (à droite)</span>
+            </div>
+            <div class="bg-slate-950 rounded-lg p-1.5 flex items-center justify-center">
+              <svg viewBox="0 0 540 185" class="w-full max-w-[460px] h-auto">
+                <!-- Pile 4,5V en haut au centre -->
+                <rect x="215" y="12" width="90" height="58" rx="6" fill="#1d4ed8" stroke="#93c5fd" stroke-width="2"/>
+                <rect x="215" y="28" width="90" height="22" fill="#facc15"/>
+                <text x="260" y="43" text-anchor="middle" font-size="10" font-weight="bold" fill="#0f172a">PILE 4,5 V</text>
+                <!-- Lames laiton + (gauche) et - (droite) -->
+                <path d="M 235 12 L 235 4 L 222 4" fill="none" stroke="#eab308" stroke-width="4" stroke-linecap="round"/>
+                <path d="M 285 12 L 285 3 L 302 3" fill="none" stroke="#eab308" stroke-width="4" stroke-linecap="round"/>
+                <text x="235" y="24" text-anchor="middle" font-size="12" font-weight="extrabold" fill="#ef4444">+</text>
+                <text x="285" y="24" text-anchor="middle" font-size="13" font-weight="extrabold" fill="#ffffff">-</text>
+
+                <!-- Fil 1 (Rouge) : Borne + (gauche) vers Lampe (en bas à gauche) -->
+                <path d="M 225 5 C 120 5, 95 60, 125 135" fill="none" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>
+                <!-- Pince croco rouge sur + -->
+                <polygon points="215,0 230,5 215,10" fill="#dc2626" stroke="#fecaca" stroke-width="1"/>
+                <text x="92" y="65" font-size="11" font-weight="bold" fill="#fca5a5">Côté gauche</text>
+
+                <!-- Lampe en bas à gauche -->
+                <rect x="120" y="130" width="60" height="16" rx="3" fill="#475569" stroke="#94a3b8" stroke-width="1.5"/>
+                <circle cx="125" cy="138" r="3.5" fill="#ef4444"/>
+                <circle cx="175" cy="138" r="3.5" fill="#3b82f6"/>
+                <rect x="138" y="116" width="24" height="15" rx="2" fill="#94a3b8"/>
+                <circle cx="150" cy="96" r="20" fill="#fef08a" stroke="#facc15" stroke-width="2.5"/>
+                <path d="M 143 114 L 146 94 L 154 94 L 157 114" fill="none" stroke="#ca8a04" stroke-width="2"/>
+                <text x="150" y="164" text-anchor="middle" font-size="11" font-weight="bold" fill="#fde047">Lampe</text>
+
+                <!-- Fil 2 (Bleu) : Lampe vers Interrupteur (en bas à droite) -->
+                <path d="M 175 138 Q 260 165 340 138" fill="none" stroke="#3b82f6" stroke-width="4" stroke-linecap="round"/>
+
+                <!-- Interrupteur en bas à droite -->
+                <rect x="330" y="124" width="85" height="24" rx="5" fill="#334155" stroke="#94a3b8" stroke-width="1.5"/>
+                <circle cx="344" cy="136" r="4" fill="#eab308"/>
+                <circle cx="400" cy="136" r="4" fill="#eab308"/>
+                <line x1="344" y1="136" x2="400" y2="136" stroke="#eab308" stroke-width="3.5" stroke-linecap="round"/>
+                <text x="372" y="164" text-anchor="middle" font-size="11" font-weight="bold" fill="#6ee7b7">Interrupteur</text>
+
+                <!-- Fil 3 (Noir/Bleu) : Interrupteur vers Borne - (droite) -->
+                <path d="M 400 136 C 435 80, 400 5, 296 4" fill="none" stroke="#60a5fa" stroke-width="4" stroke-linecap="round"/>
+                <!-- Pince croco noire sur - -->
+                <polygon points="308,-1 293,4 308,9" fill="#1e293b" stroke="#cbd5e1" stroke-width="1"/>
+                <text x="415" y="65" font-size="11" font-weight="bold" fill="#93c5fd">Côté droit</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Palette de sélection rapide AVEC NOM + SYMBOLE -->
+          <div class="mb-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div class="text-xs font-bold text-slate-600 mb-2">
+              1️⃣ Choisis d'abord l'élément avec son symbole (ou clique directement sur un côté du rectangle) :
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="paletteButtons">
+              <!-- Lampe -->
+              <button onclick="setActiveTool('lampe')" id="tool-lampe" class="tool-btn p-2 rounded-xl text-xs font-bold border-2 border-blue-600 bg-blue-50 text-blue-900 flex flex-col items-center gap-1 shadow-sm transition">
+                <span>💡 Lampe</span>
+                <svg viewBox="0 0 70 34" class="w-14 h-7">
+                  <line x1="4" y1="17" x2="21" y2="17" stroke="#0f172a" stroke-width="2.5"/>
+                  <circle cx="35" cy="17" r="13" fill="white" stroke="#0f172a" stroke-width="2.5"/>
+                  <line x1="26" y1="8" x2="44" y2="26" stroke="#0f172a" stroke-width="2.5"/>
+                  <line x1="26" y1="26" x2="44" y2="8" stroke="#0f172a" stroke-width="2.5"/>
+                  <line x1="49" y1="17" x2="66" y2="17" stroke="#0f172a" stroke-width="2.5"/>
+                </svg>
+              </button>
+
+              <!-- Interrupteur fermé -->
+              <button onclick="setActiveTool('inter_ferme')" id="tool-inter_ferme" class="tool-btn p-2 rounded-xl text-xs font-bold border-2 border-slate-200 bg-white text-slate-700 hover:border-blue-300 flex flex-col items-center gap-1 transition">
+                <span>🔘 Inter. fermé</span>
+                <svg viewBox="0 0 70 34" class="w-14 h-7">
+                  <line x1="4" y1="20" x2="22" y2="20" stroke="#0f172a" stroke-width="2.5"/>
+                  <circle cx="22" cy="20" r="3" fill="#0f172a"/>
+                  <line x1="22" y1="20" x2="48" y2="20" stroke="#059669" stroke-width="3"/>
+                  <circle cx="48" cy="20" r="3" fill="#0f172a"/>
+                  <line x1="48" y1="20" x2="66" y2="20" stroke="#0f172a" stroke-width="2.5"/>
+                </svg>
+              </button>
+
+              <!-- Interrupteur ouvert -->
+              <button onclick="setActiveTool('inter_ouvert')" id="tool-inter_ouvert" class="tool-btn p-2 rounded-xl text-xs font-bold border-2 border-slate-200 bg-white text-slate-700 hover:border-blue-300 flex flex-col items-center gap-1 transition">
+                <span>🔘 Inter. ouvert</span>
+                <svg viewBox="0 0 70 34" class="w-14 h-7">
+                  <line x1="4" y1="22" x2="22" y2="22" stroke="#0f172a" stroke-width="2.5"/>
+                  <circle cx="22" cy="22" r="3" fill="#0f172a"/>
+                  <line x1="22" y1="22" x2="45" y2="7" stroke="#e11d48" stroke-width="3"/>
+                  <circle cx="48" cy="22" r="3" fill="#0f172a"/>
+                  <line x1="48" y1="22" x2="66" y2="22" stroke="#0f172a" stroke-width="2.5"/>
+                </svg>
+              </button>
+
+              <!-- Fil de connexion -->
+              <button onclick="setActiveTool('fil')" id="tool-fil" class="tool-btn p-2 rounded-xl text-xs font-bold border-2 border-slate-200 bg-white text-slate-700 hover:border-blue-300 flex flex-col items-center gap-1 transition">
+                <span>➖ Fil de connexion</span>
+                <svg viewBox="0 0 70 34" class="w-14 h-7">
+                  <line x1="6" y1="17" x2="64" y2="17" stroke="#0f172a" stroke-width="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Zone SVG du schéma rectangulaire -->
+          <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-3 flex items-center justify-center relative">
+            <svg id="schematicSvg" viewBox="0 0 500 290" class="w-full max-w-[460px] h-auto select-none">
+              <!-- Grille cahier légère -->
+              <defs>
+                <pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="500" height="290" fill="url(#smallGrid)" rx="8"/>
+
+              <!-- Rectangle de base (4 côtés tracés à la règle) -->
+              <!-- Haut (Pile déjà placée comme repère de départ) -->
+              <line x1="90" y1="60" x2="232" y2="60" stroke="#0f172a" stroke-width="3"/>
+              <line x1="268" y1="60" x2="410" y2="60" stroke="#0f172a" stroke-width="3"/>
+              <!-- Symbole Pile en haut au milieu -->
+              <g id="sch-top-pile">
+                <rect x="215" y="25" width="70" height="65" fill="transparent"/>
+                <line x1="232" y1="34" x2="232" y2="86" stroke="#0f172a" stroke-width="3"/>
+                <line x1="268" y1="45" x2="268" y2="75" stroke="#0f172a" stroke-width="6"/>
+                <text x="214" y="45" font-size="16" font-weight="bold" fill="#dc2626">+</text>
+                <text x="278" y="45" font-size="18" font-weight="bold" fill="#0f172a">-</text>
+                <text x="250" y="20" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">Pile (départ)</text>
+              </g>
+
+              <!-- Coins du rectangle (interdits aux symboles) -->
+              <circle cx="90" cy="60" r="3.5" fill="#0f172a"/>
+              <circle cx="410" cy="60" r="3.5" fill="#0f172a"/>
+              <circle cx="90" cy="230" r="3.5" fill="#0f172a"/>
+              <circle cx="410" cy="230" r="3.5" fill="#0f172a"/>
+
+              <!-- Côté GAUCHE (cliquable) -->
+              <g id="slot-left" onclick="placeOnSlot('left')" class="cursor-pointer group"></g>
+
+              <!-- Côté BAS (cliquable) -->
+              <g id="slot-bottom" onclick="placeOnSlot('bottom')" class="cursor-pointer group"></g>
+
+              <!-- Côté DROIT (cliquable) -->
+              <g id="slot-right" onclick="placeOnSlot('right')" class="cursor-pointer group"></g>
+            </svg>
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+            <button onclick="checkSchematic()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-sm transition">
+              ✔️ Vérifier mon schéma du circuit 3
+            </button>
+            <div id="feedback-schema" class="text-xs sm:text-sm font-semibold hidden flex-1"></div>
+          </div>
+        </div>
+
+        <!-- Grille d'Autoévaluation officielle de la fiche -->
+        <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+          <div>
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 mb-4">
+              <h3 class="font-extrabold text-indigo-950 text-sm uppercase tracking-wider">
+                📋 Autoévaluation (sur ton cahier / ta fiche)
+              </h3>
+              <p class="text-xs text-indigo-800 mt-1">
+                Après avoir construit le modèle ci-contre, trace le schéma sur ta feuille au <strong>crayon à papier et à la règle</strong>, puis coche chaque critère réussi :
+              </p>
+            </div>
+
+            <div class="space-y-2.5">
+              <div class="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Mon schéma est réussi si :</div>
+
+              <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                <input type="checkbox" class="autoeval-check w-4 h-4 text-emerald-600 rounded mt-0.5" onchange="updateAutoEvalScore()">
+                <span class="text-xs sm:text-sm text-slate-800 font-medium">Il est propre, lisible et réalisé au <strong>crayon à papier</strong>.</span>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                <input type="checkbox" class="autoeval-check w-4 h-4 text-emerald-600 rounded mt-0.5" onchange="updateAutoEvalScore()">
+                <span class="text-xs sm:text-sm text-slate-800 font-medium">L'allure générale est un <strong>rectangle</strong>.</span>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                <input type="checkbox" class="autoeval-check w-4 h-4 text-emerald-600 rounded mt-0.5" onchange="updateAutoEvalScore()">
+                <span class="text-xs sm:text-sm text-slate-800 font-medium">Chaque composant est représenté par son <strong>symbole</strong>.</span>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                <input type="checkbox" class="autoeval-check w-4 h-4 text-emerald-600 rounded mt-0.5" onchange="updateAutoEvalScore()">
+                <span class="text-xs sm:text-sm text-slate-800 font-medium">Chaque symbole est placé <strong>au milieu d'un côté</strong> (jamais dans les coins).</span>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                <input type="checkbox" class="autoeval-check w-4 h-4 text-emerald-600 rounded mt-0.5" onchange="updateAutoEvalScore()">
+                <span class="text-xs sm:text-sm text-slate-800 font-medium">Les traits droits sont tracés <strong>à la règle</strong>.</span>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                <input type="checkbox" class="autoeval-check w-4 h-4 text-emerald-600 rounded mt-0.5" onchange="updateAutoEvalScore()">
+                <span class="text-xs sm:text-sm text-slate-800 font-medium">Les composants sont placés <strong>dans l'ordre par rapport à la pile</strong>.</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="autoEvalSummary" class="mt-4 bg-slate-100 rounded-xl p-3 text-center text-xs font-bold text-slate-600">
+            Critères validés sur ma feuille : 0 / 6
+          </div>
+        </div>
+      </div>
+
+      <!-- RAPPEL FEUILLE PAPIER ÉTAPE 2 -->
+      <div id="reminder-box-2" class="bg-amber-50 border-2 border-amber-400 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-start gap-3.5">
+          <div class="w-11 h-11 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl shrink-0 shadow-sm">
+            📐
+          </div>
+          <div>
+            <h4 class="font-extrabold text-amber-950 text-sm sm:text-base">
+              À faire sur ta feuille d'activité avant de passer à l'étape 3 !
+            </h4>
+            <p class="text-xs sm:text-sm text-amber-900 mt-0.5 leading-relaxed">
+              As-tu bien <strong>tracé le schéma électrique du circuit 3 (question 4a)</strong> au crayon à papier et à la règle dans le cadre de ta feuille, et coché ta grille d'autoévaluation ?
+            </p>
+            <p id="warn-sheet-2" class="hidden text-xs font-extrabold text-rose-600 mt-1.5">
+              ⚠️ Coche d'abord la case « J'ai tracé le schéma sur ma feuille » avant de continuer !
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+          <button onclick="goToStep(1)" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm transition">
+            ⬅ Retour
+          </button>
+          <label id="label-sheet-2" class="flex items-center gap-2.5 bg-white px-4 py-2.5 rounded-xl border-2 border-amber-400 cursor-pointer hover:bg-amber-100/60 transition shadow-sm">
+            <input type="checkbox" id="check-sheet-2" onchange="toggleSheetCheck(2)" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">
+            <span id="text-sheet-2" class="font-extrabold text-xs sm:text-sm text-slate-800">J'ai tracé sur ma feuille ✓</span>
+          </label>
+          <button onclick="tryNextStep(2, 3)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl shadow flex items-center justify-center gap-2 transition text-sm">
+            <span>Étape 3 : Interrupteur O / I</span>
+            <span>➔</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ÉTAPE 3 : FOCUS PÉDAGOGIQUE INTERRUPTEUR OUVERT / FERMÉ (Q4b, Q4c)
+    =========================================== -->
+    <section id="step-3" class="step-section hidden space-y-6">
+      <!-- Bannière anti-confusion -->
+      <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-2xl p-5 text-white shadow-md">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <span class="inline-block bg-slate-950/30 text-amber-100 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+              ⚠️ Piège classique à éviter absolument !
+            </span>
+            <h2 class="text-xl sm:text-2xl font-extrabold">
+              Ne confonds pas « Interrupteur OUVERT / FERMÉ » et « Lampe ALLUMÉE / ÉTEINTE » !
+            </h2>
+            <p class="text-xs sm:text-sm text-amber-50 leading-relaxed max-w-3xl">
+              Dans la vie de tous les jours, on dit parfois <em>« ouvre la lumière »</em> ou <em>« ouvre le robinet »</em>.
+              <strong>En électricité, c'est l'inverse !</strong> Pense à un <strong>pont-levis</strong> sur une route :
+            </p>
+          </div>
+          <div class="bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl p-3 text-xs shrink-0 space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-rose-600 font-extrabold">Position O</span>
+              <span>Pont <strong>OUVERT</strong> (levé) = Route coupée = Lampe <strong>ÉTEINTE</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-emerald-600 font-extrabold">Position I</span>
+              <span>Pont <strong>FERMÉ</strong> (abaissé) = Route continue = Lampe <strong>ALLUMÉE</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulateur synchronisé : Analogie du Pont-Levis + Circuit électrique -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <h3 class="font-extrabold text-slate-800 text-lg">
+              🔬 Simulateur interactif : Manipule l'interrupteur et un fil du circuit
+            </h3>
+            <p class="text-xs text-slate-500">
+              Actionne les boutons ci-dessous pour observer simultanément le pont-levis, le schéma électrique et la lampe.
+            </p>
+          </div>
+
+          <!-- Commandes principales -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="setStep3Switch(false)" id="btnSimOpen" class="px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 transition flex items-center gap-2 bg-rose-600 text-white border-rose-600 shadow-sm">
+              <span>⭕ Ouvrir l'interrupteur (Position O)</span>
+            </button>
+            <button onclick="setStep3Switch(true)" id="btnSimClose" class="px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 transition flex items-center gap-2 bg-white text-emerald-700 border-emerald-500 hover:bg-emerald-50">
+              <span>➖ Fermer l'interrupteur (Position I)</span>
+            </button>
+            <button onclick="toggleStep3Wire()" id="btnSimWire" class="px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-1.5">
+              <span>🔌 Débrancher un fil (Question 4c)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Double visualisation SVG : Pont-levis à gauche, Circuit à droite -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-5">
+          <!-- 1. Analogie du Pont-levis -->
+          <div class="bg-slate-900 rounded-2xl p-4 text-white border border-slate-800 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-300">🌉 Analogie : Le pont-levis sur la route</span>
+              <span id="bridgeBadge" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                Pont OUVERT (levé) : passage impossible
+              </span>
+            </div>
+
+            <div class="bg-slate-950 rounded-xl p-2 border border-slate-800">
+              <svg viewBox="0 0 420 190" class="w-full h-auto">
+                <!-- Ciel & Rivière -->
+                <rect x="0" y="0" width="420" height="125" fill="#0f172a"/>
+                <rect x="0" y="125" width="420" height="65" fill="#0284c7"/>
+                <path d="M 150 125 L 270 125 L 290 190 L 130 190 Z" fill="#38bdf8" opacity="0.4"/>
+                <text x="210" y="165" text-anchor="middle" font-size="11" font-weight="bold" fill="#e0f2fe">Rivière (coupure)</text>
+
+                <!-- Route gauche et droite -->
+                <rect x="0" y="118" width="185" height="14" fill="#475569"/>
+                <line x1="10" y1="125" x2="175" y2="125" stroke="#facc15" stroke-width="2" stroke-dasharray="10 8"/>
+                <rect x="255" y="118" width="165" height="14" fill="#475569"/>
+                <line x1="265" y1="125" x2="410" y2="125" stroke="#facc15" stroke-width="2" stroke-dasharray="10 8"/>
+
+                <!-- Piliers du pont -->
+                <rect x="175" y="95" width="14" height="55" rx="2" fill="#94a3b8"/>
+                <rect x="251" y="95" width="14" height="55" rx="2" fill="#94a3b8"/>
+
+                <!-- Tablier mobile du pont-levis -->
+                <g id="bridgeLeaf" class="bridge-leaf" style="transform: rotate(-42deg);">
+                  <rect x="185" y="118" width="70" height="12" rx="2" fill="#f59e0b" stroke="#fef08a" stroke-width="1.5"/>
+                </g>
+
+                <!-- Feu tricolore du pont -->
+                <circle id="bridgeLight" cx="165" cy="80" r="8" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/>
+
+                <!-- Voitures = Courant électrique -->
+                <g id="carsGroup">
+                  <!-- Voiture 1 -->
+                  <g id="car1" transform="translate(80, 98)">
+                    <rect x="0" y="8" width="38" height="12" rx="3" fill="#38bdf8"/>
+                    <rect x="7" y="2" width="22" height="9" rx="2" fill="#bae6fd"/>
+                    <circle cx="9" cy="20" r="4" fill="#0f172a" stroke="#e2e8f0" stroke-width="1.5"/>
+                    <circle cx="29" cy="20" r="4" fill="#0f172a" stroke="#e2e8f0" stroke-width="1.5"/>
+                    <text x="19" y="17" text-anchor="middle" font-size="7" font-weight="bold" fill="#0f172a">⚡</text>
+                  </g>
+                </g>
+
+                <!-- Texte explicatif dans le SVG -->
+                <text id="bridgeSvgText" x="210" y="32" text-anchor="middle" font-size="13" font-weight="bold" fill="#fda4af">
+                  Pont OUVERT = Il y a un trou, les voitures sont bloquées !
+                </text>
+              </svg>
+            </div>
+
+            <p id="bridgeExplanation" class="text-xs text-slate-300 mt-2.5 leading-relaxed">
+              Quand le pont est <strong class="text-rose-400">OUVERT</strong> (levé), la route est interrompue : aucune voiture ne peut traverser. C'est exactement pareil pour le courant électrique !
+            </p>
+          </div>
+
+          <!-- 2. Schéma électrique animé synchronisé -->
+          <div class="bg-slate-900 rounded-2xl p-4 text-white border border-slate-800 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-300">⚡ Circuit électrique (Liste 3)</span>
+              <span id="circuitBadge" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                Interrupteur OUVERT (O) ➔ Lampe ÉTEINTE
+              </span>
+            </div>
+
+            <div class="bg-slate-950 rounded-xl p-2 border border-slate-800">
+              <svg viewBox="0 0 420 190" class="w-full h-auto">
+                <!-- Fils du rectangle -->
+                <!-- Haut : Pile -->
+                <line x1="70" y1="40" x2="195" y2="40" stroke="#94a3b8" stroke-width="3.5"/>
+                <line x1="225" y1="40" x2="350" y2="40" stroke="#94a3b8" stroke-width="3.5"/>
+                <line x1="195" y1="20" x2="195" y2="60" stroke="#f8fafc" stroke-width="3.5"/>
+                <line x1="225" y1="28" x2="225" y2="52" stroke="#f8fafc" stroke-width="6"/>
+                <text x="180" y="30" font-size="13" font-weight="bold" fill="#f87171">+</text>
+                <text x="235" y="30" font-size="15" font-weight="bold" fill="#94a3b8">-</text>
+
+                <!-- Gauche : Lampe -->
+                <line x1="70" y1="40" x2="70" y2="75" stroke="#94a3b8" stroke-width="3.5"/>
+                <line x1="70" y1="125" x2="70" y2="155" stroke="#94a3b8" stroke-width="3.5"/>
+
+                <!-- Bas : Interrupteur -->
+                <line x1="70" y1="155" x2="175" y2="155" stroke="#94a3b8" stroke-width="3.5"/>
+                <line x1="245" y1="155" x2="350" y2="155" stroke="#94a3b8" stroke-width="3.5"/>
+
+                <!-- Droite : Fil (qui peut être débranché en 4c) -->
+                <g id="rightWireConnected">
+                  <line x1="350" y1="40" x2="350" y2="155" stroke="#94a3b8" stroke-width="3.5"/>
+                </g>
+                <g id="rightWireDisconnected" class="hidden">
+                  <line x1="350" y1="40" x2="350" y2="85" stroke="#94a3b8" stroke-width="3.5"/>
+                  <line x1="350" y1="155" x2="385" y2="115" stroke="#ef4444" stroke-width="3.5"/>
+                  <circle cx="350" cy="85" r="4" fill="#ef4444"/>
+                  <circle cx="385" cy="115" r="4" fill="#ef4444"/>
+                  <text x="335" y="105" text-anchor="end" font-size="11" font-weight="bold" fill="#fda4af">Fil débranché !</text>
+                </g>
+
+                <!-- Flux de courant animé (visible uniquement si fermé + fil branché) -->
+                <path id="simCurrentPath" d="M 195 40 L 70 40 L 70 155 L 350 155 L 350 40 L 225 40" fill="none" stroke="#facc15" stroke-width="4" class="current-flow hidden"/>
+
+                <!-- Symbole de la lampe à gauche -->
+                <g id="simLampGroup">
+                  <circle id="simLampHalo" cx="70" cy="100" r="32" fill="#facc15" opacity="0" class="transition-opacity duration-300"/>
+                  <circle id="simLampCircle" cx="70" cy="100" r="22" fill="#0f172a" stroke="#f8fafc" stroke-width="3"/>
+                  <line x1="55" y1="85" x2="85" y2="115" stroke="#f8fafc" stroke-width="3"/>
+                  <line x1="55" y1="115" x2="85" y2="85" stroke="#f8fafc" stroke-width="3"/>
+                  <text id="simLampStateText" x="112" y="104" font-size="12" font-weight="bold" fill="#94a3b8">Lampe ÉTEINTE</text>
+                </g>
+
+                <!-- Symbole de l'interrupteur en bas -->
+                <circle cx="175" cy="155" r="5" fill="#f8fafc"/>
+                <circle cx="245" cy="155" r="5" fill="#f8fafc"/>
+                <!-- Lame mobile de l'interrupteur -->
+                <line id="simSwitchBlade" x1="175" y1="155" x2="238" y2="120" stroke="#f43f5e" stroke-width="4.5" stroke-linecap="round" class=" transition-all duration-300"/>
+                <text id="simSwitchLabel" x="210" y="180" text-anchor="middle" font-size="12" font-weight="bold" fill="#fda4af">
+                  Interrupteur OUVERT (Position O)
+                </text>
+              </svg>
+            </div>
+
+            <p id="circuitExplanation" class="text-xs text-slate-300 mt-2.5 leading-relaxed">
+              L'interrupteur est <strong class="text-rose-400">OUVERT (position O)</strong> : le contact métallique est levé, le courant électrique ne peut pas passer. La lampe est donc <strong>éteinte</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Questions 4b et 4c -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Question 4b -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <span class="bg-amber-500 text-slate-950 w-7 h-7 rounded-full text-xs flex items-center justify-center font-extrabold shrink-0">4b</span>
+              <span>La lampe brille-t-elle lorsque l'interrupteur est ouvert (O) ou lorsqu'il est fermé (I) ? <span class="text-slate-500 font-normal text-sm">(Coche la bonne case)</span></span>
+            </h3>
+
+            <div class="grid grid-cols-2 gap-3 mt-4">
+              <label class="flex items-center gap-3 p-3.5 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="radio" name="q4b" id="q4b-ouvert" value="ouvert" class="w-4 h-4 text-blue-600">
+                <div>
+                  <div class="font-bold text-sm text-slate-800">ouvert (O)</div>
+                  <div class="text-[11px] text-slate-500">Le pont est levé</div>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 p-3.5 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="radio" name="q4b" id="q4b-ferme" value="ferme" class="w-4 h-4 text-blue-600">
+                <div>
+                  <div class="font-bold text-sm text-slate-800">fermé (I)</div>
+                  <div class="text-[11px] text-slate-500">Le pont est abaissé</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+            <button onclick="checkQ4b()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition">
+              ✔️ Vérifier la question 4b
+            </button>
+            <div id="feedback-q4b" class="text-xs sm:text-sm font-semibold hidden"></div>
+          </div>
+        </div>
+
+        <!-- Question 4c (FORMULATION EXACTE DEMANDÉE) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                <span class="bg-amber-500 text-slate-950 w-7 h-7 rounded-full text-xs flex items-center justify-center font-extrabold shrink-0">4c</span>
+                <span>Quand la lampe brille, ouvre la boucle du circuit en débranchant un fil. Que constate-t-on ?</span>
+              </h3>
+              <button onclick="testDisconnectForQ4c()" class="shrink-0 text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-2.5 py-1.5 rounded-lg transition">
+                🔌 Tester là-haut
+              </button>
+            </div>
+
+            <div class="space-y-2.5 mt-4">
+              <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="radio" name="q4c" id="q4c-1" value="brille_encore" class="w-4 h-4 text-blue-600">
+                <span class="text-xs sm:text-sm font-medium text-slate-800">La lampe continue de briller car l'interrupteur est fermé.</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="radio" name="q4c" id="q4c-2" value="eteint" class="w-4 h-4 text-blue-600">
+                <span class="text-xs sm:text-sm font-medium text-slate-800">La lampe s'éteint (elle ne brille plus) car la boucle est ouverte : le courant ne circule plus.</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                <input type="radio" name="q4c" id="q4c-3" value="grille" class="w-4 h-4 text-blue-600">
+                <span class="text-xs sm:text-sm font-medium text-slate-800">La lampe brille deux fois plus fort.</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+            <button onclick="checkQ4c()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition">
+              ✔️ Vérifier la question 4c
+            </button>
+            <div id="feedback-q4c" class="text-xs sm:text-sm font-semibold hidden"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RAPPEL FEUILLE PAPIER ÉTAPE 3 -->
+      <div id="reminder-box-3" class="bg-amber-50 border-2 border-amber-400 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-start gap-3.5">
+          <div class="w-11 h-11 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl shrink-0 shadow-sm">
+            ✍️
+          </div>
+          <div>
+            <h4 class="font-extrabold text-amber-950 text-sm sm:text-base">
+              À faire sur ta feuille d'activité avant de passer à l'étape 4 !
+            </h4>
+            <p class="text-xs sm:text-sm text-amber-900 mt-0.5 leading-relaxed">
+              Recopie tes réponses sur ta fiche papier :
+              <strong>4b :</strong> coche la case <span class="underline font-bold">fermé</span> •
+              <strong>4c :</strong> écris la phrase <em>« On constate que la lampe s'éteint (elle ne brille plus) car la boucle est ouverte. »</em>
+            </p>
+            <p id="warn-sheet-3" class="hidden text-xs font-extrabold text-rose-600 mt-1.5">
+              ⚠️ Coche d'abord la case « J'ai recopié sur ma feuille » avant de passer à l'étape 4 !
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+          <button onclick="goToStep(2)" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm transition">
+            ⬅ Retour
+          </button>
+          <label id="label-sheet-3" class="flex items-center gap-2.5 bg-white px-4 py-2.5 rounded-xl border-2 border-amber-400 cursor-pointer hover:bg-amber-100/60 transition shadow-sm">
+            <input type="checkbox" id="check-sheet-3" onchange="toggleSheetCheck(3)" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">
+            <span id="text-sheet-3" class="font-extrabold text-xs sm:text-sm text-slate-800">J'ai recopié sur ma feuille ✓</span>
+          </label>
+          <button onclick="tryNextStep(3, 4)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl shadow flex items-center justify-center gap-2 transition text-sm">
+            <span>Étape 4 : Je réfléchis (Q5-Q6)</span>
+            <span>➔</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ÉTAPE 4 : JE RÉFLÉCHIS - FAMILLES DE DIPÔLES & BOUCLE (Q5, Q6)
+    =========================================== -->
+    <section id="step-4" class="step-section hidden space-y-6">
+
+      <!-- CONSIGNE IMPORTANTE : LIRE LE VOCABULAIRE D'ABORD -->
+      <div class="bg-indigo-900 text-white rounded-2xl p-5 shadow-md border-2 border-indigo-400">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex items-start gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl shrink-0 font-extrabold shadow">
+              📖
+            </div>
+            <div>
+              <span class="inline-block bg-amber-400 text-slate-950 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Conseil méthodologique • Avant de répondre à la question 5
+              </span>
+              <h2 class="text-lg sm:text-xl font-extrabold mt-1">
+                Lis d'abord très attentivement l'encadré « Vocabulaire » ci-dessous !
+              </h2>
+              <p class="text-xs sm:text-sm text-indigo-100 mt-0.5">
+                Toutes les définitions pour relier correctement chaque composant à sa famille s'y trouvent.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Les 3 définitions du vocabulaire mises en avant -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-3.5">
+            <div class="text-amber-300 font-extrabold text-sm flex items-center gap-1.5">
+              <span>🔋 Générateur :</span>
+            </div>
+            <p class="text-xs sm:text-sm text-white mt-1 leading-relaxed">
+              Dipôle qui <strong>produit (fournit) de l'énergie électrique</strong>.
+            </p>
+          </div>
+
+          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-3.5">
+            <div class="text-emerald-300 font-extrabold text-sm flex items-center gap-1.5">
+              <span>💡 Récepteur :</span>
+            </div>
+            <p class="text-xs sm:text-sm text-white mt-1 leading-relaxed">
+              Dipôle qui <strong>convertit l'énergie électrique reçue</strong> en une autre forme d'énergie.
+            </p>
+          </div>
+
+          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-3.5">
+            <div class="text-sky-300 font-extrabold text-sm flex items-center gap-1.5">
+              <span>🔌 Transfert d'énergie (un) :</span>
+            </div>
+            <p class="text-xs sm:text-sm text-white mt-1 leading-relaxed">
+              <strong>Passage de l'énergie</strong> électrique d'un dipôle à un autre.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Question 5 : Jeu de liaison (Relier) -->
+        <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Étape 4 • Je réfléchis</span>
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-800 mt-0.5">
+            5- Après avoir bien lu le vocabulaire ci-dessus, relie chaque composant à la bonne famille :
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">
+            👉 Clique d'abord sur un <strong>composant à gauche</strong>, puis clique sur sa <strong>famille à droite</strong> pour tracer le trait (ou utilise les menus déroulants).
+          </p>
+
+          <!-- Zone interactive de liaison avec SVG central -->
+          <div class="mt-5 relative" id="matchingContainer">
+            <div class="grid grid-cols-12 items-center gap-2">
+              <!-- Colonne gauche : les 5 composants -->
+              <div class="col-span-5 space-y-2.5 z-10">
+                <button onclick="selectLeftMatch('lampe')" id="match-left-lampe" class="match-left-btn w-full text-left px-3.5 py-2.5 rounded-xl border-2 border-slate-200 bg-slate-50 hover:border-blue-400 font-bold text-xs sm:text-sm flex items-center justify-between transition">
+                  <span>💡 Lampe</span>
+                  <span class="w-3 h-3 rounded-full bg-slate-400" id="dot-left-lampe"></span>
+                </button>
+                <button onclick="selectLeftMatch('interrupteur')" id="match-left-interrupteur" class="match-left-btn w-full text-left px-3.5 py-2.5 rounded-xl border-2 border-slate-200 bg-slate-50 hover:border-blue-400 font-bold text-xs sm:text-sm flex items-center justify-between transition">
+                  <span>🔘 Interrupteur</span>
+                  <span class="w-3 h-3 rounded-full bg-slate-400" id="dot-left-interrupteur"></span>
+                </button>
+                <button onclick="selectLeftMatch('moteur')" id="match-left-moteur" class="match-left-btn w-full text-left px-3.5 py-2.5 rounded-xl border-2 border-slate-200 bg-slate-50 hover:border-blue-400 font-bold text-xs sm:text-sm flex items-center justify-between transition">
+                  <span>⚙️ Moteur</span>
+                  <span class="w-3 h-3 rounded-full bg-slate-400" id="dot-left-moteur"></span>
+                </button>
+                <button onclick="selectLeftMatch('pile')" id="match-left-pile" class="match-left-btn w-full text-left px-3.5 py-2.5 rounded-xl border-2 border-slate-200 bg-slate-50 hover:border-blue-400 font-bold text-xs sm:text-sm flex items-center justify-between transition">
+                  <span>🔋 Pile plate</span>
+                  <span class="w-3 h-3 rounded-full bg-slate-400" id="dot-left-pile"></span>
+                </button>
+                <button onclick="selectLeftMatch('fil')" id="match-left-fil" class="match-left-btn w-full text-left px-3.5 py-2.5 rounded-xl border-2 border-slate-200 bg-slate-50 hover:border-blue-400 font-bold text-xs sm:text-sm flex items-center justify-between transition">
+                  <span>➖ Fil électrique</span>
+                  <span class="w-3 h-3 rounded-full bg-slate-400" id="dot-left-fil"></span>
+                </button>
+              </div>
+
+              <!-- Zone centrale des traits SVG -->
+              <div class="col-span-2 h-[240px] flex items-center justify-center">
+                <svg id="matchingSvg" viewBox="0 0 100 240" class="w-full h-full overflow-visible"></svg>
+              </div>
+
+              <!-- Colonne droite : les 3 familles -->
+              <div class="col-span-5 space-y-5 z-10">
+                <button onclick="selectRightMatch('generateur')" id="match-right-generateur" class="match-right-btn w-full text-left px-3.5 py-3 rounded-xl border-2 border-slate-200 bg-indigo-50/60 hover:border-indigo-500 font-bold text-xs sm:text-sm flex items-center gap-2.5 transition">
+                  <span class="w-3 h-3 rounded-full bg-indigo-500 shrink-0"></span>
+                  <span>Générateur</span>
+                </button>
+
+                <button onclick="selectRightMatch('recepteur')" id="match-right-recepteur" class="match-right-btn w-full text-left px-3.5 py-3 rounded-xl border-2 border-slate-200 bg-amber-50/60 hover:border-amber-500 font-bold text-xs sm:text-sm flex items-center gap-2.5 transition">
+                  <span class="w-3 h-3 rounded-full bg-amber-500 shrink-0"></span>
+                  <span>Récepteur</span>
+                </button>
+
+                <button onclick="selectRightMatch('transfert')" id="match-right-transfert" class="match-right-btn w-full text-left px-3.5 py-3 rounded-xl border-2 border-slate-200 bg-emerald-50/60 hover:border-emerald-500 font-bold text-xs sm:text-sm flex items-center gap-2.5 transition">
+                  <span class="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></span>
+                  <span>Permet le transfert d'énergie électrique</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <button onclick="checkQ5()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition">
+                ✔️ Vérifier mes liaisons (Question 5)
+              </button>
+              <button onclick="resetQ5()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs px-3 py-2 rounded-lg transition">
+                Effacer
+              </button>
+            </div>
+            <div id="feedback-q5" class="text-xs sm:text-sm font-semibold hidden"></div>
+          </div>
+        </div>
+
+        <!-- Colonne droite : Question 6 -->
+        <div class="lg:col-span-4 flex flex-col justify-between space-y-4">
+          <!-- Question 6 : Entoure la bonne réponse -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                <span class="bg-blue-600 text-white w-6 h-6 rounded-full text-xs flex items-center justify-center font-extrabold shrink-0">6</span>
+                <span>Entoure la bonne réponse :</span>
+              </h3>
+
+              <div class="mt-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm sm:text-base leading-relaxed text-slate-800 font-medium">
+                « Pour que le générateur transfère de l'énergie électrique, la boucle formée par le circuit électrique doit être
+                <div class="inline-flex items-center gap-2 mx-1 my-1">
+                  <button onclick="selectQ6('ouverte')" id="q6-btn-ouverte" class="px-3.5 py-1 rounded-full border-2 border-slate-300 bg-white font-extrabold text-sm hover:border-blue-400 transition">
+                    ouverte
+                  </button>
+                  <span class="text-slate-400">/</span>
+                  <button onclick="selectQ6('fermee')" id="q6-btn-fermee" class="px-3.5 py-1 rounded-full border-2 border-slate-300 bg-white font-extrabold text-sm hover:border-blue-400 transition">
+                    fermée
+                  </button>
+                </div>
+                . »
+              </div>
+
+              <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
+                💡 <strong>Astuce :</strong> Rappelle-toi la question 4b et 4c : quand la boucle est ouverte (interrupteur ouvert ou fil débranché), le courant ne passe pas !
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+              <button onclick="checkQ6()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition">
+                ✔️ Vérifier la question 6
+              </button>
+              <div id="feedback-q6" class="text-xs sm:text-sm font-semibold hidden"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RAPPEL FEUILLE PAPIER ÉTAPE 4 -->
+      <div id="reminder-box-4" class="bg-amber-50 border-2 border-amber-400 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-start gap-3.5">
+          <div class="w-11 h-11 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl shrink-0 shadow-sm">
+            ✍️
+          </div>
+          <div>
+            <h4 class="font-extrabold text-amber-950 text-sm sm:text-base">
+              À faire sur ta feuille d'activité avant de passer à l'étape 5 !
+            </h4>
+            <p class="text-xs sm:text-sm text-amber-900 mt-0.5 leading-relaxed">
+              Sur ta fiche papier : <strong>5- Trace les traits à la règle</strong> pour relier chaque composant à sa famille •
+              <strong>6- Entoure le mot « fermée »</strong> dans la phrase.
+            </p>
+            <p id="warn-sheet-4" class="hidden text-xs font-extrabold text-rose-600 mt-1.5">
+              ⚠️ Coche d'abord la case « J'ai recopié sur ma feuille » avant de passer à la conclusion !
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+          <button onclick="goToStep(3)" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm transition">
+            ⬅ Retour
+          </button>
+          <label id="label-sheet-4" class="flex items-center gap-2.5 bg-white px-4 py-2.5 rounded-xl border-2 border-amber-400 cursor-pointer hover:bg-amber-100/60 transition shadow-sm">
+            <input type="checkbox" id="check-sheet-4" onchange="toggleSheetCheck(4)" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">
+            <span id="text-sheet-4" class="font-extrabold text-xs sm:text-sm text-slate-800">J'ai recopié sur ma feuille ✓</span>
+          </label>
+          <button onclick="tryNextStep(4, 5)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl shadow flex items-center justify-center gap-2 transition text-sm">
+            <span>Étape 5 : Je conclus (Q7-Q8)</span>
+            <span>➔</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ÉTAPE 5 : JE CONCLUS & CHAÎNE D'ÉNERGIE (Q7a, Q7b, Q8)
+    =========================================== -->
+    <section id="step-5" class="step-section hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+        <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Étape 5 • Je conclus</span>
+        <h2 class="text-xl font-extrabold text-slate-800 mt-0.5">
+          7a- Indique quelles sont les deux conditions nécessaires dans un circuit électrique pour qu'une lampe reçoive de l'énergie électrique (voir questions 5 et 6) :
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-700 mb-2">
+              Condition n°1 (voir question 5)
+            </div>
+            <p class="text-sm text-slate-800 font-medium flex flex-wrap items-center gap-1.5">
+              Le circuit électrique doit comporter un
+              <select id="q7a-cond1" class="bg-white border-2 border-indigo-300 rounded-lg px-2.5 py-1 font-bold text-indigo-900 focus:outline-none focus:border-indigo-600">
+                <option value="">-- Choisir --</option>
+                <option value="moteur">moteur</option>
+                <option value="generateur">générateur (une pile)</option>
+                <option value="interrupteur">interrupteur ouvert</option>
+              </select>
+              qui produit l'énergie électrique.
+            </p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-700 mb-2">
+              Condition n°2 (voir question 6)
+            </div>
+            <p class="text-sm text-slate-800 font-medium flex flex-wrap items-center gap-1.5">
+              La boucle formée par le circuit électrique doit être
+              <select id="q7a-cond2" class="bg-white border-2 border-indigo-300 rounded-lg px-2.5 py-1 font-bold text-indigo-900 focus:outline-none focus:border-indigo-600">
+                <option value="">-- Choisir --</option>
+                <option value="ouverte">ouverte</option>
+                <option value="fermee">fermée</option>
+              </select>
+              pour que l'énergie électrique soit transférée.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+          <button onclick="checkQ7a()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition">
+            ✔️ Vérifier la question 7a
+          </button>
+          <div id="feedback-q7a" class="text-xs sm:text-sm font-semibold hidden"></div>
+        </div>
+      </div>
+
+      <!-- Question 7b : Chaîne d'énergie de la lampe -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+        <h3 class="text-lg sm:text-xl font-extrabold text-slate-800">
+          7b- Complète la légende de la chaîne d'énergie de la lampe :
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Observe le diagramme de la chaîne d'énergie ci-dessous et complète les numéros <strong>1</strong>, <strong>2</strong> et <strong>3</strong>.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5 items-center">
+          <!-- Diagramme SVG fidèle à la fiche -->
+          <div class="lg:col-span-7 bg-slate-50 rounded-2xl border border-slate-200 p-4 flex items-center justify-center">
+            <svg viewBox="0 0 540 210" class="w-full max-w-[500px] h-auto">
+              <defs>
+                <marker id="arrowHead" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#334155"/>
+                </marker>
+              </defs>
+
+              <!-- Boîte 1 : Source (Pile / Générateur) -->
+              <rect x="15" y="65" width="115" height="75" rx="8" fill="#ffffff" stroke="#1e293b" stroke-width="2.5"/>
+              <circle cx="40" cy="102" r="14" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+              <text x="40" y="107" text-anchor="middle" font-size="14" font-weight="extrabold" fill="#1e40af">1</text>
+              <text id="svgChain1" x="85" y="106" text-anchor="middle" font-size="12" font-weight="bold" fill="#64748b">.......</text>
+
+              <!-- Flèche Énergie 2 -->
+              <line x1="130" y1="102" x2="215" y2="102" stroke="#334155" stroke-width="3" marker-end="url(#arrowHead)"/>
+              <text x="162" y="72" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e293b">Énergie</text>
+              <circle cx="200" cy="68" r="11" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+              <text x="200" y="72" text-anchor="middle" font-size="12" font-weight="extrabold" fill="#92400e">2</text>
+              <text id="svgChain2" x="172" y="92" text-anchor="middle" font-size="11" font-weight="bold" fill="#2563eb"></text>
+
+              <!-- Ovale central : Lampe -->
+              <ellipse cx="275" cy="102" rx="55" ry="40" fill="#fef9c3" stroke="#1e293b" stroke-width="2.5"/>
+              <text x="275" y="107" text-anchor="middle" font-size="15" font-weight="extrabold" fill="#0f172a">Lampe</text>
+
+              <!-- Flèche haute : Énergie 3 -->
+              <line x1="325" y1="84" x2="412" y2="62" stroke="#334155" stroke-width="3" marker-end="url(#arrowHead)"/>
+              <text x="355" y="42" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e293b">Énergie</text>
+              <circle cx="392" cy="38" r="11" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+              <text x="392" y="42" text-anchor="middle" font-size="12" font-weight="extrabold" fill="#166534">3</text>
+              <text id="svgChain3" x="368" y="60" text-anchor="middle" font-size="11" font-weight="bold" fill="#15803d"></text>
+
+              <!-- Flèche basse : Énergie thermique (dissipée) -->
+              <line x1="325" y1="120" x2="412" y2="142" stroke="#334155" stroke-width="3" marker-end="url(#arrowHead)"/>
+              <text x="368" y="158" text-anchor="middle" font-size="11" font-weight="bold" fill="#be123c">Énergie thermique</text>
+              <text x="368" y="172" text-anchor="middle" font-size="10" font-style="italic" fill="#64748b">(énergie dissipée)</text>
+
+              <!-- Boîte droite : Milieu extérieur -->
+              <rect x="420" y="48" width="105" height="110" rx="8" fill="#ffffff" stroke="#1e293b" stroke-width="2.5"/>
+              <text x="472" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#0f172a">Milieu</text>
+              <text x="472" y="116" text-anchor="middle" font-size="13" font-weight="bold" fill="#0f172a">extérieur</text>
+            </svg>
+          </div>
+
+          <!-- Sélecteurs 1, 2, 3 -->
+          <div class="lg:col-span-5 space-y-3.5">
+            <div class="bg-blue-50/70 p-3.5 rounded-xl border border-blue-200 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-full bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center shrink-0">1</span>
+                <span class="text-xs sm:text-sm font-bold text-slate-800">Dipôle qui fournit l'énergie :</span>
+              </div>
+              <select id="q7b-1" onchange="updateChainPreview()" class="bg-white border-2 border-blue-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-bold text-slate-900">
+                <option value="">-- Choisir --</option>
+                <option value="Pile (ou Générateur)">Pile (ou Générateur)</option>
+                <option value="Interrupteur">Interrupteur</option>
+                <option value="Moteur">Moteur</option>
+              </select>
+            </div>
+
+            <div class="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-full bg-amber-500 text-slate-950 font-extrabold text-xs flex items-center justify-center shrink-0">2</span>
+                <span class="text-xs sm:text-sm font-bold text-slate-800">Énergie reçue par la lampe :</span>
+              </div>
+              <select id="q7b-2" onchange="updateChainPreview()" class="bg-white border-2 border-amber-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-bold text-slate-900">
+                <option value="">-- Choisir --</option>
+                <option value="électrique">électrique</option>
+                <option value="lumineuse">lumineuse</option>
+                <option value="mécanique">mécanique</option>
+              </select>
+            </div>
+
+            <div class="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-full bg-emerald-600 text-white font-extrabold text-xs flex items-center justify-center shrink-0">3</span>
+                <span class="text-xs sm:text-sm font-bold text-slate-800">Énergie utile envoyée :</span>
+              </div>
+              <select id="q7b-3" onchange="updateChainPreview()" class="bg-white border-2 border-emerald-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-bold text-slate-900">
+                <option value="">-- Choisir --</option>
+                <option value="électrique">électrique</option>
+                <option value="lumineuse">lumineuse (ou rayonnante)</option>
+                <option value="chimique">chimique</option>
+              </select>
+            </div>
+
+            <div class="pt-2 flex flex-wrap items-center justify-between gap-2">
+              <button onclick="checkQ7b()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-sm transition">
+                ✔️ Vérifier la chaîne d'énergie (7b)
+              </button>
+              <div id="feedback-q7b" class="text-xs sm:text-sm font-semibold hidden"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RAPPEL FEUILLE PAPIER ÉTAPE 5 -->
+      <div id="reminder-box-5" class="bg-amber-50 border-2 border-amber-400 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-start gap-3.5">
+          <div class="w-11 h-11 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl shrink-0 shadow-sm">
+            ✍️
+          </div>
+          <div>
+            <h4 class="font-extrabold text-amber-950 text-sm sm:text-base">
+              Dernière étape : Recopie la conclusion sur ta feuille d'activité !
+            </h4>
+            <p class="text-xs sm:text-sm text-amber-900 mt-0.5 leading-relaxed">
+              Sur ta fiche papier, complète les réponses <strong>7a</strong> (les deux conditions) et la légende de la chaîne d'énergie <strong>7b</strong> (<em>1- Pile / Générateur • 2- électrique • 3- lumineuse</em>).
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+          <label id="label-sheet-5" class="flex items-center gap-2.5 bg-white px-4 py-2.5 rounded-xl border-2 border-amber-400 cursor-pointer hover:bg-amber-100/60 transition shadow-sm">
+            <input type="checkbox" id="check-sheet-5" onchange="toggleSheetCheck(5)" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">
+            <span id="text-sheet-5" class="font-extrabold text-xs sm:text-sm text-slate-800">Toute ma fiche est complétée ✓</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Question 8 : Liens d'entraînement corrigés + QR Codes -->
+      <div class="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl p-5 sm:p-6 text-white shadow-md">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Question 8 • Pour aller plus loin</span>
+            <h3 class="text-lg font-extrabold mt-0.5">8- Je m'entraîne et je teste mes connaissances</h3>
+            <p class="text-xs text-indigo-200 mt-1">
+              Une fois toutes les réponses notées sur ta feuille, clique sur les boutons ou scanne les QR codes pour réviser :
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <!-- Carte 8a -->
+          <div class="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="space-y-2 flex-1">
+              <div class="text-xs text-amber-300 font-extrabold uppercase tracking-wider">8a - Je m'entraîne</div>
+              <div class="font-bold text-sm sm:text-base text-white">Animation de révision interactive</div>
+              <p class="text-[11px] text-indigo-200 font-mono break-all bg-slate-950/50 px-2.5 py-1.5 rounded border border-white/10">
+                https://sstockfeld5-ship-it.github.io/physique_chimie/6e_Ch2_A1_Anim_revisions.html
+              </p>
+              <div class="flex flex-wrap items-center gap-2 pt-1">
+                <a href="https://sstockfeld5-ship-it.github.io/physique_chimie/6e_Ch2_A1_Anim_revisions.html" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-lg shadow transition">
+                  <span>🚀 Ouvrir l'animation (8a)</span>
+                  <span>↗</span>
+                </a>
+                <button onclick="copyActivityLink('https://sstockfeld5-ship-it.github.io/physique_chimie/6e_Ch2_A1_Anim_revisions.html', 'copyBtn8a')" id="copyBtn8a"
+                        class="text-xs bg-white/10 hover:bg-white/20 text-white font-semibold px-2.5 py-2 rounded-lg transition">
+                  📋 Copier le lien
+                </button>
+              </div>
+            </div>
+            <div class="bg-white p-2 rounded-xl shrink-0 shadow-md">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=https%3A%2F%2Fsstockfeld5-ship-it.github.io%2Fphysique_chimie%2F6e_Ch2_A1_Anim_revisions.html"
+                   alt="QR Code 8a" class="w-24 h-24 rounded" loading="lazy">
+            </div>
+          </div>
+
+          <!-- Carte 8b -->
+          <div class="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="space-y-2 flex-1">
+              <div class="text-xs text-emerald-300 font-extrabold uppercase tracking-wider">8b - Je teste mes connaissances</div>
+              <div class="font-bold text-sm sm:text-base text-white">QCM : Le circuit à une boucle</div>
+              <p class="text-[11px] text-indigo-200 font-mono break-all bg-slate-950/50 px-2.5 py-1.5 rounded border border-white/10">
+                https://sstockfeld5-ship-it.github.io/physique_chimie/6e_Ch2_A1_qcm_circuit_une_boucle.html
+              </p>
+              <div class="flex flex-wrap items-center gap-2 pt-1">
+                <a href="https://sstockfeld5-ship-it.github.io/physique_chimie/6e_Ch2_A1_qcm_circuit_une_boucle.html" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-1.5 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-lg shadow transition">
+                  <span>🎯 Ouvrir le QCM (8b)</span>
+                  <span>↗</span>
+                </a>
+                <button onclick="copyActivityLink('https://sstockfeld5-ship-it.github.io/physique_chimie/6e_Ch2_A1_qcm_circuit_une_boucle.html', 'copyBtn8b')" id="copyBtn8b"
+                        class="text-xs bg-white/10 hover:bg-white/20 text-white font-semibold px-2.5 py-2 rounded-lg transition">
+                  📋 Copier le lien
+                </button>
+              </div>
+            </div>
+            <div class="bg-white p-2 rounded-xl shrink-0 shadow-md">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=https%3A%2F%2Fsstockfeld5-ship-it.github.io%2Fphysique_chimie%2F6e_Ch2_A1_qcm_circuit_une_boucle.html"
+                   alt="QR Code 8b" class="w-24 h-24 rounded" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bouton Afficher le corrigé complet pour noter dans le cahier -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <button onclick="goToStep(4)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-2.5 rounded-xl transition">
+          ⬅ Retour à l'étape 4
+        </button>
+        <button onclick="toggleSummaryModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 transition">
+          <span>📋 Afficher le corrigé complet pour vérifier ma fiche</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       MODALE : CHOIX D'UN SYMBOLE (ÉTAPE 2 - AVEC NOM + SYMBOLE)
+  =========================================== -->
+  <div id="slotModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="slotModalTitle" class="font-extrabold text-slate-800 text-base">Choisir le symbole pour ce côté</h3>
+        <button onclick="closeSlotModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+      <p class="text-xs text-slate-500">
+        Quel composant (et son symbole normalisé) souhaites-tu placer au milieu de ce côté du rectangle ?
+      </p>
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Lampe -->
+        <button onclick="applySlotChoice('lampe')" class="p-3 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-xs flex flex-col items-center gap-1.5 transition">
+          <span class="text-slate-800 font-extrabold">💡 Lampe</span>
+          <svg viewBox="0 0 80 42" class="w-16 h-9">
+            <line x1="5" y1="21" x2="24" y2="21" stroke="#0f172a" stroke-width="2.5"/>
+            <circle cx="40" cy="21" r="15" fill="white" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="29.5" y1="10.5" x2="50.5" y2="31.5" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="29.5" y1="31.5" x2="50.5" y2="10.5" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="56" y1="21" x2="75" y2="21" stroke="#0f172a" stroke-width="2.5"/>
+          </svg>
+        </button>
+
+        <!-- Interrupteur fermé -->
+        <button onclick="applySlotChoice('inter_ferme')" class="p-3 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-xs flex flex-col items-center gap-1.5 transition">
+          <span class="text-slate-800 font-extrabold">🔘 Inter. fermé (I)</span>
+          <svg viewBox="0 0 80 42" class="w-16 h-9">
+            <line x1="5" y1="24" x2="26" y2="24" stroke="#0f172a" stroke-width="2.5"/>
+            <circle cx="26" cy="24" r="3.5" fill="#0f172a"/>
+            <line x1="26" y1="24" x2="54" y2="24" stroke="#059669" stroke-width="3"/>
+            <circle cx="54" cy="24" r="3.5" fill="#0f172a"/>
+            <line x1="54" y1="24" x2="75" y2="24" stroke="#0f172a" stroke-width="2.5"/>
+          </svg>
+        </button>
+
+        <!-- Interrupteur ouvert -->
+        <button onclick="applySlotChoice('inter_ouvert')" class="p-3 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-xs flex flex-col items-center gap-1.5 transition">
+          <span class="text-slate-800 font-extrabold">🔘 Inter. ouvert (O)</span>
+          <svg viewBox="0 0 80 42" class="w-16 h-9">
+            <line x1="5" y1="26" x2="26" y2="26" stroke="#0f172a" stroke-width="2.5"/>
+            <circle cx="26" cy="26" r="3.5" fill="#0f172a"/>
+            <line x1="26" y1="26" x2="50" y2="9" stroke="#e11d48" stroke-width="3"/>
+            <circle cx="54" cy="26" r="3.5" fill="#0f172a"/>
+            <line x1="54" y1="26" x2="75" y2="26" stroke="#0f172a" stroke-width="2.5"/>
+          </svg>
+        </button>
+
+        <!-- Fil de connexion -->
+        <button onclick="applySlotChoice('fil')" class="p-3 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-xs flex flex-col items-center gap-1.5 transition">
+          <span class="text-slate-800 font-extrabold">➖ Fil de connexion</span>
+          <svg viewBox="0 0 80 42" class="w-16 h-9">
+            <line x1="8" y1="21" x2="72" y2="21" stroke="#0f172a" stroke-width="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODALE : CORRIGÉ COMPLET / BILAN FICHE ÉLÈVE
+  =========================================== -->
+  <div id="summaryModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 my-8 max-h-[90vh] overflow-y-auto custom-scroll space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3 sticky top-0 bg-white z-10">
+        <div>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600">Fiche de synthèse</span>
+          <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">Corrigé récapitulatif de l'Activité 1</h3>
+        </div>
+        <button onclick="toggleSummaryModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-sm">
+          Fermer ✕
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs sm:text-sm text-slate-700">
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="font-bold text-slate-900">2- Avec quelle(s) liste(s) la lampe brille-t-elle ?</div>
+          <p class="mt-1 text-emerald-700 font-semibold">☑ Liste 1 et ☑ Liste 3 (lorsque l'interrupteur est fermé).</p>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="font-bold text-slate-900">3- Composant qui permet de faire briller la lampe :</div>
+          <p class="mt-1 text-emerald-700 font-semibold">☑ La pile plate (c'est le générateur qui fournit l'énergie électrique).</p>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="font-bold text-slate-900">4a- Schéma électrique du circuit 3 :</div>
+          <p class="mt-1">Un rectangle tracé à la règle et au crayon à papier comportant sur ses côtés, dans l'ordre : le symbole de la <strong>pile</strong>, le symbole de la <strong>lampe</strong> et le symbole de l'<strong>interrupteur</strong> (ainsi qu'un fil sur le 4ème côté).</p>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200">
+          <div class="font-bold text-amber-950">4b & 4c- Interrupteur et ouverture de la boucle :</div>
+          <ul class="list-disc list-inside mt-1 space-y-1">
+            <li><strong>4b :</strong> La lampe brille lorsque l'interrupteur est <strong class="text-emerald-700 underline">☑ fermé (I)</strong> (il laisse passer le courant électrique).</li>
+            <li><strong>4c (Quand la lampe brille, ouvre la boucle du circuit en débranchant un fil. Que constate-t-on ?) :</strong> Lorsqu'on débranche un fil pour ouvrir la boucle, <strong>la lampe s'éteint</strong> car le courant électrique ne peut plus circuler.</li>
+          </ul>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="font-bold text-slate-900">5- Familles de dipôles :</div>
+          <ul class="list-disc list-inside mt-1 space-y-1">
+            <li><strong>Pile plate</strong> ➔ <strong>Générateur</strong> (produit de l'énergie électrique).</li>
+            <li><strong>Lampe</strong> et <strong>Moteur</strong> ➔ <strong>Récepteurs</strong> (convertissent l'énergie électrique reçue).</li>
+            <li><strong>Interrupteur</strong> et <strong>Fil électrique</strong> ➔ <strong>Permettent le transfert d'énergie électrique</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="font-bold text-slate-900">6- Condition sur la boucle :</div>
+          <p class="mt-1">Pour que le générateur transfère de l'énergie électrique, la boucle formée par le circuit électrique doit être <strong class="text-emerald-700 underline">fermée</strong>.</p>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+          <div class="font-bold text-emerald-950">7a & 7b- Conclusion et Chaîne d'énergie de la lampe :</div>
+          <p class="mt-1"><strong>7a (Les 2 conditions) :</strong> Pour qu'une lampe reçoive de l'énergie électrique, le circuit doit contenir un <strong>générateur</strong> (pile) ET former une <strong>boucle fermée</strong>.</p>
+          <p class="mt-1"><strong>7b (Légende) :</strong> <strong>1 =</strong> Pile (ou Générateur) • <strong>2 =</strong> Énergie électrique • <strong>3 =</strong> Énergie lumineuse (ou rayonnante).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       LOGIQUE JAVASCRIPT INTERACTIVE
+  =========================================== -->
+  <script>
+    // État global
+    let currentStep = 1;
+    let currentBenchList = 1;
+    let list3BenchSwitchClosed = true;
+
+    // État du suivi "Recopié sur ma feuille" pour les 5 étapes
+    const sheetCopied = { 1: false, 2: false, 3: false, 4: false, 5: false };
+
+    // État du schéma (Étape 2 - Question 4a)
+    let activeTool = 'lampe';
+    let currentModalSlot = null;
+    // Les 3 côtés démarrent à 'vide' pour afficher "Cliquer ici". Quand l'élève choisit 'fil', cela devient un vrai fil validé !
+    const schematicSlots = {
+      left: 'vide',
+      bottom: 'vide',
+      right: 'vide'
+    };
+
+    // État du simulateur Étape 3 (Pont-levis + Circuit)
+    let step3SwitchClosed = false; // Démarre sur OUVERT (O) pour bien montrer que Ouvert = Éteint
+    let step3WireDisconnected = false;
+
+    // État du jeu de liaison (Étape 4 - Question 5)
+    let selectedLeftItem = null;
+    const userMatches = {
+      lampe: null,
+      interrupteur: null,
+      moteur: null,
+      pile: null,
+      fil: null
+    };
+    const expectedMatches = {
+      lampe: 'recepteur',
+      interrupteur: 'transfert',
+      moteur: 'recepteur',
+      pile: 'generateur',
+      fil: 'transfert'
+    };
+
+    // État Question 6
+    let selectedQ6Choice = null;
+
+    // ==========================================
+    // GESTION DU RAPPEL "RECOPIER SUR LA FEUILLE"
+    // ==========================================
+    function toggleSheetCheck(stepNum) {
+      const checkbox = document.getElementById(`check-sheet-${stepNum}`);
+      const label = document.getElementById(`label-sheet-${stepNum}`);
+      const text = document.getElementById(`text-sheet-${stepNum}`);
+      const warn = document.getElementById(`warn-sheet-${stepNum}`);
+
+      sheetCopied[stepNum] = checkbox.checked;
+
+      if (checkbox.checked) {
+        label.classList.remove('border-amber-400', 'bg-white');
+        label.classList.add('border-emerald-600', 'bg-emerald-50');
+        text.classList.remove('text-slate-800');
+        text.classList.add('text-emerald-800');
+        if (warn) warn.classList.add('hidden');
+      } else {
+        label.classList.add('border-amber-400', 'bg-white');
+        label.classList.remove('border-emerald-600', 'bg-emerald-50');
+        text.classList.add('text-slate-800');
+        text.classList.remove('text-emerald-800');
+      }
+    }
+
+    function tryNextStep(fromStep, toStep) {
+      if (!sheetCopied[fromStep]) {
+        const warn = document.getElementById(`warn-sheet-${fromStep}`);
+        const box = document.getElementById(`reminder-box-${fromStep}`);
+        if (warn) warn.classList.remove('hidden');
+        if (box) {
+          box.classList.remove('shake-remind');
+          void box.offsetWidth; // relance l'animation
+          box.classList.add('shake-remind');
+          box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+      goToStep(toStep);
+    }
+
+    // ==========================================
+    // NAVIGATION ENTRE LES 5 ÉTAPES
+    // ==========================================
+    function goToStep(stepNumber) {
+      currentStep = stepNumber;
+      for (let i = 1; i <= 5; i++) {
+        const sec = document.getElementById(`step-${i}`);
+        const tab = document.getElementById(`tab-${i}`);
+        if (i === stepNumber) {
+          sec.classList.remove('hidden');
+          tab.className = "step-tab flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all bg-blue-600 text-white shadow-sm";
+        } else {
+          sec.classList.add('hidden');
+          tab.className = "step-tab flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all bg-slate-100 text-slate-600 hover:bg-slate-200";
+          if (i === 3) tab.classList.add('ring-2', 'ring-amber-400/70');
+        }
+      }
+      // Mise à jour barre de progression
+      document.getElementById('progressBar').style.width = `${stepNumber * 20}%`;
+      document.getElementById('progressText').textContent = `${stepNumber}/5`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleSummaryModal() {
+      const modal = document.getElementById('summaryModal');
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+    }
+
+    // ==========================================
+    // ÉTAPE 1 : PAILLASSE VIRTUELLE (4 LISTES)
+    // ==========================================
+    function selectBenchList(listNum) {
+      currentBenchList = listNum;
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`btn-list-${i}`);
+        const badge = document.getElementById(`badge-list-${i}`);
+        if (i === listNum) {
+          btn.className = "bench-btn text-left p-3.5 rounded-xl border-2 border-blue-600 bg-blue-50/70 transition-all shadow-sm flex items-start gap-3";
+          badge.textContent = "Testée ✓";
+          badge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
+        } else {
+          btn.className = "bench-btn text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-blue-300 bg-white transition-all flex items-start gap-3";
+        }
+      }
+      renderBenchCircuit();
+    }
+
+    function toggleList3BenchSwitch() {
+      list3BenchSwitchClosed = !list3BenchSwitchClosed;
+      renderBenchCircuit();
+    }
+
+    function renderBenchCircuit() {
+      const svg = document.getElementById('benchSvg');
+      const title = document.getElementById('benchTitle');
+      const switchCtrl = document.getElementById('benchSwitchControl');
+      const btnSwitch = document.getElementById('btnList3Switch');
+      const obsIcon = document.getElementById('benchObsIcon');
+      const obsTitle = document.getElementById('benchObsTitle');
+      const obsDesc = document.getElementById('benchObsDesc');
+
+      title.textContent = `Paillasse d'expérience : Montage de la Liste ${currentBenchList}`;
+      switchCtrl.classList.toggle('hidden', currentBenchList !== 3);
+
+      if (currentBenchList === 1) {
+        // LISTE 1 : Pile plate + Lampe + 2 fils + 2 pinces crocodiles -> BRILLE
+        svg.innerHTML = `
+          <!-- Fils de connexion reliés directement aux lames + (x=175, y=115) et - (x=215, y=102) -->
+          <path d="M 175 115 C 175 35, 360 35, 360 120" fill="none" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
+          <path d="M 215 102 C 290 102, 275 198, 332 152" fill="none" stroke="#3b82f6" stroke-width="5" stroke-linecap="round"/>
+          <!-- Courant animé -->
+          <path d="M 175 115 C 175 35, 360 35, 360 120" fill="none" stroke="#fef08a" stroke-width="3" class="current-flow"/>
+          <path d="M 332 152 C 275 198, 290 102, 215 102" fill="none" stroke="#fef08a" stroke-width="3" class="current-flow"/>
+
+          <!-- Pile plate 4,5V -->
+          <g>
+            <!-- Lames en laiton bien visibles en haut de la pile -->
+            <!-- Lame + (courte à gauche) -->
+            <path d="M 162 140 L 162 115 L 180 115" fill="none" stroke="#eab308" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Lame - (longue à droite) -->
+            <path d="M 198 140 L 198 102 L 220 102" fill="none" stroke="#eab308" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- Corps de la pile -->
+            <rect x="130" y="140" width="100" height="78" rx="8" fill="#1d4ed8" stroke="#93c5fd" stroke-width="2.5"/>
+            <rect x="130" y="164" width="100" height="28" fill="#facc15"/>
+            <text x="180" y="183" text-anchor="middle" font-size="13" font-weight="extrabold" fill="#0f172a">PILE 4,5 V</text>
+
+            <!-- Repères + et - bien lisibles -->
+            <circle cx="152" cy="152" r="9" fill="#dc2626"/>
+            <text x="152" y="156" text-anchor="middle" font-size="13" font-weight="extrabold" fill="#ffffff">+</text>
+            <circle cx="208" cy="152" r="9" fill="#0f172a"/>
+            <text x="208" y="156" text-anchor="middle" font-size="15" font-weight="extrabold" fill="#ffffff">-</text>
+
+            <!-- Pince crocodile ROUGE mordant directement la lame + en (175, 115) -->
+            <g transform="translate(175, 115)">
+              <polygon points="-10,-6 8,-2 8,2 -10,6" fill="#dc2626" stroke="#fecaca" stroke-width="1.5"/>
+              <circle cx="0" cy="0" r="3" fill="#fef08a"/>
+            </g>
+
+            <!-- Pince crocodile NOIRE/BLEUE mordant directement la lame - en (215, 102) -->
+            <g transform="translate(215, 102)">
+              <polygon points="-8,-6 10,-2 10,2 -8,6" fill="#1e293b" stroke="#93c5fd" stroke-width="1.5"/>
+              <circle cx="0" cy="0" r="3" fill="#fef08a"/>
+            </g>
+          </g>
+
+          <!-- Lampe brillante -->
+          <g transform="translate(360, 130)">
+            <circle cx="0" cy="-25" r="42" fill="#facc15" opacity="0.35" class="bulb-glow"/>
+            <!-- Rayons lumineux -->
+            <line x1="-45" y1="-25" x2="-32" y2="-25" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+            <line x1="45" y1="-25" x2="32" y2="-25" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+            <line x1="-32" y1="-55" x2="-22" y2="-45" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="-55" x2="22" y2="-45" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+            <line x1="0" y1="-70" x2="0" y2="-56" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+            <!-- Socle & Ampoule -->
+            <rect x="-35" y="12" width="70" height="18" rx="4" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+            <circle cx="-28" cy="21" r="4.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1"/>
+            <circle cx="0" cy="-10" r="4.5" fill="#ef4444" stroke="#ffffff" stroke-width="1"/>
+            <rect x="-14" y="-4" width="28" height="16" rx="2" fill="#94a3b8"/>
+            <circle cx="0" cy="-25" r="24" fill="#fef08a" stroke="#facc15" stroke-width="3"/>
+            <path d="M -8 -6 L -4 -26 L 4 -26 L 8 -6" fill="none" stroke="#ca8a04" stroke-width="2.5"/>
+            <text x="0" y="50" text-anchor="middle" font-size="13" font-weight="bold" fill="#fde047">Lampe ALLUMÉE ✨</text>
+          </g>
+        `;
+        obsIcon.textContent = "💡";
+        obsTitle.textContent = "Observation pour la Liste 1 : La lampe brille !";
+        obsTitle.className = "font-bold text-sm text-emerald-300";
+        obsDesc.textContent = "Les deux fils sont bien branchés sur les bornes + et - de la pile plate grâce aux pinces crocodiles : la lampe reçoit de l'énergie électrique et brille.";
+      } else if (currentBenchList === 2) {
+        // LISTE 2 : Moteur + Lampe + 2 fils (Pas de pile !) -> NE BRILLE PAS
+        svg.innerHTML = `
+          <!-- Fils de connexion -->
+          <path d="M 170 95 C 240 40, 310 40, 360 118" fill="none" stroke="#ef4444" stroke-width="4.5"/>
+          <path d="M 170 145 C 240 195, 310 195, 332 148" fill="none" stroke="#3b82f6" stroke-width="4.5"/>
+
+          <!-- Moteur électrique -->
+          <g transform="translate(145, 120)">
+            <rect x="-45" y="-32" width="70" height="64" rx="8" fill="#64748b" stroke="#cbd5e1" stroke-width="2"/>
+            <circle cx="-10" cy="0" r="20" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+            <text x="-10" y="6" text-anchor="middle" font-size="18" font-weight="bold" fill="#e2e8f0">M</text>
+            <!-- Axe et hélice immobile -->
+            <rect x="25" y="-4" width="14" height="8" fill="#94a3b8"/>
+            <ellipse cx="40" cy="-14" rx="5" ry="14" fill="#38bdf8"/>
+            <ellipse cx="40" cy="14" rx="5" ry="14" fill="#38bdf8"/>
+            <text x="-5" y="55" text-anchor="middle" font-size="13" font-weight="bold" fill="#cbd5e1">Moteur (immobile)</text>
+          </g>
+
+          <!-- Lampe éteinte -->
+          <g transform="translate(360, 125)">
+            <rect x="-35" y="12" width="70" height="18" rx="4" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+            <circle cx="-28" cy="21" r="4" fill="#eab308"/>
+            <rect x="-14" y="-4" width="28" height="16" rx="2" fill="#94a3b8"/>
+            <circle cx="0" cy="-25" r="24" fill="#1e293b" stroke="#64748b" stroke-width="2.5"/>
+            <path d="M -8 -6 L -4 -26 L 4 -26 L 8 -6" fill="none" stroke="#64748b" stroke-width="2"/>
+            <text x="0" y="52" text-anchor="middle" font-size="13" font-weight="bold" fill="#94a3b8">Lampe ÉTEINTE</text>
+          </g>
+        `;
+        obsIcon.textContent = "🌑";
+        obsTitle.textContent = "Observation pour la Liste 2 : La lampe ne brille pas !";
+        obsTitle.className = "font-bold text-sm text-rose-300";
+        obsDesc.textContent = "Il n'y a ni pile ni générateur dans ce circuit. Le moteur et la lampe sont deux récepteurs : aucun composant ne fournit d'énergie électrique.";
+      } else if (currentBenchList === 3) {
+        // LISTE 3 : Pile plate + Lampe + Interrupteur + 3 fils + 2 pinces -> BRILLE (si interrupteur fermé)
+        const isOn = list3BenchSwitchClosed;
+        btnSwitch.innerHTML = isOn
+          ? `<span>🔘 Interrupteur : FERMÉ (Position I)</span><span class="underline ml-1">Ouvrir (O)</span>`
+          : `<span>⭕ Interrupteur : OUVERT (Position O)</span><span class="underline ml-1">Fermer (I)</span>`;
+        btnSwitch.className = isOn
+          ? "bg-emerald-400 hover:bg-emerald-500 text-slate-950 font-extrabold text-xs px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1.5"
+          : "bg-rose-500 hover:bg-rose-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1.5";
+
+        svg.innerHTML = `
+          <!-- 3 Fils de connexion parfaitement reliés aux bornes + (145, 115) et - (185, 102) -->
+          <!-- Fil 1 : Borne + (145,115) -> Haut de la lampe (410,95) -->
+          <path d="M 145 115 C 145 30, 410 30, 410 95" fill="none" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
+          <!-- Fil 2 : Socle lampe (382,125) -> Borne droite interrupteur (312,190) -->
+          <path d="M 382 125 C 375 185, 345 190, 312 190" fill="none" stroke="#10b981" stroke-width="5" stroke-linecap="round"/>
+          <!-- Fil 3 : Borne gauche interrupteur (248,190) -> Borne - (185,102) -->
+          <path d="M 248 190 C 215 190, 220 102, 185 102" fill="none" stroke="#3b82f6" stroke-width="5" stroke-linecap="round"/>
+
+          ${isOn ? `
+            <path d="M 145 115 C 145 30, 410 30, 410 95" fill="none" stroke="#fef08a" stroke-width="3" class="current-flow"/>
+            <path d="M 382 125 C 375 185, 345 190, 312 190" fill="none" stroke="#fef08a" stroke-width="3" class="current-flow"/>
+            <path d="M 248 190 C 215 190, 220 102, 185 102" fill="none" stroke="#fef08a" stroke-width="3" class="current-flow"/>
+          ` : ''}
+
+          <!-- Pile plate 4,5V -->
+          <g>
+            <!-- Lame + (courte à gauche) -->
+            <path d="M 132 140 L 132 115 L 150 115" fill="none" stroke="#eab308" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Lame - (longue à droite) -->
+            <path d="M 168 140 L 168 102 L 190 102" fill="none" stroke="#eab308" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- Corps de la pile -->
+            <rect x="100" y="140" width="95" height="76" rx="8" fill="#1d4ed8" stroke="#93c5fd" stroke-width="2.5"/>
+            <rect x="100" y="164" width="95" height="26" fill="#facc15"/>
+            <text x="147" y="181" text-anchor="middle" font-size="12" font-weight="extrabold" fill="#0f172a">PILE 4,5 V</text>
+
+            <!-- Repères + et - -->
+            <circle cx="122" cy="152" r="8.5" fill="#dc2626"/>
+            <text x="122" y="156" text-anchor="middle" font-size="12" font-weight="extrabold" fill="#ffffff">+</text>
+            <circle cx="175" cy="152" r="8.5" fill="#0f172a"/>
+            <text x="175" y="156" text-anchor="middle" font-size="14" font-weight="extrabold" fill="#ffffff">-</text>
+
+            <!-- Pince crocodile ROUGE mordant directement la lame + en (145, 115) -->
+            <g transform="translate(145, 115)">
+              <polygon points="-10,-6 8,-2 8,2 -10,6" fill="#dc2626" stroke="#fecaca" stroke-width="1.5"/>
+              <circle cx="0" cy="0" r="3" fill="#fef08a"/>
+            </g>
+
+            <!-- Pince crocodile NOIRE/BLEUE mordant directement la lame - en (185, 102) -->
+            <g transform="translate(185, 102)">
+              <polygon points="-8,-6 10,-2 10,2 -8,6" fill="#1e293b" stroke="#93c5fd" stroke-width="1.5"/>
+              <circle cx="0" cy="0" r="3" fill="#fef08a"/>
+            </g>
+          </g>
+
+          <!-- Interrupteur en bas au centre -->
+          <g onclick="toggleList3BenchSwitch()" class="cursor-pointer">
+            <rect x="235" y="176" width="90" height="28" rx="6" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+            <circle cx="248" cy="190" r="5" fill="#eab308"/>
+            <circle cx="312" cy="190" r="5" fill="#eab308"/>
+            ${isOn
+              ? `<line x1="248" y1="190" x2="312" y2="190" stroke="#4ade80" stroke-width="4.5" stroke-linecap="round"/>`
+              : `<line x1="248" y1="190" x2="305" y2="162" stroke="#fb7185" stroke-width="4.5" stroke-linecap="round"/>`
+            }
+            <text x="280" y="222" text-anchor="middle" font-size="11" font-weight="bold" fill="${isOn ? '#4ade80' : '#fda4af'}">
+              Interrupteur ${isOn ? 'FERMÉ (I)' : 'OUVERT (O)'}
+            </text>
+          </g>
+
+          <!-- Lampe à droite -->
+          <g transform="translate(410, 105)">
+            ${isOn ? `
+              <circle cx="0" cy="-22" r="38" fill="#facc15" opacity="0.35" class="bulb-glow"/>
+              <line x1="-40" y1="-22" x2="-28" y2="-22" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+              <line x1="40" y1="-22" x2="28" y2="-22" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+              <line x1="0" y1="-64" x2="0" y2="-50" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+            ` : ''}
+            <rect x="-35" y="12" width="70" height="18" rx="4" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+            <circle cx="-28" cy="21" r="4.5" fill="#10b981" stroke="#ffffff" stroke-width="1"/>
+            <circle cx="0" cy="-10" r="4.5" fill="#ef4444" stroke="#ffffff" stroke-width="1"/>
+            <rect x="-14" y="-4" width="28" height="16" rx="2" fill="#94a3b8"/>
+            <circle cx="0" cy="-22" r="22" fill="${isOn ? '#fef08a' : '#1e293b'}" stroke="${isOn ? '#facc15' : '#64748b'}" stroke-width="2.5"/>
+            <path d="M -8 -6 L -4 -23 L 4 -23 L 8 -6" fill="none" stroke="${isOn ? '#ca8a04' : '#64748b'}" stroke-width="2"/>
+            <text x="0" y="48" text-anchor="middle" font-size="12" font-weight="bold" fill="${isOn ? '#fde047' : '#94a3b8'}">
+              ${isOn ? 'Lampe ALLUMÉE ✨' : 'Lampe ÉTEINTE'}
+            </text>
+          </g>
+        `;
+        obsIcon.textContent = isOn ? "💡" : "🔘";
+        obsTitle.textContent = isOn
+          ? "Observation pour la Liste 3 : La lampe brille (interrupteur fermé) !"
+          : "Observation pour la Liste 3 : Interrupteur ouvert -> lampe éteinte.";
+        obsTitle.className = isOn ? "font-bold text-sm text-emerald-300" : "font-bold text-sm text-amber-300";
+        obsDesc.textContent = "Avec la Liste 3, on possède une pile plate, une lampe et un interrupteur. Lorsque l'interrupteur est fermé (position I), la lampe brille !";
+      } else if (currentBenchList === 4) {
+        // LISTE 4 : Interrupteur + Lampe + 2 fils (Pas de pile !) -> NE BRILLE PAS
+        svg.innerHTML = `
+          <path d="M 145 130 C 145 60, 360 60, 360 118" fill="none" stroke="#ef4444" stroke-width="4.5"/>
+          <path d="M 215 130 C 260 185, 310 185, 332 148" fill="none" stroke="#3b82f6" stroke-width="4.5"/>
+
+          <!-- Interrupteur -->
+          <g transform="translate(130, 116)">
+            <rect x="0" y="0" width="100" height="28" rx="6" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+            <circle cx="18" cy="14" r="5" fill="#eab308"/>
+            <circle cx="82" cy="14" r="5" fill="#eab308"/>
+            <line x1="18" y1="14" x2="82" y2="14" stroke="#eab308" stroke-width="4"/>
+            <text x="50" y="50" text-anchor="middle" font-size="13" font-weight="bold" fill="#cbd5e1">Interrupteur seul</text>
+          </g>
+
+          <!-- Lampe éteinte -->
+          <g transform="translate(360, 125)">
+            <rect x="-35" y="12" width="70" height="18" rx="4" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+            <circle cx="-28" cy="21" r="4" fill="#eab308"/>
+            <rect x="-14" y="-4" width="28" height="16" rx="2" fill="#94a3b8"/>
+            <circle cx="0" cy="-25" r="24" fill="#1e293b" stroke="#64748b" stroke-width="2.5"/>
+            <path d="M -8 -6 L -4 -26 L 4 -26 L 8 -6" fill="none" stroke="#64748b" stroke-width="2"/>
+            <text x="0" y="52" text-anchor="middle" font-size="13" font-weight="bold" fill="#94a3b8">Lampe ÉTEINTE</text>
+          </g>
+        `;
+        obsIcon.textContent = "🌑";
+        obsTitle.textContent = "Observation pour la Liste 4 : La lampe ne brille pas !";
+        obsTitle.className = "font-bold text-sm text-rose-300";
+        obsDesc.textContent = "Même si l'interrupteur est fermé, il n'y a pas de pile (pas de générateur) dans la liste 4 pour fournir de l'énergie électrique.";
+      }
+    }
+
+    function checkQ2() {
+      const l1 = document.getElementById('q2-l1').checked;
+      const l2 = document.getElementById('q2-l2').checked;
+      const l3 = document.getElementById('q2-l3').checked;
+      const l4 = document.getElementById('q2-l4').checked;
+      const fb = document.getElementById('feedback-q2');
+      fb.classList.remove('hidden');
+
+      if (l1 && l3 && !l2 && !l4) {
+        fb.textContent = "✅ Bravo ! La lampe brille uniquement avec la Liste 1 et la Liste 3 (qui contiennent une pile). Cocher ces 2 cases sur ta feuille !";
+        fb.className = "text-xs sm:text-sm font-bold text-emerald-600";
+      } else {
+        fb.textContent = "❌ Regarde bien sur la paillasse : quelles sont les deux listes qui possèdent une pile pour faire briller la lampe ?";
+        fb.className = "text-xs sm:text-sm font-bold text-rose-600";
+      }
+    }
+
+    function checkQ3() {
+      const pile = document.getElementById('q3-pile').checked;
+      const fb = document.getElementById('feedback-q3');
+      fb.classList.remove('hidden');
+
+      if (pile) {
+        fb.textContent = "✅ Exact ! C'est la pile plate (le générateur) qui fournit l'énergie électrique nécessaire pour faire briller la lampe.";
+        fb.className = "text-xs sm:text-sm font-bold text-emerald-600";
+      } else {
+        fb.textContent = "❌ Compare les listes 1 et 3 avec les listes 2 et 4 : quel composant fournit l'énergie électrique ?";
+        fb.className = "text-xs sm:text-sm font-bold text-rose-600";
+      }
+    }
+
+    // ==========================================
+    // ÉTAPE 2 : CONSTRUCTEUR DE SCHÉMA (Q4a)
+    // ==========================================
+    function setActiveTool(tool) {
+      activeTool = tool;
+      const tools = ['lampe', 'inter_ferme', 'inter_ouvert', 'fil'];
+      tools.forEach(t => {
+        const btn = document.getElementById(`tool-${t}`);
+        if (t === tool) {
+          btn.className = "tool-btn p-2 rounded-xl text-xs font-bold border-2 border-blue-600 bg-blue-50 text-blue-900 flex flex-col items-center gap-1 shadow-sm transition";
+        } else {
+          btn.className = "tool-btn p-2 rounded-xl text-xs font-bold border-2 border-slate-200 bg-white text-slate-700 hover:border-blue-300 flex flex-col items-center gap-1 transition";
+        }
+      });
+    }
+
+    function placeOnSlot(slotName) {
+      currentModalSlot = slotName;
+      const titles = {
+        left: "Côté GAUCHE du rectangle (relié à la borne +)",
+        bottom: "Côté BAS du rectangle",
+        right: "Côté DROIT du rectangle (relié à la borne -)"
+      };
+      document.getElementById('slotModalTitle').textContent = titles[slotName];
+      const modal = document.getElementById('slotModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSlotModal() {
+      const modal = document.getElementById('slotModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function applySlotChoice(choice) {
+      if (currentModalSlot) {
+        schematicSlots[currentModalSlot] = choice;
+        setActiveTool(choice);
+        renderSchematicSlots();
+      }
+      closeSlotModal();
+    }
+
+    function resetSchematic() {
+      schematicSlots.left = 'vide';
+      schematicSlots.bottom = 'vide';
+      schematicSlots.right = 'vide';
+      document.getElementById('feedback-schema').classList.add('hidden');
+      renderSchematicSlots();
+    }
+
+    function renderSchematicSlots() {
+      renderSingleSlot('left', 90, 60, 90, 230, true);
+      renderSingleSlot('bottom', 90, 230, 410, 230, false);
+      renderSingleSlot('right', 410, 60, 410, 230, true);
+    }
+
+    function renderSingleSlot(slotName, x1, y1, x2, y2, isVertical) {
+      const g = document.getElementById(`slot-${slotName}`);
+      const comp = schematicSlots[slotName];
+      const cx = (x1 + x2) / 2;
+      const cy = (y1 + y2) / 2;
+
+      let html = `<rect x="${isVertical ? cx - 38 : x1 + 20}" y="${isVertical ? y1 + 15 : cy - 38}" width="${isVertical ? 76 : x2 - x1 - 40}" height="${isVertical ? y2 - y1 - 30 : 76}" rx="10" fill="transparent"/>`;
+
+      if (comp === 'vide') {
+        // État initial non complété : affiche "Cliquer ici"
+        html += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#94a3b8" stroke-width="3" stroke-dasharray="6 5"/>`;
+        html += `
+          <g class="opacity-95 group-hover:opacity-100">
+            <rect x="${cx - 46}" y="${cy - 14}" width="92" height="28" rx="7" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4 2"/>
+            <text x="${cx}" y="${cy + 4}" text-anchor="middle" font-size="11" font-weight="bold" fill="#1d4ed8">➕ Cliquer ici</text>
+          </g>
+        `;
+      } else if (comp === 'fil') {
+        // L'élève a explicitement choisi "Fil de connexion" : trait continu noir + étiquette validée (sans "Cliquer ici" !)
+        html += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#0f172a" stroke-width="3"/>`;
+        const labelX = isVertical ? (slotName === 'left' ? cx - 48 : cx + 48) : cx;
+        const labelY = isVertical ? cy + 4 : cy + 26;
+        html += `
+          <g>
+            <rect x="${labelX - 42}" y="${labelY - 12}" width="84" height="18" rx="5" fill="#f0fdf4" stroke="#86efac" stroke-width="1"/>
+            <text x="${labelX}" y="${labelY + 1}" text-anchor="middle" font-size="10" font-weight="bold" fill="#15803d">Fil tracé ✓</text>
+          </g>
+        `;
+      } else if (comp === 'lampe') {
+        if (isVertical) {
+          html += `
+            <line x1="${cx}" y1="${y1}" x2="${cx}" y2="${cy - 22}" stroke="#0f172a" stroke-width="3"/>
+            <line x1="${cx}" y1="${cy + 22}" x2="${cx}" y2="${y2}" stroke="#0f172a" stroke-width="3"/>
+          `;
+        } else {
+          html += `
+            <line x1="${x1}" y1="${cy}" x2="${cx - 22}" y2="${cy}" stroke="#0f172a" stroke-width="3"/>
+            <line x1="${cx + 22}" y1="${cy}" x2="${x2}" y2="${cy}" stroke="#0f172a" stroke-width="3"/>
+          `;
+        }
+        html += `
+          <circle cx="${cx}" cy="${cy}" r="22" fill="#ffffff" stroke="#0f172a" stroke-width="3"/>
+          <line x1="${cx - 15}" y1="${cy - 15}" x2="${cx + 15}" y2="${cy + 15}" stroke="#0f172a" stroke-width="3"/>
+          <line x1="${cx - 15}" y1="${cy + 15}" x2="${cx + 15}" y2="${cy - 15}" stroke="#0f172a" stroke-width="3"/>
+        `;
+      } else if (comp === 'inter_ferme' || comp === 'inter_ouvert') {
+        const isClosed = comp === 'inter_ferme';
+        if (isVertical) {
+          html += `
+            <line x1="${cx}" y1="${y1}" x2="${cx}" y2="${cy - 22}" stroke="#0f172a" stroke-width="3"/>
+            <line x1="${cx}" y1="${cy + 22}" x2="${cx}" y2="${y2}" stroke="#0f172a" stroke-width="3"/>
+            <circle cx="${cx}" cy="${cy - 22}" r="4" fill="#0f172a"/>
+            <circle cx="${cx}" cy="${cy + 22}" r="4" fill="#0f172a"/>
+            <line x1="${cx}" y1="${cy - 22}" x2="${isClosed ? cx : cx + 20}" y2="${isClosed ? cy + 22 : cy + 16}" stroke="#0f172a" stroke-width="3.5" stroke-linecap="round"/>
+          `;
+        } else {
+          html += `
+            <line x1="${x1}" y1="${cy}" x2="${cx - 24}" y2="${cy}" stroke="#0f172a" stroke-width="3"/>
+            <line x1="${cx + 24}" y1="${cy}" x2="${x2}" y2="${cy}" stroke="#0f172a" stroke-width="3"/>
+            <circle cx="${cx - 24}" cy="${cy}" r="4" fill="#0f172a"/>
+            <circle cx="${cx + 24}" cy="${cy}" r="4" fill="#0f172a"/>
+            <line x1="${cx - 24}" y1="${cy}" x2="${isClosed ? cx + 24 : cx + 18}" y2="${isClosed ? cy : cy - 20}" stroke="#0f172a" stroke-width="3.5" stroke-linecap="round"/>
+          `;
+        }
+      }
+
+      g.innerHTML = html;
+    }
+
+    function checkSchematic() {
+      const vals = Object.values(schematicSlots);
+      const fb = document.getElementById('feedback-schema');
+      fb.classList.remove('hidden');
+
+      if (vals.includes('vide')) {
+        fb.textContent = "⚠️ Attention : il reste au moins un côté avec « Cliquer ici ». N'oublie pas de choisir « Fil de connexion » sur le 4ème côté du rectangle !";
+        fb.className = "text-xs sm:text-sm font-bold text-amber-700";
+        return;
+      }
+
+      const lampCount = vals.filter(v => v === 'lampe').length;
+      const interCount = vals.filter(v => v === 'inter_ferme' || v === 'inter_ouvert').length;
+      const filCount = vals.filter(v => v === 'fil').length;
+
+      if (lampCount === 1 && interCount === 1 && filCount === 1) {
+        // Vérifier l'ordre par rapport au modèle : Borne + (à gauche) -> Lampe -> Interrupteur -> Borne - (à droite)
+        const orderFromPlus = [schematicSlots.left, schematicSlots.bottom, schematicSlots.right].filter(v => v !== 'fil');
+        if (orderFromPlus[0] === 'lampe') {
+          fb.textContent = "✅ Parfait ! Ton schéma respecte toutes les règles : un rectangle, chaque symbole au milieu d'un côté, le fil de connexion tracé et les composants dans l'ordre exact du montage (Borne + ➔ Lampe ➔ Interrupteur ➔ Borne -). Recopie-le à la règle sur ta feuille !";
+          fb.className = "text-xs sm:text-sm font-bold text-emerald-600";
+        } else {
+          fb.textContent = "👍 Tous les bons symboles y sont ! Petit détail d'ordre : sur le dessin du montage 3, la borne + (à gauche) est reliée en premier à la lampe, puis à l'interrupteur.";
+          fb.className = "text-xs sm:text-sm font-bold text-blue-600";
+        }
+      } else {
+        fb.textContent = "❌ Le circuit 3 contient 1 pile (déjà placée en haut), 1 lampe, 1 interrupteur et 1 fil de connexion sur le côté restant.";
+        fb.className = "text-xs sm:text-sm font-bold text-rose-600";
+      }
+    }
+
+    function updateAutoEvalScore() {
+      const checks = document.querySelectorAll('.autoeval-check:checked').length;
+      const box = document.getElementById('autoEvalSummary');
+      box.textContent = `Critères validés sur ma feuille : ${checks} / 6`;
+      if (checks === 6) {
+        box.className = "mt-4 bg-emerald-100 border border-emerald-300 rounded-xl p-3 text-center text-xs font-extrabold text-emerald-800";
+        box.textContent = "🌟 Félicitations ! Ton schéma sur ta feuille respecte les 6 critères de réussite !";
+      } else {
+        box.className = "mt-4 bg-slate-100 rounded-xl p-3 text-center text-xs font-bold text-slate-600";
+      }
+    }
+
+    // ==========================================
+    // ÉTAPE 3 : PONT-LEVIS & INTERRUPTEUR O / I
+    // ==========================================
+    function setStep3Switch(closed) {
+      step3SwitchClosed = closed;
+      updateStep3Simulation();
+    }
+
+    function toggleStep3Wire() {
+      if (!step3WireDisconnected && !step3SwitchClosed) {
+        // Pour bien répondre à "Quand la lampe brille, ouvre la boucle en débranchant un fil", on s'assure que l'interrupteur est fermé !
+        step3SwitchClosed = true;
+      }
+      step3WireDisconnected = !step3WireDisconnected;
+      updateStep3Simulation();
+    }
+
+    function testDisconnectForQ4c() {
+      step3SwitchClosed = true;
+      step3WireDisconnected = true;
+      updateStep3Simulation();
+      document.getElementById('btnSimWire').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function updateStep3Simulation() {
+      const btnOpen = document.getElementById('btnSimOpen');
+      const btnClose = document.getElementById('btnSimClose');
+      const btnWire = document.getElementById('btnSimWire');
+
+      // Style des boutons
+      if (!step3SwitchClosed) {
+        btnOpen.className = "px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 transition flex items-center gap-2 bg-rose-600 text-white border-rose-600 shadow-sm";
+        btnClose.className = "px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 transition flex items-center gap-2 bg-white text-emerald-700 border-emerald-500 hover:bg-emerald-50";
+      } else {
+        btnOpen.className = "px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 transition flex items-center gap-2 bg-white text-rose-700 border-rose-400 hover:bg-rose-50";
+        btnClose.className = "px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 transition flex items-center gap-2 bg-emerald-600 text-white border-emerald-600 shadow-sm";
+      }
+
+      if (step3WireDisconnected) {
+        btnWire.innerHTML = `<span>🔌 Rebrancher le fil</span>`;
+        btnWire.className = "px-3.5 py-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-amber-500 bg-amber-400 text-slate-950 shadow-sm transition flex items-center gap-1.5";
+      } else {
+        btnWire.innerHTML = `<span>🔌 Débrancher un fil (Question 4c)</span>`;
+        btnWire.className = "px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-1.5";
+      }
+
+      // 1. Mise à jour du Pont-Levis
+      const bridgeLeaf = document.getElementById('bridgeLeaf');
+      const bridgeLight = document.getElementById('bridgeLight');
+      const bridgeBadge = document.getElementById('bridgeBadge');
+      const bridgeSvgText = document.getElementById('bridgeSvgText');
+      const bridgeExplanation = document.getElementById('bridgeExplanation');
+      const car1 = document.getElementById('car1');
+
+      if (step3SwitchClosed) {
+        bridgeLeaf.style.transform = "rotate(0deg)";
+        bridgeLight.setAttribute('fill', '#22c55e');
+        bridgeBadge.textContent = "Pont FERMÉ (abaissé) : route continue !";
+        bridgeBadge.className = "text-xs font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+        bridgeSvgText.textContent = "Pont FERMÉ = La route est continue, les voitures passent !";
+        bridgeSvgText.setAttribute('fill', '#6ee7b7');
+        car1.setAttribute('transform', 'translate(295, 98)');
+        bridgeExplanation.innerHTML = `Quand le pont est <strong class="text-emerald-400">FERMÉ</strong> (abaissé), les deux rives sont reliées : les voitures traversent librement.`;
+      } else {
+        bridgeLeaf.style.transform = "rotate(-42deg)";
+        bridgeLight.setAttribute('fill', '#ef4444');
+        bridgeBadge.textContent = "Pont OUVERT (levé) : passage impossible";
+        bridgeBadge.className = "text-xs font-extrabold px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40";
+        bridgeSvgText.textContent = "Pont OUVERT = Il y a un trou, les voitures sont bloquées !";
+        bridgeSvgText.setAttribute('fill', '#fda4af');
+        car1.setAttribute('transform', 'translate(115, 98)');
+        bridgeExplanation.innerHTML = `Quand le pont est <strong class="text-rose-400">OUVERT</strong> (levé), la route est coupée : aucune voiture ne peut passer.`;
+      }
+
+      // 2. Mise à jour du Schéma électrique
+      const blade = document.getElementById('simSwitchBlade');
+      const switchLabel = document.getElementById('simSwitchLabel');
+      const rightConnected = document.getElementById('rightWireConnected');
+      const rightDisconnected = document.getElementById('rightWireDisconnected');
+      const currentPath = document.getElementById('simCurrentPath');
+      const lampHalo = document.getElementById('simLampHalo');
+      const lampCircle = document.getElementById('simLampCircle');
+      const lampStateText = document.getElementById('simLampStateText');
+      const circuitBadge = document.getElementById('circuitBadge');
+      const circuitExplanation = document.getElementById('circuitExplanation');
+
+      // Lame de l'interrupteur
+      if (step3SwitchClosed) {
+        blade.setAttribute('x2', '245');
+        blade.setAttribute('y2', '155');
+        blade.setAttribute('stroke', '#10b981');
+        switchLabel.textContent = "Interrupteur FERMÉ (Position I)";
+        switchLabel.setAttribute('fill', '#6ee7b7');
+      } else {
+        blade.setAttribute('x2', '238');
+        blade.setAttribute('y2', '120');
+        blade.setAttribute('stroke', '#f43f5e');
+        switchLabel.textContent = "Interrupteur OUVERT (Position O)";
+        switchLabel.setAttribute('fill', '#fda4af');
+      }
+
+      // Fil de droite (4c)
+      rightConnected.classList.toggle('hidden', step3WireDisconnected);
+      rightDisconnected.classList.toggle('hidden', !step3WireDisconnected);
+
+      // État global de la lampe : brille seulement si interrupteur fermé ET fil branché
+      const circuitIsClosedLoop = step3SwitchClosed && !step3WireDisconnected;
+
+      if (circuitIsClosedLoop) {
+        currentPath.classList.remove('hidden');
+        lampHalo.setAttribute('opacity', '0.45');
+        lampCircle.setAttribute('fill', '#fef08a');
+        lampCircle.setAttribute('stroke', '#facc15');
+        lampStateText.textContent = "Lampe BRILLE ✨";
+        lampStateText.setAttribute('fill', '#fde047');
+        circuitBadge.textContent = "Interrupteur FERMÉ (I) ➔ Lampe BRILLE";
+        circuitBadge.className = "text-xs font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+        circuitExplanation.innerHTML = `L'interrupteur est <strong class="text-emerald-400">FERMÉ (position I)</strong> et tous les fils sont branchés : la boucle est fermée, le courant électrique circule et <strong>la lampe brille</strong> !`;
+      } else {
+        currentPath.classList.add('hidden');
+        lampHalo.setAttribute('opacity', '0');
+        lampCircle.setAttribute('fill', '#0f172a');
+        lampCircle.setAttribute('stroke', '#f8fafc');
+        lampStateText.textContent = "Lampe ÉTEINTE";
+        lampStateText.setAttribute('fill', '#94a3b8');
+
+        if (step3WireDisconnected) {
+          circuitBadge.textContent = "Fil débranché (boucle ouverte) ➔ Lampe ÉTEINTE";
+          circuitBadge.className = "text-xs font-extrabold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40";
+          circuitExplanation.innerHTML = `<strong>Expérience 4c :</strong> Même si l'interrupteur est fermé, en débranchant un fil on <strong>ouvre la boucle</strong> du circuit : le courant ne circule plus et <strong>la lampe s'éteint</strong> !`;
+        } else {
+          circuitBadge.textContent = "Interrupteur OUVERT (O) ➔ Lampe ÉTEINTE";
+          circuitBadge.className = "text-xs font-extrabold px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40";
+          circuitExplanation.innerHTML = `L'interrupteur est <strong class="text-rose-400">OUVERT (position O)</strong> : il ne laisse pas passer le courant électrique. La lampe est donc <strong>éteinte</strong>.`;
+        }
+      }
+    }
+
+    function checkQ4b() {
+      const ferme = document.getElementById('q4b-ferme').checked;
+      const ouvert = document.getElementById('q4b-ouvert').checked;
+      const fb = document.getElementById('feedback-q4b');
+      fb.classList.remove('hidden');
+
+      if (ferme) {
+        fb.textContent = "✅ Exactement ! La lampe brille lorsque l'interrupteur est FERMÉ (Position I), car le pont est abaissé et laisse passer le courant.";
+        fb.className = "text-xs sm:text-sm font-bold text-emerald-600";
+      } else if (ouvert) {
+        fb.textContent = "❌ Attention au piège ! Quand l'interrupteur est OUVERT (O), le pont est levé : le courant ne passe pas et la lampe est éteinte.";
+        fb.className = "text-xs sm:text-sm font-bold text-rose-600";
+      } else {
+        fb.textContent = "👉 Choisis une réponse avant de vérifier.";
+        fb.className = "text-xs sm:text-sm font-bold text-amber-600";
+      }
+    }
+
+    function checkQ4c() {
+      const r2 = document.getElementById('q4c-2').checked;
+      const fb = document.getElementById('feedback-q4c');
+      fb.classList.remove('hidden');
+
+      if (r2) {
+        fb.textContent = "✅ Très bien ! Quand la lampe brille et qu'on débranche un fil pour ouvrir la boucle, la lampe s'éteint immédiatement.";
+        fb.className = "text-xs sm:text-sm font-bold text-emerald-600";
+      } else {
+        fb.textContent = "❌ Clique sur le bouton « Débrancher un fil » dans le simulateur ci-dessus pour observer ce que fait la lampe !";
+        fb.className = "text-xs sm:text-sm font-bold text-rose-600";
+      }
+    }
+
+    // ==========================================
+    // ÉTAPE 4 : JEU DE LIAISON (Q5) & QUESTION 6
+    // ==========================================
+    function selectLeftMatch(itemKey) {
+      selectedLeftItem = itemKey;
+      const keys = ['lampe', 'interrupteur', 'moteur', 'pile', 'fil'];
+      keys.forEach(k => {
+        const btn = document.getElementById(`match-left-${k}`);
+        if (k === itemKey) {
+          btn.classList.add('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-300');
+          btn.classList.remove('border-slate-200', 'bg-slate-50');
+        } else {
+          btn.classList.remove('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-300');
+          btn.classList.add('border-slate-200', 'bg-slate-50');
+        }
+      });
+    }
+
+    function selectRightMatch(familyKey) {
+      if (!selectedLeftItem) return;
+      userMatches[selectedLeftItem] = familyKey;
+      selectedLeftItem = null;
+      const keys = ['lampe', 'interrupteur', 'moteur', 'pile', 'fil'];
+      keys.forEach(k => {
+        const btn = document.getElementById(`match-left-${k}`);
+        btn.classList.remove('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-300');
+        btn.classList.add('border-slate-200', 'bg-slate-50');
+      });
+      renderMatchingLines();
+    }
+
+    function renderMatchingLines() {
+      const svg = document.getElementById('matchingSvg');
+      const leftY = {
+        lampe: 22,
+        interrupteur: 70,
+        moteur: 120,
+        pile: 168,
+        fil: 216
+      };
+      const rightY = {
+        generateur: 38,
+        recepteur: 118,
+        transfert: 200
+      };
+      const colors = {
+        generateur: '#6366f1',
+        recepteur: '#f59e0b',
+        transfert: '#10b981'
+      };
+
+      let linesHtml = '';
+      Object.entries(userMatches).forEach(([leftKey, rightKey]) => {
+        const dot = document.getElementById(`dot-left-${leftKey}`);
+        if (rightKey) {
+          const y1 = leftY[leftKey];
+          const y2 = rightY[rightKey];
+          const col = colors[rightKey];
+          dot.style.backgroundColor = col;
+          linesHtml += `
+            <line x1="0" y1="${y1}" x2="100" y2="${y2}" stroke="${col}" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="0" cy="${y1}" r="4" fill="${col}"/>
+            <circle cx="100" cy="${y2}" r="4" fill="${col}"/>
+          `;
+        } else {
+          dot.style.backgroundColor = '#94a3b8';
+        }
+      });
+      svg.innerHTML = linesHtml;
+    }
+
+    function resetQ5() {
+      Object.keys(userMatches).forEach(k => userMatches[k] = null);
+      document.getElementById('feedback-q5').classList.add('hidden');
+      renderMatchingLines();
+    }
+
+    function checkQ5() {
+      const fb = document.getElementById('feedback-q5');
+      fb.classList.remove('hidden');
+
+      const allFilled = Object.values(userMatches).every(v => v !== null);
+      if (!allFilled) {
+        fb.textContent = "👉 Relie chacun des 5 composants de gauche à une famille de droite avant de vérifier.";
+        fb.className = "text-xs sm:text-sm font-bold text-amber-600";
+        return;
+      }
+
+      const isCorrect = Object.keys(expectedMatches).every(k => userMatches[k] === expectedMatches[k]);
+      if (isCorrect) {
+        fb.textContent = "✅ Bravo ! Pile = Générateur • Lampe et Moteur = Récepteurs • Interrupteur et Fil = Permettent le transfert d'énergie électrique. Trace ces traits à la règle sur ta feuille !";
+        fb.className = "text-xs sm:text-sm font-bold text-emerald-600";
+      } else {
+        fb.textContent = "❌ Certaines liaisons sont incorrectes. Relis bien l'encadré Vocabulaire en haut de la page : qui produit l'énergie ? Qui la convertit ? Qui la laisse passer ?";
+        fb.className = "text-xs sm:text-sm font-bold text-rose-600";
+      }
+    }
+
+    function selectQ6(choice) {
+      selectedQ6Choice = choice;
+      const btnOuv = document.getElementById('q6-btn-ouverte');
+      const btnFerm = document.getElementById('q6-btn-fermee');
+
+      if (choice === 'ouverte') {
+        btnOuv.className = "px-3.5 py-1 rounded-full border-4 border-blue-600 bg-blue-50 text-blue-900 font-extrabold text-sm transition";
+        btnFerm.className = "px-3.5 py-1 rounded-full border-2 border-slate-300 bg-white font-extrabold text-sm hover:border-blue-400 transition";
+      } else {
+        btnFerm.className = "px-3.5 py-1 rounded-full border-4 border-blue-600 bg-blue-50 text-blue-900 font-extrabold text-sm transition";
+        btnOuv.className = "px-3.5 py-1 rounded-full border-2 border-slate-300 bg-white font-extrabold text-sm hover:border-blue-400 transition";
+      }
+    }
+
+    function checkQ6() {
+      const fb = document.getElementById('feedback-q6');
+      fb.classList.remove('hidden');
+
+      if (selectedQ6Choice === 'fermee') {
+        fb.textContent = "✅ Exact ! La boucle formée par le circuit doit impérativement être FERMÉE. Entoure « fermée » sur ta feuille !";
+        fb.className = "text-xs sm:text-sm font-bold text-emerald-600";
+      } else if (selectedQ6Choice === 'ouverte') {
+        fb.textContent = "❌ Non : si la boucle est ouverte, le courant électrique est bloqué et aucun transfert n'a lieu.";
+        fb.className = "text-xs sm:text-sm font-bold text-rose-600";
+      } else {
+        fb.textContent = "👉 Clique sur « ouverte » ou « fermée » pour entourer ta réponse.";
+        fb.className = "text-xs sm:text-sm font-bold text-amber-600";
+      }
+    }
+
+    // ==========================================
+    // ÉTAPE 5 : CONCLUSION & CHAÎNE D'ÉNERGIE (Q7a, Q7b)
+    // ==========================================
+    function checkQ7a() {
+      const c1 = document.getElementById('q7a-cond1').value;
+      const c2 = document.getElementById('q7a-cond2').value;
+      const fb = document.getElementById('feedback-q7a');
+      fb.classList.remove('hidden');
+
+      if (c1 === 'generateur' && c2 === 'fermee') {
+        fb.textContent = "✅ Parfait ! Les deux conditions indispensables sont : 1) la présence d'un générateur (pile) et 2) une boucle fermée.";
+        fb.className = "text-xs sm:text-sm font-bold text-emerald-600";
+      } else {
+        fb.textContent = "❌ Vérifie tes deux choix en t'aidant des questions 5 et 6.";
+        fb.className = "text-xs sm:text-sm font-bold text-rose-600";
+      }
+    }
+
+    function updateChainPreview() {
+      const v1 = document.getElementById('q7b-1').value;
+      const v2 = document.getElementById('q7b-2').value;
+      const v3 = document.getElementById('q7b-3').value;
+
+      document.getElementById('svgChain1').textContent = v1 ? (v1.includes('Pile') ? 'Pile' : v1) : '.......';
+      document.getElementById('svgChain2').textContent = v2 || '';
+      document.getElementById('svgChain3').textContent = v3 ? 'lumineuse' : '';
+    }
+
+    function checkQ7b() {
+      const v1 = document.getElementById('q7b-1').value;
+      const v2 = document.getElementById('q7b-2').value;
+      const v3 = document.getElementById('q7b-3').value;
+      const fb = document.getElementById('feedback-q7b');
+      fb.classList.remove('hidden');
+
+      if (v1 === 'Pile (ou Générateur)' && v2 === 'électrique' && v3 === 'lumineuse') {
+        fb.textContent = "✅ Bravo ! 1 = Pile (ou Générateur) • 2 = électrique • 3 = lumineuse. La lampe reçoit de l'énergie électrique et la convertit en énergie lumineuse et thermique !";
+        fb.className = "text-xs sm:text-sm font-bold text-emerald-600";
+      } else {
+        fb.textContent = "❌ Regarde bien le sens des flèches : qui fournit l'énergie électrique à la lampe (1) ? Quelle énergie entre dans la lampe (2) ? Quelle énergie éclaire la pièce (3) ?";
+        fb.className = "text-xs sm:text-sm font-bold text-rose-600";
+      }
+    }
+
+    function copyActivityLink(url, btnId) {
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById(btnId);
+        const oldText = btn.textContent;
+        btn.textContent = "✅ Lien copié !";
+        setTimeout(() => { btn.textContent = oldText; }, 2000);
+      });
+    }
+
+    // Initialisation au chargement
+    window.addEventListener('DOMContentLoaded', () => {
+      renderBenchCircuit();
+      renderSchematicSlots();
+      updateStep3Simulation();
+    });
+  </script>
+</body>
+</html>
