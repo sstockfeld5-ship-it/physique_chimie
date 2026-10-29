@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activité 2 : Influence de la position des composants (6ème)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Animations personnalisées pour l'électricité et les lampes */
+        @keyframes pulseGlowStrong {
+            0%, 100% { filter: drop-shadow(0 0 18px rgba(250, 204, 21, 0.95)) drop-shadow(0 0 35px rgba(250, 204, 21, 0.7)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 25px rgba(250, 204, 21, 1)) drop-shadow(0 0 45px rgba(253, 224, 71, 0.9)); transform: scale(1.03); }
+        }
+
+        @keyframes pulseGlowWeak {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5)); }
+            50% { filter: drop-shadow(0 0 9px rgba(245, 158, 11, 0.7)); }
+        }
+
+        @keyframes dashFlow {
+            to {
+                stroke-dashoffset: -40;
+            }
+        }
+
+        @keyframes floatBubble {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .glow-strong {
+            animation: pulseGlowStrong 2s infinite ease-in-out;
+        }
+
+        .glow-weak {
+            animation: pulseGlowWeak 2.5s infinite ease-in-out;
+        }
+
+        .current-flow {
+            stroke-dasharray: 8 12;
+            animation: dashFlow 1s linear infinite;
+        }
+
+        .floating {
+            animation: floatBubble 3s ease-in-out infinite;
+        }
+
+        /* Transitions douces pour les échanges de dipôles */
+        .dipole-transition {
+            transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Zoom dynamique pour repérer un composant quand on en parle */
+        .zoom-target {
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.45s ease;
+            transform-origin: center center;
+            transform-box: fill-box;
+        }
+
+        .spotlight-active {
+            transform: scale(1.36);
+            filter: drop-shadow(0 0 22px rgba(56, 189, 248, 0.95)) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.8));
+        }
+
+        .spotlight-ring {
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            pointer-events: none;
+        }
+
+        .spotlight-active .spotlight-ring {
+            opacity: 1;
+            animation: ringPulse 1.2s infinite ease-in-out;
+        }
+
+        @keyframes ringPulse {
+            0%, 100% { stroke-width: 3.5px; stroke-opacity: 1; }
+            50% { stroke-width: 7px; stroke-opacity: 0.55; }
+        }
+
+        .scene-container {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+
+        /* Barre de progression fluide */
+        .progress-bar-fill {
+            transition: width 0.15s linear;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-slate-900 text-slate-100">
+
+    <!-- ÉCRAN D'ACCUEIL OVERLAY (Pour débloquer la synthèse vocale et l'audio sur iPad/Chrome) -->
+    <div id="start-overlay" class="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+        <div class="max-w-xl bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+            </div>
+            <span class="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 rounded-full border border-blue-400/30">Physique-Chimie • Niveau 6ème</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold mt-4 mb-3 text-white">Activité 2 : Influence de la position des composants</h1>
+            <p class="text-slate-300 text-sm sm:text-base mb-8 leading-relaxed">
+                Cette animation pédagogique explique pas à pas l'expérience sur la place des dipôles dans un circuit électrique comportant une seule boucle (Durée : ~1 min 45 en boucle continue).
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button id="btn-start-sound" class="flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold rounded-2xl shadow-lg shadow-amber-500/25 transform hover:-translate-y-0.5 transition active:translate-y-0 text-base cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>
+                    Activer le son et lancer l'animation
+                </button>
+                <button id="btn-start-muted" class="flex items-center justify-center gap-2 px-5 py-4 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded-2xl transition text-sm cursor-pointer">
+                    Lancer sans le son (Sous-titres)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EN-TÊTE ET NAVIGATION PAR ÉTAPES -->
+    <header class="bg-slate-800/90 border-b border-slate-700/80 px-4 py-3 backdrop-blur-sm z-20">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm sm:text-base font-bold text-white leading-tight">Activité 2 : Position des composants dans un circuit</h2>
+                    <p id="scene-title-header" class="text-xs text-amber-400 font-medium">Étape 1/6 : Observation du montage</p>
+                </div>
+            </div>
+
+            <!-- Boutons des 6 étapes pour accès direct -->
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center">
+                <button onclick="goToScene(0)" id="step-btn-0" class="step-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">1. Observation</button>
+                <button onclick="goToScene(1)" id="step-btn-1" class="step-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">2. Hypothèse</button>
+                <button onclick="goToScene(2)" id="step-btn-2" class="step-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">3. Schémas</button>
+                <button onclick="goToScene(3)" id="step-btn-3" class="step-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">4. Expérience</button>
+                <button onclick="goToScene(4)" id="step-btn-4" class="step-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">5. Interrupteur</button>
+                <button onclick="goToScene(5)" id="step-btn-5" class="step-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">6. Bilan</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ZONE CENTRALE DE L'ANIMATION -->
+    <main class="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 relative overflow-hidden">
+        <div class="w-full max-w-5xl bg-slate-800/70 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col justify-between min-h-[420px] sm:min-h-[490px] relative">
+
+            <!-- Bandeau de compétence / Question de l'étape -->
+            <div class="bg-slate-900/60 border-b border-slate-700/60 px-6 py-3 flex items-center justify-between">
+                <span id="competence-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+                    Observer et formuler un problème
+                </span>
+                <span id="loop-indicator" class="text-xs text-slate-400 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    Lecture continue en boucle
+                </span>
+            </div>
+
+            <!-- CONTENEUR DES 6 SCÈNES -->
+            <div class="flex-1 relative flex items-center justify-center p-4 sm:p-6">
+
+                <!-- ==========================================
+                     SCÈNE 1 & 2 & 4 : LE MONTAGE DU LABORATOIRE (Style Photo Activité)
+                     ========================================== -->
+                <div id="stage-lab" class="w-full h-full flex flex-col items-center justify-center">
+                    <!-- Question / Bulle d'hypothèse dynamique en haut du montage -->
+                    <div id="lab-banner" class="mb-2 max-w-2xl w-full text-center transition-all duration-500">
+                        <!-- Injecté par JS selon Scène 1, 2 ou 4 -->
+                    </div>
+
+                    <!-- SVG du Montage Réel de Laboratoire -->
+                    <div class="w-full max-w-3xl relative">
+                        <svg id="svg-lab" viewBox="0 0 800 410" class="w-full h-auto drop-shadow-md">
+                            <defs>
+                                <radialGradient id="bulbGlowStrong" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#fef08a" stop-opacity="1"/>
+                                    <stop offset="45%" stop-color="#facc15" stop-opacity="0.85"/>
+                                    <stop offset="100%" stop-color="#eab308" stop-opacity="0"/>
+                                </radialGradient>
+                                <radialGradient id="bulbGlowWeak" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#fde68a" stop-opacity="0.9"/>
+                                    <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.4"/>
+                                    <stop offset="100%" stop-color="#d97706" stop-opacity="0"/>
+                                </radialGradient>
+                            </defs>
+
+                            <!-- Fond table de laboratoire -->
+                            <rect x="15" y="10" width="770" height="390" rx="24" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+
+                            <!-- FILS DE CONNEXION -->
+                            <!-- Fil Vert : Générateur (+) gauche vers Boîtier Gauche (Lampe 1) -->
+                            <path d="M 370 155 C 310 190, 260 60, 155 155" fill="none" stroke="#10b981" stroke-width="7" stroke-linecap="round"/>
+                            <!-- Fil Rouge : Générateur (-) droite vers Boîtier Droite -->
+                            <path d="M 430 155 C 490 220, 560 75, 645 155" fill="none" stroke="#ef4444" stroke-width="7" stroke-linecap="round"/>
+                            <!-- Fil Noir Gauche : Boîtier Gauche vers Boîtier Bas -->
+                            <path d="M 155 275 C 155 360, 220 330, 310 330" fill="none" stroke="#0f172a" stroke-width="7" stroke-linecap="round"/>
+                            <path d="M 155 275 C 155 360, 220 330, 310 330" fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+                            <!-- Fil Noir Droite : Boîtier Bas vers Boîtier Droite -->
+                            <path d="M 490 330 C 580 330, 645 360, 645 275" fill="none" stroke="#0f172a" stroke-width="7" stroke-linecap="round"/>
+                            <path d="M 490 330 C 580 330, 645 360, 645 275" fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+
+                            <!-- Flux de courant animé quand le circuit est fermé -->
+                            <path id="lab-current-loop" d="M 370 155 C 310 190, 260 60, 155 155 L 155 275 C 155 360, 220 330, 310 330 L 490 330 C 580 330, 645 360, 645 275 L 645 155 C 560 75, 490 220, 430 155" fill="none" stroke="#fde047" stroke-width="3" class="current-flow" opacity="0.65"/>
+
+                            <!-- 1. GÉNÉRATEUR (Haut Centre) -->
+                            <g transform="translate(335, 30)">
+                                <g id="zoom-lab-gen" class="zoom-target">
+                                    <rect class="spotlight-ring" x="-14" y="-26" width="158" height="166" rx="18" fill="rgba(56, 189, 248, 0.12)" stroke="#38bdf8" stroke-dasharray="8 5"/>
+                                    <text x="65" y="-6" text-anchor="middle" fill="#f8fafc" font-size="16" font-weight="bold">Générateur (6 V)</text>
+                                    <!-- Boîtier noir du générateur -->
+                                    <rect x="0" y="5" width="130" height="125" rx="10" fill="#0f172a" stroke="#475569" stroke-width="2.5"/>
+                                    <!-- Grilles d'aération -->
+                                    <line x1="25" y1="22" x2="25" y2="55" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+                                    <line x1="45" y1="22" x2="45" y2="55" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+                                    <line x1="65" y1="22" x2="65" y2="55" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+                                    <line x1="85" y1="22" x2="85" y2="55" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+                                    <line x1="105" y1="22" x2="105" y2="55" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+                                    <!-- Panneau avant gris -->
+                                    <rect x="12" y="70" width="106" height="50" rx="5" fill="#94a3b8"/>
+                                    <!-- Bouton rotatif et voyant rouge -->
+                                    <circle cx="45" cy="90" r="10" fill="#1e293b"/>
+                                    <circle cx="88" cy="82" r="4" fill="#ef4444" class="animate-pulse"/>
+                                    <!-- Bornes Verte et Rouge -->
+                                    <circle cx="35" cy="118" r="8" fill="#10b981" stroke="#064e3b" stroke-width="2"/>
+                                    <circle cx="95" cy="118" r="8" fill="#ef4444" stroke="#7f1d1d" stroke-width="2"/>
+                                </g>
+                            </g>
+
+                            <!-- 2. LAMPE 1 (Toujours à gauche) -->
+                            <g id="group-lampe1" transform="translate(85, 150)">
+                                <g id="zoom-lab-l1" class="zoom-target">
+                                    <rect class="spotlight-ring" x="-16" y="-34" width="172" height="172" rx="18" fill="rgba(250, 204, 21, 0.14)" stroke="#facc15" stroke-dasharray="8 5"/>
+                                    <text x="70" y="-15" text-anchor="middle" fill="#fde047" font-size="16" font-weight="bold">Lampe 1 (Brille fort)</text>
+                                    <!-- Cercle de mise en évidence pour l'étape 2 (Hypothèse) -->
+                                    <rect id="highlight-l1" x="-12" y="-8" width="164" height="140" rx="16" fill="none" stroke="#fde047" stroke-width="3.5" stroke-dasharray="8 6" opacity="0"/>
+                                    <!-- Boîtier blanc/gris -->
+                                    <rect x="0" y="0" width="140" height="125" rx="10" fill="#cbd5e1" stroke="#64748b" stroke-width="2.5"/>
+                                    <rect x="20" y="18" width="100" height="88" rx="6" fill="#64748b"/>
+                                    <!-- Halo lumineux FORT -->
+                                    <circle cx="70" cy="60" r="52" fill="url(#bulbGlowStrong)" class="glow-strong"/>
+                                    <!-- Rayons lumineux forts -->
+                                    <g stroke="#fef08a" stroke-width="3" stroke-linecap="round">
+                                        <line x1="70" y1="2" x2="70" y2="-10"/>
+                                        <line x1="115" y1="20" x2="128" y2="10"/>
+                                        <line x1="25" y1="20" x2="12" y2="10"/>
+                                        <line x1="125" y1="60" x2="140" y2="60"/>
+                                        <line x1="15" y1="60" x2="0" y2="60"/>
+                                    </g>
+                                    <!-- Ampoule -->
+                                    <circle cx="70" cy="68" r="14" fill="#475569" stroke="#1e293b" stroke-width="2"/>
+                                    <circle cx="70" cy="56" r="18" fill="#fef9c3" stroke="#eab308" stroke-width="2"/>
+                                    <path d="M 63 62 Q 70 45 77 62" fill="none" stroke="#ca8a04" stroke-width="2.5"/>
+                                </g>
+                            </g>
+
+                            <!-- 3. LAMPE 2 (Positionnable : En bas au début, ou à droite à l'étape 4) -->
+                            <g id="group-lampe2" class="dipole-transition" transform="translate(310, 265)">
+                                <g id="zoom-lab-l2" class="zoom-target">
+                                    <rect class="spotlight-ring" x="-16" y="-34" width="212" height="162" rx="18" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-dasharray="8 5"/>
+                                    <text id="label-lampe2" x="90" y="-14" text-anchor="middle" fill="#fdba74" font-size="16" font-weight="bold">Lampe 2 (Brille faiblement)</text>
+                                    <!-- Boîtier support -->
+                                    <rect x="0" y="0" width="180" height="115" rx="10" fill="#cbd5e1" stroke="#64748b" stroke-width="2.5"/>
+                                    <rect x="25" y="18" width="130" height="78" rx="6" fill="#64748b"/>
+                                    <!-- Halo lumineux FAIBLE -->
+                                    <circle cx="90" cy="55" r="28" fill="url(#bulbGlowWeak)" class="glow-weak"/>
+                                    <!-- Ampoule faible -->
+                                    <circle cx="90" cy="62" r="12" fill="#475569" stroke="#1e293b" stroke-width="2"/>
+                                    <circle cx="90" cy="52" r="15" fill="#fed7aa" stroke="#d97706" stroke-width="2"/>
+                                    <path d="M 84 56 Q 90 44 96 56" fill="none" stroke="#9a3412" stroke-width="2"/>
+                                </g>
+                            </g>
+
+                            <!-- 4. INTERRUPTEUR (Positionnable : À droite au début, ou en bas à l'étape 4) -->
+                            <g id="group-switch" class="dipole-transition" transform="translate(575, 150)">
+                                <g id="zoom-lab-sw" class="zoom-target">
+                                    <rect class="spotlight-ring" x="-16" y="-34" width="172" height="172" rx="18" fill="rgba(56, 189, 248, 0.14)" stroke="#38bdf8" stroke-dasharray="8 5"/>
+                                    <text id="label-switch" x="70" y="-15" text-anchor="middle" fill="#e2e8f0" font-size="16" font-weight="bold">Interrupteur (Fermé)</text>
+                                    <rect x="0" y="0" width="140" height="125" rx="10" fill="#cbd5e1" stroke="#64748b" stroke-width="2.5"/>
+                                    <rect x="25" y="20" width="90" height="85" rx="6" fill="#475569"/>
+                                    <!-- Levier de l'interrupteur -->
+                                    <circle cx="70" cy="62" r="16" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+                                    <rect id="switch-lever-rect" x="65" y="42" width="10" height="24" rx="4" fill="#f8fafc"/>
+                                </g>
+                            </g>
+
+                            <!-- Flèche d'inversion (Visible uniquement lors de l'échange en scène 4) -->
+                            <g id="swap-arrows" opacity="0" class="transition-opacity duration-500">
+                                <path d="M 510 310 Q 595 310 610 240" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="6 4"/>
+                                <polygon points="610,235 602,248 618,248" fill="#38bdf8"/>
+                                <rect x="485" y="215" width="175" height="32" rx="8" fill="#0284c7"/>
+                                <text x="572" y="236" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="bold">Inversion effectuée !</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     SCÈNE 3 : LES DEUX SCHÉMAS NORMALISÉS
+                     ========================================== -->
+                <div id="stage-schemas" class="w-full h-full hidden flex-col items-center justify-center">
+                    <div class="text-center mb-4">
+                        <h3 class="text-lg sm:text-xl font-bold text-white">Du montage réel aux schémas électriques normalisés</h3>
+                        <p class="text-xs sm:text-sm text-slate-300">Pour vérifier notre idée, on prépare un second circuit où la <span class="text-amber-400 font-semibold">Lampe 2</span> et <span class="text-sky-400 font-semibold">l'interrupteur</span> échangent leur place.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+                        <!-- SCHÉMA 1 : Montage de la photographie -->
+                        <div class="bg-slate-900/90 border-2 border-slate-700 rounded-2xl p-4 flex flex-col items-center shadow-lg">
+                            <span class="px-3 py-1 bg-slate-800 text-slate-200 rounded-lg text-xs font-bold mb-2 border border-slate-600">
+                                Montage initial (Lampe 2 éloignée du générateur)
+                            </span>
+                            <svg viewBox="0 0 360 240" class="w-full max-w-[330px] h-auto">
+                                <!-- Rectangle du circuit -->
+                                <rect x="50" y="45" width="260" height="150" fill="none" stroke="#e2e8f0" stroke-width="3.5"/>
+
+                                <!-- Générateur G en haut -->
+                                <g id="zoom-sch1-gen" class="zoom-target">
+                                    <circle cx="180" cy="45" r="24" fill="#0f172a" stroke="#38bdf8" stroke-width="3.5"/>
+                                    <text x="180" y="53" text-anchor="middle" fill="#38bdf8" font-size="22" font-weight="bold">G</text>
+                                    <text x="142" y="35" fill="#10b981" font-size="16" font-weight="bold">+</text>
+                                    <text x="212" y="35" fill="#ef4444" font-size="18" font-weight="bold">-</text>
+                                </g>
+
+                                <!-- Lampe 1 à gauche (Brille fort) -->
+                                <g id="zoom-sch1-l1" class="zoom-target">
+                                    <circle cx="50" cy="120" r="22" fill="#0f172a" stroke="#facc15" stroke-width="3.5" class="glow-strong"/>
+                                    <line x1="35" y1="105" x2="65" y2="135" stroke="#facc15" stroke-width="3.5"/>
+                                    <line x1="65" y1="105" x2="35" y2="135" stroke="#facc15" stroke-width="3.5"/>
+                                    <text x="90" y="125" fill="#fde047" font-size="15" font-weight="bold">L₁</text>
+                                </g>
+
+                                <!-- Lampe 2 en bas -->
+                                <g id="zoom-sch1-l2" class="zoom-target">
+                                    <circle class="spotlight-ring" cx="180" cy="195" r="32" fill="none" stroke="#fb923c" stroke-dasharray="6 4"/>
+                                    <circle cx="180" cy="195" r="22" fill="#0f172a" stroke="#fb923c" stroke-width="3.5"/>
+                                    <line x1="165" y1="180" x2="195" y2="210" stroke="#fb923c" stroke-width="3.5"/>
+                                    <line x1="195" y1="180" x2="165" y2="210" stroke="#fb923c" stroke-width="3.5"/>
+                                    <text x="180" y="162" text-anchor="middle" fill="#fdba74" font-size="15" font-weight="bold">L₂ (Loin de G)</text>
+                                </g>
+
+                                <!-- Interrupteur fermé à droite -->
+                                <g id="zoom-sch1-sw" class="zoom-target">
+                                    <circle class="spotlight-ring" cx="310" cy="120" r="32" fill="none" stroke="#38bdf8" stroke-dasharray="6 4"/>
+                                    <rect x="298" y="98" width="24" height="44" fill="#0f172a"/>
+                                    <circle cx="310" cy="98" r="4.5" fill="#e2e8f0"/>
+                                    <circle cx="310" cy="142" r="4.5" fill="#e2e8f0"/>
+                                    <line x1="310" y1="98" x2="310" y2="142" stroke="#38bdf8" stroke-width="4"/>
+                                    <text x="258" y="125" text-anchor="middle" fill="#38bdf8" font-size="13" font-weight="bold">Interrupteur</text>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- SCHÉMA 2 : Après inversion de L2 et de l'interrupteur -->
+                        <div class="bg-slate-900/90 border-2 border-amber-500/60 rounded-2xl p-4 flex flex-col items-center shadow-lg relative">
+                            <span class="px-3 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold mb-2 border border-amber-400/40">
+                                Nouveau montage (Lampe 2 et Interrupteur inversés)
+                            </span>
+                            <svg viewBox="0 0 360 240" class="w-full max-w-[330px] h-auto">
+                                <!-- Rectangle du circuit -->
+                                <rect x="50" y="45" width="260" height="150" fill="none" stroke="#e2e8f0" stroke-width="3.5"/>
+
+                                <!-- Générateur G en haut -->
+                                <g id="zoom-sch2-gen" class="zoom-target">
+                                    <circle cx="180" cy="45" r="24" fill="#0f172a" stroke="#38bdf8" stroke-width="3.5"/>
+                                    <text x="180" y="53" text-anchor="middle" fill="#38bdf8" font-size="22" font-weight="bold">G</text>
+                                    <text x="142" y="35" fill="#10b981" font-size="16" font-weight="bold">+</text>
+                                    <text x="212" y="35" fill="#ef4444" font-size="18" font-weight="bold">-</text>
+                                </g>
+
+                                <!-- Lampe 1 à gauche -->
+                                <g id="zoom-sch2-l1" class="zoom-target">
+                                    <circle cx="50" cy="120" r="22" fill="#0f172a" stroke="#facc15" stroke-width="3.5" class="glow-strong"/>
+                                    <line x1="35" y1="105" x2="65" y2="135" stroke="#facc15" stroke-width="3.5"/>
+                                    <line x1="65" y1="105" x2="35" y2="135" stroke="#facc15" stroke-width="3.5"/>
+                                    <text x="90" y="125" fill="#fde047" font-size="15" font-weight="bold">L₁</text>
+                                </g>
+
+                                <!-- Interrupteur fermé en bas -->
+                                <g id="zoom-sch2-sw" class="zoom-target">
+                                    <circle class="spotlight-ring" cx="180" cy="195" r="32" fill="none" stroke="#38bdf8" stroke-dasharray="6 4"/>
+                                    <rect x="158" y="183" width="44" height="24" fill="#0f172a"/>
+                                    <circle cx="158" cy="195" r="4.5" fill="#e2e8f0"/>
+                                    <circle cx="202" cy="195" r="4.5" fill="#e2e8f0"/>
+                                    <line x1="158" y1="195" x2="202" y2="195" stroke="#38bdf8" stroke-width="4"/>
+                                    <text x="180" y="172" text-anchor="middle" fill="#38bdf8" font-size="14" font-weight="bold">Interrupteur</text>
+                                </g>
+
+                                <!-- Lampe 2 à droite (Reliée directement au Générateur !) -->
+                                <g id="zoom-sch2-l2" class="zoom-target">
+                                    <circle class="spotlight-ring" cx="310" cy="120" r="32" fill="none" stroke="#fb923c" stroke-dasharray="6 4"/>
+                                    <circle cx="310" cy="120" r="22" fill="#0f172a" stroke="#fb923c" stroke-width="3.5"/>
+                                    <line x1="295" y1="105" x2="325" y2="135" stroke="#fb923c" stroke-width="3.5"/>
+                                    <line x1="325" y1="105" x2="295" y2="135" stroke="#fb923c" stroke-width="3.5"/>
+                                    <text x="242" y="120" text-anchor="middle" fill="#fdba74" font-size="14" font-weight="bold">L₂ (Près de G)</text>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     SCÈNE 5 : APPLICATION À L'INTERRUPTEUR (Pile + 2 Lampes)
+                     ========================================== -->
+                <div id="stage-verify" class="w-full h-full hidden flex-col items-center justify-center">
+                    <div class="text-center mb-3 max-w-2xl">
+                        <span class="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-xs font-bold">
+                            Et pour la place de l'interrupteur dans le circuit ?
+                        </span>
+                        <h3 class="text-base sm:text-lg font-bold text-white mt-2">
+                            Pour commander l'allumage et l'extinction des deux lampes L₁ et L₂, où faut-il placer l'interrupteur ?
+                        </h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl items-center">
+                        <!-- Cas A : Interrupteur entre la pile et L1 -->
+                        <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-4 flex flex-col items-center">
+                            <span class="text-xs font-bold text-sky-300 mb-2">Possibilité A : Entre la pile et la lampe L₁</span>
+                            <svg viewBox="0 0 340 200" class="w-full max-w-[300px] h-auto">
+                                <rect x="45" y="40" width="250" height="125" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+                                <!-- Pile plate à gauche -->
+                                <g id="zoom-verA-pile" class="zoom-target">
+                                    <rect x="20" y="72" width="50" height="62" rx="6" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+                                    <rect x="20" y="72" width="50" height="20" rx="4" fill="#eab308"/>
+                                    <text x="34" y="87" fill="#0f172a" font-size="14" font-weight="bold">+</text>
+                                    <text x="52" y="87" fill="#0f172a" font-size="16" font-weight="bold">-</text>
+                                </g>
+
+                                <!-- Interrupteur en haut (Entre Pile et L1) -->
+                                <g id="zoom-verA-sw" class="zoom-target">
+                                    <circle class="spotlight-ring" cx="170" cy="35" r="30" fill="none" stroke="#38bdf8" stroke-dasharray="6 4"/>
+                                    <rect x="145" y="25" width="50" height="30" fill="#0f172a"/>
+                                    <circle cx="150" cy="40" r="4" fill="#fff"/>
+                                    <circle cx="190" cy="40" r="4" fill="#fff"/>
+                                    <line class="verify-switch-blade" x1="150" y1="40" x2="190" y2="40" stroke="#38bdf8" stroke-width="4"/>
+                                    <text x="170" y="18" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="bold">Interrupteur</text>
+                                </g>
+
+                                <!-- Lampe L1 à droite -->
+                                <g id="zoom-verA-l1" class="zoom-target">
+                                    <circle cx="295" cy="102" r="20" fill="#0f172a" stroke="#facc15" stroke-width="3" class="verify-bulb"/>
+                                    <line x1="281" y1="88" x2="309" y2="116" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                    <line x1="309" y1="88" x2="281" y2="116" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                    <text x="260" y="106" fill="#fde047" font-size="14" font-weight="bold">L₁</text>
+                                </g>
+
+                                <!-- Lampe L2 en bas -->
+                                <g id="zoom-verA-l2" class="zoom-target">
+                                    <circle cx="170" cy="165" r="20" fill="#0f172a" stroke="#facc15" stroke-width="3" class="verify-bulb"/>
+                                    <line x1="156" y1="151" x2="184" y2="179" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                    <line x1="184" y1="151" x2="156" y2="179" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                    <text x="170" y="136" text-anchor="middle" fill="#fde047" font-size="14" font-weight="bold">L₂</text>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- Cas B : Interrupteur entre les deux lampes L1 et L2 -->
+                        <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-4 flex flex-col items-center">
+                            <span class="text-xs font-bold text-amber-300 mb-2">Possibilité B : Entre les deux lampes L₁ et L₂</span>
+                            <svg viewBox="0 0 340 200" class="w-full max-w-[300px] h-auto">
+                                <rect x="45" y="40" width="250" height="125" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+                                <!-- Pile plate à gauche -->
+                                <g id="zoom-verB-pile" class="zoom-target">
+                                    <rect x="20" y="72" width="50" height="62" rx="6" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+                                    <rect x="20" y="72" width="50" height="20" rx="4" fill="#eab308"/>
+                                    <text x="34" y="87" fill="#0f172a" font-size="14" font-weight="bold">+</text>
+                                    <text x="52" y="87" fill="#0f172a" font-size="16" font-weight="bold">-</text>
+                                </g>
+
+                                <!-- Lampe L1 en haut -->
+                                <g id="zoom-verB-l1" class="zoom-target">
+                                    <circle cx="170" cy="40" r="20" fill="#0f172a" stroke="#facc15" stroke-width="3" class="verify-bulb"/>
+                                    <line x1="156" y1="26" x2="184" y2="54" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                    <line x1="184" y1="26" x2="156" y2="54" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                    <text x="170" y="76" text-anchor="middle" fill="#fde047" font-size="14" font-weight="bold">L₁</text>
+                                </g>
+
+                                <!-- Interrupteur à droite (Entre L1 et L2) -->
+                                <g id="zoom-verB-sw" class="zoom-target">
+                                    <circle class="spotlight-ring" cx="295" cy="102" r="30" fill="none" stroke="#38bdf8" stroke-dasharray="6 4"/>
+                                    <rect x="280" y="80" width="30" height="45" fill="#0f172a"/>
+                                    <circle cx="295" cy="84" r="4" fill="#fff"/>
+                                    <circle cx="295" cy="120" r="4" fill="#fff"/>
+                                    <line class="verify-switch-blade-v" x1="295" y1="84" x2="295" y2="120" stroke="#38bdf8" stroke-width="4"/>
+                                    <text x="242" y="106" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="bold">Interrupteur</text>
+                                </g>
+
+                                <!-- Lampe L2 en bas -->
+                                <g id="zoom-verB-l2" class="zoom-target">
+                                    <circle cx="170" cy="165" r="20" fill="#0f172a" stroke="#facc15" stroke-width="3" class="verify-bulb"/>
+                                    <line x1="156" y1="151" x2="184" y2="179" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                    <line x1="184" y1="151" x2="156" y2="179" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                    <text x="170" y="136" text-anchor="middle" fill="#fde047" font-size="14" font-weight="bold">L₂</text>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     SCÈNE 5 : JE VÉRIFIE QUE J'AI COMPRIS (Question 5 - Pile + 2 Lampes)
+                     ========================================== -->
+                <div id="stage-verify" class="w-full h-full hidden flex-col items-center justify-center">
+                    <div class="text-center mb-3 max-w-2xl">
+                        <span class="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-xs font-bold">
+                            Question 5 : Je vérifie que j'ai compris
+                        </span>
+                        <h3 class="text-base sm:text-lg font-bold text-white mt-2">
+                            Où faut-il placer l'interrupteur pour allumer et éteindre les deux lampes L₁ et L₂ ?
+                        </h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl items-center">
+                        <!-- Cas A : Interrupteur entre la pile et L1 -->
+                        <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-4 flex flex-col items-center">
+                            <span class="text-xs font-bold text-sky-300 mb-2">Position A : Entre la pile et la lampe L₁</span>
+                            <svg viewBox="0 0 340 200" class="w-full max-w-[300px] h-auto">
+                                <rect x="45" y="40" width="250" height="125" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+                                <!-- Pile plate à gauche -->
+                                <rect x="20" y="72" width="50" height="62" rx="6" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+                                <rect x="20" y="72" width="50" height="20" rx="4" fill="#eab308"/>
+                                <text x="34" y="87" fill="#0f172a" font-size="14" font-weight="bold">+</text>
+                                <text x="52" y="87" fill="#0f172a" font-size="16" font-weight="bold">-</text>
+
+                                <!-- Interrupteur en haut (Entre Pile et L1) -->
+                                <rect x="145" y="25" width="50" height="30" fill="#0f172a"/>
+                                <circle cx="150" cy="40" r="4" fill="#fff"/>
+                                <circle cx="190" cy="40" r="4" fill="#fff"/>
+                                <line class="verify-switch-blade" x1="150" y1="40" x2="190" y2="40" stroke="#38bdf8" stroke-width="4"/>
+                                <text x="170" y="18" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="bold">Interrupteur</text>
+
+                                <!-- Lampe L1 à droite -->
+                                <circle cx="295" cy="102" r="20" fill="#0f172a" stroke="#facc15" stroke-width="3" class="verify-bulb"/>
+                                <line x1="281" y1="88" x2="309" y2="116" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                <line x1="309" y1="88" x2="281" y2="116" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                <text x="260" y="106" fill="#fde047" font-size="14" font-weight="bold">L₁</text>
+
+                                <!-- Lampe L2 en bas -->
+                                <circle cx="170" cy="165" r="20" fill="#0f172a" stroke="#facc15" stroke-width="3" class="verify-bulb"/>
+                                <line x1="156" y1="151" x2="184" y2="179" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                <line x1="184" y1="151" x2="156" y2="179" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                <text x="170" y="136" text-anchor="middle" fill="#fde047" font-size="14" font-weight="bold">L₂</text>
+                            </svg>
+                        </div>
+
+                        <!-- Cas B : Interrupteur entre les deux lampes L1 et L2 -->
+                        <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-4 flex flex-col items-center">
+                            <span class="text-xs font-bold text-amber-300 mb-2">Position B : Entre les deux lampes L₁ et L₂</span>
+                            <svg viewBox="0 0 340 200" class="w-full max-w-[300px] h-auto">
+                                <rect x="45" y="40" width="250" height="125" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+                                <!-- Pile plate à gauche -->
+                                <rect x="20" y="72" width="50" height="62" rx="6" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+                                <rect x="20" y="72" width="50" height="20" rx="4" fill="#eab308"/>
+                                <text x="34" y="87" fill="#0f172a" font-size="14" font-weight="bold">+</text>
+                                <text x="52" y="87" fill="#0f172a" font-size="16" font-weight="bold">-</text>
+
+                                <!-- Lampe L1 en haut -->
+                                <circle cx="170" cy="40" r="20" fill="#0f172a" stroke="#facc15" stroke-width="3" class="verify-bulb"/>
+                                <line x1="156" y1="26" x2="184" y2="54" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                <line x1="184" y1="26" x2="156" y2="54" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                <text x="170" y="76" text-anchor="middle" fill="#fde047" font-size="14" font-weight="bold">L₁</text>
+
+                                <!-- Interrupteur à droite (Entre L1 et L2) -->
+                                <rect x="280" y="80" width="30" height="45" fill="#0f172a"/>
+                                <circle cx="295" cy="84" r="4" fill="#fff"/>
+                                <circle cx="295" cy="120" r="4" fill="#fff"/>
+                                <line class="verify-switch-blade-v" x1="295" y1="84" x2="295" y2="120" stroke="#38bdf8" stroke-width="4"/>
+                                <text x="242" y="106" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="bold">Interrupteur</text>
+
+                                <!-- Lampe L2 en bas -->
+                                <circle cx="170" cy="165" r="20" fill="#0f172a" stroke="#facc15" stroke-width="3" class="verify-bulb"/>
+                                <line x1="156" y1="151" x2="184" y2="179" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                <line x1="184" y1="151" x2="156" y2="179" stroke="#facc15" stroke-width="3" class="verify-bulb-cross"/>
+                                <text x="170" y="136" text-anchor="middle" fill="#fde047" font-size="14" font-weight="bold">L₂</text>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div id="verify-status-badge" class="mt-3 px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-xs sm:text-sm font-bold">
+                        On peut placer l'interrupteur n'importe où dans le circuit : sa position n'a aucune influence !
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     SCÈNE 6 : BILAN DE L'ACTIVITÉ 2
+                     ========================================== -->
+                <div id="stage-bilan" class="w-full h-full hidden flex-col items-center justify-center p-4">
+                    <div class="max-w-2xl w-full bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 border-2 border-amber-400/70 rounded-3xl p-6 sm:p-8 shadow-2xl text-center relative">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-400/20 border border-amber-400/50 flex items-center justify-center text-amber-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+
+                        <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-slate-950">
+                            Bilan Activité 2 • À retenir par cœur
+                        </span>
+
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-white mt-5 mb-4 leading-snug">
+                            « Dans un circuit électrique comportant <span class="text-amber-400 underline decoration-2 underline-offset-4">une seule boucle</span>, la place des composants n’a <span class="text-emerald-400">pas d’influence</span> sur leur fonctionnement. »
+                        </h3>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left mt-6">
+                            <div class="bg-slate-900/70 border border-slate-700 p-3.5 rounded-2xl flex items-start gap-3">
+                                <span class="text-amber-400 font-bold text-lg">💡</span>
+                                <p class="text-xs sm:text-sm text-slate-200">
+                                    <strong>Éclat des lampes :</strong> Rapprocher une lampe du générateur ne la fait pas briller plus fort.
+                                </p>
+                            </div>
+                            <div class="bg-slate-900/70 border border-slate-700 p-3.5 rounded-2xl flex items-start gap-3">
+                                <span class="text-sky-400 font-bold text-lg">🔌</span>
+                                <p class="text-xs sm:text-sm text-slate-200">
+                                    <strong>Place de l'interrupteur :</strong> Il peut être placé n'importe où dans la boucle pour commander tout le circuit.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ZONE DES SOUS-TITRES SYNCHRONISÉS (Toujours visible) -->
+            <div class="bg-slate-950/90 border-t border-slate-800 px-6 py-4 text-center min-h-[76px] flex items-center justify-center">
+                <p id="subtitle-box" class="text-sm sm:text-base md:text-lg font-medium text-amber-100 max-w-4xl leading-relaxed">
+                    Bienvenue dans l'animation de l'activité 2.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- BARRE DE CONTRÔLE ET PROGRESSION CONTINUE -->
+    <footer class="bg-slate-800 border-t border-slate-700 px-4 py-3 z-20">
+        <div class="max-w-5xl mx-auto flex flex-col gap-2">
+            <!-- Barre de progression globale -->
+            <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden flex cursor-pointer" id="progress-container" title="Cliquer pour naviguer">
+                <div id="progress-fill" class="progress-bar-fill bg-gradient-to-r from-amber-400 via-orange-400 to-emerald-400 h-full w-0"></div>
+            </div>
+
+            <!-- Boutons de contrôle -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Précédent -->
+                    <button onclick="prevScene()" class="p-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 transition cursor-pointer" title="Étape précédente">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <!-- Lecture / Pause -->
+                    <button onclick="togglePlayPause()" id="btn-play-pause" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition cursor-pointer">
+                        <svg id="icon-pause" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <svg id="icon-play" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span id="label-play-pause" class="text-xs sm:text-sm">Pause</span>
+                    </button>
+
+                    <!-- Suivant -->
+                    <button onclick="nextScene()" class="p-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 transition cursor-pointer" title="Étape suivante">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Temps et Statut Audio -->
+                <div class="flex items-center gap-3">
+                    <span id="time-display" class="text-xs sm:text-sm font-mono text-slate-300">00:00 / 01:45</span>
+
+                    <button onclick="toggleMute()" id="btn-mute" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs sm:text-sm font-semibold transition cursor-pointer">
+                        <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        </svg>
+                        <svg id="icon-sound-off" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-rose-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                        </svg>
+                        <span id="label-mute">Son activé</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           DONNÉES PÉDAGOGIQUES DES 6 SCÈNES (Fil conducteur naturel + Zooms synchronisés)
+           ========================================================================== */
+        const SCENES = [
+            {
+                id: 0,
+                title: "1. Observation du montage électrique",
+                competence: "Observer et formuler un problème scientifique",
+                duration: 18,
+                speech: "Observons ce circuit électrique comportant une seule boucle. Il contient un générateur, une première lampe qui brille fortement, une deuxième lampe qui brille très faiblement, et un interrupteur fermé. Pourquoi ces deux lampes ne brillent-elles pas de la même façon ?",
+                subtitle: "Observation : Dans ce circuit à une seule boucle, la Lampe 1 brille fortement tandis que la Lampe 2 brille très faiblement. La position d'un composant a-t-elle une influence ?",
+                cues: [
+                    { at: 2.2, targets: ['zoom-lab-gen'], duration: 2.4 },
+                    { at: 5.0, targets: ['zoom-lab-l1'], duration: 3.2 },
+                    { at: 8.6, targets: ['zoom-lab-l2'], duration: 3.2 },
+                    { at: 12.1, targets: ['zoom-lab-sw'], duration: 2.2 }
+                ]
+            },
+            {
+                id: 1,
+                title: "2. Notre hypothèse de départ",
+                competence: "Démarche scientifique : Formuler une hypothèse",
+                duration: 17,
+                speech: "On peut formuler une hypothèse : peut-être que la lampe 1 brille plus fort parce qu'elle est branchée juste à côté du générateur, alors que la lampe 2 en est plus éloignée. Réalisons une expérience pour vérifier cette idée !",
+                subtitle: "Hypothèse : Et si la Lampe 1 brillait plus fort simplement parce qu'elle est reliée directement au générateur, contrairement à la Lampe 2 ?",
+                cues: [
+                    { at: 2.5, targets: ['zoom-lab-l1'], duration: 3.5 },
+                    { at: 6.3, targets: ['zoom-lab-gen'], duration: 2.8 },
+                    { at: 9.6, targets: ['zoom-lab-l2'], duration: 3.5 }
+                ]
+            },
+            {
+                id: 2,
+                title: "3. Préparation de l'expérience sur les schémas",
+                competence: "Modéliser : Passer au schéma électrique normalisé",
+                duration: 19,
+                speech: "Représentons l'expérience avec les schémas normalisés. Sur le montage de départ à gauche, la lampe 2 est loin du générateur. Sur le nouveau montage à droite, on échange la place de la lampe 2 et de l'interrupteur : la lampe 2 est maintenant reliée directement au générateur !",
+                subtitle: "Protocole : En inversant la Lampe 2 et l'interrupteur sur le second schéma, la Lampe 2 se retrouve elle aussi branchée directement à côté du générateur.",
+                cues: [
+                    { at: 4.5, targets: ['zoom-sch1-l2'], duration: 3.2 },
+                    { at: 9.8, targets: ['zoom-sch1-sw', 'zoom-sch2-sw'], duration: 3.0 },
+                    { at: 13.2, targets: ['zoom-sch2-l2', 'zoom-sch2-gen'], duration: 3.8 }
+                ]
+            },
+            {
+                id: 3,
+                title: "4. Expérience d'inversion et constat",
+                competence: "Expérimenter et interpréter les résultats",
+                duration: 20,
+                speech: "Échangeons maintenant la lampe 2 et l'interrupteur sur la table. La lampe 2 est désormais tout près du générateur ! Pourtant, regarde bien : la lampe 2 brille toujours aussi faiblement, et la lampe 1 brille toujours fort. Notre hypothèse est donc fausse : leur position n'a aucune influence !",
+                subtitle: "Expérience : Même placée juste à côté du générateur, la Lampe 2 brille toujours faiblement ! L'hypothèse est réfutée : la position des dipôles n'a pas d'influence.",
+                cues: [
+                    { at: 4.2, targets: ['zoom-lab-l2', 'zoom-lab-gen'], duration: 3.2 },
+                    { at: 8.5, targets: ['zoom-lab-l2'], duration: 3.6 },
+                    { at: 12.6, targets: ['zoom-lab-l1'], duration: 3.0 }
+                ]
+            },
+            {
+                id: 4,
+                title: "5. Et pour la place de l'interrupteur ?",
+                competence: "Vérifier la règle avec l'interrupteur",
+                duration: 18,
+                speech: "Vérifions si cette règle s'applique aussi à l'interrupteur. Que l'on place l'interrupteur entre la pile et la première lampe, ou bien au milieu entre les deux lampes, il commande exactement de la même manière l'allumage et l'extinction de tout le circuit.",
+                subtitle: "Application : On peut placer l'interrupteur n'importe où dans la boucle (avant une lampe ou entre les deux lampes), il commande toujours tout le circuit.",
+                cues: [
+                    { at: 4.0, targets: ['zoom-verA-sw', 'zoom-verA-l1'], duration: 3.5 },
+                    { at: 8.2, targets: ['zoom-verB-sw', 'zoom-verB-l1', 'zoom-verB-l2'], duration: 3.8 }
+                ]
+            },
+            {
+                id: 5,
+                title: "6. Bilan à retenir",
+                competence: "Conclusion de l'activité",
+                duration: 15,
+                speech: "Retenons le bilan de cette activité : dans un circuit électrique comportant une seule boucle, la place des composants n'a aucune influence sur leur fonctionnement.",
+                subtitle: "BILAN : Dans un circuit électrique comportant une seule boucle, la place des composants n’a pas d’influence sur leur fonctionnement.",
+                cues: []
+            }
+        ];
+
+        const TOTAL_DURATION = SCENES.reduce((acc, s) => acc + s.duration, 0);
+
+        /* ==========================================================================
+           ÉTAT DE L'APPLICATION ET SYNTHÉTISEUR AUDIO (Web Audio API + Web Speech)
+           ========================================================================== */
+        let currentSceneIndex = 0;
+        let sceneElapsed = 0;
+        let isPlaying = false;
+        let isMuted = false;
+        let audioCtx = null;
+        let animationTimer = null;
+        let verifyToggleTimer = null;
+        let swapTimeout = null;
+        let cueTimeouts = [];
+
+        // Nettoyer tous les zooms actifs et minuteries de zoom
+        function clearAllSpotlights() {
+            cueTimeouts.forEach(t => clearTimeout(t));
+            cueTimeouts = [];
+            document.querySelectorAll('.zoom-target').forEach(el => {
+                el.classList.remove('spotlight-active');
+            });
+        }
+
+        // Programmer les agrandissements (zooms) synchronisés de la scène courante
+        function scheduleSceneCues(scene) {
+            clearAllSpotlights();
+            if (!scene.cues) return;
+
+            scene.cues.forEach(cue => {
+                const startId = setTimeout(() => {
+                    if (!isPlaying) return;
+                    playSoundEffect('zoom');
+                    cue.targets.forEach(targetId => {
+                        const el = document.getElementById(targetId);
+                        if (el) el.classList.add('spotlight-active');
+                    });
+                }, cue.at * 1000);
+
+                const endId = setTimeout(() => {
+                    cue.targets.forEach(targetId => {
+                        const el = document.getElementById(targetId);
+                        if (el) el.classList.remove('spotlight-active');
+                    });
+                }, (cue.at + cue.duration) * 1000);
+
+                cueTimeouts.push(startId, endId);
+            });
+        }
+
+        // Initialisation du contexte Web Audio pour les effets sonores
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Bruitages synthétisés (aucun fichier externe requis)
+        function playSoundEffect(type) {
+            if (isMuted || !audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                if (type === 'transition') {
+                    // Doux carillon de changement d'étape
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // Do5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.18); // Mi5
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'click') {
+                    // Clic franc d'interrupteur électrique
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.exponentialRampToValueAtTime(60, now + 0.06);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.06);
+                } else if (type === 'zoom') {
+                    // Doux "pop" sonore lors de l'agrandissement d'une lampe ou d'un composant
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(340, now);
+                    osc.frequency.exponentialRampToValueAtTime(580, now + 0.14);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.16);
+                } else if (type === 'success') {
+                    // Jingle de bilan (Do - Mi - Sol)
+                    const notes = [523.25, 659.25, 783.99];
+                    notes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.11);
+                        gain.gain.setValueAtTime(0.09, now + idx * 0.11);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.11 + 0.4);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + idx * 0.11);
+                        osc.stop(now + idx * 0.11 + 0.4);
+                    });
+                }
+            } catch (e) {
+                // Ignorer si l'audio est bloqué
+            }
+        }
+
+        // Lecture de la voix off en français via Web Speech API
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            if (isMuted || !isPlaying) return;
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'fr-FR';
+            utterance.rate = 0.98; // Débit posé et pédagogique pour des 6èmes
+            utterance.pitch = 1.0;
+
+            // Sélectionner une voix française naturelle si disponible
+            const voices = window.speechSynthesis.getVoices();
+            const frVoice = voices.find(v => v.lang.startsWith('fr') && (v.name.includes('Thomas') || v.name.includes('Amelie') || v.name.includes('Google') || v.name.includes('Marie'))) || voices.find(v => v.lang.startsWith('fr'));
+            if (frVoice) {
+                utterance.voice = frVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* ==========================================================================
+           MISE À JOUR VISUELLE DES SCÈNES
+           ========================================================================== */
+        function renderScene(index) {
+            const scene = SCENES[index];
+
+            // Nettoyage des minuteries internes aux scènes et des zooms précédents
+            if (verifyToggleTimer) clearInterval(verifyToggleTimer);
+            if (swapTimeout) clearTimeout(swapTimeout);
+            clearAllSpotlights();
+
+            // Mise à jour des textes d'en-tête et sous-titres
+            document.getElementById('scene-title-header').textContent = scene.title;
+            document.getElementById('competence-badge').textContent = scene.competence;
+            document.getElementById('subtitle-box').textContent = scene.subtitle;
+
+            // Mise à jour des boutons d'étapes (1 à 6)
+            for (let i = 0; i < SCENES.length; i++) {
+                const btn = document.getElementById(`step-btn-${i}`);
+                if (i === index) {
+                    btn.className = "step-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 cursor-pointer";
+                } else {
+                    btn.className = "step-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition bg-slate-700/70 text-slate-300 hover:bg-slate-600 cursor-pointer";
+                }
+            }
+
+            // Masquer tous les plateaux principaux
+            const stageLab = document.getElementById('stage-lab');
+            const stageSchemas = document.getElementById('stage-schemas');
+            const stageVerify = document.getElementById('stage-verify');
+            const stageBilan = document.getElementById('stage-bilan');
+
+            stageLab.classList.add('hidden');
+            stageLab.classList.remove('flex');
+            stageSchemas.classList.add('hidden');
+            stageSchemas.classList.remove('flex');
+            stageVerify.classList.add('hidden');
+            stageVerify.classList.remove('flex');
+            stageBilan.classList.add('hidden');
+            stageBilan.classList.remove('flex');
+
+            // Éléments SVG du laboratoire
+            const labBanner = document.getElementById('lab-banner');
+            const highlightL1 = document.getElementById('highlight-l1');
+            const groupLampe2 = document.getElementById('group-lampe2');
+            const groupSwitch = document.getElementById('group-switch');
+            const swapArrows = document.getElementById('swap-arrows');
+
+            // Effet sonore de transition
+            if (index === 5) {
+                playSoundEffect('success');
+            } else {
+                playSoundEffect('transition');
+            }
+
+            // Configuration spécifique à chaque scène
+            if (index === 0) {
+                // SCÈNE 1 : Observation initiale
+                stageLab.classList.remove('hidden');
+                stageLab.classList.add('flex');
+                highlightL1.setAttribute('opacity', '0');
+                swapArrows.setAttribute('opacity', '0');
+
+                // Positions initiales : Lampe 2 en bas (310, 265), Interrupteur à droite (575, 150)
+                groupLampe2.setAttribute('transform', 'translate(310, 265)');
+                groupSwitch.setAttribute('transform', 'translate(575, 150)');
+
+                labBanner.innerHTML = `
+                    <div class="inline-block bg-slate-900/90 border border-amber-400/50 rounded-2xl px-5 py-2.5 shadow-lg">
+                        <p class="text-sm sm:text-base font-bold text-amber-300">
+                            ❓ Problème : La position d’un composant dans un circuit a-t-elle une influence sur son fonctionnement ?
+                        </p>
+                    </div>
+                `;
+            } else if (index === 1) {
+                // SCÈNE 2 : Hypothèse sur la Lampe 1
+                stageLab.classList.remove('hidden');
+                stageLab.classList.add('flex');
+                highlightL1.setAttribute('opacity', '1');
+                swapArrows.setAttribute('opacity', '0');
+
+                groupLampe2.setAttribute('transform', 'translate(310, 265)');
+                groupSwitch.setAttribute('transform', 'translate(575, 150)');
+
+                labBanner.innerHTML = `
+                    <div class="inline-block bg-indigo-950/90 border-2 border-indigo-400 rounded-2xl px-5 py-2.5 shadow-lg floating">
+                        <p class="text-xs sm:text-sm font-bold text-indigo-200">
+                            💭 Hypothèse : « La Lampe 1 brille-t-elle plus fortement que la Lampe 2 parce qu'elle est reliée directement au générateur ? »
+                        </p>
+                    </div>
+                `;
+            } else if (index === 2) {
+                // SCÈNE 3 : Les 2 schémas normalisés côte à côte
+                stageSchemas.classList.remove('hidden');
+                stageSchemas.classList.add('flex');
+            } else if (index === 3) {
+                // SCÈNE 4 : Expérience d'inversion Lampe 2 <-> Interrupteur et constat
+                stageLab.classList.remove('hidden');
+                stageLab.classList.add('flex');
+                highlightL1.setAttribute('opacity', '0');
+
+                // On démarre en position initiale puis on anime l'échange après 1 seconde
+                groupLampe2.setAttribute('transform', 'translate(310, 265)');
+                groupSwitch.setAttribute('transform', 'translate(575, 150)');
+                swapArrows.setAttribute('opacity', '0');
+
+                labBanner.innerHTML = `
+                    <div class="inline-block bg-sky-950/90 border border-sky-400 rounded-2xl px-5 py-2.5 shadow-lg">
+                        <p class="text-xs sm:text-sm font-bold text-sky-200">
+                            🔄 Inversion de la Lampe 2 et de l'interrupteur : la Lampe 2 est maintenant reliée directement au générateur !
+                        </p>
+                    </div>
+                `;
+
+                swapTimeout = setTimeout(() => {
+                    playSoundEffect('click');
+                    // Échange des positions : Lampe 2 passe à droite (555, 155) et Interrupteur passe en bas (330, 265)
+                    groupLampe2.setAttribute('transform', 'translate(555, 155)');
+                    groupSwitch.setAttribute('transform', 'translate(330, 265)');
+                    swapArrows.setAttribute('opacity', '1');
+
+                    setTimeout(() => {
+                        labBanner.innerHTML = `
+                            <div class="inline-block bg-emerald-950/95 border-2 border-emerald-400 rounded-2xl px-5 py-2.5 shadow-lg">
+                                <p class="text-xs sm:text-sm font-bold text-emerald-200">
+                                    ✅ Constat : L’éclat de la Lampe 2 ne change pas lorsqu'on la rapproche du générateur ! La position n'a aucune influence.
+                                </p>
+                            </div>
+                        `;
+                    }, 2200);
+                }, 1200);
+
+            } else if (index === 4) {
+                // SCÈNE 5 : Je vérifie que j'ai compris (Interrupteur entre pile et L1 ou entre L1 et L2)
+                stageVerify.classList.remove('hidden');
+                stageVerify.classList.add('flex');
+
+                let switchClosed = true;
+                const updateVerifySwitches = () => {
+                    const bladesH = document.querySelectorAll('.verify-switch-blade');
+                    const bladesV = document.querySelectorAll('.verify-switch-blade-v');
+                    const bulbs = document.querySelectorAll('.verify-bulb');
+                    const crosses = document.querySelectorAll('.verify-bulb-cross');
+                    const badge = document.getElementById('verify-status-badge');
+
+                    playSoundEffect('click');
+
+                    if (switchClosed) {
+                        bladesH.forEach(b => b.setAttribute('y2', '40'));
+                        bladesV.forEach(b => b.setAttribute('x2', '295'));
+                        bulbs.forEach(b => {
+                            b.setAttribute('stroke', '#facc15');
+                            b.classList.add('glow-strong');
+                        });
+                        crosses.forEach(c => c.setAttribute('stroke', '#facc15'));
+                        badge.textContent = "Interrupteur FERMÉ : Dans les 2 positions, les deux lampes L₁ et L₂ s'allument ensemble !";
+                    } else {
+                        bladesH.forEach(b => b.setAttribute('y2', '22'));
+                        bladesV.forEach(b => b.setAttribute('x2', '312'));
+                        bulbs.forEach(b => {
+                            b.setAttribute('stroke', '#64748b');
+                            b.classList.remove('glow-strong');
+                        });
+                        crosses.forEach(c => c.setAttribute('stroke', '#64748b'));
+                        badge.textContent = "Interrupteur OUVERT : Dans les 2 positions, les deux lampes L₁ et L₂ s'éteignent ensemble !";
+                    }
+                    switchClosed = !switchClosed;
+                };
+
+                updateVerifySwitches();
+                verifyToggleTimer = setInterval(updateVerifySwitches, 3500);
+
+            } else if (index === 5) {
+                // SCÈNE 6 : Bilan final
+                stageBilan.classList.remove('hidden');
+                stageBilan.classList.add('flex');
+            }
+
+            // Programmer les zooms synchronisés sur les lampes/composants et lancer la voix
+            scheduleSceneCues(scene);
+            speakText(scene.speech);
+        }
+
+        /* ==========================================================================
+           BOUCLE TEMPORELLE CONTINUE ET CONTRÔLES UTILISATEUR
+           ========================================================================== */
+        function startLoopTimer() {
+            if (animationTimer) clearInterval(animationTimer);
+            animationTimer = setInterval(() => {
+                if (!isPlaying) return;
+
+                sceneElapsed += 0.1;
+                const currentScene = SCENES[currentSceneIndex];
+
+                // Passage automatique à la scène suivante ou rebouclage au début
+                if (sceneElapsed >= currentScene.duration) {
+                    sceneElapsed = 0;
+                    currentSceneIndex = (currentSceneIndex + 1) % SCENES.length;
+                    renderScene(currentSceneIndex);
+                }
+
+                updateProgressUI();
+            }, 100);
+        }
+
+        function updateProgressUI() {
+            // Calcul du temps global écoulé
+            let elapsedBefore = 0;
+            for (let i = 0; i < currentSceneIndex; i++) {
+                elapsedBefore += SCENES[i].duration;
+            }
+            const totalElapsed = Math.min(TOTAL_DURATION, elapsedBefore + sceneElapsed);
+            const percent = (totalElapsed / TOTAL_DURATION) * 100;
+
+            document.getElementById('progress-fill').style.width = `${percent}%`;
+            document.getElementById('time-display').textContent = `${formatTime(totalElapsed)} / ${formatTime(TOTAL_DURATION)}`;
+        }
+
+        function formatTime(sec) {
+            const s = Math.floor(sec);
+            const mins = Math.floor(s / 60);
+            const rem = s % 60;
+            return `${String(mins).padStart(2, '0')}:${String(rem).padStart(2, '0')}`;
+        }
+
+        // Navigation manuelle vers une étape
+        function goToScene(index) {
+            currentSceneIndex = index;
+            sceneElapsed = 0;
+            renderScene(currentSceneIndex);
+            updateProgressUI();
+        }
+
+        function nextScene() {
+            const nextIdx = (currentSceneIndex + 1) % SCENES.length;
+            goToScene(nextIdx);
+        }
+
+        function prevScene() {
+            const prevIdx = (currentSceneIndex - 1 + SCENES.length) % SCENES.length;
+            goToScene(prevIdx);
+        }
+
+        function togglePlayPause() {
+            isPlaying = !isPlaying;
+            const iconPause = document.getElementById('icon-pause');
+            const iconPlay = document.getElementById('icon-play');
+            const label = document.getElementById('label-play-pause');
+
+            if (isPlaying) {
+                iconPause.classList.remove('hidden');
+                iconPlay.classList.add('hidden');
+                label.textContent = 'Pause';
+                scheduleSceneCues(SCENES[currentSceneIndex]);
+                speakText(SCENES[currentSceneIndex].speech);
+            } else {
+                iconPause.classList.add('hidden');
+                iconPlay.classList.remove('hidden');
+                label.textContent = 'Lecture';
+                clearAllSpotlights();
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                }
+            }
+        }
+
+        function toggleMute() {
+            initAudioContext();
+            isMuted = !isMuted;
+            const iconOn = document.getElementById('icon-sound-on');
+            const iconOff = document.getElementById('icon-sound-off');
+            const label = document.getElementById('label-mute');
+
+            if (isMuted) {
+                iconOn.classList.add('hidden');
+                iconOff.classList.remove('hidden');
+                label.textContent = 'Son coupé';
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                }
+            } else {
+                iconOn.classList.remove('hidden');
+                iconOff.classList.add('hidden');
+                label.textContent = 'Son activé';
+                if (isPlaying) {
+                    speakText(SCENES[currentSceneIndex].speech);
+                }
+            }
+        }
+
+        // Clic sur la barre de progression pour avancer/reculer directement
+        document.getElementById('progress-container').addEventListener('click', (e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            const targetTime = ratio * TOTAL_DURATION;
+
+            let accum = 0;
+            for (let i = 0; i < SCENES.length; i++) {
+                if (targetTime <= accum + SCENES[i].duration) {
+                    currentSceneIndex = i;
+                    sceneElapsed = targetTime - accum;
+                    renderScene(i);
+                    updateProgressUI();
+                    break;
+                }
+                accum += SCENES[i].duration;
+            }
+        });
+
+        // Boutons de l'écran de démarrage (déverrouillage Audio iPad / Chrome)
+        document.getElementById('btn-start-sound').addEventListener('click', () => {
+            initAudioContext();
+            isMuted = false;
+            isPlaying = true;
+            document.getElementById('start-overlay').classList.add('hidden');
+            renderScene(0);
+            startLoopTimer();
+        });
+
+        document.getElementById('btn-start-muted').addEventListener('click', () => {
+            isMuted = true;
+            isPlaying = true;
+            document.getElementById('icon-sound-on').classList.add('hidden');
+            document.getElementById('icon-sound-off').classList.remove('hidden');
+            document.getElementById('label-mute').textContent = 'Son coupé';
+            document.getElementById('start-overlay').classList.add('hidden');
+            renderScene(0);
+            startLoopTimer();
+        });
+
+        // Pré-chargement des voix du navigateur
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+    </script>
+</body>
+</html>
