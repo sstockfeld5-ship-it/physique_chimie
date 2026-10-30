@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QCM - La Tension et l'Intensité (4ème)</title>
+    <title>QCM : La Tension Électrique & Fiche Méthode (4e)</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --accent: #f59e0b;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #1e293b;
+            --primary: #1e3a8a;
+            --primary-light: #2563eb;
+            --accent: #0284c7;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
             --border: #cbd5e1;
             --success: #16a34a;
             --error: #dc2626;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
+            padding: 16px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -31,200 +32,282 @@
 
         .container {
             width: 100%;
-            max-width: 750px;
-            background: var(--card-bg);
+            max-width: 800px;
+            background: var(--card);
             border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 28px;
             box-sizing: border-box;
         }
 
         h1 {
             color: var(--primary);
             text-align: center;
-            margin-top: 0;
-            font-size: 1.8rem;
+            margin: 0 0 8px 0;
+            font-size: 1.65rem;
         }
 
         .subtitle {
             text-align: center;
-            color: #64748b;
-            margin-bottom: 25px;
-            font-size: 0.95rem;
+            color: var(--muted);
+            margin-bottom: 24px;
+            font-size: 0.96rem;
+            line-height: 1.5;
         }
 
-        .screen {
-            display: none;
+        .topics-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 22px;
         }
 
-        .screen.active {
-            display: block;
+        .topic-tag {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 5px 12px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 700;
         }
 
-        /* Accueil */
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.25s ease-in-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .home-box {
             text-align: center;
+            margin-top: 16px;
         }
 
         .btn {
-            background-color: var(--primary);
-            color: white;
+            background-color: var(--primary-light);
+            color: #ffffff;
             border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-            margin-top: 15px;
-            display: inline-block;
+            transition: all 0.2s;
             width: 100%;
-            max-width: 320px;
+            box-sizing: border-box;
         }
 
-        .btn:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
+        .home-box .btn {
+            width: auto;
         }
 
-        .btn-secondary {
-            background-color: #64748b;
-        }
-        .btn-secondary:hover {
-            background-color: #475569;
-        }
+        .btn:hover:not(:disabled) { background-color: var(--primary); transform: translateY(-1px); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background-color: #475569; }
+        .btn-secondary:hover:not(:disabled) { background-color: #334155; }
+        .btn-accent { background-color: var(--accent); }
+        .btn-accent:hover:not(:disabled) { background-color: #0369a1; }
 
-        /* Quiz */
         .quiz-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: #64748b;
-            font-size: 0.9rem;
-            border-bottom: 2px solid #f1f5f9;
+            margin-bottom: 12px;
             padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            font-weight: 700;
+            color: var(--muted);
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-light);
+            width: 10%;
+            transition: width 0.3s ease;
         }
 
         .badge {
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.75rem;
             text-transform: uppercase;
-            font-weight: bold;
+            font-weight: 800;
         }
-        .badge.facile { background-color: #dcfce7; color: #166534; }
-        .badge.intermediaire { background-color: #fef9c3; color: #854d0e; }
-        .badge.difficile { background-color: #fee2e2; color: #991b1b; }
+        .badge.facile { background: #dcfce7; color: #166534; }
+        .badge.intermediaire { background: #fef9c3; color: #854d0e; }
+        .badge.difficile { background: #fee2e2; color: #991b1b; }
 
         .question-text {
             font-size: 1.15rem;
             font-weight: 600;
-            margin-bottom: 20px;
-            line-height: 1.4;
+            margin-bottom: 16px;
+            line-height: 1.45;
         }
 
         .svg-container {
             text-align: center;
-            margin: 15px 0;
+            margin: 14px 0 18px 0;
         }
 
         .svg-container svg {
             max-width: 100%;
             height: auto;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: #fff;
+            max-height: 235px;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            background: #ffffff;
+            padding: 8px;
+            box-sizing: border-box;
         }
 
         .options-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-bottom: 25px;
+            gap: 10px;
+            margin-bottom: 18px;
         }
 
         .option-btn {
-            background-color: #f8fafc;
+            background: #f8fafc;
             border: 2px solid var(--border);
-            padding: 14px 18px;
+            padding: 13px 16px;
             text-align: left;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 0.98rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
             color: var(--text);
+            line-height: 1.35;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option-key {
+            background: #e2e8f0;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.8rem;
+            min-width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         .option-btn:hover:not(:disabled) {
-            background-color: #f1f5f9;
-            border-color: var(--primary);
+            background: #eff6ff;
+            border-color: var(--primary-light);
+        }
+
+        .option-btn:hover:not(:disabled) .option-key {
+            background: var(--primary-light);
+            color: #ffffff;
         }
 
         .option-btn.correct {
-            background-color: #dcfce7 !important;
+            background: #dcfce7 !important;
             border-color: var(--success) !important;
-            color: #166534;
-            font-weight: bold;
+            color: #14532d;
+            font-weight: 700;
+        }
+
+        .option-btn.correct .option-key {
+            background: var(--success);
+            color: #ffffff;
         }
 
         .option-btn.incorrect {
-            background-color: #fee2e2 !important;
+            background: #fee2e2 !important;
             border-color: var(--error) !important;
-            color: #991b1b;
+            color: #7f1d1d;
+        }
+
+        .option-btn.incorrect .option-key {
+            background: var(--error);
+            color: #ffffff;
         }
 
         .explanation {
-            background-color: #f0f9ff;
-            border-left: 4px solid var(--primary);
+            background: #f0f9ff;
+            border-left: 4px solid var(--primary-light);
             padding: 12px 16px;
             border-radius: 0 8px 8px 0;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
+            margin-bottom: 18px;
+            font-size: 0.93rem;
+            line-height: 1.45;
             display: none;
         }
+        .explanation.visible { display: block; }
 
-        .explanation.visible {
-            display: block;
-        }
+        .next-btn { display: none; }
+        .next-btn.visible { display: block; }
 
-        .next-btn {
-            display: none;
-            width: 100%;
-            max-width: 100%;
-        }
-
-        .next-btn.visible {
-            display: block;
-        }
-
-        /* Résultats */
-        .results-box {
+        .score-circle {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--primary-light);
             text-align: center;
+            margin: 12px 0;
         }
 
-        .score-display {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin: 15px 0;
+        .sync-status {
+            font-size: 0.85rem;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 14px;
+            background: #f1f5f9;
+            color: var(--muted);
         }
 
-        .score-details {
-            margin: 15px 0;
-            text-align: left;
+        .stats-box {
             background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin: 14px 0;
+            font-size: 0.92rem;
+            line-height: 1.6;
         }
 
-        .restart-options {
-            display: flex;
-            flex-direction: column;
+        .review-box {
+            margin-top: 16px;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 14px;
+        }
+
+        .review-item {
+            background: #fff1f2;
+            border-left: 4px solid var(--error);
+            padding: 10px 14px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 10px;
+            font-size: 0.88rem;
+            line-height: 1.4;
+        }
+
+        .restart-grid {
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 10px;
-            align-items: center;
-            margin-top: 15px;
+            margin-top: 16px;
         }
     </style>
 </head>
@@ -233,565 +316,841 @@
 <div class="container">
     <!-- ÉCRAN D'ACCUEIL -->
     <div id="home-screen" class="screen active">
-        <h1>Entraînement : La Tension et l'Intensité</h1>
-        <p class="subtitle">Programme de Physique-Chimie - Niveau 4ème<br>Teste tes connaissances avec un tirage équilibré de questions faciles, intermédiaires et plus difficiles.</p>
+        <h1>⚡ QCM : La Tension Électrique (4e)</h1>
+        <p class="subtitle">
+            Entraîne-toi sur l'<strong>Activité 1</strong> (sans le bilan) et la <strong>Fiche Méthode 1</strong>.<br>
+            À chaque partie, <strong>10 questions sont piochées au hasard parmi 40</strong> (4 faciles, 3 intermédiaires, 3 difficiles).
+        </p>
+        <div class="topics-tags">
+            <span class="topic-tag">💧 Analogie du circuit d'eau</span>
+            <span class="topic-tag">🔋 Dipôles isolés (Générateur / Récepteur)</span>
+            <span class="topic-tag">🍋 Pile au citron & Schéma normalisé</span>
+            <span class="topic-tag">📟 Voltmètre & Choix du calibre</span>
+        </div>
         <div class="home-box">
-            <button class="btn" onclick="startQuiz('new')">Lancer le QCM (10 questions)</button>
+            <button class="btn" onclick="startQuiz('new')">Commencer l'entraînement (10 questions)</button>
         </div>
     </div>
 
-    <!-- ÉCRAN DU QUIZ -->
+    <!-- ÉCRAN DU QCM -->
     <div id="quiz-screen" class="screen">
         <div class="quiz-header">
             <span id="question-counter">Question 1 / 10</span>
-            <span id="difficulty-badge" class="badge facile">Facile</span>
+            <span style="color: var(--muted); font-size: 0.85rem;">Activité 1 & Fiche Méthode 1</span>
+            <span id="difficulty-badge" class="badge facile">FACILE</span>
         </div>
-        
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+
         <div id="question-container" class="question-text"></div>
         <div id="svg-slot" class="svg-container"></div>
-        
         <div id="options-container" class="options-list"></div>
-        
         <div id="explanation-box" class="explanation"></div>
-        
-        <button id="next-btn" class="btn next-btn" onclick="nextQuestion()">Question suivante</button>
+
+        <button id="next-btn" class="btn next-btn" onclick="nextQuestion()">Question suivante ➔</button>
     </div>
 
-    <!-- ÉCRAN DE RÉSULTAT -->
+    <!-- ÉCRAN DES RÉSULTATS -->
     <div id="result-screen" class="screen">
-        <div class="results-box">
-            <h1>Résultats de l'entraînement</h1>
-            <div id="final-score" class="score-display">0 / 10</div>
-            <p id="feedback-message">Bravo pour tes efforts !</p>
-            <div id="score-breakdown" class="score-details"></div>
-            
-            <p style="font-weight: bold; margin-top: 20px;">Comment souhaites-tu continuer ?</p>
-            <div class="restart-options">
-                <button class="btn" onclick="startQuiz('new')">🔄 Nouvelles questions aléatoires</button>
-                <button class="btn btn-secondary" onclick="startQuiz('same')">🔁 Refaire exactement les mêmes</button>
-                <button class="btn btn-secondary" onclick="startQuiz('mix')">🔀 Mélange (Erreurs + Nouvelles)</button>
-            </div>
+        <h1>Bilan de ton entraînement</h1>
+        <div id="final-score" class="score-circle">0 / 10</div>
+        <p id="feedback-message" style="text-align:center; font-weight:600; margin-bottom:10px;"></p>
+        <div id="sync-status" class="sync-status">Enregistrement anonyme des statistiques...</div>
+
+        <div id="score-breakdown" class="stats-box"></div>
+        <div id="errors-review" class="review-box" style="display:none;"></div>
+
+        <p style="text-align:center; font-weight:700; margin-top:18px; margin-bottom:8px;">
+            Choisis ton mode pour recommencer :
+        </p>
+        <div class="restart-grid">
+            <button class="btn" onclick="startQuiz('new')">🔄 Tirer 10 nouvelles questions aléatoires</button>
+            <button id="btn-mix" class="btn btn-accent" onclick="startQuiz('mix')">🔀 Faire un Mix (Mes erreurs + Nouvelles questions)</button>
+            <button class="btn btn-secondary" onclick="startQuiz('same')">🔁 Refaire exactement les 10 mêmes questions</button>
         </div>
     </div>
 </div>
 
 <script>
-// Banque de 40 questions variées (Facile, Intermédiaire, Difficile)
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvgAKJjjs62QhCzlr0Mgd4ha_UXU-9aJfkgs1XZWoRfgX9Cyh1NhrP8p8BS7ZKfq8s/exec";
+
+let anonymousId = "anon_session";
+try {
+    anonymousId = localStorage.getItem("qcm_anon_id");
+    if (!anonymousId) {
+        anonymousId = "anon_" + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem("qcm_anon_id", anonymousId);
+    }
+} catch (e) {
+    anonymousId = "anon_" + Math.random().toString(36).substring(2, 9);
+}
+
+// 6 Illustrations & Schémas SVG fidèles à l'Activité 1 (Parties 0 et 1) et à la Fiche Méthode 1
+const SVGS = {
+    analogie_eau: `<svg viewBox="0 0 500 210" width="480" height="200" role="img" aria-label="Analogie hydraulique entre circuit d'eau et circuit électrique">
+        <rect width="500" height="210" rx="10" fill="#f8fafc"/>
+        <path d="M 90 165 L 90 45 L 340 45 L 340 165 Z" fill="none" stroke="#38bdf8" stroke-width="14" stroke-linejoin="round"/>
+        <path d="M 140 45 L 250 45" stroke="#ffffff" stroke-width="3" stroke-dasharray="6,6"/>
+        <rect x="145" y="12" width="120" height="22" rx="5" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+        <text x="205" y="27" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e40af">DÉBIT = INTENSITÉ (I)</text>
+        <rect x="45" y="75" width="90" height="60" rx="8" fill="#fef08a" stroke="#ca8a04" stroke-width="2.5"/>
+        <text x="90" y="102" text-anchor="middle" font-size="12" font-weight="bold" fill="#854d0e">POMPE</text>
+        <text x="90" y="118" text-anchor="middle" font-size="10" fill="#854d0e">(Générateur)</text>
+        <circle cx="340" cy="105" r="24" fill="#fde047" stroke="#ca8a04" stroke-width="2.5"/>
+        <line x1="340" y1="81" x2="340" y2="129" stroke="#ca8a04" stroke-width="2"/>
+        <line x1="316" y1="105" x2="364" y2="105" stroke="#ca8a04" stroke-width="2"/>
+        <text x="285" y="102" text-anchor="end" font-size="11" font-weight="bold" fill="#854d0e">MOULIN</text>
+        <text x="285" y="116" text-anchor="end" font-size="10" fill="#854d0e">(Lampe)</text>
+        <line x1="355" y1="45" x2="415" y2="45" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <line x1="355" y1="165" x2="415" y2="165" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <line x1="400" y1="50" x2="400" y2="160" stroke="#dc2626" stroke-width="2.5"/>
+        <polygon points="400,45 395,55 405,55" fill="#dc2626"/>
+        <polygon points="400,165 395,155 405,155" fill="#dc2626"/>
+        <rect x="410" y="80" width="82" height="50" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+        <text x="451" y="100" text-anchor="middle" font-size="11" font-weight="bold" fill="#991b1b">CHUTE D'EAU</text>
+        <text x="451" y="116" text-anchor="middle" font-size="11" font-weight="bold" fill="#dc2626">= TENSION (U)</text>
+    </svg>`,
+
+    symbole_voltmetre: `<svg viewBox="0 0 420 110" width="400" height="105" role="img" aria-label="Quatre symboles électriques normalisés">
+        <g transform="translate(20,15)">
+            <circle cx="45" cy="40" r="24" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5"/>
+            <text x="45" y="47" text-anchor="middle" font-size="18" font-weight="bold" fill="#0369a1">V</text>
+            <text x="45" y="85" text-anchor="middle" font-size="12" font-weight="bold">Symbole 1</text>
+        </g>
+        <g transform="translate(120,15)">
+            <circle cx="45" cy="40" r="24" fill="#fef9c3" stroke="#ca8a04" stroke-width="2.5"/>
+            <line x1="28" y1="23" x2="62" y2="57" stroke="#854d0e" stroke-width="2.5"/>
+            <line x1="62" y1="23" x2="28" y2="57" stroke="#854d0e" stroke-width="2.5"/>
+            <text x="45" y="85" text-anchor="middle" font-size="12" font-weight="bold">Symbole 2</text>
+        </g>
+        <g transform="translate(220,15)">
+            <circle cx="45" cy="40" r="24" fill="#ffedd5" stroke="#ea580c" stroke-width="2.5"/>
+            <text x="45" y="47" text-anchor="middle" font-size="18" font-weight="bold" fill="#9a3412">G</text>
+            <text x="45" y="85" text-anchor="middle" font-size="12" font-weight="bold">Symbole 3</text>
+        </g>
+        <g transform="translate(320,15)">
+            <circle cx="45" cy="40" r="24" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5"/>
+            <text x="45" y="47" text-anchor="middle" font-size="18" font-weight="bold" fill="#b91c1c">M</text>
+            <text x="45" y="85" text-anchor="middle" font-size="12" font-weight="bold">Symbole 4</text>
+        </g>
+    </svg>`,
+
+    multimetre_cl1: `<svg viewBox="0 0 440 215" width="420" height="205" role="img" aria-label="Schéma du multimètre Jeulin CL1 avec ses calibres et ses bornes">
+        <rect width="440" height="215" rx="10" fill="#f8fafc"/>
+        <rect x="130" y="10" width="180" height="195" rx="14" fill="#e2e8f0" stroke="#475569" stroke-width="2.5"/>
+        <rect x="150" y="24" width="140" height="38" rx="4" fill="#cbd5e1" stroke="#334155" stroke-width="1.5"/>
+        <text x="280" y="51" text-anchor="end" font-family="monospace" font-size="22" font-weight="bold" fill="#0f172a">4.56</text>
+        <path d="M 145 125 A 70 70 0 0 1 215 68 L 215 125 Z" fill="#bae6fd" stroke="#0284c7" stroke-width="1"/>
+        <text x="162" y="82" font-size="12" font-weight="bold" fill="#0369a1">V ⎓</text>
+        <text x="200" y="80" font-size="10" font-weight="bold" fill="#0f172a">600</text>
+        <text x="175" y="92" font-size="10" font-weight="bold" fill="#0f172a">200</text>
+        <text x="160" y="107" font-size="10" font-weight="bold" fill="#0f172a">20</text>
+        <text x="158" y="123" font-size="10" font-weight="bold" fill="#0f172a">2</text>
+        <text x="255" y="82" font-size="12" font-weight="bold" fill="#0369a1">V ~</text>
+        <text x="268" y="135" font-size="12" font-weight="bold" fill="#15803d">Ω</text>
+        <text x="158" y="152" font-size="12" font-weight="bold" fill="#be185d">A ⎓</text>
+        <circle cx="220" cy="118" r="34" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+        <line x1="220" y1="118" x2="192" y2="105" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="155" cy="175" r="10" fill="#dc2626" stroke="#7f1d1d" stroke-width="2"/>
+        <text x="155" y="196" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f172a">VΩ</text>
+        <circle cx="198" cy="175" r="10" fill="#1e293b"/>
+        <text x="198" y="196" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f172a">COM</text>
+        <circle cx="242" cy="175" r="10" fill="#ca8a04" stroke="#713f12" stroke-width="2"/>
+        <text x="242" y="196" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f172a">mA</text>
+        <circle cx="285" cy="175" r="10" fill="#ca8a04" stroke="#713f12" stroke-width="2"/>
+        <text x="285" y="196" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f172a">10A</text>
+        <text x="65" y="95" text-anchor="middle" font-size="11" font-weight="bold" fill="#0369a1">Zone tensions</text>
+        <text x="65" y="109" text-anchor="middle" font-size="11" font-weight="bold" fill="#0369a1">continues (V⎓)</text>
+        <line x1="110" y1="100" x2="155" y2="100" stroke="#0369a1" stroke-width="1.5"/>
+    </svg>`,
+
+    calibres_tableau: `<svg viewBox="0 0 480 135" width="460" height="130" role="img" aria-label="Tableau des 4 affichages du voltmètre selon le calibre utilisé (Fiche Méthode)">
+        <rect width="480" height="135" rx="8" fill="#f8fafc"/>
+        <g transform="translate(12,15)">
+            <rect width="105" height="105" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+            <text x="52" y="22" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e3a8a">Calibre 600 V</text>
+            <rect x="15" y="35" width="75" height="36" rx="4" fill="#d9f99d" stroke="#4d7c0f" stroke-width="1.5"/>
+            <text x="80" y="60" text-anchor="end" font-family="monospace" font-size="20" font-weight="bold" fill="#1e293b">5</text>
+            <text x="52" y="90" text-anchor="middle" font-size="10" fill="#64748b">Peu précis</text>
+        </g>
+        <g transform="translate(129,15)">
+            <rect width="105" height="105" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+            <text x="52" y="22" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e3a8a">Calibre 200 V</text>
+            <rect x="15" y="35" width="75" height="36" rx="4" fill="#d9f99d" stroke="#4d7c0f" stroke-width="1.5"/>
+            <text x="80" y="60" text-anchor="end" font-family="monospace" font-size="20" font-weight="bold" fill="#1e293b">4.6</text>
+            <text x="52" y="90" text-anchor="middle" font-size="10" fill="#64748b">1 décimale</text>
+        </g>
+        <g transform="translate(246,15)">
+            <rect width="105" height="105" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+            <text x="52" y="22" text-anchor="middle" font-size="12" font-weight="bold" fill="#15803d">Calibre 20 V</text>
+            <rect x="15" y="35" width="75" height="36" rx="4" fill="#d9f99d" stroke="#4d7c0f" stroke-width="1.5"/>
+            <text x="82" y="60" text-anchor="end" font-family="monospace" font-size="20" font-weight="bold" fill="#1e293b">4.56</text>
+            <text x="52" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="#15803d">2 décimales</text>
+        </g>
+        <g transform="translate(363,15)">
+            <rect width="105" height="105" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+            <text x="52" y="22" text-anchor="middle" font-size="12" font-weight="bold" fill="#b91c1c">Calibre 2 V</text>
+            <rect x="15" y="35" width="75" height="36" rx="4" fill="#d9f99d" stroke="#4d7c0f" stroke-width="1.5"/>
+            <text x="35" y="60" text-anchor="start" font-family="monospace" font-size="20" font-weight="bold" fill="#b91c1c">1.</text>
+            <text x="52" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="#b91c1c">Trop petit !</text>
+        </g>
+    </svg>`,
+
+    pile_citron: `<svg viewBox="0 0 460 190" width="440" height="180" role="img" aria-label="Schéma de l'expérience de la pile au citron reliée à un voltmètre affichant -0.92 V">
+        <rect width="460" height="190" rx="10" fill="#f8fafc"/>
+        <ellipse cx="115" cy="125" rx="75" ry="48" fill="#fde047" stroke="#ca8a04" stroke-width="2.5"/>
+        <text x="115" y="145" text-anchor="middle" font-size="13" font-weight="bold" fill="#854d0e">Citron</text>
+        <rect x="75" y="55" width="18" height="55" rx="2" fill="#94a3b8" stroke="#334155" stroke-width="2"/>
+        <text x="65" y="42" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Zinc (gris)</text>
+        <rect x="135" y="55" width="18" height="55" rx="2" fill="#ea580c" stroke="#7c2d12" stroke-width="2"/>
+        <text x="165" y="42" text-anchor="middle" font-size="11" font-weight="bold" fill="#9a3412">Cuivre (orangé)</text>
+        <rect x="275" y="25" width="150" height="145" rx="10" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+        <rect x="292" y="38" width="115" height="38" rx="4" fill="#cbd5e1" stroke="#334155" stroke-width="1.5"/>
+        <text x="398" y="65" text-anchor="end" font-family="monospace" font-size="20" font-weight="bold" fill="#0f172a">-0.92</text>
+        <circle cx="325" cy="135" r="9" fill="#dc2626"/><text x="325" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#dc2626">V</text>
+        <circle cx="375" cy="135" r="9" fill="#1e293b"/><text x="375" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">COM</text>
+        <path d="M 84 55 Q 190 15 325 135" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+        <path d="M 144 55 Q 230 180 375 135" fill="none" stroke="#1e293b" stroke-width="2.5"/>
+    </svg>`,
+
+    schema_pile_isolee: `<svg viewBox="0 0 360 190" width="340" height="180" role="img" aria-label="Schéma normalisé d'un voltmètre branché aux bornes d'une pile isolée">
+        <rect x="60" y="40" width="240" height="115" fill="none" stroke="#0f172a" stroke-width="2.5"/>
+        <rect x="165" y="25" width="30" height="30" fill="#ffffff"/>
+        <line x1="172" y1="22" x2="172" y2="58" stroke="#dc2626" stroke-width="3"/>
+        <line x1="186" y1="30" x2="186" y2="50" stroke="#0f172a" stroke-width="5"/>
+        <text x="155" y="35" font-size="14" font-weight="bold" fill="#dc2626">+</text>
+        <text x="198" y="35" font-size="16" font-weight="bold" fill="#0f172a">-</text>
+        <circle cx="180" cy="155" r="22" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5"/>
+        <text x="180" y="161" text-anchor="middle" font-size="16" font-weight="bold" fill="#0369a1">V</text>
+        <text x="120" y="146" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc2626">Borne 1 ?</text>
+        <text x="240" y="146" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">Borne 2 ?</text>
+    </svg>`
+};
+
+const historiqueU = " <em>Le savais-tu ?</em> La lettre U vient de l'allemand <strong>« Unterschied »</strong> qui signifie « différence » (d'état électrique entre deux bornes).";
+
+// BANQUE DE 40 QUESTIONS VARIÉES (UNIQUEMENT Activité 1 sans le bilan + Fiche Méthode 1)
 const questionBank = [
-    // --- FACILE ---
+    // ==================== NIVEAU FACILE (14 questions) ====================
     {
-        id: 1,
-        q: "Qu'est-ce que la tension électrique ?",
-        level: "facile",
-        options: [
-            "La quantité d'électrons par seconde",
-            "La pression ou l'énergie disponible pour faire circuler le courant",
-            "La résistance des fils électriques",
-            "La vitesse de la lumière dans les fils"
-        ],
-        correct: 1,
-        explanation: "La tension électrique (notée U) représente la 'poussée' ou l'énergie disponible entre deux points pour faire circuler les électrons."
+        id: 1, level: "facile",
+        q: "Quelle lettre majuscule utilise-t-on comme symbole pour noter la grandeur « tension électrique » ?",
+        options: ["La lettre I", "La lettre V", "La lettre U", "La lettre A"],
+        correct: 2,
+        explanation: "La tension électrique se note avec la lettre majuscule <strong>U</strong>." + historiqueU
     },
     {
-        id: 2,
+        id: 2, level: "facile",
         q: "Quelle est l'unité de mesure de la tension électrique ?",
-        level: "facile",
-        options: ["L'Ampère (A)", "Le Watt (W)", "Le Volt (V)", "L'Ohm (Ω)"],
-        correct: 2,
-        explanation: "La tension s'exprime en volts (symbole V), en hommage au physicien Alessandro Volta."
+        options: ["L'Ampère (A)", "Le Volt (V)", "L'Ohm (Ω)", "Le Watt (W)"],
+        correct: 1,
+        explanation: "L'unité de la tension électrique est le <strong>volt</strong> (de symbole <strong>V</strong>), en hommage au physicien italien Alessandro Volta."
     },
     {
-        id: 3,
-        q: "Quel appareil utilise-t-on pour mesurer une tension électrique ?",
-        level: "facile",
-        options: ["Un ampèremètre", "Un ohmmètre", "Un voltmètre", "Un wattmètre"],
-        correct: 2,
-        explanation: "Le voltmètre est l'appareil spécifique pour mesurer la tension aux bornes d'un dipôle."
+        id: 3, level: "facile",
+        q: "Avec quel appareil mesure-t-on une tension électrique (Fiche Méthode 1) ?",
+        options: ["Un ampèremètre", "Un voltmètre", "Un ohmmètre", "Un thermomètre"],
+        correct: 1,
+        explanation: "On mesure une tension électrique avec un <strong>voltmètre</strong>."
     },
     {
-        id: 4,
-        q: "Comment doit-on brancher un voltmètre dans un circuit électrique ?",
-        level: "facile",
+        id: 4, level: "facile",
+        q: "Comment doit-on toujours brancher un voltmètre pour mesurer la tension aux bornes d'un dipôle ?",
         options: [
-            "En série avec les autres dipôles",
-            "En dérivation (aux bornes) du dipôle à étudier",
-            "N'importe où dans le circuit",
-            "Directement branché sur la prise secteur"
+            "En série dans la boucle",
+            "En dérivation aux bornes du dipôle",
+            "Avec un seul fil sur la borne COM",
+            "En coupant un fil du circuit"
         ],
         correct: 1,
-        explanation: "Le voltmètre se branche toujours en dérivation (en parallèle) aux bornes du dipôle dont on veut mesurer la tension."
+        explanation: "D'après la Fiche Méthode 1 et la Partie 0, le voltmètre se branche toujours <strong>en dérivation</strong> aux bornes du dipôle."
     },
     {
-        id: 5,
-        q: "Quelle est l'unité de l'intensité du courant électrique ?",
-        level: "facile",
-        options: ["Le Volt (V)", "L'Ampère (A)", "Le Joule (J)", "Le Coulomb (C)"],
-        correct: 1,
-        explanation: "L'intensité du courant (notée I) s'exprime en ampères (A)."
-    },
-    {
-        id: 6,
-        q: "Quel appareil utilise-t-on pour mesurer l'intensité du courant ?",
-        level: "facile",
-        options: ["Un voltmètre", "Un ampèremètre", "Un thermomètre", "Un chronomètre"],
-        correct: 1,
-        explanation: "L'ampèremètre mesure l'intensité du courant qui le traverse."
-    },
-    {
-        id: 7,
-        q: "Comment se branche un ampèremètre dans un circuit électrique ?",
-        level: "facile",
+        id: 5, level: "facile",
+        q: "D'après l'illustration de l'analogie hydraulique (Partie 0), à quoi correspond la tension électrique (U) ?",
+        svg: SVGS.analogie_eau,
         options: [
-            "En dérivation aux bornes de la lampe",
-            "En série dans la boucle du circuit",
-            "En dehors du circuit",
-            "Directement entre les deux bornes d'une pile sans récepteur"
+            "Au débit d'eau qui passe chaque seconde",
+            "À la hauteur de la chute d'eau (le dénivelé entre le haut et le bas)",
+            "À la largeur du tuyau",
+            "À la température de l'eau"
         ],
         correct: 1,
-        explanation: "L'ampèremètre se branche obligatoirement en série pour que le courant le traverse."
+        explanation: "Dans l'analogie du circuit d'eau (Partie 0), la <strong>tension (U)</strong> correspond à la <strong>hauteur de la chute (le dénivelé)</strong> créée par la pompe."
     },
     {
-        id: 8,
-        q: "Quel est le symbole littéral de la grandeur tension électrique ?",
-        level: "facile",
-        options: ["I", "E", "U", "P"],
-        correct: 2,
-        explanation: "La tension se note avec la lettre U majuscule. <em>Le saviez-vous ?</em> Cette lettre vient de l'allemand <strong>'Unterschied'</strong> qui signifie « différence » (de potentiel), terme popularisé par les physiciens germanophones au XIXe siècle."
-    },
-    {
-        id: 9,
-        q: "Quel est le symbole littéral de la grandeur intensité du courant ?",
-        level: "facile",
-        options: ["U", "I", "T", "A"],
-        correct: 1,
-        explanation: "L'intensité du courant se note avec la lettre I majuscule."
-    },
-    {
-        id: 10,
-        q: "Quel rôle joue un générateur dans un circuit électrique ?",
-        level: "facile",
+        id: 6, level: "facile",
+        q: "Dans l'analogie du circuit d'eau ci-dessous (Question 1 de la Partie 0), si la pompe est arrêtée (Tension = 0 V, aucun dénivelé), l'eau peut-elle circuler ?",
+        svg: SVGS.analogie_eau,
         options: [
-            "Il consomme toute l'énergie électrique",
-            "Il fournit l'énergie électrique et crée la tension",
-            "Il bloque le passage des électrons",
-            "Il sert uniquement d'interrupteur"
+            "Oui, l'eau circule toute seule à grande vitesse",
+            "Non, s'il n'y a aucune hauteur de chute (Tension = 0 V), l'eau ne peut pas circuler (Intensité = 0)",
+            "Oui, mais uniquement à l'envers",
+            "Le moulin se met à fabriquer de l'eau"
         ],
         correct: 1,
-        explanation: "Le générateur est le dipôle qui produit de l'énergie électrique et impose une tension."
+        explanation: "Si la pompe est arrêtée (Tension = 0 V, aucun dénivelé), l'eau ne peut pas circuler : il n'y a aucun débit (Intensité nulle)."
     },
     {
-        id: 11,
-        q: "Parmi ces dipôles, lequel est un récepteur ?",
-        level: "facile",
-        options: ["Une pile plate", "Une batterie de voiture", "Une lampe à incandescence", "Une alimentation stabilisée"],
-        correct: 2,
-        explanation: "La lampe convertit l'énergie électrique reçue en lumière et en chaleur : c'est un récepteur."
+        id: 7, level: "facile",
+        q: "Sur l'illustration ci-dessous, quel symbole normalisé représente le voltmètre ?",
+        svg: SVGS.symbole_voltmetre,
+        options: ["Le Symbole 1", "Le Symbole 2", "Le Symbole 3", "Le Symbole 4"],
+        correct: 0,
+        explanation: "Le <strong>Symbole 1</strong> (cercle contenant la lettre V) est le symbole normalisé du voltmètre."
     },
     {
-        id: 12,
-        q: "Si la tension nominale d'un moteur est de 6 V et qu'on l'alimente sous une tension de 6 V, comment fonctionne-t-il ?",
-        level: "facile",
+        id: 8, level: "facile",
+        q: "Qu'appelle-t-on un « dipôle » en électricité (Vocabulaire de l'Activité 1) ?",
         options: [
-            "Il ne tourne pas du tout",
-            "Il fonctionne normalement (adaptation)",
-            "Il gronde et grille immédiatement",
-            "Il tourne beaucoup trop vite"
-        ],
-        correct: 1,
-        explanation: "Un récepteur alimenté sous sa tension nominale fonctionne de manière optimale et normale."
-    },
-
-    // --- INTERMÉDIAIRE ---
-    {
-        id: 13,
-        q: "Qu'est-ce qu'un dipôle isolé ?",
-        level: "intermediaire",
-        options: [
-            "Un dipôle qui n'est connecté à aucun circuit électrique",
-            "Un dipôle entouré de plastique isolant",
-            "Un dipôle branché sur le secteur",
-            "Un dipôle dont la tension vaut toujours zéro"
+            "Un composant électrique qui a deux bornes de branchement",
+            "Un appareil qui mesure deux grandeurs à la fois",
+            "Un circuit qui contient deux piles",
+            "Une pile qui possède une seule borne"
         ],
         correct: 0,
-        explanation: "Un dipôle isolé est un composant qui n'est branché dans aucun circuit fermé."
+        explanation: "D'après l'encadré Vocabulaire de l'Activité 1, un <strong>dipôle</strong> est un composant qui a <strong>deux bornes de branchement</strong>."
     },
     {
-        id: 14,
-        q: "Que se passe-t-il si on branche une lampe de tension nominale 6 V sur un générateur réglé à 3 V (sous-tension) ?",
-        level: "intermediaire",
-        options: [
-            "La lampe brille normalement",
-            "La lampe brille faiblement (sous-tension)",
-            "La lampe grille instantanément",
-            "La lampe émet une lumière aveuglante"
-        ],
-        correct: 1,
-        explanation: "En sous-tension, le récepteur reçoit moins d'énergie que prévu, son éclat est donc faible."
-    },
-    {
-        id: 15,
-        q: "Que se passe-t-il si on branche une lampe de tension nominale 6 V sur un générateur réglé à 9 V (surtension) ?",
-        level: "intermediaire",
-        options: [
-            "La lampe fonctionne normalement",
-            "La lampe brille très fort (surtension) et risque de griller",
-            "La lampe s'éteint complètement",
-            "La tension de la lampe baisse automatiquement à 2V"
-        ],
-        correct: 1,
-        explanation: "En surtension, le récepteur reçoit une tension supérieure à sa valeur nominale, ce qui peut détruire son filament."
-    },
-    {
-        id: 16,
-        q: "Dans l'analogie du circuit d'eau, à quoi correspond la tension électrique ?",
-        level: "intermediaire",
-        options: [
-            "Au débit d'eau par seconde",
-            "Au diamètre du tuyau d'arrosage",
-            "À la différence de pression / hauteur de chute",
-            "À la vitesse de l'eau dans les coudes"
-        ],
+        id: 9, level: "facile",
+        q: "Parmi les composants suivants testés dans l'Activité 1, lequel est un générateur ?",
+        options: ["Une lampe", "Un moteur électrique", "Une pile plate de 4,5 V", "Un interrupteur"],
         correct: 2,
-        explanation: "La tension est assimilée à la pression ou au dénivelé (hauteur de chute) qui pousse l'eau."
+        explanation: "La <strong>pile plate</strong> est un générateur : elle produit de l'énergie électrique (source d'énergie électrique)."
     },
     {
-        id: 17,
-        q: "Dans l'analogie du circuit d'eau, à quoi correspond l'intensité du courant ?",
-        level: "intermediaire",
-        options: [
-            "À la pression de la pompe",
-            "Au débit d'eau qui s'écoule par seconde dans le tuyau",
-            "À la hauteur du réservoir",
-            "À la résistance du robinet"
-        ],
-        correct: 1,
-        explanation: "L'intensité représente le débit, c'est-à-dire la quantité de charges qui traversent la section du fil par unité de temps."
-    },
-    {
-        id: 18,
-        q: "Si on mesure la tension aux bornes d'un interrupteur fermé, que vaut-elle environ ?",
-        level: "intermediaire",
-        options: ["6 Volts", "La tension maximale de la pile", "0 Volt (ou quasi nul)", "230 Volts"],
+        id: 10, level: "facile",
+        q: "Parmi les dipôles suivants, lequel est un récepteur ?",
+        options: ["Une pile ronde de 1,5 V", "Une batterie de téléphone", "Une lampe", "Une pile bouton"],
         correct: 2,
-        explanation: "Un interrupteur fermé se comporte comme un fil conducteur idéal : il n'y a pas de chute de tension à ses bornes (U = 0 V)."
+        explanation: "La <strong>lampe</strong> est un récepteur : elle convertit l'énergie électrique reçue en une autre forme d'énergie."
     },
     {
-        id: 19,
-        q: "Quelle borne du voltmètre doit être reliée du côté du pôle positif du générateur ?",
-        level: "intermediaire",
-        options: ["La borne COM", "La borne V (ou borne d'entrée)", "La borne 10A", "N'importe quelle borne"],
-        correct: 1,
-        explanation: "La règle de branchement exige que la borne V soit du côté du pôle (+) et la borne COM du côté du pôle (-)."
+        id: 11, level: "facile",
+        q: "Que vaut la tension mesurée aux bornes d'une lampe isolée (non branchée dans un circuit) ?",
+        options: ["4,5 V", "6 V", "0 V", "1,5 V"],
+        correct: 2,
+        explanation: "Dans le tableau de mesures de la Partie 1, la tension aux bornes d'une lampe isolée est de <strong>0 V</strong>."
     },
     {
-        id: 20,
-        q: "Qu'affiche l'écran d'un multimètre numérique si on inverse les câbles de branchement (V et COM) lors d'une mesure de tension continue ?",
-        level: "intermediaire",
+        id: 12, level: "facile",
+        q: "Sur le multimètre ci-dessous (Fiche Méthode 1), quelles sont les deux bornes à utiliser pour mesurer une tension ?",
+        svg: SVGS.multimetre_cl1,
         options: [
-            "Rien du tout, l'écran reste éteint",
-            "Un signe moins (-) devant la valeur mesurée",
-            "Le chiffre '1.' clignotant",
-            "La valeur exacte multipliée par deux"
-        ],
-        correct: 1,
-        explanation: "Le signe '-' indique une inversion de polarité : le voltmètre est branché à l'envers."
-    },
-    {
-        id: 21,
-        q: "Pourquoi commence-t-on toujours les mesures de tension avec le plus grand calibre ?",
-        level: "intermediaire",
-        options: [
-            "Pour avoir tout de suite le maximum de chiffres après la virgule",
-            "Pour éviter de détériorer l'appareil si la tension est plus grande que prévu",
-            "Parce que c'est obligatoire pour allumer le multimètre",
-            "Pour consommer moins de pile"
-        ],
-        correct: 1,
-        explanation: "Le plus grand calibre protège l'appareil en évitant le dépassement de sa capacité maximale."
-    },
-    {
-        id: 22,
-        q: "Que signifie l'apparition du chiffre '1.' seul à gauche sur l'écran du multimètre ?",
-        level: "intermediaire",
-        options: [
-            "La mesure est exactement de 1 volt",
-            "Le calibre choisi est trop petit : il y a un dépassement de capacité",
-            "L'appareil est déchargé",
-            "Le circuit est ouvert"
-        ],
-        correct: 1,
-        explanation: "Le '1.' indique un dépassement de calibre (overload). Il faut passer à un calibre supérieur ou au plus grand."
-    },
-    {
-        id: 23,
-        q: "Vrai ou Faux : Un récepteur isolé (comme une lampe seule sur la table) possède une tension non nulle entre ses bornes.",
-        level: "intermediaire",
-        options: [
-            "Vrai, la lampe garde toujours en mémoire sa tension nominale",
-            "Faux, un récepteur isolé a une tension nulle entre ses bornes tant qu'il n'est pas alimenté"
-        ],
-        correct: 1,
-        explanation: "Contrairement aux générateurs (comme les piles) qui possèdent une tension intrinsèque même isolés, les récepteurs isolés ont une tension nulle."
-    },
-    {
-        id: 24,
-        q: "Quel est le symbole normalisé d'un voltmètre dans un schéma de circuit électrique ?",
-        level: "intermediaire",
-        svgContent: `<svg width="120" height="60" viewBox="0 0 120 60"><circle cx="60" cy="30" r="22" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/><text x="60" y="36" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="#0369a1">V</text><line x1="10" y1="30" x2="38" y2="30" stroke="#1e293b" stroke-width="2"/><line x1="82" y1="30" x2="110" y2="30" stroke="#1e293b" stroke-width="2"/></svg>`,
-        options: [
-            "Un cercle contenant la lettre G",
-            "Un cercle contenant la lettre V avec des fils de connexion",
-            "Un rectangle avec une croix",
-            "Une ligne brisée avec un interrupteur"
-        ],
-        correct: 1,
-        explanation: "Le symbole du voltmètre est un cercle contenant la lettre V."
-    },
-
-    // --- DIFFICILE ---
-    {
-        id: 25,
-        q: "D'après le schéma ci-dessous, que peut-on dire de la tension mesurée par le voltmètre aux bornes du récepteur ?",
-        level: "difficile",
-        svgContent: `<svg width="260" height="150" viewBox="0 0 260 150"><rect x="30" y="20" width="200" height="110" rx="6" fill="none" stroke="#1e293b" stroke-width="2"/><circle cx="130" cy="20" r="14" fill="#f8fafc" stroke="#1e293b" stroke-width="2"/><text x="130" y="25" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="12">G</text><circle cx="130" cy="130" r="14" fill="#f8fafc" stroke="#1e293b" stroke-width="2"/><line x1="121" y1="121" x2="139" y2="139" stroke="#1e293b" stroke-width="2"/><line x1="139" y1="121" x2="121" y2="139" stroke="#1e293b" stroke-width="2"/><path d="M 80 75 L 180 75" stroke="#ef4444" stroke-width="2" stroke-dasharray="3,3"/><text x="130" y="68" text-anchor="middle" font-family="Arial" font-size="10" fill="#991b1b">Mesure U</text></svg>`,
-        options: [
-            "La tension du générateur est toujours égale à zéro",
-            "La tension aux bornes du générateur s'applique aux bornes du récepteur par l'intermédiaire des fils",
-            "La tension s'additionne le long des fils",
-            "La tension dépend uniquement de la longueur des fils"
-        ],
-        correct: 1,
-        explanation: "La tension entre les bornes du générateur s'applique directement aux bornes du récepteur par l'intermédiaire des fils de connexion."
-    },
-    {
-        id: 26,
-        q: "Un voltmètre possède les calibres suivants : 2V, 20V, 200V et 600V. On mesure une tension de 4,56 V. Quel est le calibre le plus précis à choisir ?",
-        level: "difficile",
-        options: [
-            "Le calibre 2V",
-            "Le calibre 20V",
-            "Le calibre 200V",
-            "Le calibre 600V"
-        ],
-        correct: 1,
-        explanation: "Le calibre 20V est le plus adapté et le plus précis car c'est le plus petit calibre supérieur à la valeur mesurée (4,56 V). Le calibre 2V est trop petit et risquerait d'endommager l'appareil."
-    },
-    {
-        id: 27,
-        q: "On réalise une pile électrochimique artisanale avec un citron, une lame de cuivre et une lame de zinc reliées à un voltmètre. L'écran affiche une valeur positive de +0,9 V. Que peut-on en déduire concernant les bornes ?",
-        level: "difficile",
-        options: [
-            "La lame de cuivre est reliée à la borne COM et le zinc à la borne V.",
-            "La lame de cuivre est reliée à la borne V et la lame de zinc à la borne COM du voltmètre.",
-            "Le citron ne fournit aucune tension car c'est un récepteur.",
-            "Les électrons circulent de la borne V vers la borne COM."
-        ],
-        correct: 1,
-        explanation: "Pour obtenir une tension positive (+0,9 V), la borne V (positive) du voltmètre doit être connectée du côté de la borne positive de la pile (ici le cuivre), et la borne COM du côté du zinc."
-    },
-    {
-        id: 28,
-        q: "Pourquoi dit-on que la tension est une différence d'état électrique (différence de potentiel) ?",
-        level: "difficile",
-        options: [
-            "Parce qu'elle se calcule en multipliant la masse par l'accélération",
-            "Parce qu'elle mesure l'écart d'état électrique entre deux points précis du circuit (A et B)",
-            "Parce qu'elle est toujours négative",
-            "Parce qu'elle ne dépend pas des bornes choisies"
-        ],
-        correct: 1,
-        explanation: "La tension U_AB est la différence d'état électrique entre le point A et le point B, d'où l'importance du sens de branchement (bornes V et COM)."
-    },
-    {
-        id: 29,
-        q: "Si un interrupteur est ouvert dans un circuit contenant un générateur et une lampe, que vaut la tension aux bornes de cet interrupteur ouvert ?",
-        level: "difficile",
-        options: [
-            "0 Volt",
-            "La tension totale du générateur",
-            "Moitié moins que la pile",
-            "230 Volts"
-        ],
-        correct: 1,
-        explanation: "Aux bornes d'un interrupteur ouvert, toute la tension du générateur se 'porte' : on mesure la tension complète du générateur."
-    },
-    {
-        id: 30,
-        q: "Quelle est la particularité d'un générateur de tension par rapport à un récepteur concernant l'état isolé ?",
-        level: "difficile",
-        options: [
-            "Le générateur isolé n'a aucune tension",
-            "Le générateur isolé possède une tension intrinsèque entre ses bornes, contrairement au récepteur isolé",
-            "Le récepteur isolé produit plus de tension qu'une pile",
-            "Il n'y a aucune différence physique"
-        ],
-        correct: 1,
-        explanation: "Une pile (générateur) possède une tension chimique interne même lorsqu'elle n'est branchée à rien, ce qui n'est pas le cas d'une lampe (récepteur)."
-    },
-    {
-        id: 31,
-        q: "Si la tension lue sur un multimètre est de -12,4 V, quelle est la cause la plus probable ?",
-        level: "difficile",
-        options: [
-            "La pile est branchée à l'envers ou les cordons du voltmètre (V et COM) sont inversés",
-            "Le calibre sélectionné est trop grand",
-            "Le secteur est en panne",
-            "La température de la pièce est trop basse"
+            "Les bornes VΩ (borne d'entrée) et COM (borne de sortie)",
+            "Les bornes mA et 10A",
+            "Les bornes COM et 10A",
+            "Les bornes VΩ et mA"
         ],
         correct: 0,
-        explanation: "Le signe négatif indique que le courant entre par la borne COM et sort par la borne V, ce qui signifie que les cordons sont inversés par rapport aux pôles."
+        explanation: "D'après la Fiche Méthode 1, on utilise la borne d'entrée <strong>VΩ (ou V)</strong> et la borne de sortie <strong>COM</strong>."
     },
     {
-        id: 32,
-        q: "Qu'appelle-t-on la 'tension nominale' d'un appareil électrique ?",
-        level: "difficile",
+        id: 13, level: "facile",
+        q: "Dans le tableau des symboles de l'Activité 1, que représente le grand trait fin vertical du symbole de la pile ?",
         options: [
-            "La tension maximale qu'il peut supporter avant de fondre définitivement",
-            "La tension idéale conseillée par le fabricant pour qu'il fonctionne de manière optimale",
-            "La tension minimale en dessous de laquelle il s'arrête",
-            "La tension de fabrication mesurée en usine sans courant"
+            "La borne négative (-)",
+            "La borne positive (+)",
+            "Le voltmètre",
+            "L'interrupteur ouvert"
         ],
         correct: 1,
-        explanation: "La tension nominale est la valeur écrite par le fabricant pour garantir un fonctionnement normal et sécurisé de l'appareil."
+        explanation: "Sur le symbole normalisé d'une pile, le trait long et fin représente la <strong>borne positive (+)</strong>, et le trait court et épais représente la borne négative (-)."
     },
     {
-        id: 33,
-        q: "D'après les observations expérimentales de l'activité, qu'observe-t-on lorsqu'on mesure la tension aux bornes d'un dipôle isolé (comme une pile plate non branchée dans un circuit) ?",
-        level: "difficile",
+        id: 14, level: "facile",
+        q: "D'après la Fiche Méthode 1, par quoi faut-il commencer avant de brancher le voltmètre dans un circuit ?",
         options: [
-            "La tension est nulle car le circuit est ouvert.",
-            "La tension est négative car le dipôle consomme de l'énergie.",
-            "Le voltmètre mesure une tension non nulle (ex: 4,5 V), car un générateur possède une tension entre ses bornes même isolé.",
-            "Le voltmètre affiche systématiquement une surcharge ('1.')."
+            "Réaliser d'abord le circuit électrique sans le voltmètre, puis brancher le voltmètre en dérivation",
+            "Brancher uniquement le voltmètre tout seul",
+            "Placer le voltmètre en série à la place de la lampe",
+            "Relier les bornes V et COM entre elles avec un seul fil"
         ],
-        correct: 2,
-        explanation: "Contrairement à un récepteur isolé qui a une tension nulle, un générateur (comme une pile isolée) possède intrinsèquement une tension mesurable entre ses bornes."
+        correct: 0,
+        explanation: "La première consigne de la Fiche Méthode 1 est : <strong>« Réaliser d'abord le circuit électrique sans le voltmètre »</strong>, puis le brancher en dérivation."
+    },
+
+    // ==================== NIVEAU INTERMÉDIAIRE (13 questions) ====================
+    {
+        id: 15, level: "intermediaire",
+        q: "Dans l'analogie du circuit d'eau ci-dessous (Question 2 de la Partie 0), où place-t-on l'appareil pour mesurer la hauteur de la chute d'eau (la tension) ?",
+        svg: SVGS.analogie_eau,
+        options: [
+            "Entre le haut et le bas de la chute (en dérivation aux bornes)",
+            "Au milieu du tuyau (en série dans la boucle)",
+            "À l'extérieur du laboratoire",
+            "En coupant le tuyau en deux"
+        ],
+        correct: 0,
+        explanation: "Pour mesurer une hauteur de chute (dénivelé entre le niveau haut avant et le niveau bas après), on place le voltmètre <strong>entre le haut et le bas : branchement en dérivation (aux bornes)</strong>."
     },
     {
-        id: 34,
-        q: "Si l'on place un voltmètre directement aux bornes d'un fil de connexion idéal supposé parfait, que va afficher l'appareil ?",
-        level: "difficile",
+        id: 16, level: "intermediaire",
+        q: "Dans l'analogie du circuit d'eau (Partie 0), à quoi correspond l'intensité du courant électrique (I en Ampères) et comment la mesure-t-on ?",
+        svg: SVGS.analogie_eau,
         options: [
-            "La tension totale du générateur",
-            "Exactement 0 Volt",
-            "Une valeur aléatoire",
-            "12 Volts"
+            "C'est le débit d'eau (quantité qui passe chaque seconde dans le tuyau/fil) et on place l'ampèremètre à l'intérieur du passage (en série)",
+            "C'est la hauteur de la chute et on la mesure en dérivation",
+            "C'est la couleur de l'eau dans la pompe",
+            "C'est la taille du moulin"
+        ],
+        correct: 0,
+        explanation: "D'après l'encadré bleu de la Partie 0 : l'<strong>intensité (I)</strong> correspond au <strong>débit</strong> et se mesure en plaçant l'ampèremètre à l'intérieur du passage (<strong>en série dans la boucle</strong>)."
+    },
+    {
+        id: 17, level: "intermediaire",
+        q: "Qu'ont en commun tous les dipôles isolés qui fournissent une tension électrique, et comment les appelle-t-on (Question 3 de l'Activité 1) ?",
+        options: [
+            "Ils ont une tension non nulle à leurs bornes et produisent de l'énergie électrique : on les appelle des générateurs",
+            "Ils ont tous une tension de 0 V : on les appelle des récepteurs",
+            "Ils brillent tous dans le noir : on les appelle des lampes",
+            "Ils ont tous exactement 3 bornes"
+        ],
+        correct: 0,
+        explanation: "Tous les dipôles qui fournissent une tension à l'état isolé ont une <strong>tension non nulle</strong> entre leurs bornes : ce sont les <strong>générateurs</strong>."
+    },
+    {
+        id: 18, level: "intermediaire",
+        q: "Comment reconnaître expérimentalement un générateur isolé d'un autre dipôle isolé (Question 4 de l'Activité 1) ?",
+        options: [
+            "Il suffit de mesurer la tension entre ses bornes avec un voltmètre : elle est non nulle pour un générateur isolé et égale à 0 V pour un autre dipôle isolé",
+            "Il suffit de le peser sur une balance",
+            "Le générateur isolé affiche toujours 0 V",
+            "On ne peut jamais le savoir avec un voltmètre"
+        ],
+        correct: 0,
+        explanation: "Il suffit de vérifier avec un voltmètre s'il présente une <strong>tension non nulle</strong> entre ses bornes lorsqu'il est isolé (non branché dans un circuit)."
+    },
+    {
+        id: 19, level: "intermediaire",
+        q: "Sur le schéma normalisé de la mesure de la tension d'une pile isolée ci-dessous, comment doivent être placées les bornes V et COM du voltmètre ?",
+        svg: SVGS.schema_pile_isolee,
+        options: [
+            "Borne 1 = V (du côté de la borne + de la pile) et Borne 2 = COM (du côté de la borne - de la pile)",
+            "Borne 1 = COM et Borne 2 = V",
+            "Borne 1 = 10A et Borne 2 = mA",
+            "Il ne faut jamais écrire les bornes V et COM sur un schéma"
+        ],
+        correct: 0,
+        explanation: "D'après la Fiche Méthode 1 et la grille d'autoévaluation : la borne <strong>V</strong> doit être du côté de la <strong>borne positive (+)</strong> et la borne <strong>COM</strong> du côté de la <strong>borne négative (-)</strong>."
+    },
+    {
+        id: 20, level: "intermediaire",
+        q: "Sur l'exemple de la Fiche Méthode 1, l'écran du voltmètre affiche « -3.86 ». Que signifie ce signe « - » et que faut-il faire ?",
+        options: [
+            "La pile est vide ; il faut la jeter",
+            "Le voltmètre est branché à l'envers (inversion entre la borne V et la borne COM) : il suffit d'inverser le branchement",
+            "Le calibre choisi est trop petit ; il faut passer sur 600 V",
+            "L'appareil est en panne"
         ],
         correct: 1,
-        explanation: "Un fil de connexion idéal n'offre aucune résistance et ne consomme aucune énergie, la différence de potentiel entre ses deux extrémités est nulle."
+        explanation: "D'après la Fiche Méthode 1 : si le signe « <strong>-</strong> » apparaît, alors le voltmètre est branché à l'envers (inversion entre V et COM). Il suffit d'inverser le branchement."
+    },
+    {
+        id: 21, level: "intermediaire",
+        q: "Sur le multimètre ci-dessous (Fiche Méthode 1), où doit-on placer le sélecteur au début d'une mesure de tension continue ?",
+        svg: SVGS.multimetre_cl1,
+        options: [
+            "Sur le plus grand calibre (600 V) de la zone des tensions continues (V⎓)",
+            "Directement sur le plus petit calibre (2 V) de la zone V⎓",
+            "Dans la zone verte Ω sur 20k",
+            "Dans la zone rose A⎓ sur 200m"
+        ],
+        correct: 0,
+        explanation: "La Fiche Méthode 1 indique : <strong>« Placer le sélecteur sur le plus grand calibre de la zone des tensions continues (V⎓) : 600 »</strong>."
+    },
+    {
+        id: 22, level: "intermediaire",
+        q: "Qu'est-ce que le « calibre » d'un voltmètre (Fiche Méthode 1) ?",
+        options: [
+            "La valeur maximale de tension que peut mesurer l'appareil sans être détérioré",
+            "La valeur minimale que peut mesurer l'appareil",
+            "La taille de l'écran du multimètre",
+            "Le nombre de piles branchées sur l'appareil"
+        ],
+        correct: 0,
+        explanation: "Attention (Fiche Méthode 1) : <strong>le calibre est la valeur maximale que peut mesurer l'appareil sans être détérioré</strong>."
+    },
+    {
+        id: 23, level: "intermediaire",
+        q: "Que signifie l'apparition du chiffre « 1. » à gauche de l'écran du voltmètre (comme sur le calibre 2 V ci-dessous) ?",
+        svg: SVGS.calibres_tableau,
+        options: [
+            "La tension mesurée vaut exactement 1 V",
+            "Le calibre choisi est trop petit (la tension mesurée est supérieure au calibre) et l'appareil peut être endommagé",
+            "Le voltmètre est branché à l'envers",
+            "La pile est déchargée"
+        ],
+        correct: 1,
+        explanation: "D'après la Fiche Méthode 1 : <strong>« Si le chiffre 1. apparaît, alors le calibre choisi est trop petit ! L'appareil peut être endommagé. »</strong>"
+    },
+    {
+        id: 24, level: "intermediaire",
+        q: "Comment note-t-on correctement le résultat de la mesure de tension de l'exemple de la Fiche Méthode 1 (4,56 volts) ?",
+        options: [
+            "I = 4,56 V",
+            "U = 4,56 V",
+            "V = 4,56 U",
+            "U = 4,56 A"
+        ],
+        correct: 1,
+        explanation: "On écrit la lettre symbole de la tension (<strong>U</strong>), le signe égal, la valeur et l'unité (<strong>V</strong>) : <strong>U = 4,56 V</strong>." + historiqueU
+    },
+    {
+        id: 25, level: "intermediaire",
+        q: "D'après la grille d'autoévaluation de l'Activité 1 (« Mon schéma est réussi si... »), quels sont les 5 critères d'un schéma électrique réussi ?",
+        options: [
+            "Propre et réalisé au crayon à papier, symboles normalisés, traits droits à la règle, allure générale en rectangle, et bornes V et COM précisées",
+            "Fait au stylo bille, avec les dessins des vrais objets, sans règle et en forme de rond",
+            "Sans les bornes V et COM et avec des fils courbés",
+            "Uniquement dessiné au feutre de couleur"
+        ],
+        correct: 0,
+        explanation: "La grille d'autoévaluation demande : 1) propre/lisible au <strong>crayon à papier</strong>, 2) <strong>symboles</strong> de chaque composant, 3) traits à la <strong>règle</strong>, 4) allure en <strong>rectangle</strong>, 5) <strong>bornes V et COM</strong> précisées."
+    },
+    {
+        id: 26, level: "intermediaire",
+        q: "D'après le Vocabulaire de l'Activité 1, quelle est la différence exacte entre un générateur et un récepteur ?",
+        options: [
+            "Le générateur produit de l'énergie électrique (source), tandis que le récepteur convertit l'énergie électrique reçue en une autre forme d'énergie",
+            "Le récepteur produit de l'énergie électrique et le générateur la consomme",
+            "Tous les deux produisent de l'énergie électrique",
+            "Le générateur a 4 bornes et le récepteur n'en a qu'une"
+        ],
+        correct: 0,
+        explanation: "D'après l'encadré Vocabulaire : le <strong>générateur</strong> produit de l'énergie électrique, alors que le <strong>récepteur</strong> convertit l'énergie électrique reçue en une autre forme d'énergie."
+    },
+    {
+        id: 27, level: "intermediaire",
+        q: "Lors du protocole expérimental de l'Activité 1, on mesure la tension aux bornes de 5 dipôles isolés : Pile plate, Pile ronde, Lampe, Interrupteur, Moteur. Quels résultats obtient-on ?",
+        options: [
+            "La pile plate (~4,5 V) et la pile ronde (~1,5 V) ont une tension non nulle, tandis que la lampe, l'interrupteur et le moteur ont une tension de 0 V",
+            "Les 5 dipôles affichent tous 4,5 V",
+            "Les 5 dipôles affichent tous 0 V",
+            "Seul le moteur affiche une tension non nulle"
+        ],
+        correct: 0,
+        explanation: "Dans le tableau de l'Activité 1 : seules la <strong>pile plate (4,56 V)</strong> et la <strong>pile ronde (1,512 V)</strong> ont une tension non nulle. La lampe, l'interrupteur et le moteur isolés affichent <strong>0 V</strong>."
+    },
+
+    // ==================== NIVEAU DIFFICILE (13 questions) ====================
+    {
+        id: 28, level: "difficile",
+        q: "Observe le tableau d'exemples de mesures de la Fiche Méthode 1 ci-dessous. Pourquoi le calibre 20 V est-il le meilleur choix pour mesurer cette tension de 4,56 V ?",
+        svg: SVGS.calibres_tableau,
+        options: [
+            "Parce que c'est le calibre dont la valeur est la plus proche de la tension mesurée (4,56 V) tout en lui étant supérieure : il donne 2 chiffres après la virgule",
+            "Parce que c'est le plus grand calibre du multimètre",
+            "Parce que le calibre 2 V est plus précis avec l'affichage « 1. »",
+            "Parce que le calibre 200 V donne plus de chiffres après la virgule"
+        ],
+        correct: 0,
+        explanation: "D'après la Fiche Méthode 1 : le <strong>calibre 20 V</strong> est le plus précis (2 chiffres après la virgule) car sa valeur est la plus proche de 4,56 V tout en lui restant supérieure."
+    },
+    {
+        id: 29, level: "difficile",
+        q: "Dans ce même exemple de la Fiche Méthode 1 (tension de 4,56 V), pourquoi ne doit-on surtout pas utiliser le calibre 2 V ?",
+        svg: SVGS.calibres_tableau,
+        options: [
+            "Car la valeur mesurée (4,56 V) est supérieure au calibre 2 V : l'écran affiche « 1. » et cela détériorerait le voltmètre",
+            "Car le calibre 2 V sert uniquement pour les ampèremètres",
+            "Car le calibre 2 V afficherait -4,56 V",
+            "Car le calibre 2 V donne trop de chiffres après la virgule"
+        ],
+        correct: 0,
+        explanation: "Le calibre 2 V est inférieur à la tension mesurée (4,56 V > 2 V) : il y a dépassement de calibre (affichage « <strong>1.</strong> ») et risque de détérioration du voltmètre."
+    },
+    {
+        id: 30, level: "difficile",
+        q: "Dans la question 5.a (« Le Tri du Laboratoire »), Sofia mesure 4 dipôles isolés sur le calibre 20 V : Batterie de téléphone (3,85 V), DEL (0,00 V), Pile bouton (-1,54 V), Résistance (0,00 V). Lesquels sont des générateurs et lesquels sont des récepteurs ?",
+        options: [
+            "Générateurs : Batterie (3,85 V) et Pile bouton (-1,54 V) car leur tension est non nulle. Récepteurs : DEL (0,00 V) et Résistance (0,00 V) car leur tension est nulle",
+            "Générateur : uniquement la Batterie (3,85 V). Récepteurs : DEL, Résistance et Pile bouton",
+            "Les quatre dipôles sont des récepteurs",
+            "Générateurs : DEL et Résistance. Récepteurs : Batterie et Pile bouton"
+        ],
+        correct: 0,
+        explanation: "La <strong>batterie (3,85 V)</strong> et la <strong>pile bouton (-1,54 V)</strong> ont une tension non nulle à l'état isolé : ce sont des <strong>générateurs</strong>. La <strong>DEL</strong> et la <strong>résistance</strong> (0,00 V) sont des <strong>récepteurs</strong>."
+    },
+    {
+        id: 31, level: "difficile",
+        q: "Dans la question 5.b (« Le Tri du Laboratoire »), pourquoi un signe « - » apparaît-il devant la mesure de la pile bouton (-1,54 V) et que doit faire Sofia pour obtenir +1,54 V ?",
+        options: [
+            "Elle a branché le voltmètre à l'envers (borne V sur le pôle - et borne COM sur le pôle + de la pile bouton) ; elle doit inverser les fils entre les bornes V et COM",
+            "La pile bouton est déchargée ; elle doit la recharger",
+            "Le calibre 20 V est trop petit ; elle doit passer sur le calibre 600 V",
+            "Elle doit retourner l'écran du voltmètre"
+        ],
+        correct: 0,
+        explanation: "D'après la Fiche Méthode 1, le signe « - » indique une inversion entre la borne V et la borne COM. Sofia doit simplement <strong>inverser le branchement des deux fils sur V et COM</strong>."
+    },
+    {
+        id: 32, level: "difficile",
+        q: "Dans la question 5.c (« Le Tri du Laboratoire »), le voltmètre de Sofia possède les calibres : 600 V, 200 V, 20 V et 2 V. Quel calibre doit-elle choisir pour mesurer la tension de la pile bouton (1,54 V) avec le plus de précision possible ?",
+        options: [
+            "Le calibre 2 V, car c'est le calibre dont la valeur est la plus proche de 1,54 V tout en lui étant supérieure (1,54 V < 2 V)",
+            "Le calibre 20 V, car elle a commencé sur 20 V",
+            "Le calibre 200 V",
+            "Le calibre 600 V"
+        ],
+        correct: 0,
+        explanation: "Comme la tension de la pile bouton (<strong>1,54 V</strong>) est inférieure à <strong>2 V</strong>, Sofia peut abaisser le sélecteur jusqu'au <strong>calibre 2 V</strong> pour obtenir la mesure la plus précise possible."
+    },
+    {
+        id: 33, level: "difficile",
+        q: "Dans la question 6.a (« Le mystère de la pile au citron » ci-dessous), Yanis plante une lame de cuivre et une lame de zinc dans un citron et lit -0,92 V sur le voltmètre. Cet assemblage est-il un générateur ou un récepteur ?",
+        svg: SVGS.pile_citron,
+        options: [
+            "C'est un générateur, car bien qu'il soit isolé (non relié à une pile externe), il existe une tension électrique non nulle entre ses bornes (-0,92 V)",
+            "C'est un récepteur, car la valeur affichée est négative",
+            "C'est un récepteur, car un citron est un fruit",
+            "Ce n'est ni un générateur ni un récepteur car la tension est inférieure à 1 V"
+        ],
+        correct: 0,
+        explanation: "Puisque le voltmètre mesure une <strong>tension non nulle</strong> aux bornes de cet assemblage isolé, le citron + lames métalliques se comporte comme un <strong>générateur</strong>."
+    },
+    {
+        id: 34, level: "difficile",
+        q: "Dans la question 6.b (« Le mystère de la pile au citron »), comment Yanis doit-il noter scientifiquement la valeur de la tension électrique de cette pile au citron (une fois le branchement remis à l'endroit) ?",
+        svg: SVGS.pile_citron,
+        options: [
+            "U = 0,92 V (avec la lettre symbole U de la tension et son unité V)",
+            "I = 0,92 A",
+            "V = -0,92 U",
+            "Calibre = 0,92 V"
+        ],
+        correct: 0,
+        explanation: "La tension électrique se note avec la lettre symbole <strong>U</strong> et son unité le volt (<strong>V</strong>), soit : <strong>U = 0,92 V</strong>."
+    },
+    {
+        id: 35, level: "difficile",
+        q: "Dans la question 6.c de la pile au citron ci-dessous, Yanis a relié le zinc à la borne V et le cuivre à la borne COM, et l'écran affiche -0,92 V. Quelle lame est la borne positive (+) et laquelle est la borne négative (-) ?",
+        svg: SVGS.pile_citron,
+        options: [
+            "Le voltmètre est branché à l'envers : la lame de cuivre (reliée à COM) est donc la borne positive (+) et la lame de zinc (reliée à V) est la borne négative (-)",
+            "Le voltmètre est branché à l'endroit : la lame de zinc est la borne (+) et la lame de cuivre est la borne (-)",
+            "Les deux lames sont négatives (-)",
+            "Le signe - vient du calibre 2 V"
+        ],
+        correct: 0,
+        explanation: "Pour afficher un nombre positif, V doit être sur le (+) et COM sur le (-). Comme l'écran affiche <strong>-0,92 V</strong> (à l'envers), la borne V est sur le (-) (<strong>zinc = borne -</strong>) et COM est sur le (+) (<strong>cuivre = borne +</strong>)."
+    },
+    {
+        id: 36, level: "difficile",
+        q: "Dans la question 6.d de la pile au citron, comment Yanis doit-il tracer le schéma normalisé pour que le voltmètre affiche +0,92 V ?",
+        svg: SVGS.pile_citron,
+        options: [
+            "Un circuit rectangulaire avec le symbole de la pile et du voltmètre, en reliant la borne V du côté de la borne (+) (cuivre) et la borne COM du côté de la borne (-) (zinc)",
+            "Un dessin de citron jaune avec la borne V sur le zinc (-) et COM sur le cuivre (+)",
+            "Un schéma avec le symbole d'un moteur et d'une lampe",
+            "Un rectangle sans indiquer ni +, ni -, ni V, ni COM"
+        ],
+        correct: 0,
+        explanation: "Pour obtenir <strong>+0,92 V</strong> sur le schéma normalisé, on représente la pile par son symbole normalisé et on relie la borne <strong>V au pôle (+)</strong> (cuivre) et la borne <strong>COM au pôle (-)</strong> (zinc)."
+    },
+    {
+        id: 37, level: "difficile",
+        q: "Sur la photo du Doc. 1 de l'Activité 1 (mesure de la tension de la pile plate 4,5 V avec le multimètre Jeulin CL1), le sélecteur est placé sur 20 V et l'écran affiche 4,2 V. Quel calibre a été utilisé et pourquoi pas 2 V ?",
+        options: [
+            "Le calibre utilisé est 20 V ; sur le calibre 2 V, la tension de 4,2 V dépasserait le calibre maximal (4,2 V > 2 V) et l'écran afficherait « 1. »",
+            "Le calibre utilisé est 4,2 V",
+            "Le calibre utilisé est 600 V",
+            "On aurait pu utiliser le calibre 2 V pour lire 4,20 V"
+        ],
+        correct: 0,
+        explanation: "Pour une pile plate (~4,2 V à 4,56 V), le calibre à noter dans le tableau de l'Activité 1 est <strong>20 V</strong>, car 2 V est inférieur à la tension de la pile."
+    },
+    {
+        id: 38, level: "difficile",
+        q: "Dans le tableau de mesures de l'Activité 1, on mesure une pile ronde de 1,512 V avec le multimètre de la Fiche Méthode 1 (calibres : 600 V, 200 V, 20 V, 2 V). Quel calibre a permis d'obtenir 3 chiffres après la virgule (1,512 V) ?",
+        options: [
+            "Le calibre 2 V, car 1,512 V est inférieur à 2 V : c'est le calibre le plus petit supérieur à la tension de la pile ronde",
+            "Le calibre 600 V",
+            "Le calibre 200 V",
+            "Le calibre 20 V"
+        ],
+        correct: 0,
+        explanation: "La pile ronde ayant une tension d'environ 1,5 V (inférieure à 2 V), on peut descendre jusqu'au <strong>calibre 2 V</strong> qui offre une précision au millivolt près (3 chiffres après la virgule : <strong>1,512 V</strong>)."
+    },
+    {
+        id: 39, level: "difficile",
+        q: "Sur le multimètre de la Fiche Méthode 1 ci-dessous, que signifient les zones « V⎓ », « V~ », « A⎓ » et « Ω » autour du sélecteur ?",
+        svg: SVGS.multimetre_cl1,
+        options: [
+            "V⎓ : tensions continues (piles), V~ : tensions alternatives, A⎓ : intensités continues (ampèremètre), Ω : résistances (ohmmètre)",
+            "Les quatre zones servent toutes à mesurer la tension d'une pile",
+            "V⎓ sert à mesurer des ampères et A⎓ sert à mesurer des volts",
+            "Ω est la zone des tensions les plus précises"
+        ],
+        correct: 0,
+        explanation: "Le multimètre regroupe plusieurs appareils : pour mesurer la tension d'une pile ou d'un dipôle en 4e, on utilise exclusivement la <strong>zone bleue de gauche V⎓ (tensions continues)</strong>."
+    },
+    {
+        id: 40, level: "difficile",
+        q: "Un élève suit la Fiche Méthode 1 pour mesurer une tension inconnue. Sur 600 V, il lit « 4 ». Sur 200 V, il lit « 3.9 ». Sur 20 V, il lit « 3.86 ». Doit-il passer sur le calibre 2 V ?",
+        options: [
+            "Non, car 3,86 V est supérieur à 2 V : sur le calibre 2 V, il dépasserait le calibre maximal (affichage « 1. ») et risquerait d'endommager le voltmètre",
+            "Oui, il faut toujours aller jusqu'au plus petit calibre (2 V) quelle que soit la valeur lue",
+            "Oui, pour avoir 4 chiffres après la virgule",
+            "Non, il doit revenir sur 600 V pour noter le résultat final"
+        ],
+        correct: 0,
+        explanation: "D'après la Fiche Méthode 1, on déplace progressivement le sélecteur vers les petits calibres <strong>tant que le calibre reste supérieur à la tension mesurée</strong>. Comme 3,86 V > 2 V, on s'arrête sur le <strong>calibre 20 V</strong> !"
     }
 ];
 
 let currentQuestions = [];
-let lastUsedQuestions = [];
+let lastQuestions = [];
 let wrongQuestions = [];
+let sessionAnswers = [];
 let currentIndex = 0;
 let score = 0;
-let scoreByLevel = { facile: {correct: 0, total: 0}, intermediaire: {correct: 0, total: 0}, difficile: {correct: 0, total: 0} };
+let currentMode = "new";
+let currentDisplayedOptions = [];
+let isQuestionAnswered = false;
+let scoreByLevel = {
+    facile: { ok: 0, total: 0 },
+    intermediaire: { ok: 0, total: 0 },
+    difficile: { ok: 0, total: 0 }
+};
+
+function shuffleArray(arr) {
+    let copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+function pickBalancedTenQuestions() {
+    const faciles = shuffleArray(questionBank.filter(q => q.level === "facile")).slice(0, 4);
+    const inters = shuffleArray(questionBank.filter(q => q.level === "intermediaire")).slice(0, 3);
+    const difficiles = shuffleArray(questionBank.filter(q => q.level === "difficile")).slice(0, 3);
+    return shuffleArray([...faciles, ...inters, ...difficiles]);
+}
 
 function startQuiz(mode) {
-    let pool = [...questionBank];
-    
-    if (mode === 'same' && lastUsedQuestions.length > 0) {
-        currentQuestions = [...lastUsedQuestions];
+    currentMode = mode;
+
+    if (mode === 'same' && lastQuestions.length === 10) {
+        currentQuestions = [...lastQuestions];
     } else if (mode === 'mix' && wrongQuestions.length > 0) {
-        let needed = 10 - wrongQuestions.length;
-        let others = pool.filter(q => !wrongQuestions.some(wq => wq.id === q.id)).sort(() => 0.5 - Math.random());
-        currentQuestions = [...wrongQuestions, ...others.slice(0, needed)].slice(0, 10).sort(() => 0.5 - Math.random());
+        const keptWrong = [...wrongQuestions].slice(0, 6);
+        const needed = 10 - keptWrong.length;
+        const remainingPool = shuffleArray(
+            questionBank.filter(q => !keptWrong.some(w => w.id === q.id))
+        );
+        currentQuestions = shuffleArray([...keptWrong, ...remainingPool.slice(0, needed)]);
     } else {
-        let shuffled = pool.sort(() => 0.5 - Math.random());
-        currentQuestions = shuffled.slice(0, 10);
+        currentQuestions = pickBalancedTenQuestions();
     }
-    
-    lastUsedQuestions = [...currentQuestions];
+
+    lastQuestions = [...currentQuestions];
     wrongQuestions = [];
-    
+    sessionAnswers = [];
     currentIndex = 0;
     score = 0;
-    scoreByLevel = { facile: {correct: 0, total: 0}, intermediaire: {correct: 0, total: 0}, difficile: {correct: 0, total: 0} };
-    
-    currentQuestions.forEach(q => {
-        scoreByLevel[q.level].total++;
-    });
+    scoreByLevel = {
+        facile: { ok: 0, total: 0 },
+        intermediaire: { ok: 0, total: 0 },
+        difficile: { ok: 0, total: 0 }
+    };
 
-    document.getElementById('home-screen').classList.remove('active');
-    document.getElementById('result-screen').classList.remove('active');
-    document.getElementById('quiz-screen').classList.add('active');
-    
+    currentQuestions.forEach(q => scoreByLevel[q.level].total++);
+
+    document.getElementById("home-screen").classList.remove("active");
+    document.getElementById("result-screen").classList.remove("active");
+    document.getElementById("quiz-screen").classList.add("active");
+
     loadQuestion();
 }
 
 function loadQuestion() {
-    let q = currentQuestions[currentIndex];
-    
-    document.getElementById('question-counter').innerText = `Question ${currentIndex + 1} / 10`;
-    
-    let badge = document.getElementById('difficulty-badge');
-    badge.innerText = q.level.toUpperCase();
+    isQuestionAnswered = false;
+    const q = currentQuestions[currentIndex];
+    document.getElementById("question-counter").innerText = `Question ${currentIndex + 1} / 10`;
+    document.getElementById("progress-fill").style.width = `${((currentIndex + 1) / 10) * 100}%`;
+
+    const badge = document.getElementById("difficulty-badge");
+    const labels = { facile: "FACILE", intermediaire: "INTERMÉDIAIRE", difficile: "DIFFICILE" };
+    badge.innerText = labels[q.level];
     badge.className = `badge ${q.level}`;
-    
-    document.getElementById('question-container').innerText = q.q;
-    
-    let svgSlot = document.getElementById('svg-slot');
-    if (q.svgContent) {
-        svgSlot.innerHTML = q.svgContent;
-        svgSlot.style.display = 'block';
+
+    document.getElementById("question-container").innerText = q.q;
+
+    const svgSlot = document.getElementById("svg-slot");
+    if (q.svg) {
+        svgSlot.innerHTML = q.svg;
+        svgSlot.style.display = "block";
     } else {
-        svgSlot.innerHTML = '';
-        svgSlot.style.display = 'none';
+        svgSlot.innerHTML = "";
+        svgSlot.style.display = "none";
     }
-    
-    let optionsContainer = document.getElementById('options-container');
-    optionsContainer.innerHTML = '';
-    
-    q.options.forEach((opt, index) => {
-        let btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.innerText = opt;
-        btn.onclick = () => selectOption(index);
+
+    const optionsContainer = document.getElementById("options-container");
+    optionsContainer.innerHTML = "";
+
+    const mappedOptions = q.options.map((text, idx) => ({
+        text: text,
+        isCorrect: idx === q.correct
+    }));
+    currentDisplayedOptions = shuffleArray(mappedOptions);
+
+    const letters = ["A", "B", "C", "D"];
+    currentDisplayedOptions.forEach((optObj, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.innerHTML = `<span class="option-key">${letters[idx]}</span> <span>${optObj.text}</span>`;
+        btn.onclick = () => selectOption(idx);
         optionsContainer.appendChild(btn);
     });
-    
-    let expBox = document.getElementById('explanation-box');
-    expBox.classList.remove('visible');
-    expBox.innerText = '';
-    
-    let nextBtn = document.getElementById('next-btn');
-    nextBtn.classList.remove('visible');
+
+    const expBox = document.getElementById("explanation-box");
+    expBox.classList.remove("visible");
+    expBox.innerHTML = "";
+
+    const nextBtn = document.getElementById("next-btn");
+    nextBtn.classList.remove("visible");
 }
 
 function selectOption(selectedIndex) {
-    let q = currentQuestions[currentIndex];
-    let buttons = document.querySelectorAll('.option-btn');
-    
-    buttons.forEach(btn => btn.disabled = true);
-    
-    let isCorrect = (selectedIndex === q.correct);
-    
-    if (isCorrect) {
+    if (isQuestionAnswered) return;
+    isQuestionAnswered = true;
+
+    const q = currentQuestions[currentIndex];
+    const buttons = document.querySelectorAll(".option-btn");
+    buttons.forEach(b => b.disabled = true);
+
+    const chosenOption = currentDisplayedOptions[selectedIndex];
+    const correctIndex = currentDisplayedOptions.findIndex(o => o.isCorrect);
+
+    if (chosenOption.isCorrect) {
         score++;
-        scoreByLevel[q.level].correct++;
-        buttons[selectedIndex].classList.add('correct');
+        scoreByLevel[q.level].ok++;
+        buttons[selectedIndex].classList.add("correct");
     } else {
-        buttons[selectedIndex].classList.add('incorrect');
-        buttons[q.correct].classList.add('correct');
+        buttons[selectedIndex].classList.add("incorrect");
+        buttons[correctIndex].classList.add("correct");
         wrongQuestions.push(q);
     }
-    
-    let expBox = document.getElementById('explanation-box');
-    expBox.innerHTML = `<strong>${isCorrect ? 'Bonne réponse !' : 'Mauvaise réponse.'}</strong><br>${q.explanation}`;
-    expBox.classList.add('visible');
-    
-    let nextBtn = document.getElementById('next-btn');
-    if (currentIndex < currentQuestions.length - 1) {
-        nextBtn.innerText = "Question suivante";
-    } else {
-        nextBtn.innerText = "Voir mon score final";
-    }
-    nextBtn.classList.add('visible');
+
+    sessionAnswers.push({
+        id: q.id,
+        qText: `Q${q.id} - ${q.q.substring(0, 70)}...`,
+        correct: chosenOption.isCorrect
+    });
+
+    const expBox = document.getElementById("explanation-box");
+    expBox.innerHTML = `<strong>${chosenOption.isCorrect ? "✅ Bonne réponse !" : "❌ Mauvaise réponse."}</strong><br>${q.explanation}`;
+    expBox.classList.add("visible");
+
+    const nextBtn = document.getElementById("next-btn");
+    nextBtn.innerText = (currentIndex < 9) ? "Question suivante ➔" : "Voir mon résultat final 🏆";
+    nextBtn.classList.add("visible");
 }
 
 function nextQuestion() {
+    if (!isQuestionAnswered) return;
     currentIndex++;
     if (currentIndex < currentQuestions.length) {
         loadQuestion();
@@ -801,28 +1160,96 @@ function nextQuestion() {
 }
 
 function showResults() {
-    document.getElementById('quiz-screen').classList.remove('active');
-    document.getElementById('result-screen').classList.add('active');
-    
-    document.getElementById('final-score').innerText = `${score} / 10`;
-    
-    let message = "";
-    if (score === 10) message = "Exceptionnel ! C'est un sans-faute parfait ! 🌟";
-    else if (score >= 8) message = "Très bien ! Tu maîtrises super bien le chapitre ! 👍";
-    else if (score >= 5) message = "Pas mal, mais il reste quelques notions à revoir sur le cours. 📚";
-    else message = "Il faut revoir la fiche méthode et le cours, retente ta chance ! 💪";
-    
-    document.getElementById('feedback-message').innerText = message;
-    
-    let breakdownHTML = "<strong>Détail par difficulté :</strong><br><br>";
-    for (let lvl in scoreByLevel) {
-        if (scoreByLevel[lvl].total > 0) {
-            let label = lvl.charAt(0).toUpperCase() + lvl.slice(1);
-            breakdownHTML += `• Niveau ${label} : ${scoreByLevel[lvl].correct} / ${scoreByLevel[lvl].total} corrects<br>`;
+    document.getElementById("quiz-screen").classList.remove("active");
+    document.getElementById("result-screen").classList.add("active");
+
+    document.getElementById("final-score").innerText = `${score} / 10`;
+
+    let msg = "";
+    if (score === 10) msg = "🌟 Bravo, sans-faute parfait ! Tu maîtrises l'Activité 1 et la Fiche Méthode sur le bout des doigts !";
+    else if (score >= 8) msg = "👍 Très bon travail ! Les notions de tension, de dipôles isolés et de calibre sont bien comprises.";
+    else if (score >= 5) msg = "📚 C'est encourageant ! Relis bien le rappel sur tes erreurs ci-dessous et lance un Mix pour progresser.";
+    else msg = "💪 Reprends bien l'Activité 1 et la Fiche Méthode sur le voltmètre, puis réessaie !";
+    document.getElementById("feedback-message").innerText = msg;
+
+    let html = `<strong>Détail de ta réussite par niveau de difficulté :</strong><br>`;
+    html += `🟢 Questions Faciles : <strong>${scoreByLevel.facile.ok} / ${scoreByLevel.facile.total}</strong><br>`;
+    html += `🟡 Questions Intermédiaires : <strong>${scoreByLevel.intermediaire.ok} / ${scoreByLevel.intermediaire.total}</strong><br>`;
+    html += `🔴 Questions Difficiles : <strong>${scoreByLevel.difficile.ok} / ${scoreByLevel.difficile.total}</strong>`;
+    document.getElementById("score-breakdown").innerHTML = html;
+
+    const reviewBox = document.getElementById("errors-review");
+    const btnMix = document.getElementById("btn-mix");
+
+    if (wrongQuestions.length > 0) {
+        btnMix.style.display = "block";
+        btnMix.innerText = `🔀 Faire un Mix (${wrongQuestions.length} erreur${wrongQuestions.length > 1 ? 's' : ''} à retravailler + Nouvelles questions)`;
+        let reviewHtml = `<p style="font-weight:700; color:#991b1b; margin:0 0 10px 0;">📌 Rappel sur tes erreurs (${wrongQuestions.length}) :</p>`;
+        wrongQuestions.forEach(wq => {
+            reviewHtml += `<div class="review-item">
+                <strong>${wq.q}</strong><br>
+                <span style="color:#166534; font-weight:600;">➔ Bonne réponse : ${wq.options[wq.correct]}</span><br>
+                <span style="color:#475569;">${wq.explanation}</span>
+            </div>`;
+        });
+        reviewBox.innerHTML = reviewHtml;
+        reviewBox.style.display = "block";
+    } else {
+        btnMix.style.display = "none";
+        reviewBox.style.display = "none";
+        reviewBox.innerHTML = "";
+    }
+
+    sendStatsToGoogleSheet();
+}
+
+function sendStatsToGoogleSheet() {
+    const statusEl = document.getElementById("sync-status");
+    statusEl.innerText = "⏳ Enregistrement anonyme des statistiques...";
+    statusEl.style.background = "#f1f5f9";
+    statusEl.style.color = "#64748b";
+
+    const payload = {
+        studentId: anonymousId,
+        studentClass: "4e_Tension_A1_FM1_SansBilan",
+        mode: currentMode,
+        score: score,
+        answers: sessionAnswers
+    };
+
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+    })
+    .then(() => {
+        statusEl.innerText = "✅ Statistiques anonymes enregistrées !";
+        statusEl.style.background = "#dcfce7";
+        statusEl.style.color = "#166534";
+    })
+    .catch(() => {
+        statusEl.innerText = "ℹ️ Mode hors-ligne (statistiques non synchronisées).";
+    });
+}
+
+document.addEventListener("keydown", (e) => {
+    const quizActive = document.getElementById("quiz-screen").classList.contains("active");
+    if (!quizActive) return;
+
+    const key = e.key.toUpperCase();
+    if (!isQuestionAnswered) {
+        if (key === "1" || key === "A") selectOption(0);
+        else if (key === "2" || key === "B") selectOption(1);
+        else if (key === "3" || key === "C") selectOption(2);
+        else if (key === "4" || key === "D") selectOption(3);
+    } else {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            nextQuestion();
         }
     }
-    document.getElementById('score-breakdown').innerHTML = breakdownHTML;
-}
+});
 </script>
 
 </body>
