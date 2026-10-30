@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labo Virtuel 4e : Mesurer la tension d'un dipôle isolé</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            user-select: none;
+        }
+
+        .lcd-font {
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 2px;
+        }
+
+        /* Animations pour les bornes cliquables */
+        .terminal-hotspot {
+            cursor: pointer;
+            transition: transform 0.15s ease, filter 0.15s ease;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+        .terminal-hotspot:hover {
+            transform: scale(1.18);
+            filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.85));
+        }
+        .terminal-selected {
+            animation: pulseRing 0.9s infinite;
+        }
+
+        @keyframes pulseRing {
+            0% { filter: drop-shadow(0 0 2px #f59e0b); transform: scale(1.08); }
+            50% { filter: drop-shadow(0 0 14px #f59e0b); transform: scale(1.28); }
+            100% { filter: drop-shadow(0 0 2px #f59e0b); transform: scale(1.08); }
+        }
+
+        .dial-pos {
+            cursor: pointer;
+        }
+        .dial-pos:hover circle.hit-area {
+            fill: rgba(15, 23, 42, 0.12);
+            stroke: #0f172a;
+            stroke-width: 1.5px;
+        }
+
+        #dial-rotor {
+            transition: transform 0.24s cubic-bezier(0.34, 1.4, 0.64, 1);
+            transform-origin: 540px 255px;
+            cursor: grab;
+        }
+
+        .wire-group {
+            cursor: pointer;
+        }
+        .wire-group:hover .wire-main {
+            filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8));
+            stroke-width: 9px;
+        }
+
+        .wire-main {
+            fill: none;
+            stroke-linecap: round;
+            filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.28));
+            transition: stroke-width 0.15s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-3 md:p-5">
+
+<div class="max-w-7xl mx-auto space-y-4">
+
+    <!-- EN-TÊTE -->
+    <header class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:px-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+            <div class="flex items-center gap-2 text-blue-700 font-bold text-xs uppercase tracking-wider mb-1">
+                <span class="bg-blue-100 px-2.5 py-0.5 rounded-full">Physique-Chimie 4e</span>
+                <span class="bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">Activité 1 & Fiche Méthode 1</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-extrabold text-slate-900">
+                ⚡ Banc de Manipulation : Mesurer la tension d'un dipôle isolé
+            </h1>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <button onclick="toggleSchemaModal()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-2xs">
+                <span>📐</span> Aide Schéma Normalisé
+            </button>
+        </div>
+    </header>
+
+    <!-- BARRE DE SÉLECTION DU MATÉRIEL (LES 8 DIPÔLES ISOLÉS) -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-3 sm:p-3.5">
+        <div class="flex items-center justify-between mb-2">
+            <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-600 flex items-center gap-2">
+                <span class="bg-slate-800 text-white w-5 h-5 rounded-full inline-flex items-center justify-center text-xs shrink-0">1</span>
+                <span>Choisis le dipôle isolé à tester :</span>
+            </h2>
+            <span class="text-xs text-slate-500 hidden md:inline">Touche une borne puis une autre pour brancher un fil</span>
+        </div>
+        <div id="dipole-tabs" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-2">
+            <!-- Généré par JS -->
+        </div>
+    </section>
+
+    <!-- ZONE PRINCIPALE : PAILLASSE INTERACTIVE (8 col) + MODE D'EMPLOI / FICHE MÉTHODE (4 col) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+        <!-- PAILLASSE INTERACTIVE (8 colonnes) -->
+        <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-2.5 sm:p-4 flex flex-col">
+
+            <!-- Barre d'actions des cordons (optimisée mobile) -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-slate-100">
+                <div id="wiring-instruction" class="text-xs sm:text-sm font-semibold text-blue-900 bg-blue-50 border border-blue-200 px-3 py-2 rounded-xl flex items-center gap-2">
+                    <span class="text-base shrink-0">🔌</span>
+                    <span>Touche une borne du multimètre (<strong>VΩ</strong>, <strong>COM</strong>) puis une borne du dipôle.</span>
+                </div>
+                <div class="grid grid-cols-2 sm:flex items-center gap-2 shrink-0">
+                    <button onclick="swapWires()" class="text-xs font-bold bg-indigo-50 active:bg-indigo-200 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-2 rounded-xl transition flex items-center justify-center gap-1.5" title="Échanger les deux fils sur le dipôle">
+                        <span>🔄</span> Inverser les fils
+                    </button>
+                    <button onclick="clearWires()" class="text-xs font-bold bg-rose-50 active:bg-rose-200 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-2 rounded-xl transition flex items-center justify-center gap-1.5" title="Retirer tous les fils">
+                        <span>❌</span> Débrancher
+                    </button>
+                </div>
+            </div>
+
+            <!-- CANEVAS SVG DU BANC DE MESURE -->
+            <div class="relative w-full overflow-hidden rounded-xl bg-slate-100 border border-slate-200">
+                <svg id="lab-svg" viewBox="0 0 780 460" class="w-full h-auto block select-none" style="touch-action: manipulation;">
+                    <defs>
+                        <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+                            <feDropShadow dx="0" dy="4" stdDeviation="5" flood-opacity="0.14"/>
+                        </filter>
+                        <linearGradient id="flatBattGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#15803d"/>
+                            <stop offset="50%" stop-color="#16a34a"/>
+                            <stop offset="100%" stop-color="#14532d"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Fond quadrillé de paillasse -->
+                    <rect width="780" height="460" fill="#f8fafc"/>
+                    <g stroke="#e2e8f0" stroke-width="1">
+                        <line x1="0" y1="75" x2="780" y2="75"/>
+                        <line x1="0" y1="150" x2="780" y2="150"/>
+                        <line x1="0" y1="225" x2="780" y2="225"/>
+                        <line x1="0" y1="300" x2="780" y2="300"/>
+                        <line x1="0" y1="375" x2="780" y2="375"/>
+                        <line x1="130" y1="0" x2="130" y2="460"/>
+                        <line x1="260" y1="0" x2="260" y2="460"/>
+                        <line x1="390" y1="0" x2="390" y2="460"/>
+                        <line x1="520" y1="0" x2="520" y2="460"/>
+                        <line x1="650" y1="0" x2="650" y2="460"/>
+                    </g>
+
+                    <!-- ========================================================= -->
+                    <!-- ZONE GAUCHE : SUPPORT DU DIPÔLE ISOLÉ                      -->
+                    <!-- ========================================================= -->
+                    <g id="dipole-stage">
+                        <rect x="22" y="24" width="320" height="368" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+                        <rect x="22" y="24" width="320" height="44" rx="18" fill="#f1f5f9"/>
+                        <text x="182" y="51" text-anchor="middle" font-size="14" font-weight="800" fill="#1e293b">
+                            DIPÔLE ISOLÉ : <tspan id="stage-dipole-title" fill="#2563eb">Pile plate</tspan>
+                        </text>
+
+                        <!-- Conteneur graphique du dipôle sélectionné -->
+                        <g id="dipole-artwork"></g>
+
+                        <!-- Borne A (Gauche) du dipôle - Zone tactile élargie pour mobile -->
+                        <g id="term-A" class="terminal-hotspot"
+                           onmousedown="startTerminalInteraction('A', event)"
+                           ontouchstart="startTerminalInteraction('A', event)">
+                            <circle id="term-A-hit" cx="115" cy="140" r="30" fill="transparent"/>
+                            <circle id="term-A-halo" cx="115" cy="140" r="23" fill="rgba(245, 158, 11, 0.18)" stroke="none"/>
+                            <circle id="term-A-circle" cx="115" cy="140" r="16" fill="#fef3c7" stroke="#d97706" stroke-width="3"/>
+                            <text id="term-A-label" x="115" y="144" text-anchor="middle" font-size="11" font-weight="800" fill="#78350f" pointer-events="none">A</text>
+                        </g>
+
+                        <!-- Borne B (Droite) du dipôle - Zone tactile élargie pour mobile -->
+                        <g id="term-B" class="terminal-hotspot"
+                           onmousedown="startTerminalInteraction('B', event)"
+                           ontouchstart="startTerminalInteraction('B', event)">
+                            <circle id="term-B-hit" cx="245" cy="140" r="30" fill="transparent"/>
+                            <circle id="term-B-halo" cx="245" cy="140" r="23" fill="rgba(245, 158, 11, 0.18)" stroke="none"/>
+                            <circle id="term-B-circle" cx="245" cy="140" r="16" fill="#fef3c7" stroke="#d97706" stroke-width="3"/>
+                            <text id="term-B-label" x="245" y="144" text-anchor="middle" font-size="11" font-weight="800" fill="#78350f" pointer-events="none">B</text>
+                        </g>
+
+                        <!-- Bouton pour ouvrir/fermer l'interrupteur quand sélectionné -->
+                        <g id="switch-toggle-btn" style="display:none; cursor:pointer;" onclick="toggleIsolatedSwitch()">
+                            <rect x="82" y="322" width="200" height="34" rx="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+                            <text x="182" y="343" text-anchor="middle" font-size="12" font-weight="800" fill="#0369a1">
+                                👆 Ouvrir / Fermer l'interrupteur
+                            </text>
+                        </g>
+
+                        <!-- Bouton pour éclairer/cacher la photopile quand sélectionnée -->
+                        <g id="light-toggle-btn" style="display:none; cursor:pointer;" onclick="togglePhotopileLight()">
+                            <rect x="77" y="322" width="210" height="34" rx="10" fill="#fef9c3" stroke="#ca8a04" stroke-width="2"/>
+                            <text id="light-toggle-text" x="182" y="343" text-anchor="middle" font-size="12" font-weight="800" fill="#854d0e">
+                                ☀️ Éclairage : Allumé (1,854 V)
+                            </text>
+                        </g>
+
+                        <!-- Légende d'aide en bas de la carte dipôle -->
+                        <text x="182" y="378" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">
+                            Touche les bornes pour y pincer les fils
+                        </text>
+                    </g>
+
+                    <!-- ========================================================= -->
+                    <!-- ZONE DROITE : MULTIMÈTRE JEULIN CL 1 FIDÈLE                -->
+                    <!-- ========================================================= -->
+                    <g id="multimeter-group">
+                        <!-- Boîtier externe beige Jeulin CL1 -->
+                        <rect x="380" y="16" width="365" height="428" rx="28" fill="#e7e5dc" stroke="#94a3b8" stroke-width="3" filter="url(#shadow)"/>
+                        <rect x="394" y="28" width="337" height="404" rx="20" fill="#dad8ce" stroke="#cbd5e1" stroke-width="1.5"/>
+
+                        <!-- En-tête JEULIN CL 1 -->
+                        <text x="418" y="50" font-size="14" font-weight="800" fill="#334155" letter-spacing="1">JEULIN</text>
+                        <text x="705" y="50" text-anchor="end" font-size="16" font-weight="900" fill="#1e293b">CL 1</text>
+
+                        <!-- Cadre de l'écran LCD -->
+                        <rect x="418" y="58" width="289" height="72" rx="8" fill="#57534e" stroke="#334155" stroke-width="2"/>
+                        <rect id="lcd-bg" x="425" y="65" width="275" height="58" rx="5" fill="#8c9683"/>
+
+                        <!-- Petit indicateur discret sur le LCD -->
+                        <text id="lcd-mode-indicator" x="434" y="81" font-size="11" font-weight="800" fill="#293026"></text>
+                        <text id="lcd-unit-indicator" x="690" y="81" text-anchor="end" font-size="11" font-weight="800" fill="#293026"></text>
+
+                        <!-- Chiffres LCD -->
+                        <text id="lcd-value" x="688" y="113" text-anchor="end" class="lcd-font" font-size="44" font-weight="700" fill="#0f172a"></text>
+
+                        <!-- ===================================================== -->
+                        <!-- CADRAN DU SÉLECTEUR ROTATIF (Centre = 562, 255)        -->
+                        <!-- ===================================================== -->
+                        <!-- Fond coloré des 4 grandes zones autour du sélecteur -->
+                        <!-- Zone Bleue Gauche : Tensions continues V⎓ étendue jusqu'au-dessous du calibre 2 V -->
+                        <path d="M 562 255 L 434 282 A 131 131 0 0 1 540 126 Z" fill="#38bdf8" opacity="0.88" stroke="#0284c7" stroke-width="1"/>
+                        <!-- Zone Bleue Droite : Tensions alternatives V~ -->
+                        <path d="M 562 255 L 584 127 A 130 130 0 0 1 672 186 Z" fill="#7dd3fc" opacity="0.88"/>
+                        <!-- Zone Verte Bas-Droite : Ohmmètre Ω -->
+                        <path d="M 562 255 L 672 186 A 130 130 0 0 1 595 381 Z" fill="#86efac" opacity="0.88"/>
+                        <!-- Zone Rose Bas-Gauche : Ampèremètre A⎓ -->
+                        <path d="M 562 255 L 595 381 A 130 130 0 0 1 445 312 Z" fill="#f9a8d4" opacity="0.88"/>
+
+                        <!-- Titres des zones -->
+                        <text x="418" y="160" font-size="16" font-weight="900" fill="#0369a1">V ⎓</text>
+                        <text x="658" y="160" font-size="16" font-weight="900" fill="#0369a1">V ~</text>
+                        <text x="668" y="346" font-size="18" font-weight="900" fill="#15803d">Ω</text>
+                        <text x="422" y="346" font-size="16" font-weight="900" fill="#be185d">A ⎓</text>
+
+                        <!-- Encadré supérieur de la position "0" (Arrêt / OFF) -->
+                        <rect x="547" y="124" width="30" height="28" rx="5" fill="#e7e5dc" stroke="#1e293b" stroke-width="2"/>
+
+                        <!-- Calque des positions cliquables du cadran -->
+                        <g id="dial-positions-layer"></g>
+
+                        <!-- Disque rotatif central blanc/crème -->
+                        <circle cx="562" cy="255" r="70" fill="#f8fafc" stroke="#94a3b8" stroke-width="3" filter="url(#shadow)"/>
+                        <circle cx="562" cy="255" r="62" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+
+                        <!-- Poignée du sélecteur rotatif -->
+                        <g id="dial-rotor" style="transform-origin: 562px 255px;">
+                            <rect x="548" y="188" width="28" height="134" rx="14" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                            <!-- Pointe repère sur le sélecteur -->
+                            <polygon points="562,191 553,212 571,212" fill="#dc2626"/>
+                            <circle cx="562" cy="255" r="4" fill="#94a3b8"/>
+                        </g>
+
+                        <!-- ===================================================== -->
+                        <!-- LES 4 BORNES DU MULTIMÈTRE EN BAS                      -->
+                        <!-- ===================================================== -->
+                        <!-- Borne VΩ (Rouge - Entrée Tension/Ohmmètre) -->
+                        <g id="term-V" class="terminal-hotspot"
+                           onmousedown="startTerminalInteraction('V', event)"
+                           ontouchstart="startTerminalInteraction('V', event)">
+                            <circle cx="436" cy="390" r="28" fill="transparent"/>
+                            <circle cx="436" cy="390" r="20" fill="#dc2626" stroke="#7f1d1d" stroke-width="3.5"/>
+                            <circle cx="436" cy="390" r="9" fill="#1e293b"/>
+                        </g>
+                        <text x="436" y="423" text-anchor="middle" font-size="14" font-weight="900" fill="#0f172a">VΩ</text>
+
+                        <!-- Borne COM (Noire - Sortie commune) -->
+                        <g id="term-COM" class="terminal-hotspot"
+                           onmousedown="startTerminalInteraction('COM', event)"
+                           ontouchstart="startTerminalInteraction('COM', event)">
+                            <circle cx="520" cy="390" r="28" fill="transparent"/>
+                            <circle cx="520" cy="390" r="20" fill="#1e293b" stroke="#0f172a" stroke-width="3.5"/>
+                            <circle cx="520" cy="390" r="9" fill="#000000"/>
+                        </g>
+                        <text x="520" y="423" text-anchor="middle" font-size="14" font-weight="900" fill="#0f172a">COM</text>
+
+                        <!-- Borne mA (Jaune/Noire) -->
+                        <g id="term-mA" class="terminal-hotspot"
+                           onmousedown="startTerminalInteraction('mA', event)"
+                           ontouchstart="startTerminalInteraction('mA', event)">
+                            <circle cx="604" cy="390" r="28" fill="transparent"/>
+                            <circle cx="604" cy="390" r="20" fill="#eab308" stroke="#713f12" stroke-width="3.5"/>
+                            <circle cx="604" cy="390" r="9" fill="#1e293b"/>
+                        </g>
+                        <text x="604" y="423" text-anchor="middle" font-size="14" font-weight="900" fill="#0f172a">mA</text>
+
+                        <!-- Borne 10A (Jaune/Noire) -->
+                        <g id="term-10A" class="terminal-hotspot"
+                           onmousedown="startTerminalInteraction('10A', event)"
+                           ontouchstart="startTerminalInteraction('10A', event)">
+                            <circle cx="688" cy="390" r="28" fill="transparent"/>
+                            <circle cx="688" cy="390" r="20" fill="#eab308" stroke="#713f12" stroke-width="3.5"/>
+                            <circle cx="688" cy="390" r="9" fill="#1e293b"/>
+                        </g>
+                        <text x="688" y="423" text-anchor="middle" font-size="14" font-weight="900" fill="#0f172a">10A</text>
+                    </g>
+
+                    <!-- ========================================================= -->
+                    <!-- CALQUE DES FILS DE CONNEXION & FIL EN COURS DE TRACÉ       -->
+                    <!-- ========================================================= -->
+                    <g id="wires-layer"></g>
+                    <path id="drag-preview-wire" d="" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="8,6" stroke-linecap="round" pointer-events="none" style="display:none;"/>
+                </svg>
+            </div>
+
+            <!-- ACCÈS RAPIDE MOBILE AUX CALIBRES DU MULTIMÈTRE -->
+            <div class="mt-2.5 bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs font-bold text-slate-600 flex items-center gap-1.5">
+                    <span>🎛️</span> Calibre rapide (<strong class="text-sky-700">V ⎓</strong>) :
+                </span>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button onclick="setDial('OFF')" id="quick-btn-OFF" class="px-3 py-1.5 rounded-lg text-xs font-extrabold border transition bg-slate-800 text-white border-slate-900">
+                        0 (Arrêt)
+                    </button>
+                    <button onclick="setDial('V600')" id="quick-btn-V600" class="px-3 py-1.5 rounded-lg text-xs font-extrabold border transition bg-sky-100 text-sky-900 border-sky-300 hover:bg-sky-200">
+                        600 V
+                    </button>
+                    <button onclick="setDial('V200')" id="quick-btn-V200" class="px-3 py-1.5 rounded-lg text-xs font-extrabold border transition bg-sky-100 text-sky-900 border-sky-300 hover:bg-sky-200">
+                        200 V
+                    </button>
+                    <button onclick="setDial('V20')" id="quick-btn-V20" class="px-3 py-1.5 rounded-lg text-xs font-extrabold border transition bg-sky-100 text-sky-900 border-sky-300 hover:bg-sky-200">
+                        20 V
+                    </button>
+                    <button onclick="setDial('V2')" id="quick-btn-V2" class="px-3 py-1.5 rounded-lg text-xs font-extrabold border transition bg-sky-100 text-sky-900 border-sky-300 hover:bg-sky-200">
+                        2 V
+                    </button>
+                </div>
+            </div>
+
+            <!-- BANDEAU D'ÉTAT EN TEMPS RÉEL -->
+            <div id="live-status-banner" class="mt-2.5 p-3 sm:p-3.5 rounded-xl border bg-slate-50 border-slate-200 text-slate-700 text-xs sm:text-sm font-medium flex items-center gap-3">
+                <span id="live-status-icon" class="text-2xl shrink-0">🔌</span>
+                <div id="live-status-text">
+                    Le multimètre est éteint (sélecteur sur <strong>0</strong>). Branche les deux fils puis tourne le sélecteur pour allumer l'appareil !
+                </div>
+            </div>
+        </div>
+
+        <!-- PANNEAU LATÉRAL DROIT : MODE D'EMPLOI & FICHE MÉTHODE 1 (4 colonnes) -->
+        <div class="lg:col-span-4 space-y-4">
+
+            <!-- Carte Mode d'Emploi Pas à Pas (Fiche Méthode 1) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+                <div class="flex items-center gap-2 pb-3 mb-3 border-b border-slate-100">
+                    <span class="text-xl">📋</span>
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-900">Fiche Méthode 1</h2>
+                        <p class="text-xs text-slate-500 font-medium">Comment mesurer une tension ?</p>
+                    </div>
+                </div>
+
+                <ol class="space-y-3 text-xs sm:text-sm text-slate-700">
+                    <!-- Étape 1 -->
+                    <li class="flex gap-3 items-start bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                        <span class="bg-blue-600 text-white font-extrabold w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs mt-0.5">1</span>
+                        <div>
+                            <strong class="text-slate-900 block mb-0.5">Brancher les deux fils</strong>
+                            Relie la borne <span class="text-red-600 font-bold">VΩ</span> (fil rouge) et la borne <span class="text-slate-900 font-bold">COM</span> (fil noir) du voltmètre aux deux bornes du dipôle isolé.<br>
+                            <span class="text-xs text-slate-500 italic">Astuce : touche un fil déjà posé pour le débrancher.</span>
+                        </div>
+                    </li>
+
+                    <!-- Étape 2 -->
+                    <li class="flex gap-3 items-start bg-sky-50/70 p-3 rounded-xl border border-sky-200/80">
+                        <span class="bg-sky-600 text-white font-extrabold w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs mt-0.5">2</span>
+                        <div>
+                            <strong class="text-sky-950 block mb-0.5">Allumer sur le plus grand calibre</strong>
+                            Place le sélecteur dans la zone bleue des tensions continues (<strong class="text-sky-800">V ⎓</strong>) en commençant par le plus grand calibre : <strong>600</strong>.
+                        </div>
+                    </li>
+
+                    <!-- Étape 3 -->
+                    <li class="flex gap-3 items-start bg-amber-50/70 p-3 rounded-xl border border-amber-200/80">
+                        <span class="bg-amber-600 text-white font-extrabold w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs mt-0.5">3</span>
+                        <div>
+                            <strong class="text-amber-950 block mb-0.5">Vérifier le signe « - »</strong>
+                            Si un signe <strong>« - »</strong> apparaît devant la valeur, le voltmètre est branché à l'envers (inversion entre VΩ et COM). Touche <strong>« Inverser les fils »</strong> !
+                        </div>
+                    </li>
+
+                    <!-- Étape 4 -->
+                    <li class="flex gap-3 items-start bg-emerald-50/70 p-3 rounded-xl border border-emerald-200/80">
+                        <span class="bg-emerald-600 text-white font-extrabold w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs mt-0.5">4</span>
+                        <div>
+                            <strong class="text-emerald-950 block mb-0.5">Choisir le calibre le plus précis</strong>
+                            Descends progressivement le sélecteur (<strong>600 ➔ 200 ➔ 20 ➔ 2</strong>) pour avoir le plus de chiffres après la virgule.<br>
+                            <span class="text-rose-700 font-semibold">⚠️ Si « 1. » apparaît à gauche, le calibre est trop petit ! Remonte d'un cran.</span>
+                        </div>
+                    </li>
+                </ol>
+
+                <!-- Consigne finale : Éteindre le multimètre -->
+                <div class="mt-3 bg-slate-800 text-white p-3 rounded-xl flex items-center gap-2.5 text-xs sm:text-sm font-bold">
+                    <span class="text-lg">⏹️</span>
+                    <span>Éteindre le multimètre à la fin de la mesure (remettre le sélecteur sur 0).</span>
+                </div>
+            </div>
+
+            <!-- Rappel Vocabulaire de l'Activité 1 -->
+            <div class="bg-amber-50 rounded-2xl border border-amber-200 p-4 text-xs text-amber-950 space-y-1.5">
+                <div class="font-extrabold text-sm flex items-center gap-1.5 text-amber-900">
+                    <span>💡</span> Rappel Vocabulaire (Activité 1)
+                </div>
+                <p>• <strong>Tension électrique (U) :</strong> grandeur qui s'exprime en <strong>volt (V)</strong> et se mesure avec un <strong>voltmètre</strong>.</p>
+                <p>• <strong>Générateur :</strong> dipôle qui produit de l'énergie électrique (il possède une tension non nulle même isolé).</p>
+                <p>• <strong>Récepteur :</strong> dipôle qui utilise l'énergie électrique (isolé, sa tension vaut <strong>0 V</strong>).</p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- ======================================================================= -->
+<!-- MODALE : AIDE AU SCHÉMA NORMALISÉ                                       -->
+<!-- ======================================================================= -->
+<div id="schema-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-xl border border-slate-200">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+            <h3 class="text-lg font-extrabold text-emerald-900">📐 Aide : Schéma normalisé du montage</h3>
+            <button onclick="toggleSchemaModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">✕</button>
+        </div>
+        <p id="schema-modal-subtitle" class="text-xs sm:text-sm text-slate-600 mb-3">
+            Schéma normalisé pour mesurer la tension aux bornes du dipôle :
+        </p>
+        <div id="schema-svg-container" class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex justify-center">
+            <!-- SVG généré dynamiquement -->
+        </div>
+        <div class="mt-4 bg-slate-100 rounded-xl p-3.5 text-xs text-slate-700 space-y-1">
+            <strong class="block text-slate-900 mb-1">Critères d'autoévaluation de ton schéma sur papier :</strong>
+            <div>✅ Propre, lisible et tracé à la règle au crayon à papier (allure rectangulaire)</div>
+            <div>✅ Chaque composant est représenté par son symbole normalisé</div>
+            <div>✅ Les bornes <strong>V</strong> (du côté +) et <strong>COM</strong> (du côté -) du voltmètre sont indiquées</div>
+        </div>
+        <div class="mt-5 text-right">
+            <button onclick="toggleSchemaModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-sm">
+                Fermer
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================================
+// DONNÉES DES 8 DIPÔLES ISOLÉS DE L'ACTIVITÉ 1
+// (Borne A à gauche, Borne B à droite — sur les générateurs polarisés, "-" est à gauche et "+" est à droite)
+// ============================================================================
+const DIPOLES = {
+    pile_plate: {
+        id: "pile_plate",
+        name: "Pile plate",
+        icon: "🔋",
+        voltage: -4.56,
+        bestCalibre: 20,
+        termA: { x: 132, y: 140, label: "-" },
+        termB: { x: 232, y: 125, label: "+" },
+        symbolType: "pile"
+    },
+    pile_ronde: {
+        id: "pile_ronde",
+        name: "Pile ronde",
+        icon: "🔋",
+        voltage: -1.512,
+        bestCalibre: 2,
+        termA: { x: 92, y: 225, label: "-" },
+        termB: { x: 272, y: 225, label: "+" },
+        symbolType: "pile"
+    },
+    photopile: {
+        id: "photopile",
+        name: "Photopile",
+        icon: "☀️",
+        voltage: -1.854,
+        bestCalibre: 2,
+        termA: { x: 112, y: 278, label: "-" },
+        termB: { x: 252, y: 278, label: "+" },
+        symbolType: "photopile"
+    },
+    lampe: {
+        id: "lampe",
+        name: "Lampe",
+        icon: "💡",
+        voltage: 0.00,
+        bestCalibre: 2,
+        termA: { x: 118, y: 275, label: "A" },
+        termB: { x: 246, y: 275, label: "B" },
+        symbolType: "lampe"
+    },
+    del: {
+        id: "del",
+        name: "D.E.L.",
+        icon: "🚨",
+        voltage: 0.00,
+        bestCalibre: 2,
+        termA: { x: 125, y: 275, label: "A" },
+        termB: { x: 239, y: 275, label: "B" },
+        symbolType: "del"
+    },
+    interrupteur: {
+        id: "interrupteur",
+        name: "Interrupteur",
+        icon: "🔌",
+        voltage: 0.00,
+        bestCalibre: 2,
+        termA: { x: 110, y: 235, label: "A" },
+        termB: { x: 254, y: 235, label: "B" },
+        symbolType: "interrupteur"
+    },
+    moteur: {
+        id: "moteur",
+        name: "Moteur",
+        icon: "⚙️",
+        voltage: 0.00,
+        bestCalibre: 2,
+        termA: { x: 115, y: 245, label: "A" },
+        termB: { x: 249, y: 245, label: "B" },
+        symbolType: "moteur"
+    },
+    citron: {
+        id: "citron",
+        name: "Pile au citron",
+        icon: "🍋",
+        voltage: -0.924,
+        bestCalibre: 2,
+        termA: { x: 135, y: 155, label: "Zn" },
+        termB: { x: 229, y: 155, label: "Cu" },
+        symbolType: "citron"
+    }
+};
+
+// Toutes les positions du sélecteur rotatif du multimètre Jeulin CL1 (Centre = 562, 255, Rayon texte = 104)
+const DIAL_POSITIONS = [
+    // Position Arrêt (Haut)
+    { id: 'OFF',   label: '0',     angle: 0,    mode: 'OFF' },
+
+    // Zone Bleue Gauche : Tensions continues V⎓
+    { id: 'V600',  label: '600',   angle: -24,  mode: 'VDC', max: 600, decimals: 0 },
+    { id: 'V200',  label: '200',   angle: -48,  mode: 'VDC', max: 200, decimals: 1 },
+    { id: 'V20',   label: '20',    angle: -72,  mode: 'VDC', max: 20,  decimals: 2 },
+    { id: 'V2',    label: '2',     angle: -96,  mode: 'VDC', max: 2,   decimals: 3 },
+
+    // Zone Bleue Droite : Tensions alternatives V~
+    { id: 'VAC600', label: '600',  angle: 26,   mode: 'VAC', max: 600 },
+    { id: 'VAC200', label: '200',  angle: 52,   mode: 'VAC', max: 200 },
+
+    // Zone Verte Droite/Bas-Droite : Ohmmètre Ω
+    { id: 'O20M',  label: '20M',   angle: 78,   mode: 'OHM' },
+    { id: 'O2M',   label: '2M',    angle: 100,  mode: 'OHM' },
+    { id: 'O200k', label: '200k',  angle: 122,  mode: 'OHM' },
+    { id: 'O20k',  label: '20k',   angle: 144,  mode: 'OHM' },
+    { id: 'O2k',   label: '2k',    angle: 165,  mode: 'OHM' },
+
+    // Zone Rose Bas-Gauche : Ampèremètre A⎓
+    { id: 'A2000m', label: '2000m', angle: -165, mode: 'AMP' },
+    { id: 'A200m',  label: '200m',  angle: -142, mode: 'AMP' },
+    { id: 'A20m',   label: '20m',   angle: -120, mode: 'AMP' }
+];
+
+// Coordonnées des 4 bornes du multimètre sur le SVG
+const METER_TERMINALS = {
+    V:     { x: 436, y: 390, color: '#dc2626' },
+    COM:   { x: 520, y: 390, color: '#1e293b' },
+    mA:    { x: 604, y: 390, color: '#d97706' },
+    '10A': { x: 688, y: 390, color: '#d97706' }
+};
+
+let state = {
+    currentDipoleId: "pile_plate",
+    dialId: "OFF",               // Le multimètre commence ÉTEINT (sur 0) pour que l'élève l'allume lui-même
+    selectedTerminal: null,      // Pour le branchement au clic ou au glisser-déposer
+    isDraggingWire: false,
+    connections: {
+        A: null,                 // Aucun fil branché au départ : l'élève fait le branchement !
+        B: null
+    },
+    switchClosed: false,
+    photopileLit: true           // Photopile éclairée par défaut
+};
+
+// ============================================================================
+// INITIALISATION
+// ============================================================================
+window.addEventListener("DOMContentLoaded", () => {
+    renderDipoleTabs();
+    renderDialPositionsOnSvg();
+    setupSvgDragListeners();
+    selectDipole("pile_plate");
+    setDial("OFF");
+});
+
+function renderDipoleTabs() {
+    const container = document.getElementById("dipole-tabs");
+    container.innerHTML = "";
+    Object.values(DIPOLES).forEach(d => {
+        const isSelected = state.currentDipoleId === d.id;
+        const btn = document.createElement("button");
+        btn.onclick = () => selectDipole(d.id);
+        btn.className = `p-2.5 rounded-xl border text-left transition flex items-center justify-center sm:justify-start gap-2 ${
+            isSelected
+                ? "bg-blue-600 text-white border-blue-700 shadow-sm font-bold ring-2 ring-blue-300"
+                : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200 font-semibold"
+        }`;
+        btn.innerHTML = `
+            <span class="text-base">${d.icon}</span>
+            <span class="text-xs sm:text-sm truncate">${d.name}</span>
+        `;
+        container.appendChild(btn);
+    });
+}
+
+// Place dynamiquement les 15 positions autour du cadran (centre 562, 255)
+function renderDialPositionsOnSvg() {
+    const layer = document.getElementById("dial-positions-layer");
+    layer.innerHTML = "";
+    const cx = 562;
+    const cy = 255;
+    const radius = 104;
+
+    DIAL_POSITIONS.forEach(pos => {
+        // Angle 0 = en haut (12h)
+        const rad = (pos.angle - 90) * (Math.PI / 180);
+        const x = cx + radius * Math.cos(rad);
+        const y = cy + radius * Math.sin(rad);
+
+        // Petit trait de graduation vers le centre
+        const rInner = 75;
+        const rOuter = 84;
+        const x1 = cx + rInner * Math.cos(rad);
+        const y1 = cy + rInner * Math.sin(rad);
+        const x2 = cx + rOuter * Math.cos(rad);
+        const y2 = cy + rOuter * Math.sin(rad);
+
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "dial-pos");
+        g.onclick = () => setDial(pos.id);
+
+        const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        tick.setAttribute("x1", x1);
+        tick.setAttribute("y1", y1);
+        tick.setAttribute("x2", x2);
+        tick.setAttribute("y2", y2);
+        tick.setAttribute("stroke", "#1e293b");
+        tick.setAttribute("stroke-width", "2");
+
+        const hit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        hit.setAttribute("class", "hit-area");
+        hit.setAttribute("cx", x);
+        hit.setAttribute("cy", y);
+        hit.setAttribute("r", "19");
+        hit.setAttribute("fill", "transparent");
+
+        const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        t.setAttribute("x", x);
+        t.setAttribute("y", y + 4);
+        t.setAttribute("text-anchor", "middle");
+        t.setAttribute("font-size", pos.id === 'OFF' ? "14" : "11");
+        t.setAttribute("font-weight", "800");
+        t.setAttribute("fill", "#0f172a");
+        t.setAttribute("pointer-events", "none");
+        t.textContent = pos.label;
+
+        g.appendChild(tick);
+        g.appendChild(hit);
+        g.appendChild(t);
+        layer.appendChild(g);
+    });
+}
+
+// ============================================================================
+// SÉLECTION & DESSIN DU DIPÔLE ISOLÉ
+// ============================================================================
+function selectDipole(dipoleId) {
+    state.currentDipoleId = dipoleId;
+    state.selectedTerminal = null;
+    const d = DIPOLES[dipoleId];
+
+    document.getElementById("stage-dipole-title").textContent = d.name;
+
+    const switchBtn = document.getElementById("switch-toggle-btn");
+    switchBtn.style.display = (dipoleId === "interrupteur") ? "block" : "none";
+
+    const lightBtn = document.getElementById("light-toggle-btn");
+    lightBtn.style.display = (dipoleId === "photopile") ? "block" : "none";
+
+    // Mettre à jour la position des bornes A et B du dipôle
+    ['A', 'B'].forEach(key => {
+        const info = (key === 'A') ? d.termA : d.termB;
+        const hit = document.getElementById(`term-${key}-hit`);
+        const c = document.getElementById(`term-${key}-circle`);
+        const h = document.getElementById(`term-${key}-halo`);
+        const l = document.getElementById(`term-${key}-label`);
+        hit.setAttribute("cx", info.x);
+        hit.setAttribute("cy", info.y);
+        c.setAttribute("cx", info.x);
+        c.setAttribute("cy", info.y);
+        h.setAttribute("cx", info.x);
+        h.setAttribute("cy", info.y);
+        l.setAttribute("x", info.x);
+        l.setAttribute("y", info.y + 4);
+        l.textContent = info.label;
+    });
+
+    drawDipoleArtwork(d);
+    renderDipoleTabs();
+    updateAll();
+}
+
+function toggleIsolatedSwitch() {
+    state.switchClosed = !state.switchClosed;
+    drawDipoleArtwork(DIPOLES[state.currentDipoleId]);
+    updateAll();
+}
+
+function togglePhotopileLight() {
+    state.photopileLit = !state.photopileLit;
+    DIPOLES.photopile.voltage = state.photopileLit ? -1.854 : 0.000;
+    const txt = document.getElementById("light-toggle-text");
+    if (txt) {
+        txt.textContent = state.photopileLit
+            ? "☀️ Éclairage : Allumé (cliquer pour cacher)"
+            : "🌑 Obscurité : Cachée (cliquer pour éclairer)";
+    }
+    drawDipoleArtwork(DIPOLES[state.currentDipoleId]);
+    updateAll();
+}
+
+function drawDipoleArtwork(d) {
+    const art = document.getElementById("dipole-artwork");
+    if (d.id === "pile_plate") {
+        art.innerHTML = `
+            <!-- Lame - (courte à gauche) et Lame + (longue à droite) exactement comme sur le Doc. 1 -->
+            <path d="M 132 190 L 132 140" stroke="#eab308" stroke-width="10" stroke-linecap="round"/>
+            <path d="M 232 190 L 232 125" stroke="#eab308" stroke-width="10" stroke-linecap="round"/>
+            <!-- Corps de la pile 4,5 V -->
+            <rect x="104" y="185" width="156" height="150" rx="12" fill="url(#flatBattGrad)" stroke="#1e293b" stroke-width="2.5"/>
+            <rect x="104" y="185" width="156" height="38" rx="8" fill="#d97706"/>
+            <rect x="130" y="232" width="104" height="82" rx="6" fill="#0f172a"/>
+            <text x="182" y="266" text-anchor="middle" font-size="16" font-weight="800" fill="#ffffff">pile 4,5 V</text>
+            <text x="182" y="292" text-anchor="middle" font-size="15" font-weight="800" fill="#f59e0b">plus</text>
+            <text x="132" y="211" text-anchor="middle" font-size="24" font-weight="900" fill="#0f172a">-</text>
+            <text x="232" y="211" text-anchor="middle" font-size="22" font-weight="900" fill="#0f172a">+</text>
+        `;
+    } else if (d.id === "pile_ronde") {
+        art.innerHTML = `
+            <!-- Borne - à gauche et téton + à droite -->
+            <rect x="256" y="213" width="16" height="24" rx="4" fill="#94a3b8" stroke="#334155" stroke-width="2"/>
+            <rect x="92" y="195" width="164" height="60" rx="8" fill="#1e293b" stroke="#0f172a" stroke-width="2.5"/>
+            <rect x="202" y="195" width="54" height="60" rx="6" fill="#ea580c"/>
+            <text x="118" y="232" text-anchor="middle" font-size="24" font-weight="900" fill="#ffffff">-</text>
+            <text x="229" y="232" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff">+</text>
+            <text x="155" y="230" text-anchor="middle" font-size="13" font-weight="800" fill="#f8fafc">PILE 1,5 V</text>
+        `;
+    } else if (d.id === "photopile") {
+        const sunMarkup = state.photopileLit ? `
+            <circle cx="95" cy="115" r="18" fill="#facc15" stroke="#eab308" stroke-width="2"/>
+            <line x1="116" y1="130" x2="142" y2="152" stroke="#eab308" stroke-width="2.5" stroke-dasharray="4,3"/>
+            <line x1="122" y1="118" x2="154" y2="142" stroke="#eab308" stroke-width="2.5" stroke-dasharray="4,3"/>
+        ` : `
+            <circle cx="95" cy="115" r="16" fill="#64748b"/>
+            <text x="135" y="120" font-size="11" font-weight="700" fill="#64748b">Obscurité</text>
+        `;
+        art.innerHTML = `
+            ${sunMarkup}
+            <!-- Support et panneau photovoltaïque -->
+            <rect x="92" y="160" width="180" height="105" rx="10" fill="#1e293b" stroke="#0f172a" stroke-width="2.5"/>
+            <rect x="104" y="170" width="156" height="72" rx="4" fill="${state.photopileLit ? '#0284c7' : '#1e3a8a'}" stroke="#38bdf8" stroke-width="1.5"/>
+            <!-- Grille des cellules solaires -->
+            <line x1="143" y1="170" x2="143" y2="242" stroke="#bae6fd" stroke-width="1.2" opacity="0.7"/>
+            <line x1="182" y1="170" x2="182" y2="242" stroke="#bae6fd" stroke-width="1.2" opacity="0.7"/>
+            <line x1="221" y1="170" x2="221" y2="242" stroke="#bae6fd" stroke-width="1.2" opacity="0.7"/>
+            <line x1="104" y1="194" x2="260" y2="194" stroke="#bae6fd" stroke-width="1.2" opacity="0.7"/>
+            <line x1="104" y1="218" x2="260" y2="218" stroke="#bae6fd" stroke-width="1.2" opacity="0.7"/>
+            <!-- Bornes - et + sur le boîtier -->
+            <text x="132" y="258" text-anchor="middle" font-size="18" font-weight="900" fill="#f8fafc">-</text>
+            <text x="232" y="258" text-anchor="middle" font-size="16" font-weight="900" fill="#f87171">+</text>
+            <text x="182" y="308" text-anchor="middle" font-size="12" font-weight="700" fill="#475569">Cellule photovoltaïque isolée</text>
+        `;
+    } else if (d.id === "lampe") {
+        art.innerHTML = `
+            <rect x="107" y="255" width="150" height="40" rx="8" fill="#475569" stroke="#1e293b" stroke-width="2"/>
+            <circle cx="182" cy="180" r="46" fill="#fef9c3" opacity="0.55" stroke="#ca8a04" stroke-width="2.5"/>
+            <path d="M 166 220 L 172 175 L 182 185 L 192 175 L 198 220" fill="none" stroke="#713f12" stroke-width="2"/>
+            <rect x="160" y="220" width="44" height="35" rx="4" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
+            <text x="182" y="325" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">Lampe isolée</text>
+        `;
+    } else if (d.id === "del") {
+        art.innerHTML = `
+            <!-- Socle de laboratoire de la DEL -->
+            <rect x="107" y="255" width="150" height="40" rx="8" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+            <!-- Pattes métalliques -->
+            <line x1="168" y1="215" x2="168" y2="255" stroke="#94a3b8" stroke-width="5"/>
+            <line x1="196" y1="215" x2="196" y2="255" stroke="#94a3b8" stroke-width="5"/>
+            <!-- Dôme rouge de la DEL -->
+            <path d="M 154 215 L 154 172 A 28 28 0 0 1 210 172 L 210 215 Z" fill="#ef4444" fill-opacity="0.82" stroke="#b91c1c" stroke-width="2.5"/>
+            <rect x="148" y="208" width="68" height="10" rx="3" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
+            <!-- Reflet sur le dôme -->
+            <path d="M 164 172 A 18 18 0 0 1 182 154" fill="none" stroke="#fecaca" stroke-width="3" stroke-linecap="round"/>
+            <text x="182" y="325" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">DEL (Diode Électroluminescente) isolée</text>
+        `;
+    } else if (d.id === "interrupteur") {
+        const bladeY = state.switchClosed ? 235 : 185;
+        const statusTxt = state.switchClosed ? "Interrupteur FERMÉ" : "Interrupteur OUVERT";
+        art.innerHTML = `
+            <rect x="97" y="225" width="170" height="45" rx="8" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+            <line x1="115" y1="235" x2="246" y2="${bladeY}" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round"/>
+            <text x="182" y="305" text-anchor="middle" font-size="13" font-weight="800" fill="#334155">${statusTxt}</text>
+        `;
+    } else if (d.id === "moteur") {
+        art.innerHTML = `
+            <rect x="137" y="205" width="90" height="75" rx="12" fill="#94a3b8" stroke="#334155" stroke-width="2.5"/>
+            <circle cx="182" cy="170" r="28" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+            <ellipse cx="182" cy="170" rx="42" ry="8" fill="#ef4444" opacity="0.85"/>
+            <ellipse cx="182" cy="170" rx="8" ry="42" fill="#ef4444" opacity="0.85"/>
+            <circle cx="182" cy="170" r="7" fill="#1e293b"/>
+            <text x="182" y="250" text-anchor="middle" font-size="20" font-weight="900" fill="#1e293b">M</text>
+            <text x="182" y="315" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">Moteur électrique isolé</text>
+        `;
+    } else if (d.id === "citron") {
+        art.innerHTML = `
+            <!-- Citron de l'expérience de Yanis -->
+            <ellipse cx="182" cy="255" rx="95" ry="62" fill="#fde047" stroke="#ca8a04" stroke-width="3"/>
+            <ellipse cx="84" cy="255" rx="12" ry="18" fill="#fde047" stroke="#ca8a04" stroke-width="2.5"/>
+            <ellipse cx="280" cy="255" rx="12" ry="18" fill="#fde047" stroke="#ca8a04" stroke-width="2.5"/>
+            <!-- Lame de Zinc grise à gauche (A) -->
+            <rect x="123" y="155" width="24" height="80" rx="3" fill="#94a3b8" stroke="#334155" stroke-width="2.5"/>
+            <text x="125" y="118" text-anchor="middle" font-size="11" font-weight="800" fill="#334155">Lame de Zinc</text>
+            <text x="125" y="131" text-anchor="middle" font-size="10" fill="#475569">(grise)</text>
+            <!-- Lame de Cuivre orangée à droite (B) -->
+            <rect x="217" y="155" width="24" height="80" rx="3" fill="#ea580c" stroke="#7c2d12" stroke-width="2.5"/>
+            <text x="238" y="118" text-anchor="middle" font-size="11" font-weight="800" fill="#9a3412">Lame de Cuivre</text>
+            <text x="238" y="131" text-anchor="middle" font-size="10" fill="#9a3412">(rougeâtre)</text>
+            <text x="182" y="278" text-anchor="middle" font-size="15" font-weight="800" fill="#854d0e">Citron</text>
+        `;
+    }
+}
+
+// ============================================================================
+// BRANCHEMENT DES FILS SANS CROISEMENT (ROUTAGE EN COULOIRS HAUT / BAS)
+// ============================================================================
+function getTerminalCoords(termId) {
+    const d = DIPOLES[state.currentDipoleId];
+    if (termId === 'A') return d.termA;
+    if (termId === 'B') return d.termB;
+    return METER_TERMINALS[termId];
+}
+
+// Calcule une courbe de Bézier qui sépare le fil de gauche (couloir BAS extérieur)
+// et le fil de droite (couloir HAUT intérieur), comme sur le Doc. 1 de l'Activité 1,
+// garantissant géométriquement que les 2 fils ne se croisent JAMAIS.
+function buildNonCrossingWirePath(dipKey, start, end) {
+    if (dipKey === 'B') {
+        // Fil de la borne DROITE du dipôle (ex: '+' de la pile) :
+        // Passe par le couloir HAUT / INTÉRIEUR (arche souple vers le haut puis descente directe vers la borne du multimètre)
+        const c1x = start.x + 75;
+        const c1y = Math.min(start.y - 75, 95);
+        const c2x = end.x - 75;
+        const c2y = end.y - 115;
+        return `M ${start.x} ${start.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${end.x} ${end.y}`;
+    } else {
+        // Fil de la borne GAUCHE du dipôle (ex: '-' de la pile) :
+        // Passe par le couloir BAS / EXTÉRIEUR (contourne proprement par le bas de la paillasse avant de remonter sous la borne du multimètre)
+        const c1x = Math.max(25, start.x - 75);
+        const c1y = 452;
+        const c2x = end.x - 15;
+        const c2y = 458;
+        return `M ${start.x} ${start.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${end.x} ${end.y}`;
+    }
+}
+
+function startTerminalInteraction(termId, event) {
+    if (event) {
+        event.stopPropagation();
+        if (event.type === "touchstart") {
+            event.preventDefault();
+        }
+    }
+    const isDipoleTerm = (termId === 'A' || termId === 'B');
+
+    // Si une borne d'un autre groupe était déjà sélectionnée, on connecte immédiatement !
+    if (state.selectedTerminal && state.selectedTerminal !== termId) {
+        const firstIsDipole = (state.selectedTerminal === 'A' || state.selectedTerminal === 'B');
+        if (firstIsDipole !== isDipoleTerm) {
+            connectPair(state.selectedTerminal, termId);
+            return;
+        }
+    }
+
+    // Sinon on sélectionne cette borne et on active l'aperçu du fil
+    state.selectedTerminal = termId;
+    state.isDraggingWire = true;
+    updateTerminalHighlights();
+}
+
+function connectPair(t1, t2) {
+    const t1IsDipole = (t1 === 'A' || t1 === 'B');
+    const dipoleTerm = t1IsDipole ? t1 : t2;
+    const meterTerm = t1IsDipole ? t2 : t1;
+
+    // Si l'autre borne du dipôle utilisait déjà cette borne du multimètre, on la débranche
+    const otherDipoleTerm = (dipoleTerm === 'A') ? 'B' : 'A';
+    if (state.connections[otherDipoleTerm] === meterTerm) {
+        state.connections[otherDipoleTerm] = null;
+    }
+
+    state.connections[dipoleTerm] = meterTerm;
+    state.selectedTerminal = null;
+    state.isDraggingWire = false;
+    document.getElementById("drag-preview-wire").style.display = "none";
+    updateAll();
+}
+
+function setupSvgDragListeners() {
+    const svg = document.getElementById("lab-svg");
+    const preview = document.getElementById("drag-preview-wire");
+
+    function getSvgPoint(evt) {
+        const pt = svg.createSVGPoint();
+        const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+        const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+        pt.x = clientX;
+        pt.y = clientY;
+        return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    svg.addEventListener("mousemove", (evt) => {
+        if (!state.selectedTerminal) return;
+        const start = getTerminalCoords(state.selectedTerminal);
+        const curr = getSvgPoint(evt);
+        const midX = (start.x + curr.x) / 2;
+        const ctrlY = Math.max(start.y, curr.y) + 60;
+        preview.style.display = "block";
+        preview.setAttribute("d", `M ${start.x} ${start.y} Q ${midX} ${ctrlY} ${curr.x} ${curr.y}`);
+    });
+
+    svg.addEventListener("touchmove", (evt) => {
+        if (!state.selectedTerminal) return;
+        const start = getTerminalCoords(state.selectedTerminal);
+        const curr = getSvgPoint(evt);
+        const midX = (start.x + curr.x) / 2;
+        const ctrlY = Math.max(start.y, curr.y) + 60;
+        preview.style.display = "block";
+        preview.setAttribute("d", `M ${start.x} ${start.y} Q ${midX} ${ctrlY} ${curr.x} ${curr.y}`);
+    }, { passive: true });
+
+    svg.addEventListener("mouseup", (evt) => {
+        if (!state.selectedTerminal) return;
+        const curr = getSvgPoint(evt);
+        const hitTerm = findNearestTerminal(curr.x, curr.y);
+        if (hitTerm && hitTerm !== state.selectedTerminal) {
+            const firstIsDipole = (state.selectedTerminal === 'A' || state.selectedTerminal === 'B');
+            const secondIsDipole = (hitTerm === 'A' || hitTerm === 'B');
+            if (firstIsDipole !== secondIsDipole) {
+                connectPair(state.selectedTerminal, hitTerm);
+            }
+        }
+    });
+
+    svg.addEventListener("touchend", (evt) => {
+        if (!state.selectedTerminal || !evt.changedTouches || !evt.changedTouches[0]) return;
+        const pt = svg.createSVGPoint();
+        pt.x = evt.changedTouches[0].clientX;
+        pt.y = evt.changedTouches[0].clientY;
+        const curr = pt.matrixTransform(svg.getScreenCTM().inverse());
+        const hitTerm = findNearestTerminal(curr.x, curr.y);
+        if (hitTerm && hitTerm !== state.selectedTerminal) {
+            const firstIsDipole = (state.selectedTerminal === 'A' || state.selectedTerminal === 'B');
+            const secondIsDipole = (hitTerm === 'A' || hitTerm === 'B');
+            if (firstIsDipole !== secondIsDipole) {
+                connectPair(state.selectedTerminal, hitTerm);
+            }
+        }
+    });
+
+    // Clic dans le vide annule la sélection de fil en cours
+    svg.addEventListener("click", (evt) => {
+        if (evt.target === svg) {
+            state.selectedTerminal = null;
+            preview.style.display = "none";
+            updateTerminalHighlights();
+        }
+    });
+}
+
+function findNearestTerminal(x, y) {
+    const candidates = ['A', 'B', 'V', 'COM', 'mA', '10A'];
+    for (const id of candidates) {
+        const pos = getTerminalCoords(id);
+        const dist = Math.hypot(x - pos.x, y - pos.y);
+        if (dist <= 36) return id;
+    }
+    return null;
+}
+
+function removeWire(dipoleKey) {
+    state.connections[dipoleKey] = null;
+    state.selectedTerminal = null;
+    document.getElementById("drag-preview-wire").style.display = "none";
+    updateAll();
+}
+
+function swapWires() {
+    if (!state.connections.A && !state.connections.B) return;
+    const tmp = state.connections.A;
+    state.connections.A = state.connections.B;
+    state.connections.B = tmp;
+    state.selectedTerminal = null;
+    document.getElementById("drag-preview-wire").style.display = "none";
+    updateAll();
+}
+
+function clearWires() {
+    state.connections = { A: null, B: null };
+    state.selectedTerminal = null;
+    document.getElementById("drag-preview-wire").style.display = "none";
+    updateAll();
+}
+
+function updateTerminalHighlights() {
+    ['A', 'B', 'V', 'COM', 'mA', '10A'].forEach(id => {
+        const el = document.getElementById(`term-${id}`);
+        if (!el) return;
+        if (state.selectedTerminal === id) {
+            el.classList.add("terminal-selected");
+        } else {
+            el.classList.remove("terminal-selected");
+        }
+    });
+
+    const instr = document.getElementById("wiring-instruction");
+    if (state.selectedTerminal) {
+        instr.innerHTML = `<span>✨</span><span>Borne <strong>${state.selectedTerminal}</strong> sélectionnée : clique maintenant sur la borne où relier l'autre extrémité du fil !</span>`;
+    } else {
+        instr.innerHTML = `<span>🔌</span><span>Clique (ou glisse) d'une borne du multimètre (<strong>VΩ</strong>, <strong>COM</strong>) vers une borne du dipôle pour brancher un fil.</span>`;
+    }
+}
+
+function renderWires() {
+    const layer = document.getElementById("wires-layer");
+    layer.innerHTML = "";
+    const d = DIPOLES[state.currentDipoleId];
+
+    ['A', 'B'].forEach(dipKey => {
+        const meterKey = state.connections[dipKey];
+        if (!meterKey) return;
+
+        const start = (dipKey === 'A') ? d.termA : d.termB;
+        const end = METER_TERMINALS[meterKey];
+
+        // Couleur réaliste du cordon : Rouge pour VΩ, Noir pour COM, Jaune/Ambre pour mA ou 10A
+        let strokeColor = "#dc2626";
+        if (meterKey === "COM") strokeColor = "#1e293b";
+        else if (meterKey === "mA" || meterKey === "10A") strokeColor = "#d97706";
+
+        const pathData = buildNonCrossingWirePath(dipKey, start, end);
+
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "wire-group");
+        g.setAttribute("title", "Cliquer pour débrancher ce fil");
+        g.onclick = (e) => {
+            e.stopPropagation();
+            removeWire(dipKey);
+        };
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathData);
+        path.setAttribute("class", "wire-main");
+        path.setAttribute("stroke", strokeColor);
+        path.setAttribute("stroke-width", "6.5");
+
+        // Pince crocodile côté dipôle
+        const clipStart = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        clipStart.setAttribute("cx", start.x);
+        clipStart.setAttribute("cy", start.y);
+        clipStart.setAttribute("r", "7.5");
+        clipStart.setAttribute("fill", strokeColor);
+        clipStart.setAttribute("stroke", "#ffffff");
+        clipStart.setAttribute("stroke-width", "2");
+
+        // Fiche banane côté multimètre
+        const clipEnd = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        clipEnd.setAttribute("cx", end.x);
+        clipEnd.setAttribute("cy", end.y);
+        clipEnd.setAttribute("r", "8.5");
+        clipEnd.setAttribute("fill", strokeColor);
+        clipEnd.setAttribute("stroke", "#ffffff");
+        clipEnd.setAttribute("stroke-width", "2");
+
+        g.appendChild(path);
+        g.appendChild(clipStart);
+        g.appendChild(clipEnd);
+        layer.appendChild(g);
+    });
+}
+
+// ============================================================================
+// SÉLECTEUR ROTATIF & COMPORTEMENT PHYSIQUE DU MULTIMÈTRE
+// ============================================================================
+function setDial(dialId) {
+    state.dialId = dialId;
+    const pos = DIAL_POSITIONS.find(p => p.id === dialId);
+    if (!pos) return;
+
+    const rotor = document.getElementById("dial-rotor");
+    rotor.style.transform = `rotate(${pos.angle}deg)`;
+
+    // Mise à jour visuelle des boutons d'accès rapide mobile
+    ['OFF', 'V600', 'V200', 'V20', 'V2'].forEach(id => {
+        const btn = document.getElementById(`quick-btn-${id}`);
+        if (!btn) return;
+        const active = (id === dialId);
+        if (id === 'OFF') {
+            btn.className = active
+                ? "px-3 py-1.5 rounded-lg text-xs font-extrabold border transition bg-slate-900 text-white border-slate-950 ring-2 ring-slate-400"
+                : "px-3 py-1.5 rounded-lg text-xs font-extrabold border transition bg-slate-200 text-slate-800 border-slate-300 hover:bg-slate-300";
+        } else {
+            btn.className = active
+                ? "px-3 py-1.5 rounded-lg text-xs font-extrabold border transition bg-sky-600 text-white border-sky-800 ring-2 ring-sky-300"
+                : "px-3 py-1.5 rounded-lg text-xs font-extrabold border transition bg-sky-100 text-sky-900 border-sky-300 hover:bg-sky-200";
+        }
+    });
+
+    updateAll();
+}
+
+function updateAll() {
+    updateTerminalHighlights();
+    renderWires();
+    computeMultimeterDisplay();
+}
+
+function computeMultimeterDisplay() {
+    const pos = DIAL_POSITIONS.find(p => p.id === state.dialId);
+    const d = DIPOLES[state.currentDipoleId];
+    const lcdBg = document.getElementById("lcd-bg");
+    const lcdVal = document.getElementById("lcd-value");
+    const lcdMode = document.getElementById("lcd-mode-indicator");
+    const lcdUnit = document.getElementById("lcd-unit-indicator");
+
+    // 1. Position "0" (Multimètre ÉTEINT)
+    if (pos.mode === "OFF") {
+        lcdBg.setAttribute("fill", "#8c9683");
+        lcdMode.textContent = "";
+        lcdUnit.textContent = "";
+        lcdVal.textContent = "";
+        setBanner("neutral", "🔌", "Le multimètre est <strong>éteint</strong> (sélecteur sur <strong>0</strong>). Pour mesurer une tension, tourne le sélecteur sur le calibre <strong>600</strong> de la zone <strong>V ⎓</strong>.");
+        return;
+    }
+
+    // Écran allumé (rétroéclairage LCD actif)
+    lcdBg.setAttribute("fill", "#a3b19b");
+
+    const connA = state.connections.A;
+    const connB = state.connections.B;
+    const bothConnected = (connA !== null && connB !== null);
+
+    // 2. Détection d'un branchement sur mA ou 10A !
+    if (connA === 'mA' || connA === '10A' || connB === 'mA' || connB === '10A') {
+        lcdMode.textContent = pos.label;
+        lcdUnit.textContent = "";
+        if (Math.abs(d.voltage) > 0 && bothConnected) {
+            lcdBg.setAttribute("fill", "#fca5a5");
+            lcdVal.textContent = "Err";
+            setBanner("danger", "🚨", "<strong>ATTENTION : COURT-CIRCUIT !</strong> Tu as branché ce générateur sur la borne <strong>mA</strong> ou <strong>10A</strong> (ampèremètre) ! Pour mesurer une tension, utilise toujours les bornes <strong>VΩ</strong> et <strong>COM</strong>.");
+        } else {
+            lcdVal.textContent = "0.00";
+            setBanner("warning", "⚠️", "Attention aux bornes : les bornes <strong>mA</strong> et <strong>10A</strong> ne servent pas à mesurer une tension. Branche tes deux fils sur <strong>VΩ</strong> et <strong>COM</strong>.");
+        }
+        return;
+    }
+
+    // 3. Si le sélecteur est dans une mauvaise zone (V~, Ω, A⎓)
+    if (pos.mode === "VAC") {
+        lcdMode.textContent = `V~ (${pos.label})`;
+        lcdUnit.textContent = "V~";
+        lcdVal.textContent = "0.0";
+        setBanner("warning", "🧭", "Tu es dans la zone <strong>V~</strong> (tensions alternatives). Une pile fournit une tension continue : tourne le sélecteur à gauche dans la zone <strong>V ⎓</strong> !");
+        return;
+    }
+    if (pos.mode === "OHM") {
+        lcdMode.textContent = `Ω (${pos.label})`;
+        lcdUnit.textContent = "Ω";
+        lcdVal.textContent = "1.   ";
+        setBanner("warning", "🧭", "Tu es dans la zone verte <strong>Ω</strong> (ohmmètre). Pour utiliser l'appareil en voltmètre, tourne le sélecteur dans la zone bleue <strong>V ⎓</strong> !");
+        return;
+    }
+    if (pos.mode === "AMP") {
+        lcdMode.textContent = `A⎓ (${pos.label})`;
+        lcdUnit.textContent = "mA";
+        lcdVal.textContent = "0.00";
+        setBanner("warning", "🧭", "Tu es dans la zone rose <strong>A ⎓</strong> (ampèremètre). Pour mesurer une tension en volts, tourne le sélecteur dans la zone bleue <strong>V ⎓</strong> !");
+        return;
+    }
+
+    // 4. Mode Voltmètre Continu (V⎓)
+    lcdMode.textContent = `V⎓ (Calibre ${pos.label} V)`;
+    lcdUnit.textContent = "V";
+
+    // Si les deux fils ne forment pas encore une boucle complète avec VΩ et COM
+    if (!bothConnected) {
+        lcdVal.textContent = (0).toFixed(pos.decimals);
+        setBanner("info", "🔗", `Voltmètre allumé sur le calibre <strong>${pos.label} V</strong>. Relie maintenant les bornes <strong>VΩ</strong> et <strong>COM</strong> aux deux bornes du dipôle !`);
+        return;
+    }
+
+    // 5. Calcul de la tension mesurée : V(borne VΩ) - V(borne COM)
+    let measuredU = 0;
+    if (connA === 'V' && connB === 'COM') {
+        measuredU = d.voltage;
+    } else if (connA === 'COM' && connB === 'V') {
+        measuredU = -d.voltage;
+    }
+
+    const absU = Math.abs(measuredU);
+
+    // 6. Vérification du dépassement de calibre (Ex : 4,56 V sur le calibre 2 V -> "1.")
+    if (absU > pos.max) {
+        lcdVal.textContent = "1.   ";
+        setBanner("danger", "⚠️", `<strong>Chiffre « 1. » affiché : Le calibre ${pos.max} V est trop petit !</strong> La tension dépasse ${pos.max} V. Remonte vite sur le calibre <strong>20 V</strong> pour ne pas détériorer le voltmètre.`);
+        return;
+    }
+
+    // 7. Formatage réaliste selon le calibre choisi (Fiche Méthode 1)
+    let formatted = measuredU.toFixed(pos.decimals);
+    if (Math.abs(measuredU) < 0.0001) {
+        formatted = (0).toFixed(pos.decimals);
+    }
+    // Sur les différents calibres, "-0" ne doit pas apparaître
+    if (formatted === "-0" || formatted === "-0.0" || formatted === "-0.00" || formatted === "-0.000") {
+        formatted = (0).toFixed(pos.decimals);
+    }
+
+    lcdVal.textContent = formatted;
+
+    // 8. Retour visuel discret guidant l'élève
+    if (measuredU < 0) {
+        setBanner("warning", "🔄", `Un signe <strong>« - »</strong> apparaît (<strong>${formatted.replace('.', ',')} V</strong>) : le voltmètre est <strong>branché à l'envers</strong> (inversion entre VΩ et COM). Inverse les deux fils pour obtenir une valeur positive !`);
+    } else if (absU === 0) {
+        if (pos.max === 2) {
+            setBanner("success", "✅", `Tension mesurée : <strong>U = 0 V</strong> (sur le calibre le plus précis <strong>2 V</strong>). Ce dipôle isolé ne fournit aucune tension électrique.`);
+        } else {
+            setBanner("info", "🔎", `L'écran affiche <strong>${formatted} V</strong> sur le calibre ${pos.max} V. Descends jusqu'au calibre <strong>2 V</strong> pour vérifier avec le plus de précision possible.`);
+        }
+    } else {
+        if (pos.max === d.bestCalibre) {
+            setBanner("success", "🎯", `<strong>Mesure optimale !</strong> Le voltmètre est branché à l'endroit et le calibre <strong>${pos.max} V</strong> est le plus précis : <strong>U = ${formatted.replace('.', ',')} V</strong>.`);
+        } else {
+            setBanner("info", "📉", `Tu lis <strong>${formatted.replace('.', ',')} V</strong> sur le calibre <strong>${pos.max} V</strong>. Déplace progressivement le sélecteur vers un calibre plus petit pour obtenir une mesure plus précise !`);
+        }
+    }
+}
+
+function setBanner(type, iconChar, htmlText) {
+    const banner = document.getElementById("live-status-banner");
+    const icon = document.getElementById("live-status-icon");
+    const text = document.getElementById("live-status-text");
+
+    const styles = {
+        neutral: "bg-slate-50 border-slate-200 text-slate-700",
+        info:    "bg-sky-50 border-sky-200 text-sky-950",
+        success: "bg-emerald-50 border-emerald-300 text-emerald-950",
+        warning: "bg-amber-50 border-amber-300 text-amber-950",
+        danger:  "bg-rose-50 border-rose-300 text-rose-950"
+    };
+
+    banner.className = `mt-3 p-3.5 rounded-xl border text-xs sm:text-sm font-medium flex items-center gap-3 ${styles[type]}`;
+    icon.textContent = iconChar;
+    text.innerHTML = htmlText;
+}
+
+// ============================================================================
+// MODALE : SCHÉMA ÉLECTRIQUE NORMALISÉ
+// ============================================================================
+function toggleSchemaModal() {
+    const m = document.getElementById("schema-modal");
+    const isOpening = m.classList.contains("hidden");
+    if (isOpening) {
+        renderNormalizedSchemaSvg();
+    }
+    m.classList.toggle("hidden");
+}
+
+function renderNormalizedSchemaSvg() {
+    const d = DIPOLES[state.currentDipoleId];
+    document.getElementById("schema-modal-subtitle").innerHTML =
+        `Schéma normalisé pour mesurer la tension aux bornes de : <strong>${d.name}</strong>`;
+
+    let topSymbolSvg = "";
+    if (d.symbolType === "pile" || d.symbolType === "citron" || d.symbolType === "photopile") {
+        let extraLabel = "";
+        if (d.symbolType === "citron") {
+            extraLabel = `<text x="190" y="18" text-anchor="middle" font-size="11" font-weight="bold" fill="#854d0e">Pile au citron (+ = Cuivre, - = Zinc)</text>`;
+        } else if (d.symbolType === "photopile") {
+            extraLabel = `<text x="190" y="18" text-anchor="middle" font-size="11" font-weight="bold" fill="#0369a1">Photopile éclairée (Générateur)</text>`;
+        }
+        topSymbolSvg = `
+            ${extraLabel}
+            <rect x="170" y="35" width="40" height="40" fill="#f8fafc"/>
+            <line x1="182" y1="30" x2="182" y2="80" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="198" y1="42" x2="198" y2="68" stroke="#0f172a" stroke-width="6"/>
+            <text x="165" y="45" font-size="16" font-weight="bold" fill="#dc2626">+</text>
+            <text x="212" y="45" font-size="18" font-weight="bold" fill="#0f172a">-</text>
+        `;
+    } else if (d.symbolType === "lampe") {
+        topSymbolSvg = `
+            <circle cx="190" cy="55" r="22" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="174" y1="39" x2="206" y2="71" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="206" y1="39" x2="174" y2="71" stroke="#0f172a" stroke-width="2.5"/>
+        `;
+    } else if (d.symbolType === "del") {
+        topSymbolSvg = `
+            <rect x="165" y="30" width="50" height="45" fill="#f8fafc"/>
+            <polygon points="175,38 175,72 203,55" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="203" y1="38" x2="203" y2="72" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="195" y1="33" x2="208" y2="20" stroke="#0f172a" stroke-width="2"/>
+            <polygon points="208,20 202,21 207,26" fill="#0f172a"/>
+            <line x1="204" y1="38" x2="217" y2="25" stroke="#0f172a" stroke-width="2"/>
+            <polygon points="217,25 211,26 216,31" fill="#0f172a"/>
+        `;
+    } else if (d.symbolType === "moteur") {
+        topSymbolSvg = `
+            <circle cx="190" cy="55" r="22" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
+            <text x="190" y="62" text-anchor="middle" font-size="18" font-weight="bold" fill="#0f172a">M</text>
+        `;
+    } else if (d.symbolType === "interrupteur") {
+        topSymbolSvg = `
+            <rect x="165" y="40" width="50" height="30" fill="#f8fafc"/>
+            <circle cx="170" cy="55" r="3.5" fill="#0f172a"/>
+            <circle cx="210" cy="55" r="3.5" fill="#0f172a"/>
+            <line x1="170" y1="55" x2="208" y2="38" stroke="#0f172a" stroke-width="2.5"/>
+            <text x="190" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">K</text>
+        `;
+    }
+
+    document.getElementById("schema-svg-container").innerHTML = `
+        <svg viewBox="0 0 380 210" width="360" height="200">
+            <rect x="70" y="55" width="240" height="115" fill="none" stroke="#0f172a" stroke-width="2.5"/>
+            ${topSymbolSvg}
+            <circle cx="190" cy="170" r="22" fill="#ffffff" stroke="#0284c7" stroke-width="2.5"/>
+            <text x="190" y="177" text-anchor="middle" font-size="18" font-weight="bold" fill="#0369a1">V</text>
+            <text x="152" y="162" text-anchor="end" font-size="12" font-weight="bold" fill="#dc2626">V</text>
+            <text x="228" y="162" text-anchor="start" font-size="12" font-weight="bold" fill="#0f172a">COM</text>
+        </svg>
+    `;
+}
+</script>
+
+</body>
+</html>
