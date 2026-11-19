@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À la découverte de l'atome — 3ème Prépa-Métiers</title>
+    <!-- Tailwind CSS pour un design moderne, fluide et tactile -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Police Inter pour une lisibilité optimale -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.55; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.06); }
+        }
+        .animate-glow {
+            animation: pulseGlow 2.4s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- =========================================================
+         EN-TÊTE + BARRE DE PROGRESSION DU PARCOURS ÉLÈVE
+         ========================================================= -->
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-3 sm:px-5 pt-3 pb-2.5 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-md shrink-0">
+                        <svg viewBox="0 0 36 36" class="w-7 h-7">
+                            <ellipse cx="18" cy="18" rx="14" ry="6" fill="none" stroke="white" stroke-width="1.8" transform="rotate(30 18 18)"/>
+                            <ellipse cx="18" cy="18" rx="14" ry="6" fill="none" stroke="white" stroke-width="1.8" transform="rotate(-30 18 18)"/>
+                            <ellipse cx="18" cy="18" rx="14" ry="6" fill="none" stroke="white" stroke-width="1.8" transform="rotate(90 18 18)"/>
+                            <circle cx="18" cy="18" r="3.5" fill="#fbbf24"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-black tracking-tight leading-tight">À la découverte de l'atome</h1>
+                        <p class="text-xs text-slate-300 font-medium">Physique-Chimie • Niveau 3ème Prépa-Métiers</p>
+                    </div>
+                </div>
+
+                <!-- Bouton synthèse vocale (aide à la lecture des consignes) -->
+                <button onclick="speakCurrentIntro()" id="btn-tts" title="Écouter l'explication de l'onglet actif"
+                    class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-cyan-300 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition shrink-0">
+                    <span>🔊</span>
+                    <span class="hidden sm:inline">Écouter l'aide</span>
+                </button>
+            </div>
+
+            <!-- Indicateur de progression des 4 étapes -->
+            <div class="bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-1.5 flex items-center justify-between sm:justify-end gap-3 text-xs">
+                <span class="text-slate-300 font-bold">Parcours :</span>
+                <div class="flex items-center gap-1.5">
+                    <span id="badge-step-explore" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-extrabold">✓ Explorer</span>
+                    <span id="badge-step-build" class="px-2 py-0.5 rounded-md bg-slate-700 text-slate-400 border border-slate-600 font-bold">○ Défi Atome</span>
+                    <span id="badge-step-sizes" class="px-2 py-0.5 rounded-md bg-slate-700 text-slate-400 border border-slate-600 font-bold">○ Tailles</span>
+                    <span id="badge-step-quiz" class="px-2 py-0.5 rounded-md bg-slate-700 text-slate-400 border border-slate-600 font-bold">○ Quiz</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARRE DE NAVIGATION (4 ONGLETS LARGES TACTILES) -->
+        <nav class="bg-slate-800 border-t border-slate-700">
+            <div class="max-w-6xl mx-auto px-2 sm:px-5 grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 py-2">
+                <button onclick="switchTab('explorer')" id="tab-btn-explorer"
+                    class="tab-btn py-2.5 px-2 sm:px-3 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 bg-blue-600 text-white shadow-md">
+                    <span>⚛️ 1. Explorer & Construire</span>
+                </button>
+                <button onclick="switchTab('tailles')" id="tab-btn-tailles"
+                    class="tab-btn py-2.5 px-2 sm:px-3 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 text-slate-300 hover:bg-slate-700 hover:text-white">
+                    <span>📏 2. Comparer les tailles</span>
+                </button>
+                <button onclick="switchTab('retenir')" id="tab-btn-retenir"
+                    class="tab-btn py-2.5 px-2 sm:px-3 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 text-slate-300 hover:bg-slate-700 hover:text-white">
+                    <span>📘 3. L'essentiel à retenir</span>
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-btn-quiz"
+                    class="tab-btn py-2.5 px-2 sm:px-3 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 text-slate-300 hover:bg-slate-700 hover:text-white">
+                    <span>🏆 4. Mini-Défi (Quiz)</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-3 sm:px-5 py-5">
+
+        <!-- =========================================================
+             ONGLET 1 : EXPLORER & CONSTRUIRE UN ATOME
+             ========================================================= -->
+        <section id="tab-explorer" class="tab-content space-y-5">
+
+            <!-- Encadré pédagogique : Qu'est-ce qu'un atome ? (Atome -> Molécule H2O -> Matière) -->
+            <div class="bg-gradient-to-r from-blue-50 via-indigo-50 to-cyan-50 border-2 border-blue-200 p-4 sm:p-5 rounded-2xl shadow-sm">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    <div class="space-y-1.5">
+                        <div class="inline-flex items-center gap-1.5 bg-blue-600 text-white text-xs font-extrabold px-3 py-1 rounded-full">
+                            <span>🧱</span> DÉFINITION SIMPLE
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900">Qu'est-ce qu'un atome ?</h2>
+                        <p class="text-sm sm:text-base text-slate-800 leading-relaxed">
+                            Un <strong>atome</strong> est une minuscule <strong>« brique élémentaire »</strong> qui forme toute la matière qui nous entoure : l'eau, l'air, les métaux ou notre corps. En s'accrochant les uns aux autres, les atomes forment des <strong>molécules</strong> (comme l'eau <strong>H₂O</strong>) puis les objets du quotidien.
+                        </p>
+                    </div>
+
+                    <!-- Schéma SVG : Atome -> Molécule H2O -> Matière (goutte d'eau) -->
+                    <div class="w-full lg:w-auto shrink-0 bg-white border border-blue-200 rounded-2xl p-3 shadow-sm">
+                        <svg viewBox="0 0 320 92" class="w-full max-w-[320px] mx-auto h-auto">
+                            <!-- Étape 1 : Atome -->
+                            <circle cx="42" cy="36" r="16" fill="#2563eb"/>
+                            <text x="42" y="41" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="800">O</text>
+                            <text x="42" y="68" text-anchor="middle" fill="#0f172a" font-size="10.5" font-weight="800">1. Atome</text>
+                            <text x="42" y="81" text-anchor="middle" fill="#475569" font-size="9">Brique de base</text>
+
+                            <!-- Flèche 1 -->
+                            <text x="86" y="41" text-anchor="middle" fill="#2563eb" font-size="18" font-weight="900">→</text>
+
+                            <!-- Étape 2 : Molécule H2O -->
+                            <circle cx="136" cy="42" r="10" fill="#ef4444"/>
+                            <text x="136" y="46" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">H</text>
+                            <circle cx="158" cy="32" r="14" fill="#2563eb"/>
+                            <text x="158" y="37" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="800">O</text>
+                            <circle cx="180" cy="42" r="10" fill="#ef4444"/>
+                            <text x="180" y="46" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">H</text>
+                            <text x="158" y="68" text-anchor="middle" fill="#0f172a" font-size="10.5" font-weight="800">2. Molécule H₂O</text>
+                            <text x="158" y="81" text-anchor="middle" fill="#475569" font-size="9">Atomes assemblés</text>
+
+                            <!-- Flèche 2 -->
+                            <text x="218" y="41" text-anchor="middle" fill="#2563eb" font-size="18" font-weight="900">→</text>
+
+                            <!-- Étape 3 : Matière (goutte d'eau) -->
+                            <path d="M270 16 C270 16 254 36 254 46 A16 16 0 0 0 286 46 C286 36 270 16 270 16 Z" fill="#0ea5e9"/>
+                            <ellipse cx="264" cy="44" rx="3" ry="5" fill="#bae6fd" transform="rotate(-20 264 44)"/>
+                            <text x="270" y="68" text-anchor="middle" fill="#0f172a" font-size="10.5" font-weight="800">3. Matière</text>
+                            <text x="270" y="81" text-anchor="middle" fill="#475569" font-size="9">Goutte d'eau</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode Défi de construction intégré -->
+            <div id="build-challenge-bar" class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-amber-500 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-md">🎯 DÉFI CONSTRUCTION</span>
+                        <span id="build-challenge-counter" class="text-xs font-extrabold text-amber-900">Défi 1 / 4</span>
+                    </div>
+                    <p id="build-challenge-text" class="text-sm sm:text-base font-extrabold text-slate-900">
+                        Mission : Construis un atome de <strong>Carbone (C) neutre</strong> (6 protons, 6 neutrons, 6 électrons).
+                    </p>
+                    <p id="build-challenge-status" class="text-xs sm:text-sm font-bold text-amber-800">
+                        Utilise les boutons + et − ci-dessous pour relever le défi !
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button onclick="nextBuildChallenge()" class="bg-white hover:bg-amber-100 border-2 border-amber-400 text-amber-950 font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition">
+                        Autre mission →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Boutons de raccourcis : 6 atomes (H, He, C, N, O, Ne) -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                    <p class="text-sm font-extrabold text-slate-800">Raccourcis atomes connus :</p>
+                    <button onclick="toggleScaleModal(true)" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                        <span>🏟️ L'échelle du stade de foot (le vide)</span>
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                    <button onclick="loadPreset('H')" id="preset-H" class="preset-btn py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-blue-600 bg-blue-50 transition flex items-center justify-between">
+                        <span>Hydrogène (H)</span>
+                        <span class="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded font-black">1</span>
+                    </button>
+                    <button onclick="loadPreset('He')" id="preset-He" class="preset-btn py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 hover:border-blue-500 transition flex items-center justify-between">
+                        <span>Hélium (He)</span>
+                        <span class="bg-slate-100 text-slate-700 text-xs px-1.5 py-0.5 rounded font-black">2</span>
+                    </button>
+                    <button onclick="loadPreset('C')" id="preset-C" class="preset-btn py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 hover:border-blue-500 transition flex items-center justify-between">
+                        <span>Carbone (C)</span>
+                        <span class="bg-slate-100 text-slate-700 text-xs px-1.5 py-0.5 rounded font-black">6</span>
+                    </button>
+                    <button onclick="loadPreset('N')" id="preset-N" class="preset-btn py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 hover:border-blue-500 transition flex items-center justify-between">
+                        <span>Azote (N)</span>
+                        <span class="bg-slate-100 text-slate-700 text-xs px-1.5 py-0.5 rounded font-black">7</span>
+                    </button>
+                    <button onclick="loadPreset('O')" id="preset-O" class="preset-btn py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 hover:border-blue-500 transition flex items-center justify-between">
+                        <span>Oxygène (O)</span>
+                        <span class="bg-slate-100 text-slate-700 text-xs px-1.5 py-0.5 rounded font-black">8</span>
+                    </button>
+                    <button onclick="loadPreset('Ne')" id="preset-Ne" class="preset-btn py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 hover:border-blue-500 transition flex items-center justify-between">
+                        <span>Néon (Ne)</span>
+                        <span class="bg-slate-100 text-slate-700 text-xs px-1.5 py-0.5 rounded font-black">10</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Zone principale : Simulateur SVG à gauche + Contrôles & Carte d'identité à droite -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+                <!-- Colonne Simulateur SVG (7 colonnes) -->
+                <div class="lg:col-span-7 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between space-y-3">
+                    <!-- Légende + Bascules d'affichage -->
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm font-extrabold">
+                            <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-red-500 inline-block"></span> Proton (+)</span>
+                            <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-slate-500 inline-block"></span> Neutron (0)</span>
+                            <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-sky-500 inline-block"></span> Électron (−)</span>
+                        </div>
+
+                        <!-- Bascule Loupe sur le noyau / Vue réelle -->
+                        <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-300">
+                            <button onclick="setScaleMode('zoom')" id="btn-view-zoom"
+                                class="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-blue-600 text-white shadow-sm transition">
+                                🔍 Loupe noyau
+                            </button>
+                            <button onclick="setScaleMode('real')" id="btn-view-real"
+                                class="px-2.5 py-1 rounded-lg text-xs font-extrabold text-slate-700 hover:text-slate-950 transition">
+                                🌌 Vue réelle (vide)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Conteneur SVG animé -->
+                    <div class="relative w-full aspect-square max-h-[430px] mx-auto bg-slate-950 rounded-2xl overflow-hidden border-2 border-slate-800 shadow-inner flex items-center justify-center">
+                        <svg id="atomSvg" viewBox="0 0 420 420" class="w-full h-full block" aria-label="Modèle animé de l'atome">
+                            <defs>
+                                <radialGradient id="atomHalo" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#1e293b" stop-opacity="0.95"/>
+                                    <stop offset="75%" stop-color="#0f172a" stop-opacity="0.98"/>
+                                    <stop offset="100%" stop-color="#020617" stop-opacity="1"/>
+                                </radialGradient>
+                            </defs>
+                            <rect width="420" height="420" fill="url(#atomHalo)"/>
+                            <!-- Cercle délimitant l'espace de l'atome -->
+                            <circle cx="210" cy="210" r="182" fill="rgba(56, 189, 248, 0.04)" stroke="rgba(148, 163, 184, 0.3)" stroke-width="1.5" stroke-dasharray="6 6"/>
+                            <g id="orbitsLayer"></g>
+                            <g id="nucleusLayer"></g>
+                            <g id="electronsLayer"></g>
+                        </svg>
+
+                        <!-- Indicateur de mode en bas à gauche -->
+                        <div id="view-mode-caption" class="absolute bottom-3 left-3 right-3 sm:right-auto bg-slate-900/90 backdrop-blur-sm text-slate-200 text-xs px-3 py-1.5 rounded-xl border border-slate-700">
+                            🔍 <strong>Mode Loupe :</strong> le noyau est agrandi pour bien compter les protons et neutrons.
+                        </div>
+
+                        <!-- Boutons Pause & Signes +/- en haut à droite -->
+                        <div class="absolute top-3 right-3 flex items-center gap-1.5">
+                            <button onclick="toggleSigns()" id="btn-signs" class="bg-slate-800/90 hover:bg-slate-700 text-cyan-300 text-xs font-extrabold px-2.5 py-1.5 rounded-lg border border-slate-600 transition">
+                                ± Signes : OUI
+                            </button>
+                            <button onclick="toggleAnimation()" id="btn-pause" class="bg-slate-800/90 hover:bg-slate-700 text-white text-xs font-extrabold px-2.5 py-1.5 rounded-lg border border-slate-600 transition">
+                                ⏸️ Pause
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colonne Contrôles + Carte d'identité (5 colonnes) -->
+                <div class="lg:col-span-5 flex flex-col gap-4">
+
+                    <!-- Panneau de contrôle tactile + / - -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-2.5 no-select">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-black text-base text-slate-900">Ajuster les particules</h3>
+                            <button onclick="resetAtom()" class="text-xs font-bold text-slate-500 hover:text-red-600 underline">Remettre à 0</button>
+                        </div>
+
+                        <!-- Protons -->
+                        <div class="flex items-center justify-between bg-red-50 border border-red-200 p-2.5 rounded-xl">
+                            <div>
+                                <div class="font-extrabold text-red-950 text-sm">Protons (+)</div>
+                                <div class="text-xs text-red-700 font-medium">Dans le noyau (charge +)</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="changeParticle('protons', -1)" class="w-11 h-11 rounded-xl bg-white border-2 border-red-300 text-red-700 font-black text-xl hover:bg-red-100 active:scale-95 transition">−</button>
+                                <span id="count-protons" class="w-8 text-center font-black text-lg text-red-950">1</span>
+                                <button onclick="changeParticle('protons', 1)" class="w-11 h-11 rounded-xl bg-red-600 text-white font-black text-xl hover:bg-red-700 active:scale-95 transition shadow-sm">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Neutrons -->
+                        <div class="flex items-center justify-between bg-slate-100 border border-slate-300 p-2.5 rounded-xl">
+                            <div>
+                                <div class="font-extrabold text-slate-900 text-sm">Neutrons (0)</div>
+                                <div class="text-xs text-slate-600 font-medium">Dans le noyau (neutres)</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="changeParticle('neutrons', -1)" class="w-11 h-11 rounded-xl bg-white border-2 border-slate-300 text-slate-700 font-black text-xl hover:bg-slate-200 active:scale-95 transition">−</button>
+                                <span id="count-neutrons" class="w-8 text-center font-black text-lg text-slate-900">0</span>
+                                <button onclick="changeParticle('neutrons', 1)" class="w-11 h-11 rounded-xl bg-slate-600 text-white font-black text-xl hover:bg-slate-700 active:scale-95 transition shadow-sm">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Électrons -->
+                        <div class="flex items-center justify-between bg-sky-50 border border-sky-200 p-2.5 rounded-xl">
+                            <div>
+                                <div class="font-extrabold text-sky-950 text-sm">Électrons (−)</div>
+                                <div class="text-xs text-sky-700 font-medium">Autour du noyau (charge −)</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="changeParticle('electrons', -1)" class="w-11 h-11 rounded-xl bg-white border-2 border-sky-300 text-sky-700 font-black text-xl hover:bg-sky-100 active:scale-95 transition">−</button>
+                                <span id="count-electrons" class="w-8 text-center font-black text-lg text-sky-950">1</span>
+                                <button onclick="changeParticle('electrons', 1)" class="w-11 h-11 rounded-xl bg-sky-600 text-white font-black text-xl hover:bg-sky-700 active:scale-95 transition shadow-sm">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARTE D'IDENTITÉ DYNAMIQUE (Case périodique + Paires de charges + et -) -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-900 flex-grow flex flex-col justify-between space-y-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <!-- Case façon tableau périodique (A en haut, Z en bas) -->
+                            <div class="w-20 h-24 rounded-2xl bg-slate-900 text-white p-2 flex flex-col justify-between shrink-0 shadow-md">
+                                <div class="flex justify-between items-center text-xs font-extrabold text-amber-300">
+                                    <span id="periodic-A" title="Nombre de particules dans le noyau (protons + neutrons)">1</span>
+                                    <span class="text-[10px] text-slate-400">noyau</span>
+                                </div>
+                                <div id="periodic-symbol" class="text-center text-3xl font-black tracking-tight text-white leading-none">H</div>
+                                <div class="flex justify-between items-center text-xs font-extrabold text-red-400">
+                                    <span id="periodic-Z" title="Nombre de protons">1</span>
+                                    <span class="text-[10px] text-slate-400">protons</span>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow">
+                                <div class="text-xs font-extrabold uppercase text-slate-500">🪪 Carte d'identité</div>
+                                <div id="atom-full-name" class="text-xl font-black text-slate-900">Hydrogène (H)</div>
+                                <div class="mt-1 inline-flex items-center gap-1.5">
+                                    <span class="text-xs font-bold text-slate-600">Charge totale :</span>
+                                    <span id="id-charge-badge" class="px-2.5 py-0.5 rounded-lg font-black text-xs bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        NEUTRE (0)
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bilan visuel des charges (+ et - alignés face à face) -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 space-y-1.5">
+                            <div class="text-xs font-extrabold text-slate-700 flex justify-between">
+                                <span>Balance des charges électriques :</span>
+                                <span id="balance-summary" class="text-slate-600">1 (+) face à 1 (−)</span>
+                            </div>
+                            <div id="charge-pairs-visual" class="flex flex-wrap gap-1.5 min-h-[28px] items-center">
+                                <!-- Badges + et - générés par JS -->
+                            </div>
+                        </div>
+
+                        <!-- Alerte claire de neutralité -->
+                        <div id="id-feedback-box" class="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 text-xs sm:text-sm font-semibold leading-snug">
+                            ✅ <strong>Atome électriquement neutre :</strong> chaque charge (+) est annulée par une charge (−).
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =========================================================
+             ONGLET 2 : COMPARER LES TAILLES (ZÉRO PUISSANCE NÉGATIVE)
+             ========================================================= -->
+        <section id="tab-tailles" class="tab-content hidden space-y-5">
+
+            <!-- Bloc 1 : Zoom progressif -->
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-xl font-black text-slate-900">📏 Zoom progressif : de la pièce de 1 centime au noyau</h2>
+                        <p class="text-sm text-slate-600">Déplace le curseur ou utilise les boutons pour explorer les tailles sans écritures compliquées.</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="stepScale(-1)" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 font-extrabold text-slate-800 text-sm transition active:scale-95">
+                            − Dézoomer
+                        </button>
+                        <button onclick="stepScale(1)" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm transition shadow-sm active:scale-95">
+                            + Zoomer
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Curseur et boutons d'étapes -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                    <input id="scale-slider" type="range" min="0" max="5" value="0" oninput="setScaleIndex(Number(this.value))"
+                        class="w-full h-3 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    <div class="grid grid-cols-2 sm:grid-cols-6 gap-1.5">
+                        <button onclick="setScaleIndex(0)" class="scale-step-btn py-1.5 px-2 rounded-lg text-xs font-extrabold bg-blue-600 text-white">1. Pièce 1 ct</button>
+                        <button onclick="setScaleIndex(1)" class="scale-step-btn py-1.5 px-2 rounded-lg text-xs font-extrabold bg-slate-200 text-slate-700">2. Grain de sel</button>
+                        <button onclick="setScaleIndex(2)" class="scale-step-btn py-1.5 px-2 rounded-lg text-xs font-extrabold bg-slate-200 text-slate-700">3. Cheveu</button>
+                        <button onclick="setScaleIndex(3)" class="scale-step-btn py-1.5 px-2 rounded-lg text-xs font-extrabold bg-slate-200 text-slate-700">4. Globule rouge</button>
+                        <button onclick="setScaleIndex(4)" class="scale-step-btn py-1.5 px-2 rounded-lg text-xs font-extrabold bg-slate-200 text-slate-700">5. Atome</button>
+                        <button onclick="setScaleIndex(5)" class="scale-step-btn py-1.5 px-2 rounded-lg text-xs font-extrabold bg-slate-200 text-slate-700">6. Noyau</button>
+                    </div>
+                </div>
+
+                <!-- Scène visuelle de comparaison -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center bg-slate-900 text-white p-5 rounded-2xl border border-slate-800">
+                    <div class="lg:col-span-5 flex flex-col items-center justify-center bg-slate-800/80 rounded-2xl p-5 min-h-[200px] border border-slate-700">
+                        <div id="scale-visual-stage" class="flex items-center justify-center h-28">
+                            <!-- Dessin dynamique -->
+                        </div>
+                        <span id="scale-badge" class="mt-2 text-xs font-extrabold px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+                            Étape 1 / 6
+                        </span>
+                    </div>
+
+                    <div class="lg:col-span-7 space-y-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h3 id="scale-title" class="text-2xl font-black text-white">Pièce de 1 centime (épaisseur)</h3>
+                            <span id="scale-measure" class="bg-amber-400 text-slate-950 text-xs sm:text-sm font-black px-3 py-1 rounded-lg">
+                                Environ 1,6 mm
+                            </span>
+                        </div>
+                        <p id="scale-desc" class="text-sm sm:text-base text-slate-200 leading-relaxed">
+                            C'est un repère facile à voir à l'œil nu : l'épaisseur d'une pièce de 1 centime d'euro mesure environ 1,6 millimètre.
+                        </p>
+                        <div id="scale-fact" class="bg-blue-950/80 border border-blue-700/60 p-3.5 rounded-xl text-sm text-cyan-100 font-semibold">
+                            💡 Un grain de sel (0,3 mm) est environ 5 fois plus petit que l'épaisseur d'une pièce de 1 centime.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloc 2 : Comparaison côte à côte & Duel des tailles en 4 manches -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+                <!-- Repères visuels côte à côte (7 colonnes) -->
+                <div class="lg:col-span-7 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                    <h3 class="text-lg font-black text-slate-900">📊 Repères concrets à retenir (sans puissances négatives)</h3>
+                    <div class="space-y-3">
+                        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                            <div class="flex justify-between text-xs sm:text-sm font-extrabold">
+                                <span>🪙 Pièce de 1 centime (1,6 mm) vs 💇 Cheveu (0,08 mm)</span>
+                                <span class="text-blue-700">20 fois plus fin</span>
+                            </div>
+                            <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
+                                <div class="bg-blue-600 h-full rounded-full" style="width: 100%"></div>
+                            </div>
+                            <p class="text-xs text-slate-600">Il faut empiler environ <strong>20 cheveux</strong> pour atteindre l'épaisseur d'une pièce de 1 centime.</p>
+                        </div>
+
+                        <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-1.5">
+                            <div class="flex justify-between text-xs sm:text-sm font-extrabold text-amber-950">
+                                <span>💇 Épaisseur d'un cheveu vs ⚛️ Un atome</span>
+                                <span class="text-amber-800">1 000 000 de fois plus petit</span>
+                            </div>
+                            <div class="w-full bg-amber-200 h-3 rounded-full overflow-hidden">
+                                <div class="bg-amber-500 h-full rounded-full" style="width: 12%"></div>
+                            </div>
+                            <p class="text-xs text-amber-900 font-medium">Il faudrait aligner environ <strong>1 000 000 d'atomes côte à côte</strong> pour faire l'épaisseur d'un seul cheveu !</p>
+                        </div>
+
+                        <div class="p-3.5 rounded-xl bg-red-50 border border-red-200 space-y-1.5">
+                            <div class="flex justify-between text-xs sm:text-sm font-extrabold text-red-950">
+                                <span>⚛️ Atome entier vs 🔴 Noyau de l'atome</span>
+                                <span class="text-red-700">100 000 fois plus petit</span>
+                            </div>
+                            <div class="w-full bg-red-200 h-3 rounded-full overflow-hidden">
+                                <div class="bg-red-600 h-full rounded-full" style="width: 3%"></div>
+                            </div>
+                            <p class="text-xs text-red-900 font-medium">Le noyau est <strong>100 000 fois plus petit</strong> que l'atome : entre les deux, il n'y a que du vide.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini-jeu : Duel des tailles en 4 manches (5 colonnes) -->
+                <div class="lg:col-span-5 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-black px-2.5 py-1 rounded-lg">🎮 DUEL DES TAILLES</span>
+                            <span id="duel-progress" class="text-xs font-extrabold text-slate-600">Manche 1 / 4 • Score : 0</span>
+                        </div>
+                        <h3 id="duel-question" class="text-base sm:text-lg font-black text-slate-900">
+                            Lequel de ces deux éléments est le PLUS PETIT ?
+                        </h3>
+                    </div>
+
+                    <div id="duel-choices" class="grid grid-cols-2 gap-3">
+                        <!-- Injecté par JS -->
+                    </div>
+
+                    <div id="duel-feedback" class="hidden p-3 rounded-xl text-xs sm:text-sm font-bold">
+                        <!-- Injecté par JS -->
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button id="duel-next-btn" onclick="nextDuelRound()" class="hidden bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-extrabold px-4 py-2.5 rounded-xl transition">
+                            Manche suivante →
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- =========================================================
+             ONGLET 3 : L'ESSENTIEL À RETENIR (4 CARTES MÉMO VISUELLES)
+             ========================================================= -->
+        <section id="tab-retenir" class="tab-content hidden space-y-5">
+            <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-xl font-black text-slate-900">📘 Les 4 cartes mémo à retenir</h2>
+                <p class="text-sm text-slate-600 mt-1">Tout l'essentiel du cours illustré simplement pour réviser.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                <!-- CARTE 1 : DE LA MATIÈRE À L'ATOME -->
+                <article class="bg-white rounded-2xl shadow-sm border-2 border-blue-200 overflow-hidden flex flex-col">
+                    <div class="bg-blue-600 text-white px-4 py-3 font-black text-base flex items-center gap-2.5">
+                        <span class="bg-white text-blue-600 w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">1</span>
+                        <span>De la matière à l'atome</span>
+                    </div>
+                    <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                        <div class="bg-slate-900 rounded-xl p-3">
+                            <svg viewBox="0 0 280 85" class="w-full max-w-[280px] mx-auto h-auto">
+                                <circle cx="42" cy="42" r="15" fill="#3b82f6"/>
+                                <text x="42" y="47" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">C</text>
+                                <text x="42" y="74" text-anchor="middle" fill="#cbd5e1" font-size="10" font-weight="700">Atome</text>
+                                <text x="86" y="47" text-anchor="middle" fill="#fbbf24" font-size="18" font-weight="900">→</text>
+                                <circle cx="122" cy="42" r="10" fill="#ef4444"/>
+                                <circle cx="142" cy="42" r="13" fill="#3b82f6"/>
+                                <circle cx="162" cy="42" r="10" fill="#ef4444"/>
+                                <text x="142" y="74" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="700">Molécule</text>
+                                <text x="196" y="47" text-anchor="middle" fill="#fbbf24" font-size="18" font-weight="900">→</text>
+                                <rect x="220" y="25" width="38" height="32" rx="6" fill="#0ea5e9"/>
+                                <text x="239" y="74" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="700">Matière</text>
+                            </svg>
+                        </div>
+                        <p class="text-sm sm:text-base text-slate-800 leading-relaxed">
+                            Toute la matière (eau, air, métaux, êtres vivants) est constituée d'<strong>atomes</strong>. En s'assemblant, les atomes forment des <strong>molécules</strong>.
+                        </p>
+                    </div>
+                </article>
+
+                <!-- CARTE 2 : LES 3 PARTICULES DE L'ATOME -->
+                <article class="bg-white rounded-2xl shadow-sm border-2 border-purple-200 overflow-hidden flex flex-col">
+                    <div class="bg-purple-600 text-white px-4 py-3 font-black text-base flex items-center gap-2.5">
+                        <span class="bg-white text-purple-700 w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">2</span>
+                        <span>Les 3 particules de l'atome</span>
+                    </div>
+                    <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                        <div class="bg-slate-900 rounded-xl p-3">
+                            <svg viewBox="0 0 280 85" class="w-full max-w-[280px] mx-auto h-auto">
+                                <ellipse cx="140" cy="42" rx="95" ry="30" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4 4"/>
+                                <circle cx="134" cy="40" r="8" fill="#ef4444"/>
+                                <text x="134" y="44" text-anchor="middle" fill="#fff" font-size="11" font-weight="900">+</text>
+                                <circle cx="147" cy="43" r="8" fill="#94a3b8"/>
+                                <circle cx="52" cy="33" r="7" fill="#38bdf8"/>
+                                <text x="52" y="37" text-anchor="middle" fill="#0f172a" font-size="12" font-weight="900">−</text>
+                                <text x="235" y="25" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="800">Noyau (+ et 0)</text>
+                                <text x="52" y="65" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="800">Électron (−)</text>
+                            </svg>
+                        </div>
+                        <ul class="space-y-1.5 text-sm text-slate-800">
+                            <li>🔴 <strong>Protons (+)</strong> et ⚪ <strong>Neutrons (0)</strong> : regroupés au centre dans le <strong>noyau</strong>.</li>
+                            <li>🔵 <strong>Électrons (−)</strong> : tournent autour du noyau.</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <!-- CARTE 3 : LA STRUCTURE LACUNAIRE -->
+                <article class="bg-white rounded-2xl shadow-sm border-2 border-amber-200 overflow-hidden flex flex-col">
+                    <div class="bg-amber-500 text-slate-950 px-4 py-3 font-black text-base flex items-center gap-2.5">
+                        <span class="bg-slate-950 text-amber-400 w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">3</span>
+                        <span>La structure lacunaire (le vide)</span>
+                    </div>
+                    <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                        <div class="bg-slate-900 rounded-xl p-3">
+                            <svg viewBox="0 0 280 85" class="w-full max-w-[280px] mx-auto h-auto">
+                                <circle cx="140" cy="42" r="34" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3 3"/>
+                                <circle cx="140" cy="42" r="3" fill="#ef4444"/>
+                                <circle cx="172" cy="32" r="4" fill="#38bdf8"/>
+                                <text x="80" y="45" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="800">VIDE</text>
+                                <text x="215" y="45" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="800">VIDE</text>
+                            </svg>
+                        </div>
+                        <p class="text-sm sm:text-base text-slate-800 leading-relaxed">
+                            Le noyau est <strong>100 000 fois plus petit</strong> que l'atome : entre le noyau et les électrons, il n'y a que du <strong>vide</strong>. On dit que l'atome a une <strong>structure lacunaire</strong>.
+                        </p>
+                    </div>
+                </article>
+
+                <!-- CARTE 4 : LA NEUTRALITÉ ÉLECTRIQUE -->
+                <article class="bg-white rounded-2xl shadow-sm border-2 border-emerald-200 overflow-hidden flex flex-col">
+                    <div class="bg-emerald-600 text-white px-4 py-3 font-black text-base flex items-center gap-2.5">
+                        <span class="bg-white text-emerald-700 w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">4</span>
+                        <span>La neutralité électrique</span>
+                    </div>
+                    <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                        <div class="bg-slate-900 rounded-xl p-3 flex items-center justify-center gap-4">
+                            <div class="flex gap-1.5">
+                                <span class="w-7 h-7 rounded-full bg-red-500 text-white font-black flex items-center justify-center text-sm">+</span>
+                                <span class="w-7 h-7 rounded-full bg-red-500 text-white font-black flex items-center justify-center text-sm">+</span>
+                                <span class="w-7 h-7 rounded-full bg-red-500 text-white font-black flex items-center justify-center text-sm">+</span>
+                            </div>
+                            <span class="text-white font-black text-lg">=</span>
+                            <div class="flex gap-1.5">
+                                <span class="w-7 h-7 rounded-full bg-sky-500 text-white font-black flex items-center justify-center text-sm">−</span>
+                                <span class="w-7 h-7 rounded-full bg-sky-500 text-white font-black flex items-center justify-center text-sm">−</span>
+                                <span class="w-7 h-7 rounded-full bg-sky-500 text-white font-black flex items-center justify-center text-sm">−</span>
+                            </div>
+                            <span class="text-emerald-400 font-black text-sm">→ 0</span>
+                        </div>
+                        <p class="text-sm sm:text-base text-slate-800 leading-relaxed">
+                            Un atome possède <strong>autant de protons (+) que d'électrons (−)</strong>. Les charges positives et négatives s'annulent : l'atome est <strong>électriquement neutre</strong>.
+                        </p>
+                    </div>
+                </article>
+
+            </div>
+
+            <div class="text-center pt-2">
+                <button onclick="switchTab('quiz')" class="bg-blue-600 hover:bg-blue-700 text-white font-black text-base px-6 py-3.5 rounded-2xl shadow-md transition active:scale-95">
+                    Passer au Mini-Défi final (8 questions) →
+                </button>
+            </div>
+        </section>
+
+
+        <!-- =========================================================
+             ONGLET 4 : MINI-DÉFI (QUIZ DE 8 QUESTIONS)
+             ========================================================= -->
+        <section id="tab-quiz" class="tab-content hidden">
+            <div class="max-w-2xl mx-auto bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+
+                <!-- En-tête Quiz -->
+                <div id="quiz-header" class="mb-5">
+                    <div class="flex items-center justify-between text-sm font-extrabold text-slate-700 mb-2">
+                        <span id="quiz-progress-text">Question 1 sur 8</span>
+                        <span id="quiz-score-live" class="text-blue-600">Score : 0 / 8</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
+                        <div id="quiz-progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 12.5%;"></div>
+                    </div>
+                </div>
+
+                <!-- Zone Question active -->
+                <div id="quiz-question-area" class="space-y-4">
+                    <div id="quiz-visual-hint" class="hidden bg-slate-900 text-white p-3 rounded-xl text-center text-sm font-bold">
+                        <!-- Repère visuel éventuel -->
+                    </div>
+
+                    <h3 id="quiz-question-text" class="text-lg sm:text-xl font-black text-slate-900 leading-snug">
+                        Chargement...
+                    </h3>
+
+                    <div id="quiz-options" class="space-y-2.5">
+                        <!-- Options injectées par JS -->
+                    </div>
+
+                    <div id="quiz-feedback" class="hidden p-4 rounded-xl border-2 text-sm sm:text-base font-semibold">
+                        <!-- Feedback immédiat -->
+                    </div>
+
+                    <div class="pt-2 flex justify-end">
+                        <button id="quiz-next-btn" onclick="nextQuestion()" class="hidden bg-slate-900 hover:bg-slate-800 text-white font-extrabold px-6 py-3 rounded-xl transition active:scale-95">
+                            Question suivante →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Écran Bilan final à recopier sur la fiche papier -->
+                <div id="quiz-result-area" class="hidden text-center py-5 space-y-5">
+                    <div id="result-emoji" class="text-6xl">🏆</div>
+                    <div>
+                        <h3 class="text-2xl font-black text-slate-900">Bilan de ton Mini-Défi !</h3>
+                        <p class="text-sm text-slate-600 font-medium mt-1">Tu peux noter ce résultat sur ta fiche d'activité papier :</p>
+                    </div>
+
+                    <div class="bg-slate-50 border-2 border-slate-300 rounded-2xl p-5 max-w-md mx-auto space-y-2">
+                        <div class="text-xs font-extrabold uppercase text-slate-500">Score obtenu</div>
+                        <div id="final-score" class="text-4xl font-black text-blue-600">8 / 8</div>
+                        <div id="final-badge" class="inline-block px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800">
+                            Niveau : Expert de l'atome
+                        </div>
+                        <p id="result-message" class="text-sm font-bold text-slate-800 pt-2">
+                            Bravo ! Tu maîtrises tout le chapitre sur l'atome.
+                        </p>
+                    </div>
+
+                    <div class="pt-2 flex flex-col sm:flex-row justify-center gap-3">
+                        <button onclick="restartQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-6 py-3.5 rounded-xl shadow-md transition active:scale-95">
+                            🔄 Recommencer le quiz
+                        </button>
+                        <button onclick="switchTab('explorer')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-6 py-3.5 rounded-xl transition">
+                            Retourner au simulateur
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =========================================================
+         MODALE : L'ÉCHELLE DU STADE DE FOOTBALL (100 MÈTRES)
+         ========================================================= -->
+    <div id="scale-modal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-lg w-full rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-amber-400 text-slate-950 px-5 py-4 flex items-center justify-between">
+                <h3 class="font-black text-lg flex items-center gap-2">
+                    <span>🏟️</span> L'échelle du stade de football (100 m)
+                </h3>
+                <button onclick="toggleScaleModal(false)" class="w-8 h-8 rounded-lg bg-amber-500/40 hover:bg-amber-500/70 font-black text-slate-950 flex items-center justify-center">✕</button>
+            </div>
+
+            <div class="p-5 space-y-4">
+                <!-- Illustration SVG du stade de football -->
+                <div class="bg-slate-900 rounded-xl p-3 border-2 border-slate-800">
+                    <svg viewBox="0 0 340 185" class="w-full h-auto">
+                        <!-- Tribunes -->
+                        <rect x="6" y="6" width="328" height="173" rx="16" fill="#334155" stroke="#475569" stroke-width="2"/>
+                        <!-- Pelouse (100 m) -->
+                        <rect x="30" y="26" width="280" height="133" rx="4" fill="#16a34a" stroke="#ffffff" stroke-width="2"/>
+                        <line x1="170" y1="26" x2="170" y2="159" stroke="#ffffff" stroke-width="2"/>
+                        <circle cx="170" cy="92.5" r="24" fill="none" stroke="#ffffff" stroke-width="2"/>
+                        <rect x="30" y="60" width="34" height="65" fill="none" stroke="#ffffff" stroke-width="2"/>
+                        <rect x="276" y="60" width="34" height="65" fill="none" stroke="#ffffff" stroke-width="2"/>
+
+                        <!-- Cote 100 m -->
+                        <line x1="30" y1="170" x2="310" y2="170" stroke="#fbbf24" stroke-width="2"/>
+                        <rect x="132" y="161" width="76" height="16" rx="4" fill="#0f172a"/>
+                        <text x="170" y="172" text-anchor="middle" fill="#fbbf24" font-size="9.5" font-weight="800">100 mètres</text>
+
+                        <!-- Noyau = Bille au centre -->
+                        <circle cx="170" cy="92.5" r="4.5" fill="#ef4444" stroke="#ffffff" stroke-width="1.2"/>
+                        <rect x="108" y="46" width="124" height="22" rx="6" fill="#0f172a" fill-opacity="0.9"/>
+                        <text x="170" y="60" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="800">🔴 Noyau = 1 petite bille</text>
+
+                        <!-- Électrons dans les tribunes -->
+                        <circle cx="305" cy="15" r="5" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5"/>
+                        <rect x="178" y="6" width="118" height="18" rx="5" fill="#0f172a" fill-opacity="0.92"/>
+                        <text x="237" y="18" text-anchor="middle" fill="#7dd3fc" font-size="9.5" font-weight="800">🔵 Électron (tribunes)</text>
+                    </svg>
+                </div>
+
+                <div class="space-y-2 text-slate-800 text-sm sm:text-base leading-relaxed">
+                    <p class="font-extrabold text-slate-900">
+                        Si un atome avait la taille d'un grand stade de football (100 m) :
+                    </p>
+                    <ul class="space-y-1.5">
+                        <li>🔴 <strong>Le noyau</strong> aurait la taille d'une <strong>petite bille</strong> posée au centre du terrain.</li>
+                        <li>🔵 <strong>Les électrons</strong> circuleraient tout en haut des <strong>tribunes</strong>.</li>
+                        <li>🌬️ <strong>Entre les deux</strong> (toute la pelouse et les gradins), il n'y a que <strong>du vide</strong> !</li>
+                    </ul>
+                </div>
+
+                <button onclick="toggleScaleModal(false)" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 rounded-xl transition">
+                    J'ai compris ! Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIED DE PAGE -->
+    <footer class="text-center text-xs text-slate-500 py-4 px-3">
+        Application interactive • Physique-Chimie 3ème Prépa-Métiers
+    </footer>
+
+    <!-- =========================================================
+         JAVASCRIPT : SIMULATEUR SVG, DÉFIS, TAILLES & QUIZ
+         ========================================================= -->
+    <script>
+        /* -----------------------------------------------------------
+           1. ÉTAT GLOBAL & BASE DES ÉLÉMENTS (Z = 0 à 10)
+           ----------------------------------------------------------- */
+        const state = {
+            protons: 1,
+            neutrons: 0,
+            electrons: 1,
+            scaleMode: 'zoom', // 'zoom' ou 'real'
+            showSigns: true,
+            isPlaying: true,
+            angle: 0
+        };
+
+        const progressState = {
+            explore: true,
+            build: false,
+            sizes: false,
+            quiz: false
+        };
+
+        const elementsDB = {
+            0:  { symbol: "—",  name: "Aucun atome" },
+            1:  { symbol: "H",  name: "Hydrogène" },
+            2:  { symbol: "He", name: "Hélium" },
+            3:  { symbol: "Li", name: "Lithium" },
+            4:  { symbol: "Be", name: "Béryllium" },
+            5:  { symbol: "B",  name: "Bore" },
+            6:  { symbol: "C",  name: "Carbone" },
+            7:  { symbol: "N",  name: "Azote" },
+            8:  { symbol: "O",  name: "Oxygène" },
+            9:  { symbol: "F",  name: "Fluor" },
+            10: { symbol: "Ne", name: "Néon" }
+        };
+
+        function markProgress(stepKey) {
+            progressState[stepKey] = true;
+            const labels = {
+                explore: "✓ Explorer",
+                build: "✓ Défi Atome",
+                sizes: "✓ Tailles",
+                quiz: "✓ Quiz"
+            };
+            const el = document.getElementById('badge-step-' + stepKey);
+            if (el) {
+                el.textContent = labels[stepKey];
+                el.className = "px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-extrabold";
+            }
+        }
+
+        /* -----------------------------------------------------------
+           2. NAVIGATION & SYNTHÈSE VOCALE D'AIDE
+           ----------------------------------------------------------- */
+        let activeTabName = 'explorer';
+
+        function switchTab(tabName) {
+            activeTabName = tabName;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                btn.classList.add('text-slate-300', 'hover:bg-slate-700', 'hover:text-white');
+            });
+
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            const activeBtn = document.getElementById('tab-btn-' + tabName);
+            activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-700', 'hover:text-white');
+            activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+
+            if (tabName === 'tailles') markProgress('sizes');
+        }
+
+        function speakCurrentIntro() {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const scripts = {
+                explorer: "Un atome est une minuscule brique qui compose toute la matière. Au centre se trouve le noyau avec les protons positifs et les neutrons. Autour tournent les électrons négatifs.",
+                tailles: "Utilise le curseur pour comparer les tailles, depuis une pièce de un centime jusqu'au noyau de l'atome, sans puissances négatives.",
+                retenir: "Voici les quatre cartes mémo à retenir : de la matière à l'atome, les trois particules, la structure lacunaire et la neutralité électrique.",
+                quiz: "Réponds aux huit questions du mini-défi pour vérifier ce que tu as retenu."
+            };
+            const utter = new SpeechSynthesisUtterance(scripts[activeTabName] || scripts.explorer);
+            utter.lang = 'fr-FR';
+            window.speechSynthesis.speak(utter);
+        }
+
+        function toggleScaleModal(show) {
+            const modal = document.getElementById('scale-modal');
+            modal.classList.toggle('hidden', !show);
+        }
+
+        /* -----------------------------------------------------------
+           3. DÉFI DE CONSTRUCTION INTÉGRÉ (ONGLET 1)
+           ----------------------------------------------------------- */
+        const buildChallenges = [
+            { text: "Construis un atome de <strong>Carbone (C) neutre</strong> (6 protons, 6 neutrons, 6 électrons).", p: 6, n: 6, e: 6 },
+            { text: "Construis un atome d'<strong>Oxygène (O) neutre</strong> (8 protons, 8 neutrons, 8 électrons).", p: 8, n: 8, e: 8 },
+            { text: "Construis un atome d'<strong>Hélium (He) neutre</strong> (2 protons, 2 neutrons, 2 électrons).", p: 2, n: 2, e: 2 },
+            { text: "Construis un atome d'<strong>Azote (N) neutre</strong> (7 protons, 7 neutrons, 7 électrons).", p: 7, n: 7, e: 7 }
+        ];
+        let buildIdx = 0;
+
+        function renderBuildChallenge() {
+            const c = buildChallenges[buildIdx];
+            document.getElementById('build-challenge-counter').textContent = `Défi ${buildIdx + 1} / ${buildChallenges.length}`;
+            document.getElementById('build-challenge-text').innerHTML = `Mission : ${c.text}`;
+            checkBuildChallenge();
+        }
+
+        function checkBuildChallenge() {
+            const c = buildChallenges[buildIdx];
+            const bar = document.getElementById('build-challenge-bar');
+            const status = document.getElementById('build-challenge-status');
+
+            if (state.protons === c.p && state.neutrons === c.n && state.electrons === c.e) {
+                bar.className = "bg-emerald-50 border-2 border-emerald-400 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3";
+                status.className = "text-xs sm:text-sm font-black text-emerald-800";
+                status.textContent = "🎉 Félicitations ! Défi réussi : l'atome est bien construit et électriquement neutre !";
+                markProgress('build');
+            } else {
+                bar.className = "bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3";
+                status.className = "text-xs sm:text-sm font-bold text-amber-800";
+                status.textContent = `En cours : tu as actuellement ${state.protons} proton(s), ${state.neutrons} neutron(s) et ${state.electrons} électron(s).`;
+            }
+        }
+
+        function nextBuildChallenge() {
+            buildIdx = (buildIdx + 1) % buildChallenges.length;
+            renderBuildChallenge();
+        }
+
+        /* -----------------------------------------------------------
+           4. SIMULATEUR SVG & CARTE D'IDENTITÉ
+           ----------------------------------------------------------- */
+        function loadPreset(symbol) {
+            const presets = {
+                'H':  { p: 1, n: 0, e: 1 },
+                'He': { p: 2, n: 2, e: 2 },
+                'C':  { p: 6, n: 6, e: 6 },
+                'N':  { p: 7, n: 7, e: 7 },
+                'O':  { p: 8, n: 8, e: 8 },
+                'Ne': { p: 10, n: 10, e: 10 }
+            };
+            if (!presets[symbol]) return;
+            state.protons = presets[symbol].p;
+            state.neutrons = presets[symbol].n;
+            state.electrons = presets[symbol].e;
+
+            updatePresetButtonsUI(symbol);
+            renderAtomSvg();
+            updateIdentityCard();
+            checkBuildChallenge();
+        }
+
+        function updatePresetButtonsUI(activeSymbol) {
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('border-blue-600', 'bg-blue-50');
+                btn.classList.add('border-slate-200');
+                const badge = btn.querySelector('span:last-child');
+                badge.classList.remove('bg-blue-600', 'text-white');
+                badge.classList.add('bg-slate-100', 'text-slate-700');
+            });
+
+            if (activeSymbol) {
+                const activeBtn = document.getElementById('preset-' + activeSymbol);
+                if (activeBtn) {
+                    activeBtn.classList.remove('border-slate-200');
+                    activeBtn.classList.add('border-blue-600', 'bg-blue-50');
+                    const badge = activeBtn.querySelector('span:last-child');
+                    badge.classList.remove('bg-slate-100', 'text-slate-700');
+                    badge.classList.add('bg-blue-600', 'text-white');
+                }
+            }
+        }
+
+        function changeParticle(type, delta) {
+            const maxVal = type === 'electrons' ? 10 : 12;
+            const next = state[type] + delta;
+            if (next < 0 || next > maxVal) return;
+            state[type] = next;
+            updatePresetButtonsUI(null);
+            renderAtomSvg();
+            updateIdentityCard();
+            checkBuildChallenge();
+        }
+
+        function resetAtom() {
+            state.protons = 0;
+            state.neutrons = 0;
+            state.electrons = 0;
+            updatePresetButtonsUI(null);
+            renderAtomSvg();
+            updateIdentityCard();
+            checkBuildChallenge();
+        }
+
+        function setScaleMode(mode) {
+            state.scaleMode = mode;
+            const btnZoom = document.getElementById('btn-view-zoom');
+            const btnReal = document.getElementById('btn-view-real');
+            const caption = document.getElementById('view-mode-caption');
+
+            if (mode === 'zoom') {
+                btnZoom.className = "px-2.5 py-1 rounded-lg text-xs font-extrabold bg-blue-600 text-white shadow-sm transition";
+                btnReal.className = "px-2.5 py-1 rounded-lg text-xs font-extrabold text-slate-700 hover:text-slate-950 transition";
+                caption.innerHTML = "🔍 <strong>Mode Loupe :</strong> le noyau est agrandi pour bien compter les protons et neutrons.";
+            } else {
+                btnReal.className = "px-2.5 py-1 rounded-lg text-xs font-extrabold bg-blue-600 text-white shadow-sm transition";
+                btnZoom.className = "px-2.5 py-1 rounded-lg text-xs font-extrabold text-slate-700 hover:text-slate-950 transition";
+                caption.innerHTML = "🌌 <strong>Vue réelle :</strong> le noyau est minuscule au centre et tout le reste est du <strong>vide</strong> !";
+            }
+            renderAtomSvg();
+        }
+
+        function toggleSigns() {
+            state.showSigns = !state.showSigns;
+            document.getElementById('btn-signs').textContent = state.showSigns ? '± Signes : OUI' : '± Signes : NON';
+            renderAtomSvg();
+        }
+
+        function toggleAnimation() {
+            state.isPlaying = !state.isPlaying;
+            document.getElementById('btn-pause').textContent = state.isPlaying ? '⏸️ Pause' : '▶️ Lecture';
+        }
+
+        function createSvgEl(tag, attrs) {
+            const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+            return el;
+        }
+
+        function renderAtomSvg() {
+            const orbitsLayer = document.getElementById('orbitsLayer');
+            const nucleusLayer = document.getElementById('nucleusLayer');
+            const electronsLayer = document.getElementById('electronsLayer');
+
+            orbitsLayer.innerHTML = '';
+            nucleusLayer.innerHTML = '';
+            electronsLayer.innerHTML = '';
+
+            const cx = 210, cy = 210;
+
+            // 1. Dessin du noyau selon le mode (Loupe vs Vue réelle)
+            const particles = [];
+            const maxP = Math.max(state.protons, state.neutrons);
+            for (let i = 0; i < maxP; i++) {
+                if (i < state.protons) particles.push('proton');
+                if (i < state.neutrons) particles.push('neutron');
+            }
+
+            if (state.scaleMode === 'real') {
+                // Vue réelle : noyau minuscule + mentions "VIDE"
+                if (particles.length > 0) {
+                    nucleusLayer.appendChild(createSvgEl('circle', {
+                        cx, cy, r: 2.8, fill: '#ef4444', stroke: '#fca5a5', 'stroke-width': 0.8
+                    }));
+                }
+                const voidLabels = [
+                    { x: 115, y: 125 }, { x: 305, y: 125 },
+                    { x: 115, y: 300 }, { x: 305, y: 300 }
+                ];
+                voidLabels.forEach(pt => {
+                    const txt = createSvgEl('text', {
+                        x: pt.x, y: pt.y, 'text-anchor': 'middle',
+                        fill: 'rgba(251, 191, 36, 0.45)', 'font-size': '13', 'font-weight': '800'
+                    });
+                    txt.textContent = 'VIDE';
+                    nucleusLayer.appendChild(txt);
+                });
+            } else {
+                // Mode Loupe : particules bien visibles au centre
+                const nucleonR = 9.5;
+                particles.forEach((type, idx) => {
+                    const angle = idx * 2.39996;
+                    const dist = idx === 0 ? 0 : 8.5 * Math.sqrt(idx);
+                    const px = cx + Math.cos(angle) * dist;
+                    const py = cy + Math.sin(angle) * dist;
+
+                    nucleusLayer.appendChild(createSvgEl('circle', {
+                        cx: px, cy: py, r: nucleonR,
+                        fill: type === 'proton' ? '#ef4444' : '#64748b',
+                        stroke: type === 'proton' ? '#fecaca' : '#cbd5e1',
+                        'stroke-width': 1.5
+                    }));
+
+                    if (state.showSigns && type === 'proton') {
+                        const t = createSvgEl('text', {
+                            x: px, y: py + 4, 'text-anchor': 'middle',
+                            fill: '#ffffff', 'font-size': '13', 'font-weight': '900'
+                        });
+                        t.textContent = '+';
+                        nucleusLayer.appendChild(t);
+                    }
+                });
+            }
+
+            // 2. Orbites et électrons
+            const innerR = state.scaleMode === 'real' ? 120 : 105;
+            const outerR = state.scaleMode === 'real' ? 172 : 162;
+            const eRadius = state.scaleMode === 'real' ? 4.5 : 8.5;
+
+            const innerCount = Math.min(2, state.electrons);
+            const outerCount = Math.max(0, state.electrons - 2);
+
+            if (innerCount > 0) {
+                orbitsLayer.appendChild(createSvgEl('circle', {
+                    cx, cy, r: innerR, fill: 'none',
+                    stroke: 'rgba(56, 189, 248, 0.35)', 'stroke-width': 1.5, 'stroke-dasharray': '5 5'
+                }));
+            }
+            if (outerCount > 0) {
+                orbitsLayer.appendChild(createSvgEl('circle', {
+                    cx, cy, r: outerR, fill: 'none',
+                    stroke: 'rgba(56, 189, 248, 0.35)', 'stroke-width': 1.5, 'stroke-dasharray': '5 5'
+                }));
+            }
+
+            const addElectronNode = (radius, baseAngle, speedFactor) => {
+                const g = createSvgEl('g', {
+                    'data-r': radius,
+                    'data-base': baseAngle,
+                    'data-speed': speedFactor
+                });
+                const x = cx + Math.cos(baseAngle) * radius;
+                const y = cy + Math.sin(baseAngle) * radius;
+
+                g.appendChild(createSvgEl('circle', {
+                    cx: x, cy: y, r: eRadius * 1.5,
+                    fill: 'rgba(56, 189, 248, 0.22)'
+                }));
+                g.appendChild(createSvgEl('circle', {
+                    cx: x, cy: y, r: eRadius,
+                    fill: '#0284c7', stroke: '#bae6fd', 'stroke-width': 1.5
+                }));
+                if (state.showSigns && state.scaleMode === 'zoom') {
+                    const t = createSvgEl('text', {
+                        x: x, y: y + 4, 'text-anchor': 'middle',
+                        fill: '#ffffff', 'font-size': '13', 'font-weight': '900'
+                    });
+                    t.textContent = '−';
+                    g.appendChild(t);
+                }
+                electronsLayer.appendChild(g);
+            };
+
+            for (let i = 0; i < innerCount; i++) {
+                addElectronNode(innerR, (i * Math.PI * 2) / innerCount, 1.25);
+            }
+            for (let i = 0; i < outerCount; i++) {
+                addElectronNode(outerR, (i * Math.PI * 2) / outerCount, -0.85);
+            }
+        }
+
+        function animateElectrons() {
+            if (state.isPlaying) {
+                state.angle += 0.018;
+                const cx = 210, cy = 210;
+                document.querySelectorAll('#electronsLayer > g').forEach(g => {
+                    const r = parseFloat(g.getAttribute('data-r'));
+                    const base = parseFloat(g.getAttribute('data-base'));
+                    const speed = parseFloat(g.getAttribute('data-speed'));
+                    const theta = base + state.angle * speed;
+                    const x = cx + Math.cos(theta) * r;
+                    const y = cy + Math.sin(theta) * r;
+
+                    const circles = g.querySelectorAll('circle');
+                    circles.forEach(c => {
+                        c.setAttribute('cx', x);
+                        c.setAttribute('cy', y);
+                    });
+                    const txt = g.querySelector('text');
+                    if (txt) {
+                        txt.setAttribute('x', x);
+                        txt.setAttribute('y', y + 4);
+                    }
+                });
+            }
+            requestAnimationFrame(animateElectrons);
+        }
+
+        function updateIdentityCard() {
+            document.getElementById('count-protons').textContent = state.protons;
+            document.getElementById('count-neutrons').textContent = state.neutrons;
+            document.getElementById('count-electrons').textContent = state.electrons;
+
+            const info = elementsDB[state.protons] || { symbol: "?", name: "Élément" };
+            document.getElementById('periodic-symbol').textContent = info.symbol;
+            document.getElementById('periodic-Z').textContent = state.protons;
+            document.getElementById('periodic-A').textContent = state.protons + state.neutrons;
+            document.getElementById('atom-full-name').textContent = state.protons === 0 ? "Aucun atome" : `${info.name} (${info.symbol})`;
+
+            // Balance visuelle des charges (+ et - alignés face à face)
+            document.getElementById('balance-summary').textContent = `${state.protons} (+) face à ${state.electrons} (−)`;
+            const pairsBox = document.getElementById('charge-pairs-visual');
+            pairsBox.innerHTML = '';
+
+            const maxPairs = Math.max(state.protons, state.electrons);
+            if (maxPairs === 0) {
+                pairsBox.innerHTML = '<span class="text-xs text-slate-400 italic">Aucune charge présente</span>';
+            } else {
+                for (let i = 0; i < maxPairs; i++) {
+                    const pairCol = document.createElement('div');
+                    pairCol.className = "flex flex-col items-center gap-0.5 bg-white px-1 py-1 rounded-lg border border-slate-200";
+                    const hasPlus = i < state.protons;
+                    const hasMinus = i < state.electrons;
+
+                    pairCol.innerHTML = `
+                        <span class="w-5 h-5 rounded-full text-[11px] font-black flex items-center justify-center ${hasPlus ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-300'}">+</span>
+                        <span class="w-5 h-5 rounded-full text-[11px] font-black flex items-center justify-center ${hasMinus ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-300'}">−</span>
+                    `;
+                    pairsBox.appendChild(pairCol);
+                }
+            }
+
+            // Charge globale et message
+            const net = state.protons - state.electrons;
+            const chargeBadge = document.getElementById('id-charge-badge');
+            const feedbackBox = document.getElementById('id-feedback-box');
+
+            if (state.protons === 0 && state.electrons === 0) {
+                chargeBadge.textContent = "VIDE (0)";
+                chargeBadge.className = "px-2.5 py-0.5 rounded-lg font-black text-xs bg-slate-200 text-slate-700";
+                feedbackBox.className = "p-3 rounded-xl bg-slate-100 border border-slate-300 text-slate-800 text-xs sm:text-sm font-semibold";
+                feedbackBox.innerHTML = "ℹ️ Ajoute des <strong>protons (+)</strong> et des <strong>électrons (−)</strong> pour construire un atome.";
+            } else if (net === 0) {
+                chargeBadge.textContent = "NEUTRE (0)";
+                chargeBadge.className = "px-2.5 py-0.5 rounded-lg font-black text-xs bg-emerald-100 text-emerald-800 border border-emerald-300";
+                feedbackBox.className = "p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 text-xs sm:text-sm font-semibold";
+                feedbackBox.innerHTML = `✅ <strong>Atome électriquement neutre :</strong> chaque charge (+) est annulée par une charge (−).`;
+            } else if (net > 0) {
+                chargeBadge.textContent = `POSITIF (+${net})`;
+                chargeBadge.className = "px-2.5 py-0.5 rounded-lg font-black text-xs bg-red-100 text-red-800 border border-red-300";
+                feedbackBox.className = "p-3 rounded-xl bg-red-50 border border-red-300 text-red-950 text-xs sm:text-sm font-semibold";
+                feedbackBox.innerHTML = `⚠️ <strong>Attention :</strong> il y a ${net} proton(s) (+) en trop ! L'atome n'est plus neutre (c'est un <strong>ion positif</strong>).`;
+            } else {
+                chargeBadge.textContent = `NÉGATIF (${net})`;
+                chargeBadge.className = "px-2.5 py-0.5 rounded-lg font-black text-xs bg-sky-100 text-sky-800 border border-sky-300";
+                feedbackBox.className = "p-3 rounded-xl bg-sky-50 border border-sky-300 text-sky-950 text-xs sm:text-sm font-semibold";
+                feedbackBox.innerHTML = `⚠️ <strong>Attention :</strong> il y a ${Math.abs(net)} électron(s) (−) en trop ! L'atome n'est plus neutre (c'est un <strong>ion négatif</strong>).`;
+            }
+        }
+
+        /* -----------------------------------------------------------
+           5. ONGLET 2 : COMPARER LES TAILLES (ZÉRO PUISSANCE NÉGATIVE)
+           ----------------------------------------------------------- */
+        const scaleSteps = [
+            {
+                title: "Pièce de 1 centime (épaisseur)",
+                measure: "Environ 1,6 mm",
+                emoji: "🪙",
+                visualClass: "w-24 h-24 rounded-full bg-amber-500 border-4 border-amber-300 flex items-center justify-center text-3xl shadow-lg",
+                desc: "C'est notre point de départ visible à l'œil nu : l'épaisseur d'une pièce de 1 centime d'euro mesure environ 1,6 millimètre.",
+                fact: "Un grain de sel (0,3 mm) est environ 5 fois plus petit que l'épaisseur d'une pièce de 1 centime."
+            },
+            {
+                title: "Grain de sel fin",
+                measure: "Environ 0,3 mm",
+                emoji: "🧂",
+                visualClass: "w-16 h-16 rounded-xl bg-slate-100 border-2 border-slate-300 flex items-center justify-center text-2xl shadow-md",
+                desc: "Un grain de sel mesure environ 0,3 millimètre. On le distingue encore à l'œil nu, mais il est déjà tout petit.",
+                fact: "L'épaisseur d'un cheveu (0,08 mm) est environ 4 fois plus fine qu'un grain de sel."
+            },
+            {
+                title: "Épaisseur d'un cheveu humain",
+                measure: "Environ 0,08 mm",
+                emoji: "💇",
+                visualClass: "w-28 h-2 rounded-full bg-amber-200 border border-amber-400 shadow",
+                desc: "Un cheveu mesure environ 0,08 millimètre d'épaisseur : il est environ 20 fois plus fin qu'une pièce de 1 centime.",
+                fact: "Un globule rouge du sang (0,008 mm) est 10 fois plus petit que l'épaisseur d'un cheveu."
+            },
+            {
+                title: "Globule rouge (dans le sang)",
+                measure: "Environ 0,008 mm",
+                emoji: "🩸",
+                visualClass: "w-10 h-10 rounded-full bg-red-500 border-2 border-red-300 flex items-center justify-center text-base shadow-md",
+                desc: "Un globule rouge mesure environ 0,008 millimètre : il faut un microscope pour le voir.",
+                fact: "Un atome est environ 100 000 fois plus petit qu'un globule rouge !"
+            },
+            {
+                title: "Un atome",
+                measure: "1 000 000 de fois plus petit qu'un cheveu",
+                emoji: "⚛️",
+                visualClass: "w-5 h-5 rounded-full bg-sky-400 border-2 border-white shadow-[0_0_16px_rgba(56,189,248,0.9)]",
+                desc: "L'atome est totalement invisible même au microscope classique : il faudrait aligner environ 1 000 000 d'atomes pour faire l'épaisseur d'un seul cheveu.",
+                fact: "Pourtant, l'atome est encore 100 000 fois plus grand que son noyau !"
+            },
+            {
+                title: "Le noyau de l'atome",
+                measure: "100 000 fois plus petit que l'atome",
+                emoji: "🔴",
+                visualClass: "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,1)]",
+                desc: "Caché tout au centre de l'atome, le noyau est 100 000 fois plus petit que l'atome entier. Tout le reste autour n'est que du vide !",
+                fact: "Si l'atome avait la taille d'un stade de foot (100 m), le noyau serait une petite bille au centre."
+            }
+        ];
+
+        let currentScaleIdx = 0;
+
+        function setScaleIndex(idx) {
+            currentScaleIdx = Math.max(0, Math.min(scaleSteps.length - 1, idx));
+            const s = scaleSteps[currentScaleIdx];
+
+            document.getElementById('scale-slider').value = currentScaleIdx;
+            document.getElementById('scale-badge').textContent = `Étape ${currentScaleIdx + 1} / ${scaleSteps.length}`;
+            document.getElementById('scale-title').textContent = s.title;
+            document.getElementById('scale-measure').textContent = s.measure;
+            document.getElementById('scale-desc').textContent = s.desc;
+            document.getElementById('scale-fact').innerHTML = `💡 ${s.fact}`;
+
+            const stage = document.getElementById('scale-visual-stage');
+            stage.innerHTML = `<div class="${s.visualClass}">${currentScaleIdx <= 3 ? s.emoji : ''}</div>`;
+
+            document.querySelectorAll('.scale-step-btn').forEach((btn, i) => {
+                btn.className = i === currentScaleIdx
+                    ? "scale-step-btn py-1.5 px-2 rounded-lg text-xs font-extrabold bg-blue-600 text-white"
+                    : "scale-step-btn py-1.5 px-2 rounded-lg text-xs font-extrabold bg-slate-200 text-slate-700 hover:bg-slate-300";
+            });
+        }
+
+        function stepScale(delta) {
+            setScaleIndex(currentScaleIdx + delta);
+        }
+
+        // Duel des tailles en 4 manches
+        const duelRounds = [
+            {
+                question: "Manche 1 : Entre l'épaisseur d'un cheveu et un atome, lequel est le PLUS PETIT ?",
+                a: { label: "Épaisseur d'un cheveu", sub: "Environ 0,08 mm", emoji: "💇" },
+                b: { label: "Un atome", sub: "1 million de fois plus fin", emoji: "⚛️" },
+                correct: 'b',
+                explain: "Bravo ! Il faudrait aligner 1 000 000 d'atomes pour atteindre l'épaisseur d'un cheveu."
+            },
+            {
+                question: "Manche 2 : Entre un atome entier et son noyau, lequel est le PLUS PETIT ?",
+                a: { label: "Le noyau de l'atome", sub: "100 000 fois plus petit", emoji: "🔴" },
+                b: { label: "L'atome entier", sub: "Noyau + vide + électrons", emoji: "⚛️" },
+                correct: 'a',
+                explain: "Exact ! Le noyau est 100 000 fois plus petit que l'atome entier."
+            },
+            {
+                question: "Manche 3 : Entre un grain de sel (0,3 mm) et un globule rouge (0,008 mm), lequel est le PLUS PETIT ?",
+                a: { label: "Grain de sel fin", sub: "Environ 0,3 mm", emoji: "🧂" },
+                b: { label: "Globule rouge", sub: "Environ 0,008 mm", emoji: "🩸" },
+                correct: 'b',
+                explain: "Bien joué ! Un globule rouge est invisible à l'œil nu, contrairement au grain de sel."
+            },
+            {
+                question: "Manche 4 : Entre une pièce de 1 centime (1,6 mm) et un cheveu (0,08 mm), lequel est le PLUS GRAND ?",
+                a: { label: "Pièce de 1 centime", sub: "Environ 1,6 mm", emoji: "🪙" },
+                b: { label: "Épaisseur d'un cheveu", sub: "Environ 0,08 mm", emoji: "💇" },
+                correct: 'a',
+                explain: "Parfait ! Une pièce de 1 centime est environ 20 fois plus épaisse qu'un cheveu."
+            }
+        ];
+
+        let duelIdx = 0;
+        let duelScore = 0;
+        let duelAnswered = false;
+
+        function renderDuelRound() {
+            duelAnswered = false;
+            const r = duelRounds[duelIdx];
+            document.getElementById('duel-progress').textContent = `Manche ${duelIdx + 1} / ${duelRounds.length} • Score : ${duelScore}`;
+            document.getElementById('duel-question').textContent = r.question;
+            document.getElementById('duel-feedback').classList.add('hidden');
+            document.getElementById('duel-next-btn').classList.add('hidden');
+
+            const choicesBox = document.getElementById('duel-choices');
+            choicesBox.innerHTML = '';
+
+            ['a', 'b'].forEach(key => {
+                const item = r[key];
+                const btn = document.createElement('button');
+                btn.className = "p-3.5 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition flex flex-col items-center text-center gap-1 active:scale-95";
+                btn.innerHTML = `
+                    <span class="text-2xl">${item.emoji}</span>
+                    <span class="font-black text-sm text-slate-900 leading-tight">${item.label}</span>
+                    <span class="text-[11px] font-semibold text-slate-500">${item.sub}</span>
+                `;
+                btn.onclick = () => answerDuel(key);
+                choicesBox.appendChild(btn);
+            });
+        }
+
+        function answerDuel(chosenKey) {
+            if (duelAnswered) return;
+            duelAnswered = true;
+            const r = duelRounds[duelIdx];
+            const isWin = chosenKey === r.correct;
+            if (isWin) duelScore++;
+
+            document.getElementById('duel-progress').textContent = `Manche ${duelIdx + 1} / ${duelRounds.length} • Score : ${duelScore}`;
+            const fb = document.getElementById('duel-feedback');
+            fb.classList.remove('hidden');
+            fb.className = isWin
+                ? "p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 text-xs sm:text-sm font-bold"
+                : "p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs sm:text-sm font-bold";
+            fb.textContent = (isWin ? "✅ " : "💡 ") + r.explain;
+
+            const nextBtn = document.getElementById('duel-next-btn');
+            nextBtn.textContent = duelIdx < duelRounds.length - 1 ? "Manche suivante →" : "Rejouer le duel 🔄";
+            nextBtn.classList.remove('hidden');
+        }
+
+        function nextDuelRound() {
+            if (duelIdx < duelRounds.length - 1) {
+                duelIdx++;
+            } else {
+                duelIdx = 0;
+                duelScore = 0;
+            }
+            renderDuelRound();
+        }
+
+        /* -----------------------------------------------------------
+           6. ONGLET 4 : MINI-DÉFI (QUIZ DE 8 QUESTIONS)
+           ----------------------------------------------------------- */
+        const quizQuestions = [
+            {
+                hint: "🧱 Pense aux briques de construction de tout ce qui nous entoure.",
+                question: "1. Qu'est-ce qu'un atome ?",
+                options: [
+                    "La minuscule « brique élémentaire » qui forme toute la matière",
+                    "Une goutte d'eau visible à l'œil nu",
+                    "Un morceau de plastique"
+                ],
+                correct: 0,
+                explanation: "Exact ! L'atome est la brique de base de toute la matière (eau, air, métaux, vivants)."
+            },
+            {
+                hint: "🔴⚪ Au centre de l'atome se trouve le noyau.",
+                question: "2. Quelles particules trouve-t-on dans le noyau de l'atome ?",
+                options: [
+                    "Uniquement des électrons (−)",
+                    "Des protons (+) et des neutrons (0)",
+                    "De l'air et de l'eau"
+                ],
+                correct: 1,
+                explanation: "Bravo ! Le noyau central contient les protons (+) et les neutrons (neutres)."
+            },
+            {
+                hint: "🔵 Elles tournent autour du noyau central.",
+                question: "3. Quelle particule porte une charge négative (−) et tourne autour du noyau ?",
+                options: [
+                    "Le proton",
+                    "Le neutron",
+                    "L'électron"
+                ],
+                correct: 2,
+                explanation: "Parfait ! Ce sont les électrons (−) qui gravitent autour du noyau."
+            },
+            {
+                hint: "🏟️ Souviens-toi de l'image du stade de football de 100 mètres.",
+                question: "4. Que trouve-t-on entre le noyau et les électrons ?",
+                options: [
+                    "Du vide !",
+                    "De la colle",
+                    "D'autres noyaux"
+                ],
+                correct: 0,
+                explanation: "Tout à fait ! L'atome est constitué essentiellement de vide : c'est sa structure lacunaire."
+            },
+            {
+                hint: "⚖️ Compare le nombre de charges (+) et de charges (−).",
+                question: "5. Pourquoi dit-on qu'un atome est électriquement neutre ?",
+                options: [
+                    "Parce qu'il ne contient aucune particule chargée",
+                    "Parce qu'il a autant de protons (+) que d'électrons (−)",
+                    "Parce qu'il est très petit"
+                ],
+                correct: 1,
+                explanation: "Exact ! Les charges positives (+) et négatives (−) s'annulent : la charge totale vaut 0."
+            },
+            {
+                hint: "🪪 Carbone (C) : Z = 6 protons.",
+                question: "6. Un atome de Carbone possède 6 protons. Combien a-t-il d'électrons ?",
+                options: [
+                    "0 électron",
+                    "3 électrons",
+                    "6 électrons"
+                ],
+                correct: 2,
+                explanation: "Super ! Comme l'atome est neutre, il a autant d'électrons (−) que de protons (+), soit 6."
+            },
+            {
+                hint: "💇 Repère de taille sans puissance négative.",
+                question: "7. Environ combien d'atomes faut-il aligner pour faire l'épaisseur d'un cheveu (0,08 mm) ?",
+                options: [
+                    "Environ 10 atomes",
+                    "Environ 1 000 000 d'atomes",
+                    "Environ 50 atomes"
+                ],
+                correct: 1,
+                explanation: "Bien joué ! Un atome est environ 1 million de fois plus petit que l'épaisseur d'un cheveu."
+            },
+            {
+                hint: "💧 Exemple : 2 atomes d'Hydrogène + 1 atome d'Oxygène = H₂O.",
+                question: "8. Que forment des atomes qui s'assemblent entre eux ?",
+                options: [
+                    "Des molécules",
+                    "Des protons",
+                    "Des noyaux"
+                ],
+                correct: 0,
+                explanation: "Félicitations ! En s'accrochant les uns aux autres, les atomes forment des molécules."
+            }
+        ];
+
+        let currentQIndex = 0;
+        let quizScore = 0;
+        let questionAnswered = false;
+
+        function renderQuizQuestion() {
+            questionAnswered = false;
+            const q = quizQuestions[currentQIndex];
+
+            document.getElementById('quiz-progress-text').textContent = `Question ${currentQIndex + 1} sur ${quizQuestions.length}`;
+            document.getElementById('quiz-score-live').textContent = `Score : ${quizScore} / ${quizQuestions.length}`;
+            document.getElementById('quiz-progress-bar').style.width = `${((currentQIndex + 1) / quizQuestions.length) * 100}%`;
+
+            const hintEl = document.getElementById('quiz-visual-hint');
+            hintEl.textContent = q.hint;
+            hintEl.classList.remove('hidden');
+
+            document.getElementById('quiz-question-text').textContent = q.question;
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('quiz-next-btn').classList.add('hidden');
+
+            const optionsBox = document.getElementById('quiz-options');
+            optionsBox.innerHTML = '';
+
+            q.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-slate-800 text-sm sm:text-base transition flex items-center gap-3 active:scale-[0.99]";
+                const letters = ['A', 'B', 'C'];
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 font-black flex items-center justify-center shrink-0">${letters[idx]}</span>
+                    <span>${optText}</span>
+                `;
+                btn.onclick = () => selectQuizAnswer(idx);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function selectQuizAnswer(selectedIndex) {
+            if (questionAnswered) return;
+            questionAnswered = true;
+
+            const q = quizQuestions[currentQIndex];
+            const isCorrect = selectedIndex === q.correct;
+            const allBtns = document.getElementById('quiz-options').querySelectorAll('button');
+
+            allBtns.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:border-blue-500', 'hover:bg-blue-50');
+                if (idx === q.correct) {
+                    btn.classList.remove('border-slate-200');
+                    btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-950');
+                    btn.querySelector('span:first-child').className = "w-8 h-8 rounded-lg bg-emerald-600 text-white font-black flex items-center justify-center shrink-0";
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.remove('border-slate-200');
+                    btn.classList.add('border-red-500', 'bg-red-50', 'text-red-950');
+                    btn.querySelector('span:first-child').className = "w-8 h-8 rounded-lg bg-red-600 text-white font-black flex items-center justify-center shrink-0";
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            const fb = document.getElementById('quiz-feedback');
+            fb.classList.remove('hidden');
+
+            if (isCorrect) {
+                quizScore++;
+                document.getElementById('quiz-score-live').textContent = `Score : ${quizScore} / ${quizQuestions.length}`;
+                fb.className = "p-4 rounded-xl border-2 border-emerald-300 bg-emerald-50 text-emerald-950 text-sm sm:text-base font-semibold";
+                fb.innerHTML = `✅ <strong>Bonne réponse !</strong> ${q.explanation}`;
+            } else {
+                fb.className = "p-4 rounded-xl border-2 border-amber-300 bg-amber-50 text-amber-950 text-sm sm:text-base font-semibold";
+                fb.innerHTML = `💡 <strong>Pas tout à fait !</strong> ${q.explanation}`;
+            }
+
+            const nextBtn = document.getElementById('quiz-next-btn');
+            nextBtn.textContent = currentQIndex < quizQuestions.length - 1 ? "Question suivante →" : "Voir mon bilan final 🏆";
+            nextBtn.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            if (currentQIndex < quizQuestions.length - 1) {
+                currentQIndex++;
+                renderQuizQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            markProgress('quiz');
+            document.getElementById('quiz-header').classList.add('hidden');
+            document.getElementById('quiz-question-area').classList.add('hidden');
+            document.getElementById('quiz-result-area').classList.remove('hidden');
+
+            document.getElementById('final-score').textContent = `${quizScore} / ${quizQuestions.length}`;
+
+            const emojiEl = document.getElementById('result-emoji');
+            const badgeEl = document.getElementById('final-badge');
+            const msgEl = document.getElementById('result-message');
+
+            if (quizScore >= 7) {
+                emojiEl.textContent = "🏆";
+                badgeEl.textContent = "Niveau : Expert de l'atome";
+                badgeEl.className = "inline-block px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800";
+                msgEl.textContent = "Excellent travail ! Tu as parfaitement compris la structure de l'atome et ses ordres de grandeur.";
+            } else if (quizScore >= 5) {
+                emojiEl.textContent = "👏";
+                badgeEl.textContent = "Niveau : Bon maîtrise";
+                badgeEl.className = "inline-block px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-800";
+                msgEl.textContent = "Très bien ! Tu as compris l'essentiel. Tu peux refaire le quiz pour viser le 8/8.";
+            } else {
+                emojiEl.textContent = "💪";
+                badgeEl.textContent = "Niveau : En apprentissage";
+                badgeEl.className = "inline-block px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800";
+                msgEl.textContent = "Bon début ! Relis les 4 cartes mémo dans l'onglet « L'essentiel à retenir » puis retente le quiz.";
+            }
+        }
+
+        function restartQuiz() {
+            currentQIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-result-area').classList.add('hidden');
+            document.getElementById('quiz-header').classList.remove('hidden');
+            document.getElementById('quiz-question-area').classList.remove('hidden');
+            renderQuizQuestion();
+        }
+
+        /* -----------------------------------------------------------
+           7. INITIALISATION
+           ----------------------------------------------------------- */
+        window.onload = function() {
+            renderAtomSvg();
+            updateIdentityCard();
+            renderBuildChallenge();
+            setScaleIndex(0);
+            renderDuelRound();
+            renderQuizQuestion();
+            animateElectrons();
+        };
+    </script>
+</body>
+</html>
