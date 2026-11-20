@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapitre 3 : Les Fractions — QCM Interactif (6e / Cycle 3)</title>
+    <!-- Police Inter pour une lisibilité optimale -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Mise en forme mathématique verticale des fractions */
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.22em;
+            line-height: 1.05;
+            font-weight: 700;
+            font-size: 0.95em;
+        }
+        .frac .num {
+            padding: 0 0.28em 0.12em;
+            border-bottom: 2px solid currentColor;
+            text-align: center;
+        }
+        .frac .den {
+            padding: 0.12em 0.28em 0;
+            text-align: center;
+        }
+
+        /* Animations douces d'apparition */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-up {
+            animation: fadeSlideUp 0.3s ease-out forwards;
+        }
+
+        /* Personnalisation légère pour les SVG responsives */
+        .svg-container svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- En-tête fixe et léger -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-20">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-lg shadow-sm">
+                    <span class="frac text-xs leading-none"><span class="num border-white pb-0.5">a</span><span class="den pt-0.5">b</span></span>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Chapitre 3 : Les Fractions</h1>
+                    <p class="text-xs text-slate-500 font-medium">Mathématiques • Niveau 6e / Cycle 3</p>
+                </div>
+            </div>
+            <button id="header-home-btn" onclick="showHome()" class="hidden text-xs sm:text-sm font-semibold text-slate-500 hover:text-indigo-600 px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors">
+                Accueil
+            </button>
+        </div>
+    </header>
+
+    <!-- Conteneur principal -->
+    <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+        <!-- ==================== ÉCRAN 1 : ACCUEIL ==================== -->
+        <section id="screen-home" class="animate-fade-up">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 sm:p-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold mb-4">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    Banque de 40 questions • Tirage aléatoire
+                </div>
+
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
+                    Entraîne-toi sur les fractions !
+                </h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                    À chaque partie, <strong class="text-slate-800">10 questions</strong> sont piochées au hasard parmi une banque de <strong class="text-slate-800">40 questions</strong> couvrant l'ensemble du chapitre. Tu obtiens une correction immédiate avec un rappel de cours après chaque réponse.
+                </p>
+
+                <!-- Grille des 6 thèmes couverts -->
+                <div class="mb-8">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Les 6 notions travaillées</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="home-themes-grid">
+                        <!-- Injecté dynamiquement par JS -->
+                    </div>
+                </div>
+
+                <!-- Bouton de démarrage -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+                    <div class="flex items-center gap-4 text-xs sm:text-sm text-slate-500">
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            10 questions
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Correction immédiate
+                        </span>
+                    </div>
+                    <button onclick="startQuiz()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold px-7 py-3.5 rounded-2xl shadow-md shadow-indigo-200 transition-all text-base">
+                        Commencer le QCM
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ÉCRAN 2 : QUIZ EN COURS ==================== -->
+        <section id="screen-quiz" class="hidden">
+            <!-- Barre de progression & infos -->
+            <div class="mb-5">
+                <div class="flex items-center justify-between text-xs sm:text-sm font-semibold mb-2">
+                    <span class="text-slate-600">Question <span id="quiz-progress-text" class="text-indigo-600 font-bold">1 / 10</span></span>
+                    <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1 rounded-full text-slate-700 shadow-xs">
+                        Score : <span id="quiz-score-text" class="text-indigo-600 font-bold">0</span>
+                    </span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div id="quiz-progress-bar" class="h-full bg-indigo-600 rounded-full transition-all duration-300 ease-out" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <!-- Carte de la question -->
+            <div id="question-card" class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-5 sm:p-8 animate-fade-up">
+                <!-- Badge du thème -->
+                <div class="mb-4">
+                    <span id="question-theme-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700">
+                        Thème
+                    </span>
+                </div>
+
+                <!-- Énoncé de la question -->
+                <h2 id="question-prompt" class="text-lg sm:text-xl font-bold text-slate-900 leading-relaxed mb-5">
+                    <!-- Injecté par JS -->
+                </h2>
+
+                <!-- Zone d'illustration SVG (masquée si la question n'a pas de visuel) -->
+                <div id="question-visual" class="hidden mb-6 p-4 sm:p-5 bg-slate-50/90 border border-slate-200/70 rounded-2xl svg-container">
+                    <!-- SVG injecté par JS -->
+                </div>
+
+                <!-- 4 propositions de réponse -->
+                <div id="question-choices" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+                    <!-- Boutons injectés par JS -->
+                </div>
+
+                <!-- Encadré de correction immédiate -->
+                <div id="feedback-box" class="hidden mt-6 rounded-2xl p-4 sm:p-5 border-2 animate-fade-up">
+                    <div class="flex items-start gap-3">
+                        <div id="feedback-icon" class="shrink-0 mt-0.5"></div>
+                        <div class="flex-1">
+                            <p id="feedback-title" class="font-bold text-sm sm:text-base mb-1"></p>
+                            <p id="feedback-explanation" class="text-sm leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bouton Question suivante -->
+                <div id="next-btn-container" class="hidden mt-6 flex justify-end">
+                    <button id="next-btn" onclick="nextQuestion()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold px-6 py-3 rounded-2xl shadow-md shadow-indigo-200 transition-all">
+                        <span id="next-btn-label">Question suivante</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ÉCRAN 3 : BILAN FINAL ==================== -->
+        <section id="screen-results" class="hidden animate-fade-up">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 sm:p-10 mb-6">
+                <!-- En-tête du score -->
+                <div class="text-center mb-8">
+                    <div id="result-badge" class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-indigo-50 border-4 border-indigo-100 mb-4">
+                        <div class="text-center">
+                            <span id="result-score" class="text-3xl font-extrabold text-indigo-700">0</span>
+                            <span class="text-lg font-bold text-indigo-400">/10</span>
+                        </div>
+                    </div>
+                    <h2 id="result-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">Bravo !</h2>
+                    <p id="result-message" class="text-slate-600 text-sm sm:text-base max-w-lg mx-auto"></p>
+                </div>
+
+                <!-- Détail des réussites par thème -->
+                <div class="mb-8">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Réussite par thème abordé</h3>
+                    <div id="result-themes-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Injecté par JS -->
+                    </div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 border-t border-slate-100">
+                    <button onclick="startQuiz()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold px-6 py-3.5 rounded-2xl shadow-md shadow-indigo-200 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Nouvelle série de 10 questions
+                    </button>
+                    <button onclick="showHome()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-6 py-3.5 rounded-2xl transition-colors">
+                        Retour à l'accueil
+                    </button>
+                </div>
+            </div>
+
+            <!-- Récapitulatif déroulable des 10 questions -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <button onclick="toggleReview()" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors">
+                    <div class="flex items-center gap-2.5">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        <span class="font-bold text-slate-800 text-sm sm:text-base">Voir le récapitulatif des 10 questions</span>
+                    </div>
+                    <svg id="review-chevron" class="w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div id="result-review-container" class="hidden border-t border-slate-100 divide-y divide-slate-100">
+                    <!-- Cartes de récapitulatif injectées par JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Pied de page discret -->
+    <footer class="py-5 text-center text-xs text-slate-400">
+        Chapitre 3 : Les Fractions — QCM interactif de mathématiques (Cycle 3 / 6e)
+    </footer>
+
+    <script>
+        /* ============================================================================
+           1. UTILITAIRES DE FORMATAGE MATHÉMATIQUE ET GÉNÉRATEURS DE SVG
+           ============================================================================ */
+
+        /**
+         * Retourne le HTML d'une fraction affichée verticalement.
+         * @param {number|string} num - Numérateur
+         * @param {number|string} den - Dénominateur
+         * @returns {string} HTML de la fraction
+         */
+        function f(num, den) {
+            return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+        }
+
+        /**
+         * Génère un ou plusieurs disques partagés en parts égales (SVG).
+         * Gère automatiquement les fractions inférieures et supérieures à 1.
+         * @param {number} num - Nombre de parts coloriées
+         * @param {number} den - Nombre de parts par disque
+         * @param {string} fillColor - Couleur de remplissage
+         * @returns {string} Code SVG
+         */
+        function svgDisk(num, den, fillColor = '#6366f1') {
+            const diskCount = Math.max(1, Math.ceil(num / den));
+            const r = 44;
+            const gap = 22;
+            const width = diskCount * (2 * r) + (diskCount - 1) * gap + 20;
+            const height = 2 * r + 20;
+            let content = '';
+
+            for (let d = 0; d < diskCount; d++) {
+                const cx = 10 + r + d * (2 * r + gap);
+                const cy = 10 + r;
+
+                for (let i = 0; i < den; i++) {
+                    const globalIndex = d * den + i;
+                    const isFilled = globalIndex < num;
+                    const startAngle = -Math.PI / 2 + (i * 2 * Math.PI) / den;
+                    const endAngle = -Math.PI / 2 + ((i + 1) * 2 * Math.PI) / den;
+
+                    const x1 = cx + r * Math.cos(startAngle);
+                    const y1 = cy + r * Math.sin(startAngle);
+                    const x2 = cx + r * Math.cos(endAngle);
+                    const y2 = cy + r * Math.sin(endAngle);
+                    const largeArc = (endAngle - startAngle) > Math.PI ? 1 : 0;
+
+                    const pathData = `M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
+                    content += `<path d="${pathData}" fill="${isFilled ? fillColor : '#ffffff'}" stroke="#334155" stroke-width="1.8" stroke-linejoin="round" />`;
+                }
+                // Cercle extérieur net
+                content += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1e293b" stroke-width="2" />`;
+            }
+
+            return `<svg viewBox="0 0 ${width} ${height}" style="max-width: ${Math.min(width * 1.4, 340)}px" role="img" aria-label="Disque partagé en ${den} parts avec ${num} parts coloriées">${content}</svg>`;
+        }
+
+        /**
+         * Génère deux disques côte à côte pour comparer deux fractions de même dénominateur.
+         */
+        function svgCompareDisks(num1, den1, num2, den2) {
+            const r = 42;
+            const width = 260;
+            const height = 115;
+
+            function drawOne(cx, cy, num, den, color) {
+                let s = '';
+                for (let i = 0; i < den; i++) {
+                    const isFilled = i < num;
+                    const a1 = -Math.PI / 2 + (i * 2 * Math.PI) / den;
+                    const a2 = -Math.PI / 2 + ((i + 1) * 2 * Math.PI) / den;
+                    const x1 = cx + r * Math.cos(a1);
+                    const y1 = cy + r * Math.sin(a1);
+                    const x2 = cx + r * Math.cos(a2);
+                    const y2 = cy + r * Math.sin(a2);
+                    const largeArc = (a2 - a1) > Math.PI ? 1 : 0;
+                    s += `<path d="M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z" fill="${isFilled ? color : '#ffffff'}" stroke="#334155" stroke-width="1.6" />`;
+                }
+                s += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1e293b" stroke-width="2" />`;
+                return s;
+            }
+
+            const svgContent = `
+                ${drawOne(60, 52, num1, den1, '#6366f1')}
+                <text x="130" y="58" text-anchor="middle" font-size="22" font-weight="800" fill="#94a3b8">?</text>
+                ${drawOne(200, 52, num2, den2, '#0ea5e9')}
+            `;
+            return `<svg viewBox="0 0 ${width} ${height}" style="max-width: 300px" role="img" aria-label="Comparaison de deux disques fractionnés">${svgContent}</svg>`;
+        }
+
+        /**
+         * Génère une barre rectangulaire partagée en parts égales (SVG).
+         * @param {number} num - Nombre de cases coloriées
+         * @param {number} den - Nombre total de cases
+         * @param {string} fillColor - Couleur de remplissage
+         */
+        function svgBar(num, den, fillColor = '#6366f1') {
+            const width = 320;
+            const height = 64;
+            const padX = 12;
+            const padY = 12;
+            const barW = width - 2 * padX;
+            const barH = height - 2 * padY;
+            const cellW = barW / den;
+            let content = '';
+
+            for (let i = 0; i < den; i++) {
+                const x = padX + i * cellW;
+                const isFilled = i < num;
+                content += `<rect x="${x.toFixed(2)}" y="${padY}" width="${cellW.toFixed(2)}" height="${barH}" fill="${isFilled ? fillColor : '#ffffff'}" stroke="#334155" stroke-width="1.8" />`;
+            }
+            content += `<rect x="${padX}" y="${padY}" width="${barW}" height="${barH}" rx="4" fill="none" stroke="#1e293b" stroke-width="2.2" />`;
+
+            return `<svg viewBox="0 0 ${width} ${height}" style="max-width: 360px" role="img" aria-label="Barre divisée en ${den} parts avec ${num} parts coloriées">${content}</svg>`;
+        }
+
+        /**
+         * Génère un axe gradué propre avec repères 0, 1, 2... et un point coloré optionnel.
+         * @param {number} maxUnit - Entier maximum affiché (ex: 1, 2 ou 3)
+         * @param {number} stepsPerUnit - Nombre de pas dans 1 unité
+         * @param {number} targetStep - Position du point en nombre de pas (-1 si aucun point)
+         * @param {string} label - Lettre du point (ex: 'A')
+         */
+        function svgNumberLine(maxUnit, stepsPerUnit, targetStep = -1, label = 'A') {
+            const width = 500;
+            const height = 108;
+            const leftPad = 32;
+            const rightPad = 38;
+            const lineW = width - leftPad - rightPad;
+            const axisY = 66;
+            const totalSteps = maxUnit * stepsPerUnit;
+            const stepW = lineW / totalSteps;
+
+            let content = '';
+
+            // Ligne principale de l'axe avec flèche à droite
+            content += `<line x1="${leftPad}" y1="${axisY}" x2="${width - rightPad + 16}" y2="${axisY}" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" />`;
+            content += `<polyline points="${width - rightPad + 9},${axisY - 5} ${width - rightPad + 17},${axisY} ${width - rightPad + 9},${axisY + 5}" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`;
+
+            // Graduations principales (entiers) et secondaires (pas)
+            for (let s = 0; s <= totalSteps; s++) {
+                const x = leftPad + s * stepW;
+                const isMajor = (s % stepsPerUnit === 0);
+
+                if (isMajor) {
+                    const unitVal = s / stepsPerUnit;
+                    content += `<line x1="${x.toFixed(2)}" y1="${axisY - 12}" x2="${x.toFixed(2)}" y2="${axisY + 12}" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />`;
+                    content += `<text x="${x.toFixed(2)}" y="${axisY + 30}" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">${unitVal}</text>`;
+                } else {
+                    content += `<line x1="${x.toFixed(2)}" y1="${axisY - 6}" x2="${x.toFixed(2)}" y2="${axisY + 6}" stroke="#64748b" stroke-width="1.6" stroke-linecap="round" />`;
+                }
+            }
+
+            // Si aucun point cible : mettre en évidence 1 pas entre 0 et la 1re graduation
+            if (targetStep < 0) {
+                const x1 = leftPad;
+                const x2 = leftPad + stepW;
+                const midX = (x1 + x2) / 2;
+                content += `<path d="M ${x1} ${axisY - 14} Q ${midX} ${axisY - 34} ${x2} ${axisY - 14}" fill="none" stroke="#4f46e5" stroke-width="2.2" />`;
+                content += `<text x="${midX}" y="${axisY - 32}" text-anchor="middle" font-size="12" font-weight="700" fill="#4f46e5">1 pas = ?</text>`;
+            } else {
+                // Point repéré bien visible en rouge corail
+                const tx = leftPad + targetStep * stepW;
+                // Flèche vers le point
+                content += `<line x1="${tx.toFixed(2)}" y1="26" x2="${tx.toFixed(2)}" y2="${axisY - 11}" stroke="#e11d48" stroke-width="2.4" stroke-linecap="round" />`;
+                content += `<polyline points="${(tx - 5).toFixed(2)},${axisY - 17} ${tx.toFixed(2)},${axisY - 10} ${(tx + 5).toFixed(2)},${axisY - 17}" fill="none" stroke="#e11d48" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />`;
+                // Pastille du point sur l'axe
+                content += `<circle cx="${tx.toFixed(2)}" cy="${axisY}" r="6" fill="#e11d48" stroke="#ffffff" stroke-width="2" />`;
+                // Badge avec la lettre du point
+                content += `<rect x="${(tx - 13).toFixed(2)}" y="4" width="26" height="20" rx="6" fill="#e11d48" />`;
+                content += `<text x="${tx.toFixed(2)}" y="18" text-anchor="middle" font-size="13" font-weight="800" fill="#ffffff">${label}</text>`;
+            }
+
+            return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Axe gradué de 0 à ${maxUnit} partagé en ${stepsPerUnit} pas par unité">${content}</svg>`;
+        }
+
+        /**
+         * Génère une grille 10x10 (100 cases) remplie colonne par colonne pour les centièmes.
+         * @param {number} filled - Nombre de cases coloriées (0 à 100)
+         * @param {string} fillColor - Couleur de remplissage
+         */
+        function svgGrid100(filled, fillColor = '#6366f1') {
+            const cell = 16;
+            const pad = 8;
+            const size = 10 * cell + 2 * pad;
+            let content = '';
+
+            for (let col = 0; col < 10; col++) {
+                for (let row = 0; row < 10; row++) {
+                    const idx = col * 10 + row;
+                    const x = pad + col * cell;
+                    const y = pad + row * cell;
+                    const isFilled = idx < filled;
+                    content += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" fill="${isFilled ? fillColor : '#ffffff'}" stroke="#94a3b8" stroke-width="0.9" />`;
+                }
+            }
+            content += `<rect x="${pad}" y="${pad}" width="${10 * cell}" height="${10 * cell}" fill="none" stroke="#1e293b" stroke-width="2" />`;
+
+            return `<svg viewBox="0 0 ${size} ${size}" style="max-width: 190px" role="img" aria-label="Grille de 100 cases avec ${filled} cases coloriées">${content}</svg>`;
+        }
+
+
+        /* ============================================================================
+           2. DÉFINITION DES 6 THÈMES ET BANQUE COMPLÈTE DE 40 QUESTIONS VÉRIFIÉES
+           ============================================================================ */
+
+        const THEMES = {
+            vocab: {
+                id: 'vocab',
+                name: 'Vocabulaire & Fractions < 1',
+                short: 'Vocabulaire & < 1',
+                desc: 'Numérateur, dénominateur, représentations graphiques.',
+                badgeClass: 'bg-indigo-50 text-indigo-700'
+            },
+            lecture: {
+                id: 'lecture',
+                name: 'Lire les fractions',
+                short: 'Lire les fractions',
+                desc: 'Règle en « -ième(s) » et cas particuliers (demi, tiers, quart).',
+                badgeClass: 'bg-sky-50 text-sky-700'
+            },
+            decomp: {
+                id: 'decomp',
+                name: 'Décomposer & Encadrer',
+                short: 'Décomposer & Encadrer',
+                desc: 'Écrire sous forme entier + fraction et encadrer entre deux entiers.',
+                badgeClass: 'bg-violet-50 text-violet-700'
+            },
+            axe: {
+                id: 'axe',
+                name: 'Repérer sur un axe gradué',
+                short: 'Axe gradué',
+                desc: 'Valeur d’un pas et lecture d’abscisses sur une demi-droite graduée.',
+                badgeClass: 'bg-amber-50 text-amber-800'
+            },
+            comparer: {
+                id: 'comparer',
+                name: 'Comparer des fractions',
+                short: 'Comparer',
+                desc: 'Comparaison à l’unité (1) et fractions de même dénominateur.',
+                badgeClass: 'bg-emerald-50 text-emerald-700'
+            },
+            decimale: {
+                id: 'decimale',
+                name: 'La fraction décimale',
+                short: 'Fraction décimale',
+                desc: 'Dénominateur 10, 100, 1000, écriture décimale, pourcentages et grille.',
+                badgeClass: 'bg-rose-50 text-rose-700'
+            }
+        };
+
+        /**
+         * Banque rigoureusement vérifiée de 40 questions distinctes :
+         * - 6 questions : vocab
+         * - 7 questions : lecture
+         * - 7 questions : decomp
+         * - 6 questions : axe
+         * - 7 questions : comparer
+         * - 7 questions : decimale
+         * Total = 40 questions.
+         * Dans chaque objet : correctIndex correspond toujours à l'index 0 avant mélange des réponses.
+         */
+        const QUESTION_BANK = [
+            // ---------- THÈME 1 : VOCABULAIRE & FRACTIONS INFÉRIEURES À L'UNITÉ (6) ----------
+            {
+                id: 1,
+                theme: 'vocab',
+                prompt: `Dans la fraction ${f(4, 6)}, comment appelle-t-on le nombre <strong>4</strong> ?`,
+                choices: ['Le numérateur', 'Le dénominateur', 'L’unité', 'Le quotient décimal'],
+                correct: 0,
+                explanation: `Dans une fraction, le nombre situé au-dessus de la barre s’appelle le <strong>numérateur</strong> (ici 4). Le nombre en dessous (6) est le dénominateur.`
+            },
+            {
+                id: 2,
+                theme: 'vocab',
+                prompt: `Dans la fraction ${f(7, 9)}, quel est le <strong>dénominateur</strong> ?`,
+                choices: ['9', '7', '16', '2'],
+                correct: 0,
+                explanation: `Le <strong>dénominateur</strong> est le nombre situé sous la barre de fraction : il indique en combien de parts égales l’unité est partagée (ici 9).`
+            },
+            {
+                id: 3,
+                theme: 'vocab',
+                prompt: `Parmi les fractions suivantes, laquelle est <strong>inférieure à l’unité</strong> (inférieure à 1) ?`,
+                choices: [f(4, 6), f(5, 4), f(7, 7), f(9, 5)],
+                correct: 0,
+                explanation: `Une fraction est inférieure à 1 lorsque son numérateur est plus petit que son dénominateur. Ici, 4 &lt; 6, donc ${f(4, 6)} &lt; 1.`
+            },
+            {
+                id: 4,
+                theme: 'vocab',
+                prompt: `Quelle fraction correspond à la <strong>partie coloriée</strong> de ce disque ?`,
+                visual: () => svgDisk(4, 6),
+                choices: [f(4, 6), f(6, 4), f(2, 6), f(4, 5)],
+                correct: 0,
+                explanation: `Le disque est partagé en 6 parts égales (dénominateur = 6) et 4 parts sont coloriées (numérateur = 4). La fraction est donc ${f(4, 6)}.`
+            },
+            {
+                id: 5,
+                theme: 'vocab',
+                prompt: `Quelle fraction représente la <strong>partie coloriée</strong> de cette barre ?`,
+                visual: () => svgBar(3, 8),
+                choices: [f(3, 8), f(5, 8), f(3, 5), f(8, 3)],
+                correct: 0,
+                explanation: `La barre est découpée en 8 cases égales (dénominateur = 8) et 3 cases sont coloriées (numérateur = 3), ce qui donne ${f(3, 8)}.`
+            },
+            {
+                id: 6,
+                theme: 'vocab',
+                prompt: `Attention ! Quelle fraction correspond à la partie <strong>NON coloriée</strong> (blanche) de ce disque ?`,
+                visual: () => svgDisk(5, 8),
+                choices: [f(3, 8), f(5, 8), f(3, 5), f(8, 3)],
+                correct: 0,
+                explanation: `Le disque contient 8 parts égales au total. 5 parts sont coloriées, il reste donc 8 − 5 = 3 parts blanches, soit ${f(3, 8)}.`
+            },
+
+            // ---------- THÈME 2 : LIRE LES FRACTIONS (7) ----------
+            {
+                id: 7,
+                theme: 'lecture',
+                prompt: `Comment lit-on la fraction ${f(8, 12)} ?`,
+                choices: ['huit douzièmes', 'douze huitièmes', 'huit dixièmes', 'huit deuxièmes'],
+                correct: 0,
+                explanation: `Pour lire une fraction, on lit d’abord le numérateur (huit), puis le dénominateur en ajoutant « -ième(s) » (douzièmes) : <strong>huit douzièmes</strong>.`
+            },
+            {
+                id: 8,
+                theme: 'lecture',
+                prompt: `Comment lit-on la fraction ${f(1, 2)} ?`,
+                choices: ['un demi', 'un deuxième', 'deux unièmes', 'un quart'],
+                correct: 0,
+                explanation: `Le dénominateur 2 est un cas particulier : on lit « demi ». Ainsi, ${f(1, 2)} se lit <strong>un demi</strong>.`
+            },
+            {
+                id: 9,
+                theme: 'lecture',
+                prompt: `Comment lit-on la fraction ${f(2, 3)} ?`,
+                choices: ['deux tiers', 'deux troisièmes', 'trois demis', 'deux quarts'],
+                correct: 0,
+                explanation: `Le dénominateur 3 est un cas particulier : on lit « tiers ». Ainsi, ${f(2, 3)} se lit <strong>deux tiers</strong>.`
+            },
+            {
+                id: 10,
+                theme: 'lecture',
+                prompt: `Comment lit-on la fraction ${f(5, 4)} ?`,
+                choices: ['cinq quarts', 'cinq quatrièmes', 'quatre cinquièmes', 'cinq tiers'],
+                correct: 0,
+                explanation: `Le dénominateur 4 est un cas particulier : on lit « quart(s) ». Ainsi, ${f(5, 4)} se lit <strong>cinq quarts</strong>.`
+            },
+            {
+                id: 11,
+                theme: 'lecture',
+                prompt: `Quelle fraction correspond à l’écriture en lettres <strong>« trois quarts »</strong> ?`,
+                choices: [f(3, 4), f(4, 3), f(3, 14), f(1, 4)],
+                correct: 0,
+                explanation: `« Trois » est le numérateur (3) et « quarts » désigne le dénominateur 4. On obtient donc ${f(3, 4)}.`
+            },
+            {
+                id: 12,
+                theme: 'lecture',
+                prompt: `Quelle fraction correspond à l’écriture en lettres <strong>« sept neuvièmes »</strong> ?`,
+                choices: [f(7, 9), f(9, 7), f(7, 19), f(7, 10)],
+                correct: 0,
+                explanation: `« Sept » indique le numérateur (7) et « neuvièmes » correspond au dénominateur 9 : c’est la fraction ${f(7, 9)}.`
+            },
+            {
+                id: 13,
+                theme: 'lecture',
+                prompt: `Comment lit-on la fraction ${f(4, 6)} ?`,
+                choices: ['quatre sixièmes', 'six quatrièmes', 'quatre quarts', 'quatre dixièmes'],
+                correct: 0,
+                explanation: `On lit le numérateur (quatre) puis le dénominateur suivi de « -ièmes » (sixièmes) : <strong>quatre sixièmes</strong>.`
+            },
+
+            // ---------- THÈME 3 : DÉCOMPOSER ET ENCADRER UNE FRACTION (7) ----------
+            {
+                id: 14,
+                theme: 'decomp',
+                prompt: `Comment décompose-t-on la fraction ${f(5, 4)} en un entier plus une fraction inférieure à 1 ?`,
+                visual: () => svgDisk(5, 4),
+                choices: [`1 + ${f(1, 4)}`, `1 + ${f(5, 4)}`, `4 + ${f(1, 4)}`, `2 + ${f(1, 4)}`],
+                correct: 0,
+                explanation: `${f(5, 4)} = ${f(4, 4)} + ${f(1, 4)} = 1 + ${f(1, 4)}. Cela représente 1 unité complète plus 1 quart.`
+            },
+            {
+                id: 15,
+                theme: 'decomp',
+                prompt: `Quelle est la décomposition de la fraction ${f(8, 5)} en un entier plus une fraction inférieure à 1 ?`,
+                visual: () => svgDisk(8, 5),
+                choices: [`1 + ${f(3, 5)}`, `1 + ${f(8, 5)}`, `2 + ${f(3, 5)}`, `5 + ${f(3, 5)}`],
+                correct: 0,
+                explanation: `On a ${f(8, 5)} = ${f(5, 5)} + ${f(3, 5)} = 1 + ${f(3, 5)} car ${f(5, 5)} = 1.`
+            },
+            {
+                id: 16,
+                theme: 'decomp',
+                prompt: `Quelle est la décomposition de ${f(11, 4)} en un entier plus une fraction inférieure à 1 ?`,
+                choices: [`2 + ${f(3, 4)}`, `2 + ${f(1, 4)}`, `3 + ${f(1, 4)}`, `1 + ${f(7, 4)}`],
+                correct: 0,
+                explanation: `Dans 11, il y a 2 fois 4 (car 2 × 4 = 8) et il reste 3. Donc ${f(11, 4)} = ${f(8, 4)} + ${f(3, 4)} = 2 + ${f(3, 4)}.`
+            },
+            {
+                id: 17,
+                theme: 'decomp',
+                prompt: `Quelle est la décomposition de ${f(13, 6)} en un entier plus une fraction inférieure à 1 ?`,
+                choices: [`2 + ${f(1, 6)}`, `2 + ${f(3, 6)}`, `1 + ${f(7, 6)}`, `3 + ${f(1, 6)}`],
+                correct: 0,
+                explanation: `Dans 13, il y a 2 fois 6 (car 2 × 6 = 12) et il reste 1. Donc ${f(13, 6)} = ${f(12, 6)} + ${f(1, 6)} = 2 + ${f(1, 6)}.`
+            },
+            {
+                id: 18,
+                theme: 'decomp',
+                prompt: `Entre quels deux entiers consécutifs est encadrée la fraction ${f(8, 5)} ?`,
+                choices: [`1 &lt; ${f(8, 5)} &lt; 2`, `0 &lt; ${f(8, 5)} &lt; 1`, `2 &lt; ${f(8, 5)} &lt; 3`, `5 &lt; ${f(8, 5)} &lt; 8`],
+                correct: 0,
+                explanation: `Comme ${f(8, 5)} = 1 + ${f(3, 5)}, cette fraction est supérieure à 1 et inférieure à 2 : <strong>1 &lt; ${f(8, 5)} &lt; 2</strong>.`
+            },
+            {
+                id: 19,
+                theme: 'decomp',
+                prompt: `Entre quels deux entiers consécutifs est encadrée la fraction ${f(4, 6)} ?`,
+                choices: [`0 &lt; ${f(4, 6)} &lt; 1`, `1 &lt; ${f(4, 6)} &lt; 2`, `4 &lt; ${f(4, 6)} &lt; 6`, `2 &lt; ${f(4, 6)} &lt; 3`],
+                correct: 0,
+                explanation: `Le numérateur (4) est inférieur au dénominateur (6), donc ${f(4, 6)} est comprise entre 0 et 1 : <strong>0 &lt; ${f(4, 6)} &lt; 1</strong>.`
+            },
+            {
+                id: 20,
+                theme: 'decomp',
+                prompt: `Entre quels deux entiers consécutifs est encadrée la fraction ${f(7, 3)} ?`,
+                choices: [`2 &lt; ${f(7, 3)} &lt; 3`, `1 &lt; ${f(7, 3)} &lt; 2`, `3 &lt; ${f(7, 3)} &lt; 4`, `0 &lt; ${f(7, 3)} &lt; 1`],
+                correct: 0,
+                explanation: `${f(7, 3)} = ${f(6, 3)} + ${f(1, 3)} = 2 + ${f(1, 3)}. La fraction se situe donc entre 2 et 3 : <strong>2 &lt; ${f(7, 3)} &lt; 3</strong>.`
+            },
+
+            // ---------- THÈME 4 : REPÉRER SUR UN AXE GRADUÉ (6) ----------
+            {
+                id: 21,
+                theme: 'axe',
+                prompt: `Sur cet axe gradué, l’unité (entre 0 et 1) est divisée en <strong>6 pas égaux</strong>. Quelle est la valeur d’un pas ?`,
+                visual: () => svgNumberLine(1, 6, -1),
+                choices: [f(1, 6), f(6, 1), f(1, 5), f(1, 7)],
+                correct: 0,
+                explanation: `Quand l’unité est partagée en 6 pas égaux, chaque pas représente un sixième : <strong>1 pas = ${f(1, 6)}</strong>.`
+            },
+            {
+                id: 22,
+                theme: 'axe',
+                prompt: `Dans 1 unité sur cet axe gradué, on compte <strong>5 pas égaux</strong>. Quelle est la valeur d’un pas ?`,
+                visual: () => svgNumberLine(1, 5, -1),
+                choices: [f(1, 5), f(5, 5), f(1, 4), f(1, 10)],
+                correct: 0,
+                explanation: `Puisqu’il y a 5 pas égaux dans 1 unité, la valeur d’un pas est ${f(1, 5)}.`
+            },
+            {
+                id: 23,
+                theme: 'axe',
+                prompt: `Quelle est l’abscisse du point <strong>A</strong> placé sur cet axe gradué ?`,
+                visual: () => svgNumberLine(1, 6, 4, 'A'),
+                choices: [f(4, 6), f(4, 5), f(3, 6), f(5, 6)],
+                correct: 0,
+                explanation: `L’unité est divisée en 6 pas (1 pas = ${f(1, 6)}). Le point A se trouve 4 pas après 0, son abscisse est donc ${f(4, 6)}.`
+            },
+            {
+                id: 24,
+                theme: 'axe',
+                prompt: `Quelle est l’abscisse du point <strong>B</strong> placé sur cet axe gradué ?`,
+                visual: () => svgNumberLine(2, 4, 5, 'B'),
+                choices: [f(5, 4), f(5, 8), f(1, 4), f(6, 4)],
+                correct: 0,
+                explanation: `Chaque unité est partagée en 4 pas (1 pas = ${f(1, 4)}). Le point B est situé 1 pas après 1, soit ${f(4, 4)} + ${f(1, 4)} = ${f(5, 4)}.`
+            },
+            {
+                id: 25,
+                theme: 'axe',
+                prompt: `Quelle est l’abscisse du point <strong>C</strong> placé sur cet axe gradué ?`,
+                visual: () => svgNumberLine(2, 5, 8, 'C'),
+                choices: [f(8, 5), f(3, 5), f(7, 5), f(8, 10)],
+                correct: 0,
+                explanation: `L’unité est partagée en 5 pas (1 pas = ${f(1, 5)}). Le point C est 3 pas après 1, donc ${f(5, 5)} + ${f(3, 5)} = ${f(8, 5)}.`
+            },
+            {
+                id: 26,
+                theme: 'axe',
+                prompt: `Quelle est l’abscisse du point <strong>D</strong> placé sur cet axe gradué ?`,
+                visual: () => svgNumberLine(3, 3, 7, 'D'),
+                choices: [f(7, 3), f(2, 3), f(7, 9), f(8, 3)],
+                correct: 0,
+                explanation: `Chaque unité compte 3 pas (1 pas = ${f(1, 3)}). Le point D est 1 pas après 2 (qui vaut ${f(6, 3)}), donc son abscisse est ${f(7, 3)}.`
+            },
+
+            // ---------- THÈME 5 : COMPARER DES FRACTIONS (7) ----------
+            {
+                id: 27,
+                theme: 'comparer',
+                prompt: `Compare la fraction ${f(3, 4)} à l’unité (1) :`,
+                choices: [`${f(3, 4)} &lt; 1`, `${f(3, 4)} &gt; 1`, `${f(3, 4)} = 1`, `On ne peut pas comparer`],
+                correct: 0,
+                explanation: `Le numérateur (3) est inférieur au dénominateur (4) : la fraction est donc inférieure à 1 (${f(3, 4)} &lt; 1).`
+            },
+            {
+                id: 28,
+                theme: 'comparer',
+                prompt: `Compare la fraction ${f(4, 4)} à l’unité (1) :`,
+                choices: [`${f(4, 4)} = 1`, `${f(4, 4)} &lt; 1`, `${f(4, 4)} &gt; 1`, `${f(4, 4)} = 4`],
+                correct: 0,
+                explanation: `Quand le numérateur est égal au dénominateur, la fraction est égale à 1 : ${f(4, 4)} = 1.`
+            },
+            {
+                id: 29,
+                theme: 'comparer',
+                prompt: `Compare la fraction ${f(7, 5)} à l’unité (1) :`,
+                choices: [`${f(7, 5)} &gt; 1`, `${f(7, 5)} &lt; 1`, `${f(7, 5)} = 1`, `${f(7, 5)} = 2`],
+                correct: 0,
+                explanation: `Le numérateur (7) est supérieur au dénominateur (5) : la fraction est donc supérieure à 1 (${f(7, 5)} &gt; 1).`
+            },
+            {
+                id: 30,
+                theme: 'comparer',
+                prompt: `Compare les deux fractions ${f(5, 6)} et ${f(3, 6)} :`,
+                visual: () => svgCompareDisks(5, 6, 3, 6),
+                choices: [`${f(5, 6)} &gt; ${f(3, 6)}`, `${f(5, 6)} &lt; ${f(3, 6)}`, `${f(5, 6)} = ${f(3, 6)}`, `${f(3, 6)} &gt; ${f(5, 6)}`],
+                correct: 0,
+                explanation: `Les deux fractions ont le même dénominateur (6), on compare donc leurs numérateurs : 5 &gt; 3, donc ${f(5, 6)} &gt; ${f(3, 6)}.`
+            },
+            {
+                id: 31,
+                theme: 'comparer',
+                prompt: `Compare les deux fractions ${f(7, 9)} et ${f(11, 9)} :`,
+                choices: [`${f(7, 9)} &lt; ${f(11, 9)}`, `${f(7, 9)} &gt; ${f(11, 9)}`, `${f(7, 9)} = ${f(11, 9)}`, `${f(11, 9)} &lt; ${f(7, 9)}`],
+                correct: 0,
+                explanation: `Pour comparer deux fractions de même dénominateur (9), on compare les numérateurs : 7 &lt; 11, donc ${f(7, 9)} &lt; ${f(11, 9)}.`
+            },
+            {
+                id: 32,
+                theme: 'comparer',
+                prompt: `Quelle est la <strong>plus grande</strong> fraction parmi les propositions suivantes ?`,
+                choices: [f(12, 7), f(5, 7), f(9, 7), f(3, 7)],
+                correct: 0,
+                explanation: `Toutes ces fractions ont le même dénominateur (7). La plus grande est celle qui possède le plus grand numérateur : 12 &gt; 9 &gt; 5 &gt; 3, donc c’est ${f(12, 7)}.`
+            },
+            {
+                id: 33,
+                theme: 'comparer',
+                prompt: `Quelle est la <strong>plus petite</strong> fraction parmi les propositions suivantes ?`,
+                choices: [f(2, 11), f(8, 11), f(5, 11), f(11, 11)],
+                correct: 0,
+                explanation: `Elles ont toutes le même dénominateur (11). La plus petite est celle qui a le plus petit numérateur : 2 &lt; 5 &lt; 8 &lt; 11, donc c’est ${f(2, 11)}.`
+            },
+
+            // ---------- THÈME 6 : LA FRACTION DÉCIMALE (7) ----------
+            {
+                id: 34,
+                theme: 'decimale',
+                prompt: `Parmi ces fractions, laquelle est une <strong>fraction décimale</strong> ?`,
+                choices: [f(27, 100), f(10, 3), f(7, 20), f(100, 5)],
+                correct: 0,
+                explanation: `Une fraction décimale est une fraction dont le dénominateur est 1, 10, 100, 1 000… Seule ${f(27, 100)} a un dénominateur égal à 100.`
+            },
+            {
+                id: 35,
+                theme: 'decimale',
+                prompt: `Comment lit-on la fraction décimale ${f(22, 100)} ?`,
+                choices: ['vingt-deux centièmes', 'vingt-deux dixièmes', 'vingt-deux millièmes', 'cent vingt-deuxièmes'],
+                correct: 0,
+                explanation: `Le numérateur est 22 et le dénominateur est 100 (centièmes) : ${f(22, 100)} se lit <strong>vingt-deux centièmes</strong>.`
+            },
+            {
+                id: 36,
+                theme: 'decimale',
+                prompt: `Quelle est l’écriture décimale de la fraction ${f(22, 100)} ?`,
+                visual: () => svgGrid100(22),
+                choices: ['0,22', '2,2', '0,022', '22,1'],
+                correct: 0,
+                explanation: `22 centièmes correspond à 0 unité, 2 dixièmes et 2 centièmes : ${f(22, 100)} = <strong>0,22</strong>.`
+            },
+            {
+                id: 37,
+                theme: 'decimale',
+                prompt: `Quelle est l’écriture décimale de la fraction ${f(7, 10)} ?`,
+                visual: () => svgBar(7, 10),
+                choices: ['0,7', '0,07', '7,1', '70'],
+                correct: 0,
+                explanation: `7 dixièmes s’écrit <strong>0,7</strong> en écriture décimale (le chiffre 7 est au rang des dixièmes).`
+            },
+            {
+                id: 38,
+                theme: 'decimale',
+                prompt: `Quelle est l’écriture décimale de la fraction ${f(5, 100)} ?`,
+                choices: ['0,05', '0,5', '5,00', '0,005'],
+                correct: 0,
+                explanation: `5 centièmes signifie 0 unité, 0 dixième et 5 centièmes. Donc ${f(5, 100)} = <strong>0,05</strong>.`
+            },
+            {
+                id: 39,
+                theme: 'decimale',
+                prompt: `Quelle fraction décimale correspond à la partie coloriée de cette grille de 100 cases ?`,
+                visual: () => svgGrid100(34),
+                choices: [f(34, 100), f(34, 10), f(66, 100), f(3, 100)],
+                correct: 0,
+                explanation: `Il y a 3 colonnes complètes de 10 cases (30) plus 4 cases, soit 34 cases coloriées sur 100 : la fraction est ${f(34, 100)} (ou 0,34).`
+            },
+            {
+                id: 40,
+                theme: 'decimale',
+                prompt: `Laquelle de ces affirmations sur la fraction décimale ${f(1, 10)} est <strong>VRAIE</strong> ?`,
+                choices: [
+                    `${f(1, 10)} = ${f(10, 100)} = 0,1 = 10 %`,
+                    `${f(1, 10)} = 0,01 = 1 %`,
+                    `${f(1, 10)} × 10 = 10`,
+                    `1 dm = ${f(1, 100)} m`
+                ],
+                correct: 0,
+                explanation: `D’après le cours, ${f(1, 10)} = ${f(10, 100)} = 0,1 = 10 % (on a aussi 1 dm = ${f(1, 10)} m = 0,1 m et ${f(1, 10)} × 10 = 1).`
+            }
+        ];
+
+
+        /* ============================================================================
+           3. ÉTAT DE L'APPLICATION ET ALGORITHME DE FISHER-YATES
+           ============================================================================ */
+
+        const QUESTIONS_PER_SESSION = 10;
+
+        let sessionQuestions = [];   // 10 questions piochées avec leurs choix mélangés
+        let currentIndex = 0;        // Index de la question en cours (0..9)
+        let score = 0;               // Score courant
+        let hasAnswered = false;     // Verrouillage après clic
+        let userHistory = [];        // Historique des réponses pour le bilan
+
+        /**
+         * Mélange un tableau de manière équiprobable (algorithme de Fisher-Yates).
+         * Ne modifie pas le tableau d'origine.
+         * @param {Array} array
+         * @returns {Array} Nouvelle copie mélangée
+         */
+        function fisherYatesShuffle(array) {
+            const copy = [...array];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+
+        /* ============================================================================
+           4. INITIALISATION ET NAVIGATION ENTRE LES ÉCRANS
+           ============================================================================ */
+
+        /**
+         * Remplit la grille des 6 thèmes sur l'écran d'accueil.
+         */
+        function renderHomeThemes() {
+            const container = document.getElementById('home-themes-grid');
+            const counts = {};
+            QUESTION_BANK.forEach(q => {
+                counts[q.theme] = (counts[q.theme] || 0) + 1;
+            });
+
+            container.innerHTML = Object.values(THEMES).map(theme => `
+                <div class="p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/60 flex items-start gap-3">
+                    <span class="shrink-0 mt-0.5 px-2 py-0.5 rounded-lg text-xs font-bold ${theme.badgeClass}">
+                        ${counts[theme.id]} Q
+                    </span>
+                    <div>
+                        <p class="font-bold text-slate-800 text-sm">${theme.name}</p>
+                        <p class="text-xs text-slate-500 mt-0.5 leading-snug">${theme.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Affiche l'écran demandé et masque les autres.
+         * @param {'home'|'quiz'|'results'} screenName
+         */
+        function switchScreen(screenName) {
+            document.getElementById('screen-home').classList.toggle('hidden', screenName !== 'home');
+            document.getElementById('screen-quiz').classList.toggle('hidden', screenName !== 'quiz');
+            document.getElementById('screen-results').classList.toggle('hidden', screenName !== 'results');
+            document.getElementById('header-home-btn').classList.toggle('hidden', screenName === 'home');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showHome() {
+            switchScreen('home');
+        }
+
+
+        /* ============================================================================
+           5. DÉROULEMENT DU QCM
+           ============================================================================ */
+
+        /**
+         * Lance une nouvelle partie : pioche 10 questions parmi les 40
+         * et mélange les 4 propositions de chaque question.
+         */
+        function startQuiz() {
+            const picked = fisherYatesShuffle(QUESTION_BANK).slice(0, QUESTIONS_PER_SESSION);
+
+            sessionQuestions = picked.map(q => {
+                const indexedChoices = q.choices.map((html, idx) => ({
+                    html,
+                    isCorrect: idx === q.correct
+                }));
+                return {
+                    ...q,
+                    shuffledChoices: fisherYatesShuffle(indexedChoices)
+                };
+            });
+
+            currentIndex = 0;
+            score = 0;
+            userHistory = [];
+            hasAnswered = false;
+
+            switchScreen('quiz');
+            renderCurrentQuestion();
+        }
+
+        /**
+         * Affiche la question courante, son éventuel SVG et ses 4 propositions.
+         */
+        function renderCurrentQuestion() {
+            const q = sessionQuestions[currentIndex];
+            const theme = THEMES[q.theme];
+            hasAnswered = false;
+
+            // Progression et score
+            document.getElementById('quiz-progress-text').textContent = `${currentIndex + 1} / ${QUESTIONS_PER_SESSION}`;
+            document.getElementById('quiz-score-text').textContent = score;
+            document.getElementById('quiz-progress-bar').style.width = `${((currentIndex + 1) / QUESTIONS_PER_SESSION) * 100}%`;
+
+            // Ré-animation légère de la carte
+            const card = document.getElementById('question-card');
+            card.classList.remove('animate-fade-up');
+            void card.offsetWidth; // Force reflow
+            card.classList.add('animate-fade-up');
+
+            // Badge thème
+            const badge = document.getElementById('question-theme-badge');
+            badge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${theme.badgeClass}`;
+            badge.textContent = theme.name;
+
+            // Énoncé
+            document.getElementById('question-prompt').innerHTML = q.prompt;
+
+            // Visuel SVG si présent
+            const visualEl = document.getElementById('question-visual');
+            if (typeof q.visual === 'function') {
+                visualEl.innerHTML = q.visual();
+                visualEl.classList.remove('hidden');
+            } else {
+                visualEl.innerHTML = '';
+                visualEl.classList.add('hidden');
+            }
+
+            // 4 boutons de choix
+            const letters = ['A', 'B', 'C', 'D'];
+            const choicesEl = document.getElementById('question-choices');
+            choicesEl.innerHTML = q.shuffledChoices.map((choice, idx) => `
+                <button
+                    type="button"
+                    id="choice-btn-${idx}"
+                    onclick="selectChoice(${idx})"
+                    class="choice-btn group w-full text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/40 active:scale-[0.99] transition-all flex items-center gap-3.5 min-h-[68px]"
+                >
+                    <span class="choice-letter shrink-0 w-8 h-8 rounded-xl bg-slate-100 group-hover:bg-indigo-100 group-hover:text-indigo-700 text-slate-600 font-bold text-sm flex items-center justify-center transition-colors">
+                        ${letters[idx]}
+                    </span>
+                    <span class="flex-1 text-base font-semibold text-slate-800 leading-snug">
+                        ${choice.html}
+                    </span>
+                    <span class="choice-status shrink-0 hidden"></span>
+                </button>
+            `).join('');
+
+            // Masquer feedback et bouton suivant
+            document.getElementById('feedback-box').classList.add('hidden');
+            document.getElementById('next-btn-container').classList.add('hidden');
+            document.getElementById('next-btn-label').textContent =
+                currentIndex === QUESTIONS_PER_SESSION - 1 ? 'Voir mon bilan' : 'Question suivante';
+        }
+
+        /**
+         * Traite la réponse cliquée par l'élève et affiche la correction immédiate.
+         * @param {number} selectedIdx - Index du choix cliqué (0..3)
+         */
+        function selectChoice(selectedIdx) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+
+            const q = sessionQuestions[currentIndex];
+            const chosen = q.shuffledChoices[selectedIdx];
+            const correctIdx = q.shuffledChoices.findIndex(c => c.isCorrect);
+            const isCorrect = chosen.isCorrect;
+
+            if (isCorrect) {
+                score++;
+                document.getElementById('quiz-score-text').textContent = score;
+            }
+
+            // Enregistrement dans l'historique pour le bilan
+            userHistory.push({
+                question: q,
+                selectedHtml: chosen.html,
+                correctHtml: q.shuffledChoices[correctIdx].html,
+                isCorrect
+            });
+
+            // Mise en forme visuelle des 4 boutons
+            const checkIcon = `<svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>`;
+            const crossIcon = `<svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>`;
+
+            q.shuffledChoices.forEach((choice, idx) => {
+                const btn = document.getElementById(`choice-btn-${idx}`);
+                const letterEl = btn.querySelector('.choice-letter');
+                const statusEl = btn.querySelector('.choice-status');
+
+                btn.disabled = true;
+                btn.classList.remove('hover:border-indigo-400', 'hover:bg-indigo-50/40', 'active:scale-[0.99]');
+                btn.classList.add('cursor-default');
+
+                if (idx === correctIdx) {
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-emerald-500', 'bg-emerald-50/90');
+                    letterEl.classList.remove('bg-slate-100', 'text-slate-600');
+                    letterEl.classList.add('bg-emerald-600', 'text-white');
+                    statusEl.innerHTML = checkIcon;
+                    statusEl.classList.remove('hidden');
+                } else if (idx === selectedIdx && !isCorrect) {
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-rose-500', 'bg-rose-50/90');
+                    letterEl.classList.remove('bg-slate-100', 'text-slate-600');
+                    letterEl.classList.add('bg-rose-600', 'text-white');
+                    statusEl.innerHTML = crossIcon;
+                    statusEl.classList.remove('hidden');
+                } else {
+                    btn.classList.add('opacity-55');
+                }
+            });
+
+            // Affichage de l'encadré d'explication pédagogique
+            const fbBox = document.getElementById('feedback-box');
+            const fbIcon = document.getElementById('feedback-icon');
+            const fbTitle = document.getElementById('feedback-title');
+            const fbExp = document.getElementById('feedback-explanation');
+
+            fbBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-900', 'bg-rose-50', 'border-rose-200', 'text-rose-900');
+
+            if (isCorrect) {
+                fbBox.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-900');
+                fbIcon.innerHTML = `<div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>`;
+                fbTitle.textContent = 'Bonne réponse !';
+            } else {
+                fbBox.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-900');
+                fbIcon.innerHTML = `<div class="w-7 h-7 rounded-full bg-rose-600 text-white flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg></div>`;
+                fbTitle.textContent = 'Ce n’est pas la bonne réponse…';
+            }
+
+            fbExp.innerHTML = q.explanation;
+
+            // Afficher le bouton Question suivante
+            document.getElementById('next-btn-container').classList.remove('hidden');
+        }
+
+        /**
+         * Passe à la question suivante ou affiche l'écran de bilan.
+         */
+        function nextQuestion() {
+            if (currentIndex < QUESTIONS_PER_SESSION - 1) {
+                currentIndex++;
+                renderCurrentQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+
+        /* ============================================================================
+           6. ÉCRAN DE FIN (BILAN, STATS PAR THÈME & RÉCAPITULATIF DÉROULABLE)
+           ============================================================================ */
+
+        function showResults() {
+            switchScreen('results');
+
+            // Score et message d'encouragement adapté
+            document.getElementById('result-score').textContent = score;
+            const badge = document.getElementById('result-badge');
+            const titleEl = document.getElementById('result-title');
+            const msgEl = document.getElementById('result-message');
+
+            badge.className = 'inline-flex items-center justify-center w-24 h-24 rounded-3xl border-4 mb-4';
+            if (score === 10) {
+                badge.classList.add('bg-emerald-50', 'border-emerald-200');
+                titleEl.textContent = 'Parfait ! Un sans-faute !';
+                msgEl.textContent = 'Félicitations ! Tu maîtrises parfaitement toutes les notions du chapitre sur les fractions.';
+            } else if (score >= 8) {
+                badge.classList.add('bg-emerald-50', 'border-emerald-200');
+                titleEl.textContent = 'Très bon travail !';
+                msgEl.textContent = 'Tu as très bien compris le chapitre. Relis simplement les quelques erreurs ci-dessous pour viser le 10/10.';
+            } else if (score >= 5) {
+                badge.classList.add('bg-indigo-50', 'border-indigo-200');
+                titleEl.textContent = 'Bon début, continue !';
+                msgEl.textContent = 'Tu as déjà de bonnes bases. Regarde les thèmes à retravailler ci-dessous puis lance une nouvelle série.';
+            } else {
+                badge.classList.add('bg-amber-50', 'border-amber-200');
+                titleEl.textContent = 'Ne te décourage pas !';
+                msgEl.textContent = 'Les fractions demandent un peu d’entraînement. Lis bien les explications du récapitulatif et retente une nouvelle série !';
+            }
+
+            // Calcul des statistiques par thème abordé
+            const themeStats = {};
+            userHistory.forEach(item => {
+                const tId = item.question.theme;
+                if (!themeStats[tId]) {
+                    themeStats[tId] = { correct: 0, total: 0 };
+                }
+                themeStats[tId].total++;
+                if (item.isCorrect) themeStats[tId].correct++;
+            });
+
+            const themesListEl = document.getElementById('result-themes-list');
+            themesListEl.innerHTML = Object.entries(themeStats).map(([tId, stat]) => {
+                const theme = THEMES[tId];
+                const pct = Math.round((stat.correct / stat.total) * 100);
+                const barColor = pct === 100 ? 'bg-emerald-500' : (pct >= 50 ? 'bg-indigo-500' : 'bg-rose-500');
+                return `
+                    <div class="p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/70">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="text-xs font-bold text-slate-700">${theme.name}</span>
+                            <span class="text-xs font-extrabold text-slate-800">${stat.correct} / ${stat.total}</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Réinitialiser l'état replié du récapitulatif et injecter les 10 questions
+            const reviewContainer = document.getElementById('result-review-container');
+            reviewContainer.classList.add('hidden');
+            document.getElementById('review-chevron').classList.remove('rotate-180');
+
+            reviewContainer.innerHTML = userHistory.map((item, idx) => {
+                const theme = THEMES[item.question.theme];
+                const statusBadge = item.isCorrect
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Juste</span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">Faux</span>`;
+
+                return `
+                    <div class="p-5 sm:p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <span class="text-xs font-bold text-slate-400">Question ${idx + 1} • ${theme.short}</span>
+                            ${statusBadge}
+                        </div>
+                        <p class="font-bold text-slate-900 text-sm sm:text-base mb-3 leading-relaxed">${item.question.prompt}</p>
+                        <div class="flex flex-col sm:flex-row gap-2 sm:gap-5 text-sm mb-3">
+                            <div class="${item.isCorrect ? 'text-emerald-700' : 'text-rose-700'} font-semibold">
+                                Ta réponse : <span class="font-bold">${item.selectedHtml}</span>
+                            </div>
+                            ${!item.isCorrect ? `<div class="text-emerald-700 font-semibold">Bonne réponse : <span class="font-bold">${item.correctHtml}</span></div>` : ''}
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 bg-slate-50 border border-slate-200/70 rounded-xl p-3 leading-relaxed">
+                            ${item.question.explanation}
+                        </p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /**
+         * Ouvre ou ferme le panneau récapitulatif des 10 questions.
+         */
+        function toggleReview() {
+            const container = document.getElementById('result-review-container');
+            const chevron = document.getElementById('review-chevron');
+            container.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
+        }
+
+        // Initialisation au chargement de la page
+        window.addEventListener('DOMContentLoaded', () => {
+            renderHomeThemes();
+        });
+    </script>
+</body>
+</html>
