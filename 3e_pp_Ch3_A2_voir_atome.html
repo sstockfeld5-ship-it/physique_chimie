@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Atomes — Activité guidée (3ème Prépa Pro)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
+        .font-sci { font-family: 'Space Grotesk', monospace; }
+        .tab-active { background-color: #2563eb; color: white; border-color: #1d4ed8; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+        .tab-inactive { background-color: white; color: #475569; border-color: #cbd5e1; }
+        .tab-done { border-color: #10b981 !important; }
+        .paper-box {
+            background: #fffbeb;
+            border: 2.5px dashed #f59e0b;
+            border-radius: 1rem;
+        }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulseSlow { 0%, 100% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.04); } }
+        .spin-orbit { animation: orbitSpin 6s linear infinite; transform-origin: 150px 110px; }
+        .spin-orbit-rev { animation: orbitSpin 8s linear infinite reverse; transform-origin: 150px 110px; }
+        .pulse-cloud { animation: pulseSlow 3s ease-in-out infinite; transform-origin: 150px 110px; }
+    </style>
+</head>
+<body class="min-h-screen pb-14">
+
+    <!-- EN-TÊTE FIXE -->
+    <header class="bg-slate-900 text-white py-3.5 px-4 shadow-lg sticky top-0 z-30">
+        <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-400">Chapitre 3 • Physique-Chimie (3ème Prépa Pro)</span>
+                <h1 class="text-lg sm:text-xl font-extrabold leading-tight">Activité 1 : Voir et modéliser les atomes</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="openConverterModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold px-3 py-1.5 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-1.5">
+                    <span>🧮</span>
+                    <span>Convertisseur (m)</span>
+                </button>
+                <div class="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 text-xs sm:text-sm font-bold">
+                    <span id="progressText" class="text-emerald-400">0 / 4</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-3 sm:px-4 mt-5">
+
+        <!-- NAVIGATION DES 4 MISSIONS -->
+        <nav class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+            <button onclick="showStep(1)" id="btn-step-1" class="tab-active py-3 px-3 rounded-xl border-2 font-bold text-sm transition flex flex-col items-center">
+                <span class="text-xs opacity-80">Mission 1</span>
+                <span>📏 Tailles & nm</span>
+            </button>
+            <button onclick="showStep(2)" id="btn-step-2" class="tab-inactive py-3 px-3 rounded-xl border-2 font-bold text-sm transition flex flex-col items-center">
+                <span class="text-xs opacity-80">Mission 2</span>
+                <span>⏳ Histoire</span>
+            </button>
+            <button onclick="showStep(3)" id="btn-step-3" class="tab-inactive py-3 px-3 rounded-xl border-2 font-bold text-sm transition flex flex-col items-center">
+                <span class="text-xs opacity-80">Mission 3</span>
+                <span>🔬 Mesurer</span>
+            </button>
+            <button onclick="showStep(4)" id="btn-step-4" class="tab-inactive py-3 px-3 rounded-xl border-2 font-bold text-sm transition flex flex-col items-center">
+                <span class="text-xs opacity-80">Mission 4</span>
+                <span>⚛️ Vide & Schéma</span>
+            </button>
+        </nav>
+
+        <!-- ===================================================================== -->
+        <!-- MISSION 1 : COMPARER LES TAILLES, COMPRENDRE LE nm ET CONVERTIR       -->
+        <!-- ===================================================================== -->
+        <section id="step-1" class="fade-in space-y-5">
+
+            <!-- Lien vers l'animation Échelle -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h2 class="text-lg sm:text-xl font-extrabold text-blue-700 mb-2">Mission 1 : Comparer l'atome et son noyau à d'autres objets</h2>
+                <p class="text-sm sm:text-base text-slate-600 mb-4">
+                    Ouvre l'animation ci-dessous et déplace le curseur pour comparer la taille d'un <strong>atome</strong> et de son <strong>noyau</strong> avec des objets que tu connais (être humain, fourmi, cheveu, bactérie…).
+                </p>
+                <a href="https://sstockfeld5-ship-it.github.io/physique_chimie/3e_Ch3_A1_echelle_grand_petit.html" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-xl shadow transition text-sm sm:text-base">
+                    🚀 Ouvrir l'animation « L'Échelle de l'Univers »
+                </a>
+            </div>
+
+            <!-- Explication claire du nanomètre -->
+            <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-5">
+                <h3 class="text-base sm:text-lg font-extrabold text-indigo-900 mb-2 flex items-center gap-2">
+                    <span>💡</span> C'est quoi un nanomètre (nm) ?
+                </h3>
+                <p class="text-sm sm:text-base text-slate-700 leading-relaxed mb-3">
+                    Pour mesurer les atomes, le mètre (m) et même le millimètre (mm) sont beaucoup trop grands ! Les scientifiques utilisent le <strong>nanomètre</strong> (symbole <strong>nm</strong>).
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div class="bg-white rounded-xl p-3.5 border border-indigo-200">
+                        <div class="text-xs font-bold uppercase text-indigo-600 mb-1">En écriture décimale</div>
+                        <div class="font-sci font-bold text-slate-900 text-base">1 nm = 0,000 000 001 m</div>
+                        <div class="text-xs text-slate-500 mt-1">Un milliardième de mètre (1 mètre coupé en 1 milliard de parts !)</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-3.5 border border-indigo-200">
+                        <div class="text-xs font-bold uppercase text-indigo-600 mb-1">En puissance de 10</div>
+                        <div class="font-sci font-bold text-indigo-700 text-base">1 nm = 10⁻⁹ m</div>
+                        <div class="text-xs text-slate-500 mt-1">Repère : un atome mesure environ <strong>0,1 nm</strong> (10⁻¹⁰ m).</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Convertisseur interactif intégré directement dans Mission 1 -->
+            <div class="bg-slate-900 text-white rounded-2xl p-5 shadow-md">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <h3 class="text-base sm:text-lg font-extrabold text-amber-300 flex items-center gap-2">
+                        <span>🧮</span> Convertisseur en mètres (m)
+                    </h3>
+                    <span class="text-xs text-slate-400">Utile pour remplir ton tableau !</span>
+                </div>
+
+                <!-- Boutons rapides -->
+                <div class="flex flex-wrap gap-1.5 mb-4">
+                    <span class="text-xs text-slate-400 self-center mr-1">Exemples rapides :</span>
+                    <button onclick="setConv(14, -15)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold">Noyau d'or (14 fm)</button>
+                    <button onclick="setConv(0.1, -9)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold">Atome H (0,1 nm)</button>
+                    <button onclick="setConv(2, -6)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold">Bactérie (2 µm)</button>
+                    <button onclick="setConv(80, -6)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold">Cheveu (80 µm)</button>
+                    <button onclick="setConv(5, -3)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold">Fourmi (5 mm)</button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                    <div class="sm:col-span-5">
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Valeur :</label>
+                        <input id="convValue" type="number" step="any" value="1" oninput="updateConverter()"
+                               class="w-full rounded-xl bg-slate-800 border-2 border-slate-600 focus:border-sky-400 outline-none px-3 py-2.5 text-white font-sci font-bold text-lg">
+                    </div>
+                    <div class="sm:col-span-7">
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Unité de départ :</label>
+                        <select id="convUnit" onchange="updateConverter()"
+                                class="w-full rounded-xl bg-slate-800 border-2 border-slate-600 focus:border-sky-400 outline-none px-3 py-2.5 text-white font-bold text-sm sm:text-base">
+                            <option value="0">m — Mètre (10⁰ m)</option>
+                            <option value="-2">cm — Centimètre (10⁻² m)</option>
+                            <option value="-3">mm — Millimètre (10⁻³ m)</option>
+                            <option value="-6">µm — Micromètre (10⁻⁶ m)</option>
+                            <option value="-9" selected>nm — Nanomètre (10⁻⁹ m)</option>
+                            <option value="-15">fm — Femtomètre (10⁻¹⁵ m)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Résultats en m (Puissance de 10 + Décimal) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                    <div class="bg-slate-950 border border-sky-500/40 rounded-xl p-3.5">
+                        <div class="text-xs font-bold uppercase text-sky-400 mb-1">En mètres (Puissance de 10)</div>
+                        <div id="convPowResult" class="font-sci text-xl font-bold text-white">1 × 10⁻⁹ m</div>
+                        <div id="convOrderResult" class="text-xs text-slate-400 mt-1">Ordre de grandeur : 10⁻⁹ m</div>
+                    </div>
+                    <div class="bg-slate-950 border border-emerald-500/40 rounded-xl p-3.5">
+                        <div class="text-xs font-bold uppercase text-emerald-400 mb-1">En mètres (Forme décimale)</div>
+                        <div id="convDecResult" class="font-sci text-base sm:text-lg font-bold text-emerald-300 break-all">0,000 000 001 m</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercice interactif de classement (6 objets clés comparant atome & noyau) -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h3 class="font-extrabold text-slate-800 mb-1">🎯 Classe ces 6 éléments du plus petit (1) au plus grand (6) :</h3>
+                <p class="text-xs sm:text-sm text-slate-500 mb-4">Compare la taille du <strong>noyau</strong> et de l'<strong>atome</strong> avec les autres objets.</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="orderList"></div>
+
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                    <button onclick="checkMission1()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl transition">
+                        ✅ Vérifier mon classement
+                    </button>
+                    <span id="m1-feedback" class="text-sm font-bold"></span>
+                </div>
+            </div>
+
+            <!-- Encadré Fiche Papier -->
+            <div id="paper-1" class="paper-box p-5 hidden fade-in">
+                <div class="flex items-center gap-2 text-amber-800 font-extrabold mb-2">
+                    <span class="text-xl">✍️</span>
+                    <span>À RECOPIER SUR TA FICHE PAPIER (Partie 1)</span>
+                </div>
+                <p class="text-sm text-amber-950 mb-2">Recopie le classement et les dimensions en mètres dans le tableau de ta fiche :</p>
+                <ol class="list-decimal list-inside text-sm font-semibold text-slate-800 space-y-1.5 bg-white/85 p-3.5 rounded-xl border border-amber-200">
+                    <li><strong>Noyau d'or</strong> : ≈ 14 fm → <span class="font-sci text-blue-700">10⁻¹⁴ m</span> (le plus petit !)</li>
+                    <li><strong>Atome d'hydrogène</strong> : 0,1 nm → <span class="font-sci text-blue-700">10⁻¹⁰ m</span> (0,000 000 000 1 m)</li>
+                    <li><strong>Bactérie</strong> : 2 µm → <span class="font-sci text-blue-700">10⁻⁶ m</span> (0,000 002 m)</li>
+                    <li><strong>Épaisseur d'un cheveu</strong> : 80 µm → <span class="font-sci text-blue-700">10⁻⁴ m</span> (0,000 08 m)</li>
+                    <li><strong>Fourmi</strong> : 5 mm → <span class="font-sci text-blue-700">10⁻³ m</span> (0,005 m)</li>
+                    <li><strong>Être humain</strong> : 1,70 m → <span class="font-sci text-blue-700">10⁰ m</span> (1,70 m)</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MISSION 2 : ANIMATION SIMPLIFIÉE DE L'HISTOIRE DE L'ATOME             -->
+        <!-- ===================================================================== -->
+        <section id="step-2" class="hidden fade-in space-y-5">
+
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h2 class="text-lg sm:text-xl font-extrabold text-blue-700 mb-2">Mission 2 : L'histoire du modèle de l'atome</h2>
+                <p class="text-sm sm:text-base text-slate-600 mb-4">
+                    Clique sur les <strong>4 boutons de la frise</strong> pour observer comment les scientifiques ont imaginé l'atome au fil du temps.
+                </p>
+
+                <!-- ANIMATION INTÉGRÉE SIMPLIFIÉE -->
+                <div class="bg-slate-900 rounded-2xl p-4 sm:p-5 text-white">
+                    <!-- 4 boutons de dates -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                        <button onclick="setHistoryStep(0)" id="hist-btn-0" class="py-2 px-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500 text-slate-950 transition">1. Antiquité<br><span class="font-normal text-xs">Démocrite</span></button>
+                        <button onclick="setHistoryStep(1)" id="hist-btn-1" class="py-2 px-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">2. 1902<br><span class="font-normal text-xs">Thomson</span></button>
+                        <button onclick="setHistoryStep(2)" id="hist-btn-2" class="py-2 px-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">3. 1911<br><span class="font-normal text-xs">Rutherford</span></button>
+                        <button onclick="setHistoryStep(3)" id="hist-btn-3" class="py-2 px-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">4. 1927 - Auj.<br><span class="font-normal text-xs">Actuel</span></button>
+                    </div>
+
+                    <!-- Zone visuelle + explication courte -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <div class="md:col-span-6 bg-slate-950 rounded-xl border border-slate-700 p-3 flex flex-col items-center justify-center min-h-[235px]" id="historyVisual">
+                            <!-- SVG animé injecté en JS -->
+                        </div>
+                        <div class="md:col-span-6 space-y-3" id="historyText">
+                            <!-- Texte simple injecté en JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini-quiz d'association -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h3 class="font-extrabold text-slate-800 mb-3">🎯 Associe chaque scientifique à son modèle :</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <span class="font-bold">1. Démocrite (Ve siècle av. J.-C.)</span>
+                        <select id="m2-q1" class="border border-slate-300 rounded-lg p-2 bg-white font-medium">
+                            <option value="">-- Choisir --</option>
+                            <option value="bille">Une bille pleine impossible à couper (insécable)</option>
+                            <option value="pudding">Une boule positive (+) avec des électrons négatifs (-)</option>
+                            <option value="vide">Un noyau central entouré de vide et d'électrons</option>
+                            <option value="nuage">Un nuage électronique autour du noyau</option>
+                        </select>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <span class="font-bold">2. Thomson (1902 — Le « pudding »)</span>
+                        <select id="m2-q2" class="border border-slate-300 rounded-lg p-2 bg-white font-medium">
+                            <option value="">-- Choisir --</option>
+                            <option value="bille">Une bille pleine impossible à couper (insécable)</option>
+                            <option value="pudding">Une boule positive (+) avec des électrons négatifs (-)</option>
+                            <option value="vide">Un noyau central entouré de vide et d'électrons</option>
+                            <option value="nuage">Un nuage électronique autour du noyau</option>
+                        </select>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <span class="font-bold">3. Rutherford (1911 — Planétaire)</span>
+                        <select id="m2-q3" class="border border-slate-300 rounded-lg p-2 bg-white font-medium">
+                            <option value="">-- Choisir --</option>
+                            <option value="bille">Une bille pleine impossible à couper (insécable)</option>
+                            <option value="pudding">Une boule positive (+) avec des électrons négatifs (-)</option>
+                            <option value="vide">Un noyau central entouré de vide et d'électrons</option>
+                            <option value="nuage">Un nuage électronique autour du noyau</option>
+                        </select>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <span class="font-bold">4. Modèle actuel (1927)</span>
+                        <select id="m2-q4" class="border border-slate-300 rounded-lg p-2 bg-white font-medium">
+                            <option value="">-- Choisir --</option>
+                            <option value="bille">Une bille pleine impossible à couper (insécable)</option>
+                            <option value="pudding">Une boule positive (+) avec des électrons négatifs (-)</option>
+                            <option value="vide">Un noyau central entouré de vide et d'électrons</option>
+                            <option value="nuage">Un nuage électronique autour du noyau</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                    <button onclick="checkMission2()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl transition">
+                        ✅ Vérifier mes réponses
+                    </button>
+                    <span id="m2-feedback" class="text-sm font-bold"></span>
+                </div>
+            </div>
+
+            <!-- Encadré Fiche Papier -->
+            <div id="paper-2" class="paper-box p-5 hidden fade-in">
+                <div class="flex items-center gap-2 text-amber-800 font-extrabold mb-2">
+                    <span class="text-xl">✍️</span>
+                    <span>À RECOPIER SUR TA FICHE PAPIER (Partie 2)</span>
+                </div>
+                <ul class="text-sm text-slate-800 space-y-1.5 bg-white/85 p-3.5 rounded-xl border border-amber-200">
+                    <li>• <strong>Démocrite</strong> : « Atome » signifie partie <strong>insécable</strong> (impossible à couper).</li>
+                    <li>• <strong>Thomson</strong> : Sphère pleine chargée <strong>positivement (+)</strong> contenant des <strong>électrons négatifs (-)</strong>.</li>
+                    <li>• <strong>Rutherford</strong> : Un <strong>noyau</strong> central entouré de <strong>vide</strong> et d'électrons.</li>
+                    <li>• <strong>Modèle actuel</strong> : On ne connaît pas la position précise des électrons : ils forment un <strong>nuage électronique</strong> autour du noyau.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MISSION 3 : ANIMATION MICROSCOPE + TROUVER LA FORMULE + CALCUL        -->
+        <!-- ===================================================================== -->
+        <section id="step-3" class="hidden fade-in space-y-5">
+
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h2 class="text-lg sm:text-xl font-extrabold text-blue-700 mb-2">Mission 3 : Peut-on « voir » et mesurer un atome ?</h2>
+                <p class="text-sm sm:text-base text-slate-600 mb-4">
+                    Les atomes sont invisibles à l'œil nu et au microscope optique du collège. On utilise un <strong>microscope à effet tunnel</strong> : une pointe ultra-fine passe au-dessus du métal et repère chaque atome pour dessiner une image sur ordinateur.
+                </p>
+
+                <!-- PETITE ANIMATION HTML : BALAYAGE MICROSCOPE À EFFET TUNNEL -->
+                <div class="bg-slate-900 rounded-2xl p-4 sm:p-5 text-white mb-5">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <span class="text-xs sm:text-sm font-bold text-amber-300">🔬 Animation : Balayage d'une rangée d'atomes d'un métal</span>
+                        <button onclick="startStmScan()" id="btnStmScan" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold px-4 py-1.5 rounded-xl text-xs sm:text-sm transition shadow">
+                            ▶️ Lancer le balayage
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-950 rounded-xl border border-slate-700 p-3 overflow-hidden">
+                        <svg viewBox="0 0 440 165" class="w-full h-auto max-h-48 mx-auto">
+                            <!-- Pointe du microscope (se déplace en JS) -->
+                            <g id="stmTip" transform="translate(40, 0)">
+                                <polygon points="-14,5 14,5 3,42 -3,42" fill="#94a3b8" stroke="#e2e8f0" stroke-width="1.5"/>
+                                <line x1="0" y1="42" x2="0" y2="66" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="3 3"/>
+                                <text x="0" y="18" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="bold">STM</text>
+                            </g>
+
+                            <!-- Rangée de 10 atomes (de x=40 à x=400, pas=40, rayon=18) -->
+                            <g id="stmAtomsGroup">
+                                <!-- Généré en JS -->
+                            </g>
+
+                            <!-- Flèche longueur totale L = 3 nm -->
+                            <line x1="22" y1="128" x2="418" y2="128" stroke="#38bdf8" stroke-width="2.5"/>
+                            <polygon points="22,128 30,123 30,133" fill="#38bdf8"/>
+                            <polygon points="418,128 410,123 410,133" fill="#38bdf8"/>
+                            <text x="220" y="150" text-anchor="middle" fill="#7dd3fc" font-size="14" font-weight="bold">
+                                Longueur totale L = 3 nm  •  Nombre d'atomes n = <tspan id="stmCountDisplay" fill="#fde047">0</tspan>
+                            </text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- ÉTAPE 3A : TROUVER LA BONNE FORMULE -->
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-4">
+                    <p class="text-sm sm:text-base font-extrabold text-blue-900 mb-1">1. Trouve la bonne formule pour calculer le diamètre <span class="font-sci">d</span> d'UN SEUL atome :</p>
+                    <p class="text-xs sm:text-sm text-slate-600 mb-3">
+                        On connaît la longueur totale <strong>L = 3 nm</strong> et le nombre d'atomes alignés <strong>n = 10</strong>. Quelle opération faut-il faire ?
+                    </p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="formulaChoices">
+                        <button onclick="checkFormula('mul', this)" class="formula-btn bg-white hover:bg-blue-100 border-2 border-slate-300 rounded-xl py-2.5 px-3 font-sci font-bold text-slate-800 transition">d = L × n</button>
+                        <button onclick="checkFormula('div', this)" class="formula-btn bg-white hover:bg-blue-100 border-2 border-slate-300 rounded-xl py-2.5 px-3 font-sci font-bold text-slate-800 transition">d = L ÷ n</button>
+                        <button onclick="checkFormula('rev', this)" class="formula-btn bg-white hover:bg-blue-100 border-2 border-slate-300 rounded-xl py-2.5 px-3 font-sci font-bold text-slate-800 transition">d = n ÷ L</button>
+                        <button onclick="checkFormula('add', this)" class="formula-btn bg-white hover:bg-blue-100 border-2 border-slate-300 rounded-xl py-2.5 px-3 font-sci font-bold text-slate-800 transition">d = L + n</button>
+                    </div>
+                    <p id="m3-formula-fb" class="text-sm font-bold mt-3"></p>
+                </div>
+
+                <!-- ÉTAPE 3B : CALCULER (débloqué après avoir trouvé la formule) -->
+                <div id="m3-calc-box" class="bg-slate-50 border-2 border-slate-200 rounded-xl p-4 hidden fade-in space-y-3">
+                    <p class="text-sm sm:text-base font-extrabold text-slate-800">2. Applique ta formule pour trouver la taille d'un atome :</p>
+                    <div class="flex flex-wrap items-center gap-2 text-sm sm:text-base font-bold">
+                        <span class="font-sci">d = 3 nm ÷ 10 =</span>
+                        <input id="m3-input" type="text" placeholder="Ex: 0,5" class="w-24 border-2 border-blue-400 rounded-lg px-2 py-1.5 text-center bg-white font-sci">
+                        <span>nm</span>
+                        <button onclick="checkMission3()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg transition text-sm">
+                            ✅ Vérifier
+                        </button>
+                    </div>
+                    <p id="m3-feedback" class="text-sm font-bold"></p>
+                    <div class="pt-1">
+                        <button onclick="openConverterModal(0.3, -9)" class="text-xs font-bold text-blue-700 underline hover:text-blue-900">
+                            🧮 Ouvrir le convertisseur pour convertir 0,3 nm en mètres
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Encadré Fiche Papier -->
+            <div id="paper-3" class="paper-box p-5 hidden fade-in">
+                <div class="flex items-center gap-2 text-amber-800 font-extrabold mb-2">
+                    <span class="text-xl">✍️</span>
+                    <span>À RECOPIER SUR TA FICHE PAPIER (Partie 3)</span>
+                </div>
+                <ul class="text-sm text-slate-800 space-y-1.5 bg-white/85 p-3.5 rounded-xl border border-amber-200">
+                    <li>• <strong>Voir les atomes :</strong> Non, on ne peut pas les voir à l'œil nu ni au microscope optique. On utilise un <strong>microscope à effet tunnel</strong>.</li>
+                    <li>• <strong>Formule :</strong> <span class="font-sci font-bold">d = L ÷ n</span></li>
+                    <li>• <strong>Calcul :</strong> d = 3 nm ÷ 10 = <strong>0,3 nm</strong> = <strong>3 × 10⁻¹⁰ m</strong> (soit 0,000 000 000 3 m).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MISSION 4 : VIDÉO RUTHERFORD + DESSIN ATOME/NOYAU + LE VIDE           -->
+        <!-- ===================================================================== -->
+        <section id="step-4" class="hidden fade-in space-y-5">
+
+            <!-- Lien Vidéo YouTube Rutherford -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h2 class="text-lg sm:text-xl font-extrabold text-blue-700 mb-2">Mission 4 : L'expérience de Rutherford et le vide dans l'atome</h2>
+                <p class="text-sm sm:text-base text-slate-600 mb-4">
+                    Regarde la courte vidéo ci-dessous pour découvrir comment Rutherford a bombardé une feuille d'or et compris que l'atome est presque entièrement vide.
+                </p>
+                <a href="https://www.youtube.com/watch?v=_e7U-48nItA" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-3 rounded-xl shadow transition text-sm sm:text-base">
+                    ▶️ Regarder la vidéo : L'expérience de Rutherford (YouTube)
+                </a>
+            </div>
+
+            <!-- DESSIN SCHÉMATIQUE DE L'ATOME AVEC SON NOYAU -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-800">🎨 Schéma de l'atome et de son noyau (à observer)</h3>
+                    <button onclick="toggleAtomLabels()" id="btnToggleLabels" class="text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg transition">
+                        👁️ Masquer les légendes (pour t'entraîner)
+                    </button>
+                </div>
+
+                <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800 flex justify-center">
+                    <svg viewBox="0 0 520 270" class="w-full max-w-xl h-auto">
+                        <defs>
+                            <radialGradient id="cloudGrad4" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+                                <stop offset="70%" stop-color="#0284c7" stop-opacity="0.12"/>
+                                <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+                            </radialGradient>
+                        </defs>
+
+                        <!-- Zone de l'atome (centrée en 210, 135) -->
+                        <circle cx="210" cy="135" r="105" fill="url(#cloudGrad4)" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 5"/>
+
+                        <!-- Orbites fines / zone des électrons -->
+                        <ellipse cx="210" cy="135" rx="95" ry="38" fill="none" stroke="#7dd3fc" stroke-width="1.4" opacity="0.5" transform="rotate(28 210 135)"/>
+                        <ellipse cx="210" cy="135" rx="95" ry="38" fill="none" stroke="#7dd3fc" stroke-width="1.4" opacity="0.5" transform="rotate(-28 210 135)"/>
+
+                        <!-- Électrons (-) -->
+                        <g>
+                            <circle cx="132" cy="92" r="9" fill="#0284c7" stroke="#e0f2fe" stroke-width="2"/>
+                            <text x="132" y="96" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">−</text>
+
+                            <circle cx="288" cy="94" r="9" fill="#0284c7" stroke="#e0f2fe" stroke-width="2"/>
+                            <text x="288" y="98" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">−</text>
+
+                            <circle cx="268" cy="186" r="9" fill="#0284c7" stroke="#e0f2fe" stroke-width="2"/>
+                            <text x="268" y="190" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">−</text>
+                        </g>
+
+                        <!-- NOYAU CENTRAL (+) -->
+                        <circle cx="210" cy="135" r="13" fill="#ef4444" stroke="#fecaca" stroke-width="2.5"/>
+                        <text x="210" y="140" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="bold">+</text>
+
+                        <!-- Flèche taille de l'atome -->
+                        <line x1="105" y1="252" x2="315" y2="252" stroke="#38bdf8" stroke-width="2"/>
+                        <polygon points="105,252 113,248 113,256" fill="#38bdf8"/>
+                        <polygon points="315,252 307,248 307,256" fill="#38bdf8"/>
+                        <text x="210" y="246" text-anchor="middle" fill="#7dd3fc" font-size="12" font-weight="bold">Taille de l'atome ≈ 10⁻¹⁰ m</text>
+
+                        <!-- LÉGENDES (masquables) -->
+                        <g id="atomSchemaLabels">
+                            <!-- Légende Noyau -->
+                            <line x1="224" y1="135" x2="345" y2="120" stroke="#f87171" stroke-width="2"/>
+                            <rect x="345" y="98" width="162" height="44" rx="8" fill="#1e293b" stroke="#f87171" stroke-width="1.8"/>
+                            <text x="426" y="117" text-anchor="middle" fill="#fecaca" font-size="13" font-weight="bold">NOYAU (+)</text>
+                            <text x="426" y="133" text-anchor="middle" fill="#cbd5e1" font-size="11">Minuscule : ≈ 10⁻¹⁵ m</text>
+
+                            <!-- Légende Électrons -->
+                            <line x1="295" y1="88" x2="345" y2="48" stroke="#38bdf8" stroke-width="2"/>
+                            <rect x="345" y="24" width="162" height="42" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.8"/>
+                            <text x="426" y="42" text-anchor="middle" fill="#bae6fd" font-size="13" font-weight="bold">ÉLECTRONS (−)</text>
+                            <text x="426" y="57" text-anchor="middle" fill="#cbd5e1" font-size="11">Nuage électronique</text>
+
+                            <!-- Légende Vide -->
+                            <line x1="165" y1="172" x2="108" y2="198" stroke="#94a3b8" stroke-width="2"/>
+                            <rect x="12" y="182" width="102" height="36" rx="8" fill="#1e293b" stroke="#94a3b8" stroke-width="1.8"/>
+                            <text x="63" y="204" text-anchor="middle" fill="#f8fafc" font-size="13" font-weight="bold">VIDE</text>
+                        </g>
+                    </svg>
+                </div>
+                <p class="text-xs text-slate-500 text-center mt-2">
+                    ⚠️ Attention : sur ce dessin, le noyau est volontairement grossi pour être visible ! En réalité, il est <strong>100 000 fois plus petit</strong> que l'atome.
+                </p>
+            </div>
+
+            <!-- Analogie du stade de foot + Question de validation -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+                <div class="bg-emerald-900 text-white rounded-2xl p-4 text-center">
+                    <div class="text-xs uppercase tracking-wider text-emerald-300 font-bold mb-1">Pour visualiser le rapport 100 000</div>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 my-2">
+                        <div class="bg-emerald-800/80 p-3 rounded-xl border border-emerald-600 w-full sm:w-56">
+                            <div class="text-2xl mb-1">🔴</div>
+                            <div class="font-bold text-sm">Le noyau</div>
+                            <div class="text-xs text-emerald-200">= 1 bille de 1 cm au milieu du terrain</div>
+                        </div>
+                        <div class="text-xl font-extrabold text-amber-300">× 100 000</div>
+                        <div class="bg-emerald-800/80 p-3 rounded-xl border border-emerald-600 w-full sm:w-56">
+                            <div class="text-2xl mb-1">🏟️</div>
+                            <div class="font-bold text-sm">L'atome entier</div>
+                            <div class="text-xs text-emerald-200">= Un stade géant de 1 km de large !</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question finale -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                    <p class="text-sm sm:text-base font-extrabold text-slate-800">🎯 Que prouve l'expérience de Rutherford ?</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                        <button onclick="checkMission4(false)" class="p-3 rounded-xl border-2 border-slate-300 hover:border-blue-400 bg-white font-semibold text-left transition">
+                            A. L'atome est une boule complètement pleine et dure.
+                        </button>
+                        <button onclick="checkMission4(true)" class="p-3 rounded-xl border-2 border-slate-300 hover:border-blue-400 bg-white font-semibold text-left transition">
+                            B. L'atome est constitué essentiellement de vide autour d'un minuscule noyau.
+                        </button>
+                    </div>
+                    <p id="m4-feedback" class="text-sm font-bold"></p>
+                </div>
+            </div>
+
+            <!-- Encadré Fiche Papier -->
+            <div id="paper-4" class="paper-box p-5 hidden fade-in">
+                <div class="flex items-center gap-2 text-amber-800 font-extrabold mb-2">
+                    <span class="text-xl">✍️</span>
+                    <span>À RECOPIER SUR TA FICHE PAPIER (Partie 4)</span>
+                </div>
+                <ul class="text-sm text-slate-800 space-y-1.5 bg-white/85 p-3.5 rounded-xl border border-amber-200">
+                    <li>• <strong>Expérience de Rutherford :</strong> La quasi-totalité des particules traversent la feuille d'or sans être déviées → l'atome est <strong>essentiellement constitué de vide</strong>.</li>
+                    <li>• <strong>Comparaison :</strong> <span class="font-sci font-bold">10⁻¹⁰ ÷ 10⁻¹⁵ = 10⁵ = 100 000</span>. L'atome est <strong>100 000 fois plus grand</strong> que son noyau.</li>
+                    <li>• <strong>Schéma :</strong> Recopie le dessin de l'atome avec les 3 légendes : <strong>noyau (+)</strong>, <strong>électrons (−)</strong> et <strong>vide</strong>.</li>
+                </ul>
+                <div class="mt-4 pt-3 border-t border-amber-300 text-center">
+                    <a href="https://sstockfeld5-ship-it.github.io/physique_chimie/3e_Ch3_A1_QCM.html" target="_blank" rel="noopener"
+                       class="inline-block bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition">
+                        🏆 Bravo ! Passe maintenant au QCM d'entraînement en ligne →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALE CONVERTISSEUR ACCESSIBLE PARTOUT -->
+    <div id="converterModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-900 text-white border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl relative">
+            <button onclick="closeConverterModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 font-bold">✕</button>
+            <h3 class="text-lg font-extrabold text-amber-300 mb-3">🧮 Convertisseur rapide vers le mètre (m)</h3>
+            <div class="grid grid-cols-12 gap-2 mb-3">
+                <input id="modalConvVal" type="number" step="any" value="0.3" oninput="updateModalConverter()"
+                       class="col-span-5 rounded-xl bg-slate-800 border border-slate-600 px-3 py-2 text-white font-sci font-bold">
+                <select id="modalConvUnit" onchange="updateModalConverter()"
+                        class="col-span-7 rounded-xl bg-slate-800 border border-slate-600 px-3 py-2 text-white font-bold text-sm">
+                    <option value="0">m (Mètre)</option>
+                    <option value="-2">cm (Centimètre)</option>
+                    <option value="-3">mm (Millimètre)</option>
+                    <option value="-6">µm (Micromètre)</option>
+                    <option value="-9" selected>nm (Nanomètre)</option>
+                    <option value="-15">fm (Femtomètre)</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <div class="bg-slate-950 border border-sky-500/40 rounded-xl p-3">
+                    <div class="text-xs text-sky-400 font-bold uppercase">Puissance de 10</div>
+                    <div id="modalPowRes" class="font-sci text-xl font-bold text-white">3 × 10⁻¹⁰ m</div>
+                </div>
+                <div class="bg-slate-950 border border-emerald-500/40 rounded-xl p-3">
+                    <div class="text-xs text-emerald-400 font-bold uppercase">Forme décimale</div>
+                    <div id="modalDecRes" class="font-sci text-base font-bold text-emerald-300 break-all">0,000 000 000 3 m</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==================== NAVIGATION & PROGRESSION ==================== */
+        const completed = { 1: false, 2: false, 3: false, 4: false };
+
+        function updateProgress() {
+            const count = Object.values(completed).filter(Boolean).length;
+            document.getElementById('progressText').textContent = `${count} / 4`;
+            for (let i = 1; i <= 4; i++) {
+                const btn = document.getElementById(`btn-step-${i}`);
+                if (completed[i]) btn.classList.add('tab-done');
+            }
+        }
+
+        function showStep(n) {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step-${i}`).classList.toggle('hidden', i !== n);
+                const btn = document.getElementById(`btn-step-${i}`);
+                btn.className = (i === n)
+                    ? 'tab-active py-3 px-3 rounded-xl border-2 font-bold text-sm transition flex flex-col items-center'
+                    : 'tab-inactive py-3 px-3 rounded-xl border-2 font-bold text-sm transition flex flex-col items-center';
+                if (completed[i]) btn.classList.add('tab-done');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ==================== CONVERTISSEUR (PUISSANCE DE 10 & DÉCIMAL) ==================== */
+        function toSuperscript(num) {
+            const map = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+            return String(num).split('').map(c => map[c] || c).join('');
+        }
+
+        function formatMeters(val, unitExp) {
+            if (isNaN(val) || val <= 0) {
+                return { pow: "—", order: "Entre un nombre positif", dec: "—" };
+            }
+            const totalVal = val * Math.pow(10, unitExp);
+            const exp = Math.floor(Math.log10(totalVal));
+            let mantissa = totalVal / Math.pow(10, exp);
+            mantissa = Math.round(mantissa * 1000) / 1000;
+            if (mantissa >= 10) { mantissa /= 10; }
+
+            const mantissaStr = String(mantissa).replace('.', ',');
+            const powStr = (mantissa === 1) ? `10${toSuperscript(exp)} m` : `${mantissaStr} × 10${toSuperscript(exp)} m`;
+            const orderExp = mantissa >= 5 ? exp + 1 : exp;
+            const orderStr = `Ordre de grandeur : 10${toSuperscript(orderExp)} m`;
+
+            // Forme décimale lisible par paquets de 3 chiffres
+            let decStr = "";
+            if (exp >= 0) {
+                decStr = totalVal.toLocaleString('fr-FR', { maximumFractionDigits: 6 }) + " m";
+            } else {
+                const fixedDigits = Math.min(20, Math.abs(exp) + 3);
+                let raw = totalVal.toFixed(fixedDigits).replace(/0+$/, '').replace(/\.$/, '');
+                const parts = raw.split('.');
+                const frac = parts[1] || '';
+                const groupedFrac = frac.replace(/(.{3})/g, '$1 ').trim();
+                decStr = `${parts[0]},${groupedFrac} m`;
+            }
+            return { pow: powStr, order: orderStr, dec: decStr };
+        }
+
+        function updateConverter() {
+            const val = parseFloat(document.getElementById('convValue').value);
+            const unitExp = parseInt(document.getElementById('convUnit').value);
+            const res = formatMeters(val, unitExp);
+            document.getElementById('convPowResult').textContent = res.pow;
+            document.getElementById('convOrderResult').textContent = res.order;
+            document.getElementById('convDecResult').textContent = res.dec;
+        }
+
+        function setConv(val, unitExp) {
+            document.getElementById('convValue').value = val;
+            document.getElementById('convUnit').value = unitExp;
+            updateConverter();
+        }
+
+        function openConverterModal(val, unitExp) {
+            if (val !== undefined) document.getElementById('modalConvVal').value = val;
+            if (unitExp !== undefined) document.getElementById('modalConvUnit').value = unitExp;
+            updateModalConverter();
+            const m = document.getElementById('converterModal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeConverterModal() {
+            const m = document.getElementById('converterModal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function updateModalConverter() {
+            const val = parseFloat(document.getElementById('modalConvVal').value);
+            const unitExp = parseInt(document.getElementById('modalConvUnit').value);
+            const res = formatMeters(val, unitExp);
+            document.getElementById('modalPowRes').textContent = res.pow;
+            document.getElementById('modalDecRes').textContent = res.dec;
+        }
+
+        /* ==================== MISSION 1 : CLASSEMENT ==================== */
+        const objectsM1 = [
+            { id: 'cheveu', label: "Épaisseur d'un cheveu", icon: "💇", rank: 4 },
+            { id: 'noyau',  label: "Noyau d'un atome d'or", icon: "🔴", rank: 1 },
+            { id: 'humain', label: "Être humain", icon: "🧍", rank: 6 },
+            { id: 'atome',  label: "Atome d'hydrogène", icon: "⚛️", rank: 2 },
+            { id: 'fourmi', label: "Fourmi", icon: "🐜", rank: 5 },
+            { id: 'bact',   label: "Bactérie", icon: "🦠", rank: 3 }
+        ];
+
+        const orderContainer = document.getElementById('orderList');
+        objectsM1.forEach(obj => {
+            orderContainer.innerHTML += `
+                <div class="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                    <span class="font-semibold text-sm"><span class="text-lg mr-1.5">${obj.icon}</span>${obj.label}</span>
+                    <select id="rank-${obj.id}" class="border border-slate-300 rounded-lg px-2 py-1 font-bold bg-white text-sm">
+                        <option value="">Rang ?</option>
+                        <option value="1">1 (le plus petit)</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6 (le plus grand)</option>
+                    </select>
+                </div>
+            `;
+        });
+
+        function checkMission1() {
+            let ok = true;
+            objectsM1.forEach(obj => {
+                const sel = document.getElementById(`rank-${obj.id}`);
+                if (parseInt(sel.value) !== obj.rank) {
+                    ok = false;
+                    sel.classList.add('border-rose-500');
+                } else {
+                    sel.classList.remove('border-rose-500');
+                    sel.classList.add('border-emerald-500');
+                }
+            });
+            const fb = document.getElementById('m1-feedback');
+            if (ok) {
+                fb.textContent = "🎉 Parfait ! Tu peux recopier sur ta fiche.";
+                fb.className = "text-sm font-bold text-emerald-600";
+                document.getElementById('paper-1').classList.remove('hidden');
+                completed[1] = true;
+                updateProgress();
+            } else {
+                fb.textContent = "❌ Il y a une erreur (encadrée en rouge). Aide-toi de l'animation !";
+                fb.className = "text-sm font-bold text-rose-600";
+            }
+        }
+
+        /* ==================== MISSION 2 : ANIMATION HISTOIRE SIMPLIFIÉE ==================== */
+        const historyData = [
+            {
+                title: "Ve siècle av. J.-C. — Démocrite",
+                tag: "La bille insécable",
+                color: "text-amber-300",
+                desc: "Démocrite imagine que si on coupe la matière en morceaux de plus en plus petits, on arrive à une petite <strong>bille pleine impossible à couper</strong> : l'atome (<em>insécable</em>).",
+                keywords: "Mot-clé : INSÉCABLE (indivisible)",
+                svg: `
+                    <svg viewBox="0 0 300 210" class="w-full max-w-[260px]">
+                        <defs>
+                            <radialGradient id="demGrad" cx="35%" cy="35%" r="65%">
+                                <stop offset="0%" stop-color="#fef08a"/>
+                                <stop offset="55%" stop-color="#f59e0b"/>
+                                <stop offset="100%" stop-color="#92400e"/>
+                            </radialGradient>
+                        </defs>
+                        <circle id="demBall" cx="150" cy="110" r="52" fill="url(#demGrad)" stroke="#fde047" stroke-width="3"/>
+                        <text x="150" y="188" text-anchor="middle" fill="#fde047" font-size="13" font-weight="bold">Bille pleine et dure (Atome)</text>
+                        <text id="demMsg" x="150" y="34" text-anchor="middle" fill="#fca5a5" font-size="13" font-weight="bold"></text>
+                    </svg>
+                    <button onclick="tryCutDemocrite()" class="mt-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-lg">🔪 Essayer de couper</button>
+                `
+            },
+            {
+                title: "1902 — Modèle de Thomson",
+                tag: "Le « Pudding »",
+                color: "text-rose-300",
+                desc: "Thomson découvre les <strong>électrons (−)</strong>. Il imagine l'atome comme une <strong>boule pleine chargée positivement (+)</strong> avec des électrons négatifs incrustés dedans (comme des raisins dans un gâteau).",
+                keywords: "Mots-clés : Sphère positive (+) + Électrons négatifs (−)",
+                svg: `
+                    <svg viewBox="0 0 300 210" class="w-full max-w-[260px]">
+                        <defs>
+                            <radialGradient id="thomGrad" cx="35%" cy="35%" r="65%">
+                                <stop offset="0%" stop-color="#fecdd3"/>
+                                <stop offset="60%" stop-color="#e11d48"/>
+                                <stop offset="100%" stop-color="#881337"/>
+                            </radialGradient>
+                        </defs>
+                        <circle cx="150" cy="105" r="64" fill="url(#thomGrad)" stroke="#fda4af" stroke-width="2.5"/>
+                        <text x="120" y="80" fill="#fff" opacity="0.6" font-size="18" font-weight="bold">+</text>
+                        <text x="175" y="135" fill="#fff" opacity="0.6" font-size="18" font-weight="bold">+</text>
+                        <text x="148" y="150" fill="#fff" opacity="0.6" font-size="18" font-weight="bold">+</text>
+                        <g>
+                            <circle cx="122" cy="112" r="11" fill="#2563eb" stroke="#dbeafe" stroke-width="2"/><text x="122" y="117" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">−</text>
+                            <circle cx="172" cy="84" r="11" fill="#2563eb" stroke="#dbeafe" stroke-width="2"/><text x="172" y="89" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">−</text>
+                            <circle cx="164" cy="132" r="11" fill="#2563eb" stroke="#dbeafe" stroke-width="2"/><text x="164" y="137" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">−</text>
+                            <circle cx="145" cy="70" r="11" fill="#2563eb" stroke="#dbeafe" stroke-width="2"/><text x="145" y="75" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">−</text>
+                        </g>
+                        <text x="150" y="192" text-anchor="middle" fill="#fda4af" font-size="12" font-weight="bold">Boule positive (+) + Électrons (−)</text>
+                    </svg>
+                `
+            },
+            {
+                title: "1911 — Modèle de Rutherford",
+                tag: "Modèle planétaire",
+                color: "text-sky-300",
+                desc: "Rutherford montre que l'atome est presque entièrement <strong>vide</strong> ! Il y a un petit <strong>noyau positif (+)</strong> au centre, et les <strong>électrons (−)</strong> tournent autour comme des planètes.",
+                keywords: "Mots-clés : Noyau (+) + VIDE + Électrons (−)",
+                svg: `
+                    <svg viewBox="0 0 300 210" class="w-full max-w-[260px]">
+                        <ellipse cx="150" cy="110" rx="86" ry="34" fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.7" transform="rotate(25 150 110)"/>
+                        <ellipse cx="150" cy="110" rx="86" ry="34" fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.7" transform="rotate(-25 150 110)"/>
+                        <circle cx="150" cy="110" r="12" fill="#ef4444" stroke="#fecaca" stroke-width="2"/>
+                        <text x="150" y="115" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">+</text>
+                        <g class="spin-orbit">
+                            <circle cx="228" cy="110" r="8" fill="#0284c7" stroke="#fff" stroke-width="1.5"/>
+                            <text x="228" y="114" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">−</text>
+                        </g>
+                        <g class="spin-orbit-rev">
+                            <circle cx="72" cy="110" r="8" fill="#0284c7" stroke="#fff" stroke-width="1.5"/>
+                            <text x="72" y="114" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">−</text>
+                        </g>
+                        <text x="150" y="192" text-anchor="middle" fill="#7dd3fc" font-size="12" font-weight="bold">Noyau au centre + VIDE + Électrons</text>
+                    </svg>
+                `
+            },
+            {
+                title: "1927 à aujourd'hui — Modèle actuel",
+                tag: "Modèle probabiliste",
+                color: "text-purple-300",
+                desc: "Les électrons bougent si vite qu'on ne peut pas tracer leur chemin exact. On les représente par un <strong>nuage électronique</strong> (zone où ils ont le plus de chances de se trouver) autour du <strong>noyau</strong>.",
+                keywords: "Mots-clés : Noyau + Nuage électronique",
+                svg: `
+                    <svg viewBox="0 0 300 210" class="w-full max-w-[260px]">
+                        <defs>
+                            <radialGradient id="actCloud" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.8"/>
+                                <stop offset="55%" stop-color="#3b82f6" stop-opacity="0.35"/>
+                                <stop offset="100%" stop-color="#1e1b4b" stop-opacity="0"/>
+                            </radialGradient>
+                        </defs>
+                        <circle cx="150" cy="110" r="78" fill="url(#actCloud)" class="pulse-cloud"/>
+                        <circle cx="120" cy="85" r="2.2" fill="#bfdbfe"/><circle cx="178" cy="95" r="2.2" fill="#bfdbfe"/>
+                        <circle cx="135" cy="138" r="2.2" fill="#bfdbfe"/><circle cx="165" cy="130" r="2.2" fill="#bfdbfe"/>
+                        <circle cx="110" cy="122" r="2" fill="#93c5fd"/><circle cx="188" cy="118" r="2" fill="#93c5fd"/>
+                        <circle cx="150" cy="68" r="2" fill="#93c5fd"/><circle cx="145" cy="155" r="2" fill="#93c5fd"/>
+                        <circle cx="150" cy="110" r="7" fill="#ef4444" stroke="#fecaca" stroke-width="1.5"/>
+                        <text x="150" y="195" text-anchor="middle" fill="#c4b5fd" font-size="12" font-weight="bold">Noyau + Nuage électronique</text>
+                    </svg>
+                `
+            }
+        ];
+
+        function setHistoryStep(idx) {
+            for (let i = 0; i < 4; i++) {
+                const b = document.getElementById(`hist-btn-${i}`);
+                b.className = (i === idx)
+                    ? 'py-2 px-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500 text-slate-950 transition shadow'
+                    : 'py-2 px-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+            }
+            const d = historyData[idx];
+            document.getElementById('historyVisual').innerHTML = d.svg;
+            document.getElementById('historyText').innerHTML = `
+                <span class="inline-block text-xs font-extrabold uppercase px-2.5 py-1 rounded-full bg-slate-800 ${d.color}">${d.tag}</span>
+                <h4 class="text-lg font-extrabold text-white">${d.title}</h4>
+                <p class="text-sm text-slate-300 leading-relaxed">${d.desc}</p>
+                <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm font-bold text-amber-300">${d.keywords}</div>
+            `;
+        }
+
+        function tryCutDemocrite() {
+            const msg = document.getElementById('demMsg');
+            const ball = document.getElementById('demBall');
+            if (msg) msg.textContent = "💥 Impossible à couper : il est INSÉCABLE !";
+            if (ball) {
+                ball.setAttribute('transform', 'translate(4, 0)');
+                setTimeout(() => ball.setAttribute('transform', 'translate(-4, 0)'), 70);
+                setTimeout(() => ball.setAttribute('transform', 'translate(0, 0)'), 140);
+            }
+        }
+
+        function checkMission2() {
+            const ok =
+                document.getElementById('m2-q1').value === 'bille' &&
+                document.getElementById('m2-q2').value === 'pudding' &&
+                document.getElementById('m2-q3').value === 'vide' &&
+                document.getElementById('m2-q4').value === 'nuage';
+            const fb = document.getElementById('m2-feedback');
+            if (ok) {
+                fb.textContent = "🎉 Bravo ! Tous les modèles sont bien associés.";
+                fb.className = "text-sm font-bold text-emerald-600";
+                document.getElementById('paper-2').classList.remove('hidden');
+                completed[2] = true;
+                updateProgress();
+            } else {
+                fb.textContent = "❌ Vérifie bien tes réponses dans l'animation ci-dessus.";
+                fb.className = "text-sm font-bold text-rose-600";
+            }
+        }
+
+        /* ==================== MISSION 3 : ANIMATION STM + FORMULE + CALCUL ==================== */
+        const stmAtomsGroup = document.getElementById('stmAtomsGroup');
+        for (let i = 0; i < 10; i++) {
+            const cx = 40 + i * 40;
+            stmAtomsGroup.innerHTML += `
+                <circle id="stm-atom-${i}" cx="${cx}" cy="86" r="17" fill="#451a03" stroke="#92400e" stroke-width="2"/>
+                <text id="stm-num-${i}" x="${cx}" y="91" text-anchor="middle" fill="#78350f" font-size="12" font-weight="bold">${i + 1}</text>
+            `;
+        }
+
+        let stmInterval = null;
+        function startStmScan() {
+            if (stmInterval) clearInterval(stmInterval);
+            for (let i = 0; i < 10; i++) {
+                document.getElementById(`stm-atom-${i}`).setAttribute('fill', '#451a03');
+                document.getElementById(`stm-atom-${i}`).setAttribute('stroke', '#92400e');
+                document.getElementById(`stm-num-${i}`).setAttribute('fill', '#78350f');
+            }
+            let step = 0;
+            document.getElementById('stmCountDisplay').textContent = '0';
+            stmInterval = setInterval(() => {
+                if (step >= 10) {
+                    clearInterval(stmInterval);
+                    return;
+                }
+                const cx = 40 + step * 40;
+                document.getElementById('stmTip').setAttribute('transform', `translate(${cx}, 0)`);
+                document.getElementById(`stm-atom-${step}`).setAttribute('fill', '#f59e0b');
+                document.getElementById(`stm-atom-${step}`).setAttribute('stroke', '#fef08a');
+                document.getElementById(`stm-num-${step}`).setAttribute('fill', '#0f172a');
+                step++;
+                document.getElementById('stmCountDisplay').textContent = String(step);
+            }, 260);
+        }
+
+        function checkFormula(choice, btnEl) {
+            const fb = document.getElementById('m3-formula-fb');
+            document.querySelectorAll('.formula-btn').forEach(b => {
+                b.classList.remove('border-emerald-500', 'bg-emerald-50', 'border-rose-500', 'bg-rose-50');
+            });
+            if (choice === 'div') {
+                btnEl.classList.add('border-emerald-500', 'bg-emerald-50');
+                fb.textContent = "✅ Exact ! Pour trouver la taille d'un seul atome, on partage (divise) la longueur totale L par le nombre d'atomes n : d = L ÷ n.";
+                fb.className = "text-sm font-bold text-emerald-700 mt-3";
+                document.getElementById('m3-calc-box').classList.remove('hidden');
+            } else {
+                btnEl.classList.add('border-rose-500', 'bg-rose-50');
+                fb.textContent = "❌ Non ! Pense : si 10 billes alignées mesurent 3 cm, quelle opération fais-tu pour trouver la taille d'UNE seule bille ?";
+                fb.className = "text-sm font-bold text-rose-600 mt-3";
+            }
+        }
+
+        function checkMission3() {
+            const raw = document.getElementById('m3-input').value.trim().replace(',', '.');
+            const val = parseFloat(raw);
+            const fb = document.getElementById('m3-feedback');
+            if (Math.abs(val - 0.3) < 0.01) {
+                fb.textContent = "🎉 Bravo ! 3 ÷ 10 = 0,3 nm (soit 3 × 10⁻¹⁰ m).";
+                fb.className = "text-sm font-bold text-emerald-600";
+                document.getElementById('paper-3').classList.remove('hidden');
+                completed[3] = true;
+                updateProgress();
+            } else {
+                fb.textContent = "❌ Essaie encore : combien fait 3 divisé par 10 ?";
+                fb.className = "text-sm font-bold text-rose-600";
+            }
+        }
+
+        /* ==================== MISSION 4 : SCHÉMA & VALIDATION ==================== */
+        let labelsVisible = true;
+        function toggleAtomLabels() {
+            labelsVisible = !labelsVisible;
+            document.getElementById('atomSchemaLabels').style.display = labelsVisible ? 'block' : 'none';
+            document.getElementById('btnToggleLabels').textContent = labelsVisible
+                ? '👁️ Masquer les légendes (pour t\'entraîner)'
+                : '👁️ Afficher les légendes';
+        }
+
+        function checkMission4(isCorrect) {
+            const fb = document.getElementById('m4-feedback');
+            if (isCorrect) {
+                fb.textContent = "🎉 Bravo ! L'atome est presque entièrement vide.";
+                fb.className = "text-sm font-bold text-emerald-600";
+                document.getElementById('paper-4').classList.remove('hidden');
+                completed[4] = true;
+                updateProgress();
+            } else {
+                fb.textContent = "❌ Non : si l'atome était plein, les particules ne pourraient pas traverser la feuille d'or tout droit !";
+                fb.className = "text-sm font-bold text-rose-600";
+            }
+        }
+
+        /* ==================== INITIALISATION ==================== */
+        window.onload = function() {
+            updateConverter();
+            setHistoryStep(0);
+        };
+    </script>
+</body>
+</html>
